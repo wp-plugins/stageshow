@@ -34,7 +34,7 @@ Features Summary
 * Download stageshow.zip
 * Navigate to the plugins page in your administrator panel.
 * Click the Plugin Browser/Install link.
-* Under "Install a plugin in .zip format" choose the custom-post-background.zip file
+* Under "Install a plugin in .zip format" choose the stageshow.zip file
 * Click Install Now.
 * After it has installed, activate the plugin.
 
