@@ -12,7 +12,7 @@ The StageShow plugin adds an online Box-Office for websites of Small Theatres an
 
 One or more performances can be defined, each with a specified start date/time, maximum number of places, ticket types and prices. 
 
-A [sshow-boxoffice] tag added to a Page on the website adds the Box Office entry to the site.
+A tag added to a Page on the website adds a Booking Form form to the site.
 
 StageShow uses the PayPal API to interface to PayPal to create "Saved Buttons" which are used to collect ticket payments and to control the maximum number of tickets sold for each performance. PayPal IPN (Instant Payment Notification) is used to verify payments and to collect buyer information. 
 
@@ -62,6 +62,10 @@ The StageShow plugin creates a PayPal "Saved Button" when a performance is added
 = Why can't I delete a show or performances? =
 
 A performance cannot be deleted if there are sales recorded for it and the show start time has not yet been reached. A show cannot be deleted if performances are still configured for it.
+
+= How do I add a Booking Form to my site? =
+
+Add the tag [sshow-boxoffice] to either a new or existing page on your site. This will be replaced by the booking form when the page is viewed by a user.
 
 = How can I customise the EMails? =
 
