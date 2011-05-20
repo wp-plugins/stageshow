@@ -179,10 +179,14 @@ if (!class_exists('StageShowPluginClass')) {
       $this->saveStageshowOptions();
       
       $myDBaseObj->activate();
-  }
+		}
 
     function deactivate()
     {
+    }
+
+		function ResetToDefaults()
+		{
 			global $myDBaseObj;
 			global $myPayPalAPILiveObj;
 			global $myPayPalAPITestObj;
