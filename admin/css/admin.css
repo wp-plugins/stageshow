@@ -1,0 +1,18 @@
+
+#adminmenu #toplevel_page_sshow_adminmenu div.wp-menu-image,
+#oam_toplevel_page_sshow_adminmenu div.wp-menu-image {
+	background: transparent url('../images/stageshow16grey.png') no-repeat scroll 6px 6px;
+}
+
+#adminmenu #toplevel_page_sshow_adminmenu:hover div.wp-menu-image,
+#adminmenu #toplevel_page_sshow_adminmenu.wp-has-current-submenu div.wp-menu-image,
+#adminmenu #toplevel_page_sshow_adminmenu.current div.wp-menu-image,
+#oam_toplevel_page_sshow_adminmenu:hover div.wp-menu-image {
+	background: transparent url('../images/stageshow16colour.png') no-repeat scroll 6px 6px;
+}
+
+#icon-stageshow  {
+    background: transparent url(../images/stageshow32grey.png) no-repeat;
+}
+
+	
