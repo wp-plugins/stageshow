@@ -100,15 +100,16 @@ The following tags can be used in the EMail template:
 == Screenshots ==
 
 1. Screenshot 1: Stageshow and PayPal Settings Page
-2. Screenshot 2: Stageshow Overview
-3. Screenshot 3: Stageshow Shows Setup
-4. Screenshot 4: Stageshow Performances Setup
-5. Screenshot 5: Stageshow Ticket Types and Prices Setup
-6. Screenshot 6: Stageshow Sales Log Summary
-7. Screenshot 7: Stageshow Sales Log Sale Details
-8. Screenshot 8: Stageshow Sales Log Show Summary
-9. Screenshot 9: Stageshow Sales Log Performance Summary
-10. Screenshot 10: Stageshow Box Office Page
+2. Screenshot 2: Overview Page
+3. Screenshot 3: Shows Setup
+4. Screenshot 4: Performances Setup
+5. Screenshot 5: Ticket Types and Prices Setup
+6. Screenshot 6: Sales Log Summary
+7. Screenshot 7: Sales Log Sale Details
+8. Screenshot 8: Sales Log Show Summary
+9. Screenshot 9: Sales Log Performance Summary
+10. Screenshot 10: Admin Tools Page
+11. Screenshot 11: Shows Box Office Page
 
 == Changelog ==
 
