@@ -18,7 +18,7 @@ StageShow uses the PayPal API to interface to PayPal to create "Saved Buttons" w
 
 Each sale is fully recorded, with contact and payment details, and the seats purchased. Confirmation emails, which can be customised as required, are sent to each purchaser and copied to the system administrator.
 
-StageShow includes the facility to export both settings and sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Microsoft Excel etc.).
+StageShow includes the facility to export both settings and sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
 
 Features Summary
 
