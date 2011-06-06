@@ -59,6 +59,10 @@ PayPal Login details cannot be changed if one or more performance entries are pr
 
 The StageShow plugin creates a PayPal "Saved Button" when a performance is added to the show. There is currently no mechanism to recreate these buttons if the PayPal configuration is changed, hence the limitation.
 
+= What WordPress settings are required? =
+
+StageShow needs the WordPress setting of TimeZone to be correctly set-up (i.e. to a City) for time-sensitive functionality to operate correctly. The current value can be found on the Settings->General admin page.
+	
 = Why can't I delete a show or performances? =
 
 A performance cannot be deleted if there are sales recorded for it and the show start time has not yet been reached. A show cannot be deleted if performances are still configured for it.
