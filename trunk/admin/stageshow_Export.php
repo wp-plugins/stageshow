@@ -23,8 +23,8 @@ Copyright 2011 Malcolm Shergold
 include '../../../../wp-config.php';
   
   // Get the value of the "Delete Orphans" option and save it
-	$myDBaseObj->adminOptions['DeleteOrphans'] = (isset($_GET['sshow_delete_orphans']) && ($_GET['sshow_delete_orphans'] == 1));
-	$myDBaseObj->saveOptions();
+	$stageShowDBaseObj->adminOptions['DeleteOrphans'] = (isset($_GET['sshow_delete_orphans']) && ($_GET['sshow_delete_orphans'] == 1));
+	$stageShowDBaseObj->saveOptions();
 	
 	if ( isset( $_GET['download'] ) ) 
 	{
@@ -81,16 +81,16 @@ function export_sshow($dbList)
 
 function export_shows()
 {
-	global $myDBaseObj;
+	global $stageShowDBaseObj;
 				
-	export_sshow($myDBaseObj->GetSettings());
+	export_sshow($stageShowDBaseObj->GetSettings());
 }
 
 function export_tickets()
 {
-	global $myDBaseObj;
+	global $stageShowDBaseObj;
 	
-	export_sshow($myDBaseObj->GetAllTicketsList());
+	export_sshow($stageShowDBaseObj->GetAllTicketsList());
 }
 
 ?>

@@ -84,18 +84,19 @@ if (!class_exists('StageShowDBaseClass')) {
       global $wpdb;
       
 			$table_name = STAGESHOW_PERFORMANCES_TABLE;
-			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
+			//if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
 			{
 				$sql = "CREATE TABLE ".$table_name.' ( 
 					perfID INT UNSIGNED NOT NULL AUTO_INCREMENT,
 					showID INT UNSIGNED NOT NULL,
 					perfState VARCHAR('.STAGESHOW_ACTIVESTATE_TEXTLEN.'),
 					perfDateTime DATETIME NOT NULL,
-					perfExpires DATETIME,
 					perfRef VARCHAR('.STAGESHOW_PERFREF_TEXTLEN.') NOT NULL,
 					perfSeats INT NOT NULL,
 					perfPayPalTESTButtonID VARCHAR('.STAGESHOW_PPBUTTINID_TEXTLEN.'), 
 					perfPayPalLIVEButtonID VARCHAR('.STAGESHOW_PPBUTTINID_TEXTLEN.'),
+					perfOpens DATETIME,
+					perfExpires DATETIME,
 					UNIQUE KEY perfID (perfID)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
 
@@ -105,7 +106,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			}
 
 			$table_name = STAGESHOW_PRICES_TABLE;
-			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
+			//if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
 			{
 				$sql = "CREATE TABLE ".$table_name.' ( 
 					priceID INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -122,7 +123,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			}
 
 			$table_name = STAGESHOW_SALES_TABLE;
-			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
+			//if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
 			{
 				$sql = "CREATE TABLE ".$table_name.' ( 
 					saleID INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -149,7 +150,7 @@ if (!class_exists('StageShowDBaseClass')) {
       $ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
 
 			$table_name = STAGESHOW_TICKETS_TABLE;
-			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
+			//if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
 			{
 				$sql = "CREATE TABLE ".$table_name.' ( 
 					ticketID INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -168,7 +169,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			}
 		}
 
-    function deactivate()
+    function uninstall()
     {
       global $wpdb;
       
@@ -252,7 +253,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			$this->adminOptions['AdminID'] = $this->adminOptions['OrganisationID'].' '.__('Bookings',STAGESHOW_DOMAIN_NAME);
 			$this->adminOptions['AdminEMail'] = $_POST['AdminEMail'];
 			$this->adminOptions['BookingsEMail'] = $this->adminOptions['AdminEMail'];					
-			$this->adminOptions['SentCopyEMail'] = $this->adminOptions['BookingsEMail'];					
+			$this->adminOptions['SentCopyEMail'] = $this->adminOptions['AdminEMail'];					
 		}
     
     function ShowSettings($isUpdated)
@@ -303,11 +304,16 @@ if (!class_exists('StageShowDBaseClass')) {
       $showID1 = $this->AddShow($showName1);
           
       $statusMsg = '';
-	    // Populate performances table	    
-      $perfID1 = $this->CreateNewPerformance($statusMsg, $showID1, $showTime1, "Day1Eve", 80);
-      $perfID2 = $this->CreateNewPerformance($statusMsg, $showID1, $showTime2, "Day2Eve", 60);
-      $perfID3 = $this->CreateNewPerformance($statusMsg, $showID1, $showTime3, "Day3Mat", 80);
-      $perfID4 = $this->CreateNewPerformance($statusMsg, $showID1, $showTime4, "Day3Eve", 60);
+			
+	    // Populate performances table	  
+			$perfCount = 4;
+			if (defined('STAGESHOW_SAMPLE_PERFORMANCES_COUNT'))
+				$perfCount = STAGESHOW_SAMPLE_PERFORMANCES_COUNT;
+				
+      $perfID1 = $perfCount >= 1 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime1, "Day1Eve", 80) : -1;
+      $perfID2 = $perfCount >= 2 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime2, "Day2Eve", 60) : -1;
+      $perfID3 = $perfCount >= 3 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime3, "Day3Mat", 80) : -1;
+      $perfID4 = $perfCount >= 4 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime4, "Day3Eve", 60) : -1;
       if (($perfID1 == 0) ||($perfID2 == 0) || ($perfID3 == 0) || ($perfID4 == 0))
 			{
 				echo '<div id="message" class="updated"><p>'.__('Cannot Add Performances', STAGESHOW_DOMAIN_NAME).' - '.$statusMsg.'.</p></div>';
@@ -350,7 +356,7 @@ if (!class_exists('StageShowDBaseClass')) {
 		{
 			global $myPayPalAPILiveObj;
 			global $myPayPalAPITestObj;
-			global $myDBaseObj;
+			global $stageShowDBaseObj;
 			
 			if ($showID <= 0) return 0;
 			
@@ -457,6 +463,11 @@ if (!class_exists('StageShowDBaseClass')) {
 			return $ourEmail;
 		}
 		
+		function IsStateActive($state)
+		{
+			return ($state === '') || ($state === 'activate') || ($state === 'Active');
+		}
+		
 		function GetAllShowsList()
 		{
 			return $this->GetShowsList(1);
@@ -473,7 +484,7 @@ if (!class_exists('StageShowDBaseClass')) {
 				
 				$showEntry->showID = 1;
 				$showEntry->showName = $ourOptions['showName'];
-				$showEntry->showState = 'Active';
+				$showEntry->showState = 'activate';
 				
 				$results = array($showEntry);
 			}
@@ -490,6 +501,33 @@ if (!class_exists('StageShowDBaseClass')) {
 			return true;
 		}
 		
+		function IsShowActivated($showID)
+		{
+			$sql = 'SELECT showState FROM '.STAGESHOW_SHOWS_TABLE;
+
+			$sqlWhere = $this->ShowIDSQLFilter($showID);
+			$sql .= $sqlWhere;			
+			$this->ShowSQL($sql); 
+			
+			$results = $this->get_results($sql);
+			$showState = $results[0]->showState;
+			
+			return $this->IsStateActive($showState);
+		}
+		
+		function SetShowActivated($showID, $showState = 'activate')
+		{
+			global $wpdb;
+      
+			$sql  = 'UPDATE '.STAGESHOW_SHOWS_TABLE;
+			$sql .= ' SET showState="'.$showState.'"';
+			$sql .= $this->ShowIDSQLFilter($showID);
+			$this->ShowSQL($sql); 
+
+			$wpdb->query($sql);	
+			return "OK";							
+		}
+		
 		function CanAddShow()
 		{		
 			$ourOptions = get_option(STAGESHOW_OPTIONS_NAME);
@@ -501,7 +539,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			return true;
 		}
 		 
-		function AddShow($showName = '', $showState = 'Active')
+		function AddShow($showName = '', $showState = 'activate')
 		{
 			global $wpdb;
 			
@@ -607,9 +645,12 @@ if (!class_exists('StageShowDBaseClass')) {
 			
 			// Add Show Name
 			$ourOptions = get_option(STAGESHOW_OPTIONS_NAME);
-			for ($i=0; $i<count($results); $i++)
+			if (isset($ourOptions['showName']))
 			{
-				$results[$i]->showName = $ourOptions['showName'];
+				for ($i=0; $i<count($results); $i++)
+				{
+					$results[$i]->showName = $ourOptions['showName'];
+				}
 			}
 			
 			return $results;
@@ -644,7 +685,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 			
 			$this->ShowSQL($sql); 
-				
+			
 			$perfsListArray = $this->get_results($sql);
 
 			return $perfsListArray;
@@ -673,6 +714,33 @@ if (!class_exists('StageShowDBaseClass')) {
 			return $canDelete;
 		}
 		
+		function IsPerfActivated($perfID)
+		{
+			$sql = 'SELECT perfState FROM '.STAGESHOW_PERFORMANCES_TABLE;
+
+			$sqlWhere = $this->PerfIDSQLFilter($perfID);
+			$sql .= $sqlWhere;			
+			$this->ShowSQL($sql); 
+			
+			$results = $this->get_results($sql);
+			$perfState = $results[0]->perfState;
+			
+			return $this->IsStateActive($perfState);
+		}
+		
+		function SetPerfActivated($perfID, $perfState = 'activate')
+		{
+      global $wpdb;
+      
+			$sql  = 'UPDATE '.STAGESHOW_PERFORMANCES_TABLE;
+			$sql .= ' SET perfState="'.$perfState.'"';
+			$sql .= $this->PerfIDSQLFilter($perfID);
+			$this->ShowSQL($sql); 
+
+			$wpdb->query($sql);	
+			return "OK";							
+		}
+		
 		private function GetLastPerfDateTime($showID = 0)
 		{
       global $wpdb;
@@ -688,9 +756,10 @@ if (!class_exists('StageShowDBaseClass')) {
 			return $results[0]->LastPerf;
 		}
 		
-		function IsPerfExpired($result)
+		function IsPerfEnabled($result)
 		{
-				return false;
+			//echo "Show:$result->showID $result->showState Perf:$result->perfID $result->perfState<BR>\n";
+			return $this->IsStateActive($result->showState) && $this->IsStateActive($result->perfState);
 		}
 		
 		function IsPerfRefUnique($perfRef)
@@ -1189,10 +1258,6 @@ if (!class_exists('StageShowDBaseClass')) {
 			$this->ShowSQL($sql); 
 			$salesList = $this->get_results($sql);
 
-			echo "<br>\nOrphaned Sales:<br>\n";
-			print_r($salesList);
-			echo "<br>\n";
-				
 			if (count($salesList) == 0)
 				return'';
 			
@@ -1417,7 +1482,7 @@ if (!class_exists('StageShowDBaseClass')) {
 		
 		function EMailSale($saleID, $EMailTo = '')
 		{
-			global $myDBaseObj;
+			global $stageShowDBaseObj;
 			
 			$ourOptions = get_option(STAGESHOW_OPTIONS_NAME);
 		
@@ -1486,7 +1551,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			
 			if (strlen($EMailTo) == 0) $EMailTo = $saleDetails->saleEMail;
 			
-			$myDBaseObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $bookingConfirmation);
+			$stageShowDBaseObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $bookingConfirmation);
 			
 			echo '<div id="message" class="updated"><p>'.__('EMail Sent to', STAGESHOW_DOMAIN_NAME).' '.$EMailTo.'</p></div>';
 			
@@ -1543,5 +1608,12 @@ if (!class_exists('StageShowDBaseClass')) {
 		
 	}
 }
+
+if (!isset($stageShowDBaseObj) && class_exists('StageShowDBaseClass')) 
+{
+	global $stageShowDBaseObj;				
+	$stageShowDBaseObj = new StageShowDBaseClass();
+}
+
 
 ?>

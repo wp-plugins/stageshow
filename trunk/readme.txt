@@ -12,7 +12,7 @@ The StageShow plugin adds an online Box-Office for websites of Small Theatres an
 
 One or more performances can be defined, each with a specified start date/time, maximum number of places, ticket types and prices. 
 
-A tag added to a Page on the website adds a Booking Form form to the site.
+A [sshow-boxoffice] tag added to a Page on the website adds the Box Office entry to the site.
 
 StageShow uses the PayPal API to interface to PayPal to create "Saved Buttons" which are used to collect ticket payments and to control the maximum number of tickets sold for each performance. PayPal IPN (Instant Payment Notification) is used to verify payments and to collect buyer information. 
 
@@ -22,9 +22,9 @@ StageShow includes the facility to export both settings and sales to a "TAB Sepa
 
 Features Summary
 
-* Configurable Show Name
+* Adds a online BoxOffice for a Single Show 
 * Multiple Performances with Specified start Date/Time and Maximum Number of Tickets
-* Multiple Ticket Types for each performance with individually defined prices
+* Unlimited number of Ticket Types for each performance with individually defined prices
 * Integrated PayPal Payment Collection
 * EMail confirmation of Booking to Client and Administrator
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
@@ -120,9 +120,12 @@ The following tags can be used in the EMail template:
 = 0.9 =
 * First public release
 
+= 0.9.1 =
+* Added Pagination to Sales Summary
+* Added Uninstall
+* Added Activate/Deactivate options for shows and performances
+
 == Upgrade Notice ==
 
 = 0.9 =
 * First public release
-
-

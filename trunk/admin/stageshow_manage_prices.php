@@ -22,8 +22,8 @@ Copyright 2011 Malcolm Shergold
 
 //		function OutputContent_Prices()
 		{
-			global $myShowObj;
-			global $myDBaseObj;
+			global $stageShowObj;
+			global $stageShowDBaseObj;
 			global $myPayPalAPILiveObj;
 			global $myPayPalAPITestObj;
       
@@ -36,7 +36,7 @@ Copyright 2011 Malcolm Shergold
 		    'priceDelete' => __(' ', STAGESHOW_DOMAIN_NAME)
 	    );
 	
-			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
+			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
 			{
 				// Add the ID column
 				$columns = array_merge(array('priceID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
@@ -53,7 +53,7 @@ Copyright 2011 Malcolm Shergold
 				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
 				
 				$showID = $_POST['showID'];
-				$results = $myDBaseObj->GetPricesListByShowID($showID);
+				$results = $stageShowDBaseObj->GetPricesListByShowID($showID);
 
 				// Verify that Price Types are unique for each performance				
 				
@@ -70,7 +70,7 @@ Copyright 2011 Malcolm Shergold
 							if (isset($entriesList[$priceEntry]))
 							{
 								// Convert the perfID to a Performance Date & Time to display to the user
-								$perfsList = $myDBaseObj->GetPerformancesListByPerfID($newPerfID);
+								$perfsList = $stageShowDBaseObj->GetPerformancesListByPerfID($newPerfID);
 								
 								$pricesMsg = __('Duplicated Price Entry', STAGESHOW_DOMAIN_NAME).' ('.$perfsList[0]->perfDateTime.' - '.$newPriceType.')';
 								break;
@@ -111,7 +111,7 @@ Copyright 2011 Malcolm Shergold
 								$newPerfID = $_POST['perfID'.$result->priceID];
 								if ($newPerfID != $result->perfID)
 								{
-									$myDBaseObj->UpdatePricePerfID($result->priceID, $newPerfID);
+									$stageShowDBaseObj->UpdatePricePerfID($result->priceID, $newPerfID);
 									$result->perfID = $newPerfID;
 									$pricesUpdated = true;
 								}
@@ -119,7 +119,7 @@ Copyright 2011 Malcolm Shergold
 								$newPriceType = stripslashes($_POST['priceType'.$result->priceID]);
 								if ($newPriceType != $result->priceType)
 								{
-									$myDBaseObj->UpdatePriceType($result->priceID, $newPriceType);
+									$stageShowDBaseObj->UpdatePriceType($result->priceID, $newPriceType);
 									$result->priceType = $newPriceType;
 									$pricesUpdated = true;
 								}
@@ -127,7 +127,7 @@ Copyright 2011 Malcolm Shergold
 								$newPriceValue = stripslashes($_POST['priceValue'.$result->priceID]);
 								if ($newPriceValue != $result->priceValue)
 								{
-									$myDBaseObj->UpdatePriceValue($result->priceID, $newPriceValue);
+									$stageShowDBaseObj->UpdatePriceValue($result->priceID, $newPriceValue);
 									$result->priceValue = $newPriceValue;
 									$pricesUpdated = true;
 								}
@@ -138,7 +138,7 @@ Copyright 2011 Malcolm Shergold
 						} // End foreach
 						
 						if (count($perfsList) > 0)
-							$myDBaseObj->UpdateCartButtons($perfsList);
+							$stageShowDBaseObj->UpdateCartButtons($perfsList);
 					}
 					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
 				}
@@ -151,7 +151,7 @@ Copyright 2011 Malcolm Shergold
 				
 				// Performance ID of first performance is passed with call - Type ID is null ... AddPrice() will add (unique) value
 				$perfID = $_POST['perfID'];
-				$myDBaseObj->AddPrice($perfID, '', '0.00');
+				$stageShowDBaseObj->AddPrice($perfID, '', '0.00');
 				
 				// Note: Commented out ... buttons are only updated when entry is edited by user ....
 /*								
@@ -175,7 +175,7 @@ Copyright 2011 Malcolm Shergold
 			if ($delpriceId > 0)
 			{
 				// Don't delete if any tickets have been sold with this price
-				$results = $myDBaseObj->GetTicketsListByPriceID($delpriceId);
+				$results = $stageShowDBaseObj->GetTicketsListByPriceID($delpriceId);
 				if (count($results) > 0)
 				{
 					echo '<div id="message" class="updated"><p>'.__('Price cannot be deleted - Tickets already sold!', STAGESHOW_DOMAIN_NAME).'</p></div>';
@@ -183,7 +183,7 @@ Copyright 2011 Malcolm Shergold
 				else
 				{	
 					// Delete a ticket price entry
-					$myDBaseObj->DeletePriceByPriceID($delpriceId);
+					$stageShowDBaseObj->DeletePriceByPriceID($delpriceId);
 
 					echo '<div id="message" class="updated"><p>'.__('Price entry deleted', STAGESHOW_DOMAIN_NAME).'.</p></div>';
 				}
@@ -194,16 +194,16 @@ Copyright 2011 Malcolm Shergold
 <script type="text/javascript" src="<?php echo STAGESHOW_URL.'js/stageshow.js'; ?>"></script>
 <div class="wrap">
   <div id="icon-stageshow" class="icon32"></div>
-	<h2><?php echo $myShowObj->pluginName.' - '.__('Prices Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
+	<h2><?php echo $stageShowObj->pluginName.' - '.__('Prices Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
 <?php
-$showLists = $myDBaseObj->GetAllShowsList();
+$showLists = $stageShowDBaseObj->GetAllShowsList();
 if (count($showLists) == 0)
 {
 	echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
 }
 foreach ($showLists as $showList)
 {
-	$perfsLists = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
+	$perfsLists = $stageShowDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
 	<br></br>
 	<form method="post" action="admin.php?page=sshow_prices">
@@ -216,7 +216,7 @@ if (count($perfsLists) == 0)
 } 
 else 
 { 
-$results = $myDBaseObj->GetPricesListByShowID($showList->showID);
+$results = $stageShowDBaseObj->GetPricesListByShowID($showList->showID);
 if(count($results) == 0)
 {
 	_e('Show has NO Prices', STAGESHOW_DOMAIN_NAME); 
@@ -256,7 +256,7 @@ else
 			$priceValue = $result->priceValue;
 		}
 			echo '<tr>';
-			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
+			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
 				echo '<td>'.$result->priceID.'</td>';
 			echo '
 	<td>

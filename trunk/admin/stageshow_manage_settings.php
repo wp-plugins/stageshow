@@ -33,8 +33,8 @@ Copyright 2011 Malcolm Shergold
 	
 		function OutputContent_Settings()
 		{
-			global $myShowObj;
-			global $myDBaseObj;
+			global $stageShowObj;
+			global $stageShowDBaseObj;
 			global $myPayPalAPITestObj;
 			global $myPayPalAPILiveObj;
 			
@@ -48,22 +48,22 @@ Copyright 2011 Malcolm Shergold
 			 */
 			$PayPalAPITestChanged = false;
 
-			$results = $myDBaseObj->GetAllShowsList();		
+			$results = $stageShowDBaseObj->GetAllShowsList();		
 			$showsConfigured = (count($results) > 0);
 			
 			if (isset($_POST['savebutton']))
 			{
 				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
 				
-				if ($myShowObj->IsOptionChanged('PayPalAPITestUser','PayPalAPITestPwd','PayPalAPITestSig') || isset($_POST['errormsgtest']))
+				if ($stageShowObj->IsOptionChanged('PayPalAPITestUser','PayPalAPITestPwd','PayPalAPITestSig') || isset($_POST['errormsgtest']))
 				{
 					// Block changes to PayPal Login Parameters if there are shows configured				
 					if ($showsConfigured)
 					{
 						// Put back original settings
-						$_POST['PayPalAPITestUser']   = $myDBaseObj->adminOptions['PayPalAPITestUser'];
-						$_POST['PayPalAPITestPwd']    = $myDBaseObj->adminOptions['PayPalAPITestPwd'];
-						$_POST['PayPalAPITestSig']    = $myDBaseObj->adminOptions['PayPalAPITestSig'];
+						$_POST['PayPalAPITestUser']   = $stageShowDBaseObj->adminOptions['PayPalAPITestUser'];
+						$_POST['PayPalAPITestPwd']    = $stageShowDBaseObj->adminOptions['PayPalAPITestPwd'];
+						$_POST['PayPalAPITestSig']    = $stageShowDBaseObj->adminOptions['PayPalAPITestSig'];
 						
 						$SettingsUpdateMsg = __('Show already created - Paypal Login details cannot be changed.', STAGESHOW_DOMAIN_NAME);
 					}
@@ -80,16 +80,16 @@ Copyright 2011 Malcolm Shergold
 				}				
 				
 				$PayPalAPILiveChanged = false;
-				if ($myShowObj->IsOptionChanged('PayPalAPILiveUser','PayPalAPILivePwd','PayPalAPILiveSig') || isset($_POST['errormsglive']))
+				if ($stageShowObj->IsOptionChanged('PayPalAPILiveUser','PayPalAPILivePwd','PayPalAPILiveSig') || isset($_POST['errormsglive']))
 				{
 					// Block changes to PayPal Login Parameters if there are shows configured				
-					$results = $myDBaseObj->GetAllShowsList();		
+					$results = $stageShowDBaseObj->GetAllShowsList();		
 					if (count($results) > 0)
 					{
 						// Put back original settings
-						$_POST['PayPalAPILiveUser'] = $myDBaseObj->adminOptions['PayPalAPILiveUser'];
-						$_POST['PayPalAPILivePwd'] = $myDBaseObj->adminOptions['PayPalAPILivePwd'];
-						$_POST['PayPalAPILiveSig'] = $myDBaseObj->adminOptions['PayPalAPILiveSig'];
+						$_POST['PayPalAPILiveUser'] = $stageShowDBaseObj->adminOptions['PayPalAPILiveUser'];
+						$_POST['PayPalAPILivePwd'] = $stageShowDBaseObj->adminOptions['PayPalAPILivePwd'];
+						$_POST['PayPalAPILiveSig'] = $stageShowDBaseObj->adminOptions['PayPalAPILiveSig'];
 						
 						$SettingsUpdateMsg = __('Show already created - Paypal Login details cannot be changed.', STAGESHOW_DOMAIN_NAME);
 					}
@@ -105,23 +105,23 @@ Copyright 2011 Malcolm Shergold
 					}
 				}
 				        
-				if ($myShowObj->IsOptionChanged('AdminEMail'))
+				if ($stageShowObj->IsOptionChanged('AdminEMail'))
 				{
-					if (!$myShowObj->ValidateEmail($_POST('AdminEMail')))
+					if (!$stageShowObj->ValidateEmail($_POST('AdminEMail')))
 					{
 						$SettingsUpdateMsg = __('Invalid Admin EMail', STAGESHOW_DOMAIN_NAME);
 					}
 				}
         
-				if ($myShowObj->IsOptionChanged('BookingsEMail'))
+				if ($stageShowObj->IsOptionChanged('BookingsEMail'))
 				{
-					if (!$myShowObj->ValidateEmail($_POST('BookingsEMail')))
+					if (!$stageShowObj->ValidateEmail($_POST('BookingsEMail')))
 					{
 						$SettingsUpdateMsg = __('Invalid Bookings EMail', STAGESHOW_DOMAIN_NAME);
 					}
 				}
         
-				if ($myShowObj->IsOptionChanged('LogsFolderPath'))
+				if ($stageShowObj->IsOptionChanged('LogsFolderPath'))
 				{
 					// Confrm that logs folder path is valid or create folder
 					$LogsFolder = stripslashes($_POST['LogsFolderPath']);
@@ -147,29 +147,29 @@ Copyright 2011 Malcolm Shergold
         
 				if ($SettingsUpdateMsg === '')
 				{
-					$myDBaseObj->adminOptions['PayPalEnv'] = trim($myShowObj->GetArrayElement($_POST,"PayPalEnv"));
-					$myDBaseObj->adminOptions['PayPalCurrency'] = $myShowObj->GetArrayElement($_POST,"PayPalCurrency");
+					$stageShowDBaseObj->adminOptions['PayPalEnv'] = trim($stageShowObj->GetArrayElement($_POST,"PayPalEnv"));
+					$stageShowDBaseObj->adminOptions['PayPalCurrency'] = $stageShowObj->GetArrayElement($_POST,"PayPalCurrency");
 					
 					if ($PayPalAPITestChanged)
 					{
-						$myDBaseObj->adminOptions['PayPalAPITestUser'] = trim($myShowObj->GetArrayElement($_POST,'PayPalAPITestUser'));
-						$myDBaseObj->adminOptions['PayPalAPITestPwd'] = trim($myShowObj->GetArrayElement($_POST,'PayPalAPITestPwd'));
-						$myDBaseObj->adminOptions['PayPalAPITestSig'] = trim($myShowObj->GetArrayElement($_POST,'PayPalAPITestSig'));
+						$stageShowDBaseObj->adminOptions['PayPalAPITestUser'] = trim($stageShowObj->GetArrayElement($_POST,'PayPalAPITestUser'));
+						$stageShowDBaseObj->adminOptions['PayPalAPITestPwd'] = trim($stageShowObj->GetArrayElement($_POST,'PayPalAPITestPwd'));
+						$stageShowDBaseObj->adminOptions['PayPalAPITestSig'] = trim($stageShowObj->GetArrayElement($_POST,'PayPalAPITestSig'));
 					}
-					$myDBaseObj->adminOptions['PayPalAPITestEMail'] = trim($myShowObj->GetArrayElement($_POST,'PayPalAPITestEMail'));
+					$stageShowDBaseObj->adminOptions['PayPalAPITestEMail'] = trim($stageShowObj->GetArrayElement($_POST,'PayPalAPITestEMail'));
 					
 					if ($PayPalAPILiveChanged)
 					{
-						$myDBaseObj->adminOptions['PayPalAPILiveUser'] = trim($myShowObj->GetArrayElement($_POST,'PayPalAPILiveUser'));
-						$myDBaseObj->adminOptions['PayPalAPILivePwd'] = trim($myShowObj->GetArrayElement($_POST,'PayPalAPILivePwd'));
-						$myDBaseObj->adminOptions['PayPalAPILiveSig'] = trim($myShowObj->GetArrayElement($_POST,'PayPalAPILiveSig'));
-						$myDBaseObj->adminOptions['PayPalAPILiveEMail'] = $myPayPalAPILiveObj->APIemail;
+						$stageShowDBaseObj->adminOptions['PayPalAPILiveUser'] = trim($stageShowObj->GetArrayElement($_POST,'PayPalAPILiveUser'));
+						$stageShowDBaseObj->adminOptions['PayPalAPILivePwd'] = trim($stageShowObj->GetArrayElement($_POST,'PayPalAPILivePwd'));
+						$stageShowDBaseObj->adminOptions['PayPalAPILiveSig'] = trim($stageShowObj->GetArrayElement($_POST,'PayPalAPILiveSig'));
+						$stageShowDBaseObj->adminOptions['PayPalAPILiveEMail'] = $myPayPalAPILiveObj->APIemail;
 					}
 					
-					$myDBaseObj->adminOptions['PayPalLogoImageURL'] = trim($myShowObj->GetArrayElement($_POST,'PayPalLogoImageURL'));
-					$myDBaseObj->adminOptions['PayPalHeaderImageURL'] = $myShowObj->GetArrayElement($_POST,'PayPalHeaderImageURL');
+					$stageShowDBaseObj->adminOptions['PayPalLogoImageURL'] = trim($stageShowObj->GetArrayElement($_POST,'PayPalLogoImageURL'));
+					$stageShowDBaseObj->adminOptions['PayPalHeaderImageURL'] = $stageShowObj->GetArrayElement($_POST,'PayPalHeaderImageURL');
 					
-					$myDBaseObj->SaveSettings();
+					$stageShowDBaseObj->SaveSettings();
 					
 					echo '<div id="message" class="updated"><p>'.__('Settings have been saved.', STAGESHOW_DOMAIN_NAME).'</p></div>';
 				}
@@ -183,21 +183,21 @@ Copyright 2011 Malcolm Shergold
 			if ($SettingsUpdateMsg === '')
 			{
 				// Get values from database
-				$PayPalEnv = $myDBaseObj->adminOptions['PayPalEnv'];
-				$PayPalCurrency = $myDBaseObj->adminOptions['PayPalCurrency'];
+				$PayPalEnv = $stageShowDBaseObj->adminOptions['PayPalEnv'];
+				$PayPalCurrency = $stageShowDBaseObj->adminOptions['PayPalCurrency'];
 					
-				$PayPalAPITestUser = $myDBaseObj->adminOptions['PayPalAPITestUser'];
-				$PayPalAPITestPwd = $myDBaseObj->adminOptions['PayPalAPITestPwd'];
-				$PayPalAPITestSig = $myDBaseObj->adminOptions['PayPalAPITestSig'];
-				$PayPalAPITestEMail = $myDBaseObj->adminOptions['PayPalAPITestEMail'];
+				$PayPalAPITestUser = $stageShowDBaseObj->adminOptions['PayPalAPITestUser'];
+				$PayPalAPITestPwd = $stageShowDBaseObj->adminOptions['PayPalAPITestPwd'];
+				$PayPalAPITestSig = $stageShowDBaseObj->adminOptions['PayPalAPITestSig'];
+				$PayPalAPITestEMail = $stageShowDBaseObj->adminOptions['PayPalAPITestEMail'];
 						
-				$PayPalAPILiveUser = $myDBaseObj->adminOptions['PayPalAPILiveUser'];
-				$PayPalAPILivePwd = $myDBaseObj->adminOptions['PayPalAPILivePwd'];
-				$PayPalAPILiveSig = $myDBaseObj->adminOptions['PayPalAPILiveSig'];
-				$PayPalAPILiveEMail = $myDBaseObj->adminOptions['PayPalAPILiveEMail'];
+				$PayPalAPILiveUser = $stageShowDBaseObj->adminOptions['PayPalAPILiveUser'];
+				$PayPalAPILivePwd = $stageShowDBaseObj->adminOptions['PayPalAPILivePwd'];
+				$PayPalAPILiveSig = $stageShowDBaseObj->adminOptions['PayPalAPILiveSig'];
+				$PayPalAPILiveEMail = $stageShowDBaseObj->adminOptions['PayPalAPILiveEMail'];
 						
-				$PayPalLogoImageURL = $myDBaseObj->adminOptions['PayPalLogoImageURL'];
-				$PayPalHeaderImageURL = $myDBaseObj->adminOptions['PayPalHeaderImageURL'];				
+				$PayPalLogoImageURL = $stageShowDBaseObj->adminOptions['PayPalLogoImageURL'];
+				$PayPalHeaderImageURL = $stageShowDBaseObj->adminOptions['PayPalHeaderImageURL'];				
 			}
 			else
 			{
@@ -213,7 +213,7 @@ Copyright 2011 Malcolm Shergold
 				$PayPalAPILiveUser = stripslashes($_POST['PayPalAPILiveUser']);
 				$PayPalAPILivePwd = stripslashes($_POST['PayPalAPILivePwd']);
 				$PayPalAPILiveSig = stripslashes($_POST['PayPalAPILiveSig']);
-				$PayPalAPILiveEMail = $myDBaseObj->adminOptions['PayPalAPILiveEMail'];
+				$PayPalAPILiveEMail = $stageShowDBaseObj->adminOptions['PayPalAPILiveEMail'];
 						
 				$PayPalLogoImageURL = stripslashes($_POST['PayPalLogoImageURL']);
 				$PayPalHeaderImageURL = stripslashes($_POST['PayPalHeaderImageURL']);
@@ -225,7 +225,7 @@ Copyright 2011 Malcolm Shergold
 ?>
 <div class="settings_page">
 <div id="icon-stageshow" class="icon32"></div>
-<h2><?php echo $myShowObj->pluginName.' - '.__('Settings', STAGESHOW_DOMAIN_NAME); ?></h2>
+<h2><?php echo $stageShowObj->pluginName.' - '.__('Settings', STAGESHOW_DOMAIN_NAME); ?></h2>
 <form method="post" action="admin.php?page=sshow_settings">
 <?php 
 	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__));
@@ -334,7 +334,7 @@ Copyright 2011 Malcolm Shergold
 
 	<h3><?php _e('General Settings', STAGESHOW_DOMAIN_NAME); ?></h3>
 	<table class="form-table">
-	<?php $myDBaseObj->ShowSettings($SettingsUpdateMsg === ''); ?>
+	<?php $stageShowDBaseObj->ShowSettings($SettingsUpdateMsg === ''); ?>
 	</table>
 	<br></br>
 	<input class="button-primary" type="submit" name="savebutton" value="<?php _e('Save Settings', STAGESHOW_DOMAIN_NAME) ?>"/>

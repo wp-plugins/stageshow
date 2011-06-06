@@ -121,7 +121,7 @@ if (!class_exists('PayPalAPIClass')) {
 			}
 		}
 
-    function SetLoginParams($username, $password, $signature, $email, $currency) {
+    function SetLoginParams($username, $password, $signature, $currency = '', $email = '') {
       if (( strlen( $username ) == 0 ) || ( strlen( $password ) == 0 ) || ( strlen( $signature ) == 0 )) {
         $this->APIusername = '';
         $this->APIpassword = '';
@@ -497,7 +497,7 @@ if (!class_exists('PayPalAPIClass')) {
 		function VerifyPayPalLogin($username, $password, $signature)
 		{
       $this->APIemail = '';      
-			$this->SetLoginParams($username, $password, $signature, '', 'GBP');
+			$this->SetLoginParams($username, $password, $signature, 'GBP');
 			
 			// Blank PayPal login params disabled this PayPal interface
 			if ((strlen($username) == 0) && (strlen($password) == 0) && (strlen($signature) == 0))
