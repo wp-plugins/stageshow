@@ -20,24 +20,24 @@ Copyright 2011 Malcolm Shergold
 
 */
 
-	global $myShowObj;
+	global $stageShowObj;
 	$actionURL=get_site_url().'/wp-content/plugins/stageshow/admin/stageshow_Export.php';
 		
-	$DeleteOrphans = ($myDBaseObj->adminOptions['DeleteOrphans'] == true); 
+	$DeleteOrphans = ($stageShowDBaseObj->adminOptions['DeleteOrphans'] == true); 
 	if(isset($_POST['flushsalesbutton']))
 	{
-		global $myDBaseObj;
+		global $stageShowDBaseObj;
 			
 		check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
 				
-		$myDBaseObj->DeleteOrphanedSales();
+		$stageShowDBaseObj->DeleteOrphanedSales();
 	}
 	
 ?>
 
 <div class="wrap">
 	<div id="icon-stageshow" class="icon32"></div>
-	<h2><?php echo $myShowObj->pluginName.' - '.__('Tools', STAGESHOW_DOMAIN_NAME); ?></h2>
+	<h2><?php echo $stageShowObj->pluginName.' - '.__('Tools', STAGESHOW_DOMAIN_NAME); ?></h2>
 <h3><?php _e('Export Data'); ?></h3>
 <p><?php _e('Export Configuration and Ticket Sales to a "TAB Separated Text" format file on your computer.'); ?></p>
 <p><?php _e('This format can be imported to many applications including spreadsheets and databases.'); ?></p>

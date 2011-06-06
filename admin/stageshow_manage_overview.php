@@ -21,8 +21,8 @@ Copyright 2011 Malcolm Shergold
 */
 
 		{
-			global $myShowObj;
-			global $myDBaseObj;
+			global $stageShowObj;
+			global $stageShowDBaseObj;
       
       $columns = array(
 		    'showName' => __('Show', STAGESHOW_DOMAIN_NAME),
@@ -30,7 +30,7 @@ Copyright 2011 Malcolm Shergold
 		    'showSales' => __('Tickets Sold', STAGESHOW_DOMAIN_NAME)
 	    );
 	
-			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
+			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
 			{
 				// Add the ID column
 				$columns = array_merge(array('showID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
@@ -49,12 +49,12 @@ Copyright 2011 Malcolm Shergold
 ?>
 		<div class="wrap">
 			<div id="icon-stageshow" class="icon32"></div>
-			<h2><?php echo $myShowObj->pluginName.' - '.__('Overview', STAGESHOW_DOMAIN_NAME); ?></h2>
+			<h2><?php echo $stageShowObj->pluginName.' - '.__('Overview', STAGESHOW_DOMAIN_NAME); ?></h2>
 			<br></br>
 			<form method="post" action="admin.php?page=sshow_adminmenu">
 						<?php
 if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__));
-$results = $myDBaseObj->GetAllShowsList();
+$results = $stageShowDBaseObj->GetAllShowsList();
 if(count($results) == 0)
 {
 	echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
@@ -79,11 +79,11 @@ else
 	foreach($results as $result)
 	{
 		// For each show .... find the number of performances
-		$results2 = $myDBaseObj->GetPerformancesListByShowID($result->showID);
-		$showSales = $myDBaseObj->GetSalesQtyByShowID($result->showID);
+		$results2 = $stageShowDBaseObj->GetPerformancesListByShowID($result->showID);
+		$showSales = $stageShowDBaseObj->GetSalesQtyByShowID($result->showID);
 
 		echo '<tr>';
-		if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
+		if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
 			echo '<td>'.$result->showID.'</td>';
 		echo '
 		<td>'.$result->showName.'</td>

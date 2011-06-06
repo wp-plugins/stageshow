@@ -21,8 +21,8 @@ Copyright 2011 Malcolm Shergold
 */
 
 		{
-			global $myShowObj;
-			global $myDBaseObj;
+			global $stageShowObj;
+			global $stageShowDBaseObj;
       
 			$detailsSaleId = 0;
 			$deleteSaleId = 0;
@@ -44,14 +44,14 @@ Copyright 2011 Malcolm Shergold
 						
 					case 'show':
 						$showId = $_GET['id']; 
-						$results = $myDBaseObj->GetSalesListByShowID($showId);	
+						$results = $stageShowDBaseObj->GetSalesListByShowID($showId);	
 						$salesFor = '- '.$results[0]->showName.' ';
 						break;
 						
 					case 'perf':
 						$perfId = $_GET['id']; 
-						$results = $myDBaseObj->GetSalesListByPerfID($perfId);
-						$salesFor = '- '.$results[0]->showName.' ('.$myDBaseObj->FormatDateForDisplay($results[0]->perfDateTime).') ';
+						$results = $stageShowDBaseObj->GetSalesListByPerfID($perfId);
+						$salesFor = '- '.$results[0]->showName.' ('.$stageShowDBaseObj->FormatDateForDisplay($results[0]->perfDateTime).') ';
 						break;
 				}
 			}
@@ -61,16 +61,16 @@ Copyright 2011 Malcolm Shergold
 				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
 				
 				$detailsSaleId = $_POST['id'];
-				$myDBaseObj->EMailSale($detailsSaleId);
+				$stageShowDBaseObj->EMailSale($detailsSaleId);
 			}
 			
 			if ($deleteSaleId > 0)
 			{
-				$myDBaseObj->DeleteSale($deleteSaleId);
+				$stageShowDBaseObj->DeleteSale($deleteSaleId);
 			}
 
 			if ($salesFor == '')			
-				$results = $myDBaseObj->GetAllSalesList();		// Get list of sales (one row per sale)
+				$results = $stageShowDBaseObj->GetAllSalesList();		// Get list of sales (one row per sale)
 
 			if ($detailsSaleId > 0)
 			{
@@ -91,7 +91,7 @@ Copyright 2011 Malcolm Shergold
 				);
 			}
 			
-			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
+			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
 			{
 				// Add the ID column
 				$columns = array_merge(array('saleID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
@@ -105,7 +105,7 @@ Copyright 2011 Malcolm Shergold
 ?>
 			<div class="wrap">
 				<div id="icon-stageshow" class="icon32"></div>
-				<h2><?php echo $myShowObj->pluginName.' '.$salesFor.' - '.__('Sales Log', STAGESHOW_DOMAIN_NAME); ?></h2>
+				<h2><?php echo $stageShowObj->pluginName.' '.$salesFor.' - '.__('Sales Log', STAGESHOW_DOMAIN_NAME); ?></h2>
 				<br></br>
 				<form method="post" action="admin.php?page=sshow_sales">
 					<h3>
@@ -115,8 +115,32 @@ Copyright 2011 Malcolm Shergold
 	else
 		_e('Summary', STAGESHOW_DOMAIN_NAME); 
 ?>
-					</h3>
-							<?php
+	</h3>
+	<div class="tablenav">
+<?php
+		
+	if ($detailsSaleId <= 0)	
+	{
+		$salesPerPage = STAGESHOW_SALES_PER_PAGE;
+		
+		$currentPage = isset($_REQUEST['paged']) ? $_REQUEST['paged'] : 1;
+		$currentPage = isset($_GET['paged']) ? $_GET['paged'] : $currentPage;
+		
+		$totalSales = count($results);
+		
+		$firstSaleShown = 1 + (($currentPage - 1) * $salesPerPage);
+		$lastSaleShown = $firstSaleShown + $salesPerPage - 1;
+
+		if ( $totalSales > $salesPerPage ) 
+		{
+			$totalPages = (int)($totalSales/$salesPerPage) + 1;
+			$stageShowObj->ShowPageNavigation('top', $currentPage, $totalSales, $totalPages);
+		}
+	}
+?>
+	</div>
+<?php
+
 if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__));
 if(count($results) == 0)
 {
@@ -126,7 +150,7 @@ else
 {
 	if ($detailsSaleId > 0)
 	{
-		$ticketsList = $myDBaseObj->GetTicketsListBySaleID($detailsSaleId);	// Get list of tickets for a single sale
+		$ticketsList = $stageShowDBaseObj->GetTicketsListBySaleID($detailsSaleId);	// Get list of tickets for a single sale
 		
 		if (!defined('STAGESHOW_STREET_LABEL')) 
 			define ('STAGESHOW_STREET_LABEL', 'Address');
@@ -204,7 +228,7 @@ else
 		foreach($ticketsList as $ticket)
 		{
 			echo '<tr>';
-			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
+			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
 				echo '<td>'.$ticket->ticketID.'</td>';
 			echo '
 				<td>'.$ticket->ticketName.'</td>
@@ -215,22 +239,30 @@ else
 	}
 	else
 	{
-		$lastDaleId = 0;
+		$saleNo = 0;
+		$lastSaleId = 0;
 		foreach($results as $result)
 		{
-			if ($lastDaleId != $result->saleID)
-			{
-				$lastDaleId = $result->saleID;
+			if ($lastSaleId == $result->saleID)
+				continue;
 				
+			$lastSaleId = $result->saleID;
+			$saleNo = $saleNo + 1;
+			
+			if ($saleNo > $lastSaleShown)
+				continue;
+				
+			if ($saleNo >= $firstSaleShown)
+			{
 				// For each sale .... find the number of tickets
 				$noOfTickets = 0;
-				$ticketsList = $myDBaseObj->GetTicketsListBySaleID($result->saleID);
+				$ticketsList = $stageShowDBaseObj->GetTicketsListBySaleID($result->saleID);
 				foreach($ticketsList as $ticket)
 				{
 					$noOfTickets += $ticket->ticketQty;
 				}
 				echo '<tr>';
-				if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
+				if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
 					echo '<td>'.$ticket->saleID.'</td>';
 				echo '
 				<td>'.$result->saleName.'</td>
@@ -272,4 +304,5 @@ else
 <?php
         // Stage Show Sales HTML Output - End
 		}
+		 
 ?>

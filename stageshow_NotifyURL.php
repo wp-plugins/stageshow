@@ -44,12 +44,12 @@ function GetQueryString()
 
 function LogDebugToFile($DebugMessage)
 {
-	global $myDBaseObj;
+	global $stageShowDBaseObj;
   global $LogsFolder;
   global $LogNotifyFile;
   //global $ForAppending;
 	
-  $myDBaseObj->LogToFile($LogsFolder . $LogNotifyFile, $DebugMessage, $myDBaseObj->ForAppending);
+  $stageShowDBaseObj->LogToFile($LogsFolder . $LogNotifyFile, $DebugMessage, $stageShowDBaseObj->ForAppending);
 }
 
 function AddToLog($LogLine)
@@ -117,7 +117,7 @@ if (defined('STAGESHOW_LOG_IPNPARAMS'))
 		$decodedParams .= "$key=$param\n";
 	}
 	
-	$myDBaseObj->LogToFile($LogsFolder . $LogIPNCallFile, "IPN Verify Request Parameters: \n" . $decodedParams, $myDBaseObj->ForWriting);
+	$stageShowDBaseObj->LogToFile($LogsFolder . $LogIPNCallFile, "IPN Verify Request Parameters: \n" . $decodedParams, $stageShowDBaseObj->ForWriting);
 }
 
 if (defined('STAGESHOW_IPNPARAMS_ON_SCREEN'))
@@ -184,7 +184,7 @@ else if ($notifyPayPalAPIObj->APIResponseText === 'VERIFIED')
 		if ($IPNError === '')
 		{
 	    // Check that $Txn_id has not been previously processed
-			$txnStatus = $myDBaseObj->GetTxnStatus($Txn_id);
+			$txnStatus = $stageShowDBaseObj->GetTxnStatus($Txn_id);
 			if (($txnStatus === $Payment_status) || ($txnStatus === 'Completed'))
 				$IPNError = 'Txn_ID Already Processed';		// Entry with matching Txn_Id found
 		}
@@ -192,13 +192,13 @@ else if ($notifyPayPalAPIObj->APIResponseText === 'VERIFIED')
 		if ($IPNError === '')
 		{
 			if ($txnStatus !== '')
-				$myDBaseObj->UpdateSaleStatus($Txn_id, $Payment_status);
+				$stageShowDBaseObj->UpdateSaleStatus($Txn_id, $Payment_status);
 			else
 			{
 				$txdDate = date(STAGESHOW_DATETIME_FORMAT);
-				$saleID = $myDBaseObj->LogSale($txdDate);
+				$saleID = $stageShowDBaseObj->LogSale($txdDate);
 				AddToLog('Sale Logged - SaleID: '.$saleID);
-				$emailStatus = $myDBaseObj->EMailSale($saleID);
+				$emailStatus = $stageShowDBaseObj->EMailSale($saleID);
 				AddToLog('EMail Status: '.$emailStatus);
 			}
 			echo "OK<br>\n";
