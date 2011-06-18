@@ -193,7 +193,7 @@ else
 		}
 		
 		$actionLinks = '';
-			
+/*			
 		if ($stageShowDBaseObj->IsShowActivated($result->showID))
 		{
 			$actionId = 'deactivate';
@@ -208,6 +208,7 @@ else
 		$actionLinks = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($actionLinks, plugin_basename(__FILE__)) : $actionLinks;
 		$actionLinks = '<a href="'.$actionLinks.'">'.$actionText.'</a>';
 		echo "<!-- actionText=$actionText actionId=$actionId -->\n";
+*/
 		
 		if ($stageShowDBaseObj->CanDeleteShow($showSales, $result->showID))
 		{
