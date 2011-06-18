@@ -131,7 +131,7 @@ The following tags can be used in the EMail template:
 * Added Activate/Deactivate options for shows and performances
 
 = 0.9.2 =
-* Bug Fix: Malformed <form> tag on BoxOffice page fixed
+* Bug Fix: Malformed &ltform&gt tag on BoxOffice page fixed
 * BoxOffice time/date format now uses WordPress settings
 * (Note: Private release)
 
