@@ -1,0 +1,18 @@
+	#content .boxoffice,
+	#content .boxoffice div,
+	#content .boxoffice table,
+	#content .boxoffice tr,
+	#content .boxoffice td,
+	#content .boxoffice select
+	{
+		padding: 0 0 0 0;
+		margin: 0 0 0 0;
+		border: 0 none;
+		text-align: left;
+	}
+	#content .boxoffice input
+	{
+		margin: 0 0 0 0;
+		text-align: left;
+	}
+

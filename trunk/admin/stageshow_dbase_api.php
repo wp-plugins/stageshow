@@ -526,29 +526,11 @@ if (!class_exists('StageShowDBaseClass')) {
 		
 		function IsShowActivated($showID)
 		{
-			$sql = 'SELECT showState FROM '.STAGESHOW_SHOWS_TABLE;
-
-			$sqlWhere = $this->ShowIDSQLFilter($showID);
-			$sql .= $sqlWhere;			
-			$this->ShowSQL($sql); 
-			
-			$results = $this->get_results($sql);
-			$showState = $results[0]->showState;
-			
-			return $this->IsStateActive($showState);
+			return true;
 		}
 		
 		function SetShowActivated($showID, $showState = 'activate')
 		{
-			global $wpdb;
-      
-			$sql  = 'UPDATE '.STAGESHOW_SHOWS_TABLE;
-			$sql .= ' SET showState="'.$showState.'"';
-			$sql .= $this->ShowIDSQLFilter($showID);
-			$this->ShowSQL($sql); 
-
-			$wpdb->query($sql);	
-			return "OK";							
 		}
 		
 		function CanAddShow()
@@ -673,6 +655,7 @@ if (!class_exists('StageShowDBaseClass')) {
 				for ($i=0; $i<count($results); $i++)
 				{
 					$results[$i]->showName = $ourOptions['showName'];
+					$results[$i]->showState = 'activate';
 				}
 			}
 			
