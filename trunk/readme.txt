@@ -28,6 +28,7 @@ Features Summary
 * Integrated PayPal Payment Collection
 * EMail confirmation of Booking to Client and Administrator
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
+* Enhanced version with many additional features now available for a small fee - for details see webpage
 
 == Installation ==
 
@@ -128,6 +129,16 @@ The following tags can be used in the EMail template:
 * Added Pagination to Sales Summary
 * Added Uninstall
 * Added Activate/Deactivate options for shows and performances
+
+= 0.9.2 =
+* Bug Fix: Malformed <form> tag on BoxOffice page fixed
+* BoxOffice time/date format now uses WordPress settings
+* (Note: Private release)
+
+= 0.9.3 =
+* Fixed Distribution Error in ver0.9.1
+* Added Style Sheet (stageshow.css)
+* Added styles to BoxOffice page and updated default style
 
 == Upgrade Notice ==
 

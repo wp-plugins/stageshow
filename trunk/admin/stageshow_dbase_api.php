@@ -34,7 +34,7 @@ if (!class_exists('StageShowDBaseClass')) {
 	define('STAGESHOW_DEFAULT_PAYPALHEADERIMAGE_URL', STAGESHOW_URL.'/images/StageShowHeader.gif');
 	
 	define('STAGESHOW_DATE_FORMAT', 'Y-m-d');
-	define('STAGESHOW_DATETIME_FORMAT', 'Y-m-d H:i:s');
+	define('STAGESHOW_DATETIME_MYSQL_FORMAT', 'Y-m-d H:i:s');
 	define('STAGESHOW_DATETIME_TEXTLEN', 19);
 	
 	define('STAGESHOW_SHOWNAME_TEXTLEN', 80);
@@ -403,7 +403,30 @@ if (!class_exists('StageShowDBaseClass')) {
 		}
 		
     function FormatDateForDisplay($dateInDB)
-    {
+    {	
+			// Convert time string to UNIX timestamp
+			$timestamp = strtotime( $dateInDB );
+			
+			if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
+				$dateFormat = STAGESHOW_DATETIME_BOXOFFICE_FORMAT;
+			else
+				// Use Wordpress Date and Time Format
+				$dateFormat = get_option( 'date_format' ).' '.get_option( 'time_format' );
+			
+			// Return Time & Date formatted for display to user
+			return date($dateFormat, $timestamp);				 
+		}
+
+/*
+		function FormatDateForDisplay($dateInDB)
+    {	
+			// Extract the date from MYSQL format
+			list($date, $time) = explode(' ', $dateInDB);
+			list($year, $month, $day) = explode('-', $date);
+			list($hour, $minute, $second) = explode(':', $time);
+
+			$timestamp = mktime($hour, $minute, $second, $month, $day, $year);
+
 			$rtnVal  = '';
 			$rtnVal .= substr($dateInDB, 8, 2);
 			$rtnVal .= '/';
@@ -416,7 +439,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			
 			return $rtnVal;
     }
-    
+*/    
 		function UpdateCartButtons($perfsList)
 		{
 			global $myPayPalAPILiveObj;
@@ -1266,7 +1289,7 @@ if (!class_exists('StageShowDBaseClass')) {
 			{
 				$salesIDs .= ','.$saleEntry->saleID;
 			}
-			echo "<br>\nsalesIDs: $salesIDs<br>\n";
+			//echo "<br>\nsalesIDs: $salesIDs<br>\n";
 				
 			return $salesIDs;
 		}
@@ -1449,6 +1472,20 @@ if (!class_exists('StageShowDBaseClass')) {
 				return $optionURL;
 		}
 		
+		function AddBoxOfficeFields($currOptions, $BoxOfficeTemplate, $saleDetails, $ticketDetails)
+		{
+			$AddBoxOfficeFields = $BoxOfficeTemplate;
+			
+			$AddBoxOfficeFields = str_replace('[saleDateTime]', $saleDetails->saleDateTime, $AddBoxOfficeFields);
+			$AddBoxOfficeFields = str_replace('[saleName]', $saleDetails->saleName, $AddBoxOfficeFields);
+			$AddBoxOfficeFields = str_replace('[saleBoxOffice]', $saleDetails->saleBoxOffice, $AddBoxOfficeFields);
+			$AddBoxOfficeFields = str_replace('[salePaid]', $saleDetails->salePaid, $AddBoxOfficeFields);
+			$AddBoxOfficeFields = str_replace('[saleTxnId]', $saleDetails->saleTxnId, $AddBoxOfficeFields);
+			$AddBoxOfficeFields = str_replace('[saleStatus]', $saleDetails->saleStatus, $AddBoxOfficeFields);
+
+			return $AddBoxOfficeFields;
+		}
+		
 		function AddEMailFields($currOptions, $EMailTemplate, $saleDetails, $ticketDetails)
 		{
 			$AddEMailFields = $EMailTemplate;
@@ -1515,45 +1552,45 @@ if (!class_exists('StageShowDBaseClass')) {
 			
 			// Find the line with the close php entry then find the start of the line
 			$posnPHP = stripos($mailTemplate, '?>');
-			if ($posnPHP !== false) $posnPHP = strrpos(substr($mailTemplate, 0, $posnPHP), "\n");
-			if ($posnPHP !== false) $mailTemplate = substr($mailTemplate, 0, $posnPHP);
-			
-			// 
-			while (true)
-			{
-				$loopStart = stripos($mailTemplate, '[startloop]');
-				$loopEnd = stripos($mailTemplate, '[endloop]');
-				
-				if (($loopStart === false) || ($loopStart === false))
-					break;
-					
-				$section = substr($mailTemplate, 0, $loopStart);				
-				$bookingConfirmation .= $this->AddEMailFields($ourOptions, $section, $saleDetails, $ticketDetails[0]);
-				
-				$loopStart += strlen('[startloop]');
-				$loopLen = $loopEnd - $loopStart;		
-					
-				foreach($ticketDetails as $ticket)
-				{
-					$section = substr($mailTemplate, $loopStart, $loopLen);
-					$bookingConfirmation .= $this->AddEMailFields($ourOptions, $section, $saleDetails, $ticket);
-				}
-			
-				$loopEnd += strlen('[endloop]');
-				$mailTemplate = substr($mailTemplate, $loopEnd);
-			}
+if ($posnPHP !== false) $posnPHP = strrpos(substr($mailTemplate, 0, $posnPHP), "\n");
+if ($posnPHP !== false) $mailTemplate = substr($mailTemplate, 0, $posnPHP);
 
-			// Process the rest of the mail template				
-			$bookingConfirmation .= $this->AddEMailFields($ourOptions, $mailTemplate, $saleDetails, $ticketDetails[0]);
-						
-			// Get email address and organisation name from settings
-			$EMailFrom = $this->GetEmail($ourOptions);
-			
-			if (strlen($EMailTo) == 0) $EMailTo = $saleDetails->saleEMail;
-			
-			$stageShowDBaseObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $bookingConfirmation);
-			
-			echo '<div id="message" class="updated"><p>'.__('EMail Sent to', STAGESHOW_DOMAIN_NAME).' '.$EMailTo.'</p></div>';
+//
+while (true)
+{
+$loopStart = stripos($mailTemplate, '[startloop]');
+$loopEnd = stripos($mailTemplate, '[endloop]');
+
+if (($loopStart === false) || ($loopEnd === false))
+break;
+
+$section = substr($mailTemplate, 0, $loopStart);
+$bookingConfirmation .= $this->AddEMailFields($ourOptions, $section, $saleDetails, $ticketDetails[0]);
+
+$loopStart += strlen('[startloop]');
+$loopLen = $loopEnd - $loopStart;
+
+foreach($ticketDetails as $ticket)
+{
+$section = substr($mailTemplate, $loopStart, $loopLen);
+$bookingConfirmation .= $this->AddEMailFields($ourOptions, $section, $saleDetails, $ticket);
+}
+
+$loopEnd += strlen('[endloop]');
+$mailTemplate = substr($mailTemplate, $loopEnd);
+}
+
+// Process the rest of the mail template
+$bookingConfirmation .= $this->AddEMailFields($ourOptions, $mailTemplate, $saleDetails, $ticketDetails[0]);
+
+// Get email address and organisation name from settings
+$EMailFrom = $this->GetEmail($ourOptions);
+
+if (strlen($EMailTo) == 0) $EMailTo = $saleDetails->saleEMail;
+
+$stageShowDBaseObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $bookingConfirmation);
+
+echo '<div id="message" class="updated"><p>'.__('EMail Sent to', STAGESHOW_DOMAIN_NAME).' '.$EMailTo.'</p></div>';
 			
 			return 'OK';
 		}

@@ -48,9 +48,9 @@ Copyright 2011 Malcolm Shergold
 <th><label for="sshow_ex_type"><?php _e('Export'); ?></label></th>
 <td>
 <select name="sshow_ex_type">
-	<option value="all" selected="selected"><?php _e('Settings and Tickets'); ?>&nbsp;&nbsp;</option>
+	<option value="all"><?php _e('Settings and Tickets'); ?>&nbsp;&nbsp;</option>
 	<option value="settings"><?php _e('Settings Only'); ?> </option>
-	<option value="tickets"><?php _e('Tickets Only'); ?> </option>
+	<option value="tickets" selected="selected"><?php _e('Tickets Only'); ?> </option>
 </select>
 </td>
 </tr>

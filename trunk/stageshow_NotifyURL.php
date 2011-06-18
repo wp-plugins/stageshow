@@ -195,7 +195,7 @@ else if ($notifyPayPalAPIObj->APIResponseText === 'VERIFIED')
 				$stageShowDBaseObj->UpdateSaleStatus($Txn_id, $Payment_status);
 			else
 			{
-				$txdDate = date(STAGESHOW_DATETIME_FORMAT);
+				$txdDate = date(STAGESHOW_DATETIME_MYSQL_FORMAT);
 				$saleID = $stageShowDBaseObj->LogSale($txdDate);
 				AddToLog('Sale Logged - SaleID: '.$saleID);
 				$emailStatus = $stageShowDBaseObj->EMailSale($saleID);

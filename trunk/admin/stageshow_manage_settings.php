@@ -219,6 +219,8 @@ Copyright 2011 Malcolm Shergold
 				$PayPalHeaderImageURL = stripslashes($_POST['PayPalHeaderImageURL']);
 			}
       
+			$PayPalAPIURL = STAGESHOW_PAYPAL_IPN_NOTIFY_URL;
+			
 			$ppReadOnly = ($showsConfigured ? ' readonly="readonly"' : '') ;
 			
 			// PayPal Settings HTML Output - Start 
@@ -287,6 +289,10 @@ Copyright 2011 Malcolm Shergold
 		<tr valign="top">&nbsp;
 			<td><?php _e('EMail', STAGESHOW_DOMAIN_NAME) ?>:</td>
 			<td>&nbsp;<?php echo $PayPalAPILiveEMail; ?></td>
+		</tr>
+		<tr valign="top">&nbsp;
+			<td><?php _e('PayPal IPN URL', STAGESHOW_DOMAIN_NAME) ?>:</td>
+			<td>&nbsp;<?php echo $PayPalAPIURL; ?></td>
 		</tr>
 		<tr valign="top">
       <td><?php _e('Currency', STAGESHOW_DOMAIN_NAME) ?>:</td>
