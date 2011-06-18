@@ -155,7 +155,7 @@ Copyright 2011 Malcolm Shergold
 				$showID = $_POST['showID'];
 				
 				$statusMsg = '';
-				$stageShowDBaseObj->CreateNewPerformance($statusMsg, $showID, date(STAGESHOW_DATETIME_FORMAT));				
+				$stageShowDBaseObj->CreateNewPerformance($statusMsg, $showID, date(STAGESHOW_DATETIME_MYSQL_FORMAT));				
 				echo '<div id="message" class="updated"><p>'.$statusMsg.'.</p></div>';
 			}			 
 			else if (isset($_GET['action']))
