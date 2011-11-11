@@ -107,7 +107,7 @@ Copyright 2011 Malcolm Shergold
 				        
 				if ($stageShowObj->IsOptionChanged('AdminEMail'))
 				{
-					if (!$stageShowObj->ValidateEmail($_POST('AdminEMail')))
+					if (!$stageShowObj->ValidateEmail($_POST['AdminEMail']))
 					{
 						$SettingsUpdateMsg = __('Invalid Admin EMail', STAGESHOW_DOMAIN_NAME);
 					}
@@ -115,7 +115,7 @@ Copyright 2011 Malcolm Shergold
         
 				if ($stageShowObj->IsOptionChanged('BookingsEMail'))
 				{
-					if (!$stageShowObj->ValidateEmail($_POST('BookingsEMail')))
+					if (!$stageShowObj->ValidateEmail($_POST['BookingsEMail']))
 					{
 						$SettingsUpdateMsg = __('Invalid Bookings EMail', STAGESHOW_DOMAIN_NAME);
 					}
