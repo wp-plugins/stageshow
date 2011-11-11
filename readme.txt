@@ -140,6 +140,9 @@ The following tags can be used in the EMail template:
 * Added Style Sheet (stageshow.css)
 * Added styles to BoxOffice page and updated default style
 
+= 0.9.3 =
+* Fixed "Function name must be a string" error when changing Admin EMail ( stageshow_manage_settings.php)
+
 == Upgrade Notice ==
 
 = 0.9 =
