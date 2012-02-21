@@ -5,13 +5,15 @@ Thank you for your booking online with [organisation]
 
 Order Details:
 
-Purchaser:  [saleName]
-EMail:      [saleEMail]
-Reference:  [saleTxnId]
-Address:    [salePPStreet] 
-            [salePPCity] 
-            [salePPState]
-            [salePPZip]
+Reference:      [saleTxnId]
+Contact EMail:  [saleEMail]
+
+Purchaser:  
+[saleName]
+[salePPStreet] 
+[salePPCity] 
+[salePPState]
+[salePPZip]
 
 Purchased:
 [startloop]
@@ -20,7 +22,7 @@ Purchased:
 Payment:
 Total: [salePaid]
 
-Any queries relating to this booking should be emailed to [adminEMail]
+Any queries relating to this booking should be emailed to [salesEMail]
 
 For further information on shows please visit our web site on [url]
 */ ?>

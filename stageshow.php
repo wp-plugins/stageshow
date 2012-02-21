@@ -2,12 +2,12 @@
 /* 
 Plugin Name: StageShow
 Plugin URI: http://www.corondeck.co.uk/StageShow
-Version: 0.9.3.1
+Version: 1.0.0
 Author: Malcolm Shergold
 Author URI: http://www.corondeck.co.uk
 Description: A Wordpress Plugin to sell theatre tickets online
  
-Copyright 2011 Malcolm Shergold
+Copyright 2012 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,18 +25,20 @@ Copyright 2011 Malcolm Shergold
 
 */
 
-$stageshowPluginFile = __FILE__;
+define('STAGESHOW_PLUGIN_FILE', __FILE__);
 
+include 'stageshow_defs.php';
 include 'stageshow_main.php';
+
+global $stageShowObj;
+$stageShowObj = new StageShowPluginClass(new StageShowDBaseClass());
 
 //Actions and Filters	
 if (isset($stageShowObj)) 
 {
 	//Actions
-	add_action('activate_stageshow/stageshow.php',  array(&$stageShowObj, 'init'));  
-	
-	register_activation_hook( $stageshowPluginFile, array(&$stageShowObj, 'activate') );
-	register_deactivation_hook( $stageshowPluginFile, array(&$this, 'deactivate') );	
+	register_activation_hook( __FILE__, array(&$stageShowObj, 'activate') );
+	register_deactivation_hook( __FILE__, array(&$stageShowObj, 'deactivate') );	
 }
 
 ?>
