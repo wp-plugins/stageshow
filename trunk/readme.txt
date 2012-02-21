@@ -3,7 +3,7 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/wp/stageshow/
 Tags: posts, pages, calendar, events, admin, user
 Requires at least: 3.0
-Tested up to: 3.1.2
+Tested up to: 3.3.1
 Stable tag: trunk
 
 The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups.
@@ -150,9 +150,15 @@ The following tags can be used in the EMail template:
 * Added Facility to activate/deactivate selected performances
 * Box Office page elements formatted by stageshow.css stylesheet
 * Duplicate dates on BoxOffice output supressed (STAGESHOW_BOXOFFICE_ALLDATES overrides)
+* Added Facility to activate/deactivate selected shows (StageShow-Plus only)
+* Added Transaction ID Barcode to HTML Email (StageShow-Plus only)
+* Added Plugin update from custom server (StageShow-Plus only)
+* Added facility to add a "Note" to any Show (StageShow-Plus only)
 
 = 0.9.5 =
+* Bug Fix: Preserves show name when upgrading to StageShow-Plus (StageShow-Plus only)
 * Dual PayPal Credentials merged - Live or Test (Sandbox) mode must be set before adding performances
+* StageShow-Plus renamed StageShow+
 
 = 1.0.0 =
 * Bug Fix: Call to wp_enqueue_style() updated for compatibility with WP 3.3
