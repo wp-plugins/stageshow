@@ -2,7 +2,7 @@
 /* 
 Description: Code for Managing Show Configuration
  
-Copyright 2011 Malcolm Shergold
+Copyright 2012 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,28 +19,128 @@ Copyright 2011 Malcolm Shergold
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
+include STAGESHOW_INCLUDE_PATH.'mjslib_table.php';
+
+if (!class_exists('StageShowAdminShowsListClass')) 
+{
+	class StageShowAdminShowsListClass extends MJSLibAdminListClass // Define class
+	{		
+		var $updateFailed;
+		
+		function __construct($env) //constructor
 		{
-			global $stageShowObj;
-			global $myPayPalAPILiveObj;
-			global $myPayPalAPITestObj;
-      
-			$delshowId = 0;
+			// Call base constructor
+			parent::__construct($env);
 			
+			$myDBaseObj = $this->myDBaseObj;
+			
+			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
+
+			$this->SetRowsPerPage(STAGESHOW_SALES_PER_PAGE);
+			
+			$this->bulkActions = array(
+				'activate' => __('Activate/Deactivate', STAGESHOW_DOMAIN_NAME),
+				'delete'   => __('Delete', STAGESHOW_DOMAIN_NAME),
+				);
+
+			$columns = array(
+		    'showName'  => __('Show Name', STAGESHOW_DOMAIN_NAME),
+			);			
+			if ($myDBaseObj->CanSetNotes()) 
+				$columns = array_merge($columns, array('showNotes' => __('Note', STAGESHOW_DOMAIN_NAME))); 
+			$columns = array_merge($columns, array(
+		    'showSales' => __('Tickets Sold', STAGESHOW_DOMAIN_NAME),
+		    'showState' => __('State', STAGESHOW_DOMAIN_NAME)
+				)); 
+				
+			$this->SetListHeaders('stageshow_sales_list', $columns);
+		}
+		
+		function GetRecordID($result)
+		{
+			return $result->showID;
+		}
+		
+		function OutputList($results, $updateFailed)
+		{
+			$this->updateFailed = $updateFailed;
+			parent::OutputList($results);
+		}
+		
+		function AddResult($result)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+
+			if ($this->updateFailed)
+			{
+				// Get value(s) from form controls
+				$showName = stripslashes($_POST['showName'.$result->showID]);
+			}
+			else
+			{
+				// Get value(s) from database
+				$showName = $result->showName;
+			}
+			$showSales = $result->totalQty;
+				
+			$showState = $myDBaseObj->IsStateActive($result->showState) ? __("Active", STAGESHOW_DOMAIN_NAME) : __("INACTIVE", STAGESHOW_DOMAIN_NAME);
+			
+			$linkBackURL = 'admin.php?page=stageshow_shows';
+			$linkBackURL = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($linkBackURL, plugin_basename($this->caller)) : $linkBackURL;
+
+			$editNoteLink = $linkBackURL.'&action=note&id='.$result->showID;
+			
+			if ($myDBaseObj->CanSetNotes())
+			{
+				if (strlen($result->showNote) > 0)
+					$shortNote = substr($result->showNote, 0, STAGESHOW_SHORTNOTE_TEXTLEN);
+				else
+					$shortNote = __('Add a note', STAGESHOW_DOMAIN_NAME);
+			}
+			
+			if ($showSales > 0)
+			{
+				$showSalesLink = 'admin.php?page=stageshow_sales&action=show&id='.$result->showID;
+				$showSalesLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($showSalesLink, plugin_basename($this->caller)) : $showSalesLink;
+				$showSalesLink = '<a href="'.$showSalesLink.'">'.$showSales.'</a>';
+			}
+			else
+				$showSalesLink = '0';
+				
+			$rowAttr = '';
+			$this->NewRow($result, $rowAttr);
+			
+			$this->AddInputToTable($result, 'showName', STAGESHOW_SHOWNAME_TEXTLEN, $showName);
+			if ($myDBaseObj->CanSetNotes()) $this->AddLinkToTable($result, $shortNote, $editNoteLink);
+			$this->AddToTable($result, $showSalesLink);
+			$this->AddToTable($result, $showState);
+		}		
+	}
+}
+
+include STAGESHOW_INCLUDE_PATH.'mjslib_admin.php';      
+
+if (!class_exists('StageShowShowsAdminClass')) 
+{
+	class StageShowShowsAdminClass extends MJSLibAdminClass // Define class
+	{
+		function __construct($env) //constructor	
+		{
+			// Call base constructor
+			parent::__construct($env);
+			
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj = $this->myDBaseObj;			
+      
 			if (isset($_GET['action']))
 			{
-				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
 				
 				$actionID = $_GET['action'];
 				switch ($actionID)
 				{
-					case 'delete':
-						$delshowId = $_GET['id']; 
-						break;
-						
-					case 'activate':
-					case 'deactivate':
-						$showID = $_GET['id']; 
-						$stageShowDBaseObj->SetShowActivated($showID, $actionID);
+					case 'note':
+						$noteID = $_GET['id']; 
 						break;
 				}
 			}
@@ -51,21 +151,27 @@ Copyright 2011 Malcolm Shergold
 		    'showDelete' => __(' ', STAGESHOW_DOMAIN_NAME)
 	    );
 	
-			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
+			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
 			{
 				// Add the ID column
 				$columns = array_merge(array('showID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
 			}
 			
-      register_column_headers('sshow_shows_list', $columns);	
-
 			$showsMsg = '';
 				 
 			echo '<div class="wrap">';
+			if (isset($_POST['savenotebutton']) && $myDBaseObj->CanSetNotes())
+			{
+				$newNoteId = $_POST['id']; 
+				$showNote = $_POST['showNote']; 
+				$myDBaseObj->SetShowNotes($newNoteId, $showNote);
+				echo '<div id="message" class="updated"><p>'.__('Show Note Saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
+			}
+			
 			if (isset($_POST['saveshowbutton']))
 			{
 				// Save Settings Request ....
-				$results = $stageShowDBaseObj->GetAllShowsList();
+				$results = $myDBaseObj->GetAllShowsList();
 						
 				// Verify that show names are unique 				
         if(count($results) > 0)
@@ -84,7 +190,7 @@ Copyright 2011 Malcolm Shergold
 						
 				if ($showsMsg !== '')
 				{
-					echo '<div id="message" class="updated"><p>'.__('Settings have NOT been saved', STAGESHOW_DOMAIN_NAME).'. '.$showsMsg.'</p></div>';
+					echo '<div id="message" class="error"><p>'.__('Settings have NOT been saved', STAGESHOW_DOMAIN_NAME).'. '.$showsMsg.'</p></div>';
 				}
         else 
 				{
@@ -95,7 +201,7 @@ Copyright 2011 Malcolm Shergold
 							$newShowName = stripslashes($_POST['showName'.$result->showID]);
 							if ($newShowName != $result->showName)
 							{
-								$stageShowDBaseObj->UpdateShowName($result->showID, $newShowName);
+								$myDBaseObj->UpdateShowName($result->showID, $newShowName);
 							}
 						}
 					}
@@ -106,159 +212,200 @@ Copyright 2011 Malcolm Shergold
 			if (isset($_POST['addshowbutton']))
 			{
 				// Add Show with unique Show Name 
-				$showID = $stageShowDBaseObj->AddShow('New Show');
+				$showID = $myDBaseObj->AddShow('New Show');
 				
 				if ($showID == 0)
-					echo '<div id="message" class="updated"><p>'.__('Cannot add a new show - Only one show allowed', STAGESHOW_DOMAIN_NAME).'.</p></div>';
+					echo '<div id="message" class="error"><p>'.__('Cannot add a new show - Only one show allowed', STAGESHOW_DOMAIN_NAME).'.</p></div>';
 				else
 					echo '<div id="message" class="updated"><p>'.__('Default entry added - Edit and Save to update it.', STAGESHOW_DOMAIN_NAME).'.</p></div>';
 			}
 
-			if ($delshowId > 0)
+			if ( isset( $_POST['action'] ) && (-1 != $_POST['action']) )
+				$bulkAction = $_POST['action'];
+			else if ( isset( $_POST['action2'] ) && (-1 != $_POST['action2']) )
+				$bulkAction =  $_POST['action2'];
+			else
+				$bulkAction = '';
+				
+			if (($bulkAction !== '') && isset($_POST['rowSelect']))
 			{
-				// Don't delete if show still pending and any tickets have been sold for this show
-				if (!$stageShowDBaseObj->CanDeleteShow($showSales, $delshowId))
+				// Bulk Action Apply button actions
+				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				
+				$actionMsg = '';
+				switch ($bulkAction)
 				{
-					echo '<div id="message" class="updated"><p>'.__('Show cannot be deleted - Tickets already sold!', STAGESHOW_DOMAIN_NAME).'</p></div>';
-				}
-				else
-				{					
-					// Get a list of performances
-					$results = $stageShowDBaseObj->GetPerformancesListByShowID($delshowId);
-					
-					foreach($results as $result)
-					{
-						// Get ID of performance to delete
-						$delperfId = $result->perfID;
-							
-						// Delete all prices for this performance
-						$stageShowDBaseObj->DeletePriceByPerfID($delperfId);
+					case 'delete':		
+						$errorCount = 0;
+						$blockCount = 0;							
+						foreach($_POST['rowSelect'] as $delshowId)
+						{
+							// Don't delete if any tickets have been sold for this performance
+							$delShowEntry = $myDBaseObj->GetShowsList($delshowId);
+							if (count($delShowEntry) == 0)
+								$errorCount++;
+							else if (!$myDBaseObj->CanDeleteShow($delShowEntry[0]))
+								$blockCount++;
+						}
 						
-						// Delete any PayPal buttons ....
-						$myPayPalAPITestObj->DeleteButton($result->perfPayPalTESTButtonID);	
-						$myPayPalAPILiveObj->DeleteButton($result->perfPayPalLIVEButtonID);	
+						if (($errorCount > 0) || ($blockCount > 0))
+						{
+							if ($errorCount > 0)
+							{
+								$actionMsg = ($errorCount == 1) ? __("1 Show has a Database Error", $this->pluginName) : $errorCount.' '.__("Shows have a Database Error", $this->pluginName); 
+								echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
+							}
+							if ($blockCount > 0)
+							{
+								$actionMsg = ($blockCount == 1) ? __("1 Show cannot be deleted - Tickets already sold!", $this->pluginName) : $blockCount.' '.__("Shows cannot be deleted - Tickets already sold!", $this->pluginName); 
+								echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
+							}
+							break;
+						}
+						
+						// Delete shows
+						$actionCount = 0;
+						foreach($_POST['rowSelect'] as $delshowId)
+						{
+							// Get a list of performances
+							$results = $myDBaseObj->GetPerformancesListByShowID($delshowId);
+						
+							foreach($results as $result)
+							{
+								// Get ID of performance to delete
+								$delperfId = $result->perfID;
+									
+								// Delete all prices for this performance
+								$myDBaseObj->DeletePriceByPerfID($delperfId);
 								
-						// Delete a performances entry
-						$stageShowDBaseObj->DeletePerformanceByPerfID($delperfId);
-					}			
-					
-					// Now delete the entry in the SHOWS table
-					$delShowName = $stageShowDBaseObj->DeleteShowByShowID($delshowId);
-					
-					echo '<div id="message" class="updated"><p>'.$delShowName.' '.__('deleted', STAGESHOW_DOMAIN_NAME).'.</p></div>';
+								// Delete any PayPal buttons ....
+								$myDBaseObj->payPalAPIObj->DeleteButton($result->perfPayPalButtonID);	
+										
+								// Delete a performances entry
+								$myDBaseObj->DeletePerformanceByPerfID($delperfId);
+							}			
+							
+							// Now delete the entry in the SHOWS table
+							$delShowName = $myDBaseObj->DeleteShowByShowID($delshowId);
+
+							$actionCount++;
+						}
+						
+						if ($actionCount > 0)
+						{
+							$actionMsg = ($actionCount == 1) ? __("1 Show has been deleted", $this->pluginName) : $actionCount.' '.__("Shows have been deleted", $this->pluginName); 
+							echo '<div id="message" class="updated"><p>'.$actionMsg.'</p></div>';
+						}
+						else
+						{
+							$actionMsg = __("Nothing to Delete", $this->pluginName);
+							echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
+						}
+						break;
+						
+					case 'activate':
+						$actionCount = 0;
+						foreach($_POST['rowSelect'] as $showID)
+						{
+							$showEntry = $myDBaseObj->GetShowsList($showID);
+							if ($myDBaseObj->IsStateActive($showEntry[0]->showState))
+								$myDBaseObj->SetShowActivated($showID, 'deactivate');
+							else
+								$myDBaseObj->SetShowActivated($showID, 'activate');
+						}
+						break;
 				}
 			}
 
 ?>
 				<div class="wrap">
 					<div id="icon-stageshow" class="icon32"></div>
-					<h2><?php echo $stageShowObj->pluginName.' - '.__('Show Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
+					<h2><?php echo $myPluginObj->pluginName.' - '.__('Show Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
 					<br></br>
-					<form method="post" action="admin.php?page=sshow_shows">
+					<form method="post" action="admin.php?page=stageshow_shows">
 <?php
-if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__));
-$results = $stageShowDBaseObj->GetAllShowsList();
-if(count($results) == 0)
-{
-	echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
-}
-else
-{
-?>						
-								<table class="widefat" cellspacing="0">
-									<thead>
-										<tr>
-											<?php print_column_headers('sshow_shows_list'); ?>
-										</tr>
-									</thead>
+	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
 
-									<tfoot>
-										<tr>
-											<?php print_column_headers('sshow_shows_list', false); ?>
-										</tr>
-									</tfoot>
-									<tbody>
-										<?php
-	foreach($results as $result)
+	if (isset($noteID))
 	{
-		if ($showsMsg !== '')
+		$results = $myDBaseObj->GetShowsList($noteID);
+		echo '<div class="stageshow-noteform">';	
+		if(count($results) > 0)
 		{
-			// Get value(s) from form controls
-			$showName = stripslashes($_POST['showName'.$result->showID]);
-		}
-		else
-		{
-			// Get value(s) from database
-			$showName = $result->showName;
-		}
-		
-		$actionLinks = '';
-/*			
-		if ($stageShowDBaseObj->IsShowActivated($result->showID))
-		{
-			$actionId = 'deactivate';
-			$actionText = __('Deactivate', STAGESHOW_DOMAIN_NAME);
-		}
-		else
-		{
-			$actionId = 'activate';
-			$actionText = __('Activate', STAGESHOW_DOMAIN_NAME);
-		}
-		$actionLinks = 'admin.php?page=sshow_shows&action='.$actionId.'&id='.$result->showID;
-		$actionLinks = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($actionLinks, plugin_basename(__FILE__)) : $actionLinks;
-		$actionLinks = '<a href="'.$actionLinks.'">'.$actionText.'</a>';
-		echo "<!-- actionText=$actionText actionId=$actionId -->\n";
-*/
-		
-		if ($stageShowDBaseObj->CanDeleteShow($showSales, $result->showID))
-		{
-			$deleteLink = 'admin.php?page=sshow_shows&action=delete&id='.$result->showID;
-			$deleteLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($deleteLink, plugin_basename(__FILE__)) : $deleteLink;
-			$deleteLink = '<a href="'.$deleteLink.'" onclick="javascript:return confirmDelete(\''.$showName.'\')">Delete</a>';
-			if ($actionLinks !== '') $actionLinks .= ', ';
-			$actionLinks .= $deleteLink;
-		}
-		
-		if ($actionLinks === '')
-			$actionLinks = '&nbsp';
-					
-		if ($showSales > 0)
-		{
-			$showSalesLink = 'admin.php?page=sshow_sales&action=show&id='.$result->showID;
-			$showSalesLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($showSalesLink, str_replace('shows.php', 'sales.php', plugin_basename(__FILE__))) : $showSalesLink;
-			$showSalesLink = '<a href="'.$showSalesLink.'">'.$showSales.'</a>';
-		}
-		else
-			$showSalesLink = '0';
-			
-		echo '<tr>';
-		if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
-			echo '<td>'.$result->showID.'</td>';
-		echo '
-	<td><input name=showName'.$result->showID.' type=text maxlength='.STAGESHOW_SHOWNAME_TEXTLEN.' size=50 value="'.$showName.'" /></td>
-	<td>'.$showSalesLink.'</td>	
-  <td style="background-color:#FFF">
-	'.$actionLinks.'
-	</td>
-	</tr>';
-	}				
-}
-?>
-      </tbody>
-    </table>
-      <br></br>
-<?php if ($stageShowDBaseObj->CanAddShow()) { ?>						
-      <input class="button-secondary" type="submit" name="addshowbutton" value="<?php _e('Add New Show', STAGESHOW_DOMAIN_NAME) ?>"/>
-<?php } ?>						
+			$result = $results[0];
+?>						
+      <input type="hidden" name="id" value="<?php echo $result->showID; ?>"/>
+				<table>
+					<tr>
+						<td><?php _e('Show', STAGESHOW_DOMAIN_NAME); ?></td>
+						<td><?php echo $result->showName ?></td>
+					</tr>
 <?php
-	if(count($results) > 0)
-	{
-		echo '<input class="button-primary" type="submit" name="saveshowbutton" value="'.__('Save Settings', STAGESHOW_DOMAIN_NAME).'"/>';
-	}
+			if ($myDBaseObj->CanSetNotes()) 
+			{
+
+?>
+					<tr>
+						<td><?php _e('Note above', STAGESHOW_DOMAIN_NAME); ?></td>
+						<td>
+							<textarea name="showNote" cols="<?php echo STAGESHOW_NOTE_COLCOUNT; ?>" rows="<?php echo STAGESHOW_NOTE_ROWCOUNT; ?>"><?php echo $result->showNote ?></textarea>
+						</td>
+					</tr>
+<?php
+			}
+?>
+				</table>
+				
+				<br></br>
+				<input class="button-primary" type="submit" name="savenotebutton" value="<?php _e('Save Settings', STAGESHOW_DOMAIN_NAME); ?>">
+				&nbsp;
+<?php				
+		}
+?>				
+				<input class="button-secondary" type="submit" name="backtoshows" value="<?php _e('Back to Shows Summary', STAGESHOW_DOMAIN_NAME); ?>">
+				<br></br>
+			</div>
+<?php
+			}
+			else
+			{
+				$this->Output_MainPage($env, $showsMsg !== '');
+			}
+		}
+
+		function Output_MainPage($env, $updateFailed)	
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			$results = $myDBaseObj->GetAllShowsList();
+			if(count($results) == 0)
+			{
+				echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
+			}
+			else
+			{
+				$showsList = new StageShowAdminShowsListClass($env);		
+				$showsList->OutputList($results, $updateFailed);	
+			}
+			
+			if ($myDBaseObj->CanAddShow()) 
+			{ 
+?>						
+      <br></br>
+      <input class="button-secondary" type="submit" name="addshowbutton" value="<?php _e('Add New Show', STAGESHOW_DOMAIN_NAME) ?>"/>
+<?php 
+			} 
+			if(count($results) > 0)
+			{
+				echo '<input class="button-primary" type="submit" name="saveshowbutton" value="'.__('Save Settings', STAGESHOW_DOMAIN_NAME).'"/>';
+			}
 ?>
 		</form>
 </div>
 
 <?php
-    }
+		} // End of function Output_MainPage()
+	}
+}
+
 ?>

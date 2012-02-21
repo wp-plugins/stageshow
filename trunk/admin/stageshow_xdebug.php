@@ -2,7 +2,7 @@
 /* 
 Description: Code for Managing Prices Configuration
  
-Copyright 2011 Malcolm Shergold
+Copyright 2012 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,21 +20,30 @@ Copyright 2011 Malcolm Shergold
 
 */
 	
+include STAGESHOW_INCLUDE_PATH.'mjslib_admin.php';      
+
+if (!class_exists('StageShowDebugAdminClass')) 
+{
+	class StageShowDebugAdminClass extends MJSLibAdminClass // Define class
+	{
+		function __construct($env) //constructor	
 		{	
-			global $stageShowObj;
-			global $stageShowDBaseObj;
-			global $myPayPalAPITestObj;
+			// Call base constructor
+			parent::__construct($env);
+			
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj = $this->myDBaseObj;			
 					
 			// Stage Show TEST HTML Output - Start 
 ?>
 <div class="wrap">
 <div id="icon-stageshow" class="icon32"></div>
-<form method="post" action="admin.php?page=sshow_debug">
+<form method="post" action="admin.php?page=stageshow_debug">
 <?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
-	<h2><?php echo $stageShowObj->pluginName.' - TEST' ?></h2>
+	<h2><?php echo $myPluginObj->pluginName.' - TEST' ?></h2>
 	<?php 
-		Test_DebugSettings($stageShowDBaseObj->adminOptions);
-		Test_EMailSale($stageShowDBaseObj->adminOptions);
+		$this->Test_DebugSettings();
+		$this->Test_EMailSale();
 	?>
 	</div>
 	</div>
@@ -43,29 +52,28 @@ Copyright 2011 Malcolm Shergold
 			// Stage Show TEST HTML Output - End
 		}				 
 		
-		function Test_DebugSettings( $adminOptions ) {
-			global $stageShowObj;
-			global $stageShowDBaseObj;
+		function Test_DebugSettings() {
+			$myDBaseObj = $this->myDBaseObj;
 			
 			if (isset($_POST['testbutton_SaveDebugSettings'])) {
 				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
 					
-				$stageShowDBaseObj->adminOptions['Dev_EnableDebug'] = trim($stageShowObj->GetArrayElement($_POST,'cbEnableDebug'));
-				$stageShowDBaseObj->adminOptions['Dev_ShowSQL'] = trim($stageShowObj->GetArrayElement($_POST,'cbShowSQL'));
-				$stageShowDBaseObj->adminOptions['Dev_ShowPayPalIO'] = trim($stageShowObj->GetArrayElement($_POST,'cbShowPayPalIO'));
-				$stageShowDBaseObj->adminOptions['Dev_ShowEMailMsgs'] = trim($stageShowObj->GetArrayElement($_POST,'cbShowEMailMsgs'));
-				$stageShowDBaseObj->adminOptions['Dev_ShowDBIds'] = trim($stageShowObj->GetArrayElement($_POST,'cbShowDBIds'));
+				$myDBaseObj->adminOptions['Dev_EnableDebug'] = trim(MJSLibUtilsClass::GetHTTPElement($_POST,'cbEnableDebug'));
+				$myDBaseObj->adminOptions['Dev_ShowSQL'] = trim(MJSLibUtilsClass::GetHTTPElement($_POST,'cbShowSQL'));
+				$myDBaseObj->adminOptions['Dev_ShowPayPalIO'] = trim(MJSLibUtilsClass::GetHTTPElement($_POST,'cbShowPayPalIO'));
+				$myDBaseObj->adminOptions['Dev_ShowEMailMsgs'] = trim(MJSLibUtilsClass::GetHTTPElement($_POST,'cbShowEMailMsgs'));
+				$myDBaseObj->adminOptions['Dev_ShowDBIds'] = trim(MJSLibUtilsClass::GetHTTPElement($_POST,'cbShowDBIds'));
 					
-				$stageShowDBaseObj->saveOptions();
+				$myDBaseObj->saveOptions();
 			}
 ?>
 		<h3>Debug Settings</h3>
 		<table class="form-table">			
 			<tr valign="top">
-				<td align="left" width="25%">Show SQL&nbsp<input name="cbShowSQL" type="checkbox" value="1" <?php echo $stageShowObj->GetArrayElement($stageShowDBaseObj->adminOptions,'Dev_ShowSQL') == 1 ? 'checked="yes" ' : ''  ?> /></td>
-				<td align="left" width="25%">Show PayPal IO&nbsp<input name="cbShowPayPalIO" type="checkbox" value="1" <?php echo $stageShowObj->GetArrayElement($stageShowDBaseObj->adminOptions,'Dev_ShowPayPalIO') == 1 ? 'checked="yes" ' : ''  ?> /></td>
-				<td align="left" width="25%">Show EMail Msgs&nbsp<input name="cbShowEMailMsgs" type="checkbox" value="1" <?php echo $stageShowObj->GetArrayElement($stageShowDBaseObj->adminOptions,'Dev_ShowEMailMsgs') == 1 ? 'checked="yes" ' : ''  ?> /></td>
-				<td align="left" width="25%">Show DB Ids&nbsp<input name="cbShowDBIds" type="checkbox" value="1" <?php echo $stageShowObj->GetArrayElement($stageShowDBaseObj->adminOptions,'Dev_ShowDBIds') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="25%">Show SQL&nbsp<input name="cbShowSQL" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowSQL') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="25%">Show PayPal IO&nbsp<input name="cbShowPayPalIO" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowPayPalIO') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="25%">Show EMail Msgs&nbsp<input name="cbShowEMailMsgs" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowEMailMsgs') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="25%">Show DB Ids&nbsp<input name="cbShowDBIds" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowDBIds') == 1 ? 'checked="yes" ' : ''  ?> /></td>
 			</tr>
 			<tr valign="top" colspan="4">
 				<td>
@@ -77,32 +85,32 @@ Copyright 2011 Malcolm Shergold
 <?php
 		}
 
-		function Test_EMailSale($adminOptions) {
-			global $stageShowDBaseObj;
+		function Test_EMailSale() {
+			$myDBaseObj = $this->myDBaseObj;
 
 			echo '<br><br><h3>EMail Sale Test</h3>';
 			
 			if (isset($_POST['DivertEMailTo']))
-				$DivertEMailTo = $_POST['DivertEMailTo'];
+				$DivertEMailTo = stripslashes($_POST['DivertEMailTo']);
 			else if (defined('STAGESHOW_SAMPLE_EMAIL'))
 				$DivertEMailTo = STAGESHOW_SAMPLE_EMAIL;
 			else
 				$DivertEMailTo = 'malcolm@corondeck.co.uk';
 
-			$results = $stageShowDBaseObj->GetAllSalesList();		// Get list of sales (one row per sale)
+			$results = $myDBaseObj->GetSalesList(null);		// Get list of sales (one row per sale)
 			
 			if (isset($_POST['testbutton_EMailSale'])) {
 				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
 					
 				// Run EMail Test		
-				$saleID = $_POST['TestSaleID'];
+				$saleID = stripslashes($_POST['TestSaleID']);
 				$DivertEMailTo = stripslashes($_POST['DivertEMailTo']);
-				$saleResults = $stageShowDBaseObj->GetSalesListBySaleID($saleID);
+				$saleResults = $myDBaseObj->GetSale($saleID);
 				if(count($saleResults) == 0) {
-					echo '<div id="message" class="updated"><p>'.__('No Sales', STAGESHOW_DOMAIN_NAME).'</p></div>';
+					echo '<div id="message" class="error"><p>'.__('No Sales', STAGESHOW_DOMAIN_NAME).'</p></div>';
 				}
 				else {
-					$stageShowDBaseObj->EMailSale($saleResults[0]->saleID, $DivertEMailTo);
+					$myDBaseObj->EMailSale($saleResults[0]->saleID, $DivertEMailTo);
 				}	
 			}
 			
@@ -137,55 +145,7 @@ foreach($results as $result) {
 		
 <?php		
 		}
+	}
+}
 		
-
-function output_action_javascript() 
-{
-?>
-	<script type="text/javascript" >
-	function onclick_Response(response)
-	{
-		alert('Got this from the server: ' + response);
-	}
-	
-	function onclick_TestButton()
-	{
-		jQuery(document).ready
-		(
-			function($) 
-			{
-				var data = 
-				{
-					action: 'my_special_action',
-					whatever: 1234
-				};
-
-				// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-				jQuery.post(ajaxurl, data, onclick_Response);
-			}
-		);
-	}
-	</script>
-	<?php
-}
-
-/*
-echo "<br>\n";
-echo "Adding Callback!<br>\n";
-add_action('wp_ajax_my_special_action', 'my_action_callback');
-echo "Callback Done!<br>\n";
-
-function my_action_callback() 
-{
-	global $wpdb; // this is how you get access to the database
-
-	$whatever = $_POST['whatever'];
-
-	$whatever += 10;
-
-	echo $whatever;
-
-	die();
-}
-*/
 ?>

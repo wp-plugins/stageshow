@@ -2,7 +2,7 @@
 /* 
 Description: Code for Managing Performances Configuration
  
-Copyright 2011 Malcolm Shergold
+Copyright 2012 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,11 +20,108 @@ Copyright 2011 Malcolm Shergold
 
 */
 
-//    function OutputContent_Performances()
+include STAGESHOW_INCLUDE_PATH.'mjslib_table.php';
+
+if (!class_exists('StageShowAdminPerformancesListClass')) 
+{
+	class StageShowAdminPerformancesListClass extends MJSLibAdminListClass // Define class
+	{				
+		var $updateFailed;
+		
+		function __construct($env) //constructor
+		{
+			// Call base constructor
+			parent::__construct($env);
+			
+			$myDBaseObj = $this->myDBaseObj;
+			
+			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
+
+			$this->SetRowsPerPage(STAGESHOW_SALES_PER_PAGE);
+			
+			$this->bulkActions = array(
+				'activate' => __('Activate/Deactivate', STAGESHOW_DOMAIN_NAME),
+				'delete'   => __('Delete', STAGESHOW_DOMAIN_NAME),
+				);
+
+			$columns = array(
+		    'perfDateTime' => __('Date & Time', STAGESHOW_DOMAIN_NAME),
+		    'perfRef' => __('Reference', STAGESHOW_DOMAIN_NAME),
+		    'perfSeats' => __('Max Seats', STAGESHOW_DOMAIN_NAME),
+		    'perfSales' => __('Tickets Sold', STAGESHOW_DOMAIN_NAME),
+		    'perfState' => __('State', STAGESHOW_DOMAIN_NAME),
+			);			
+			$this->SetListHeaders('stageshow_sales_list', $columns);
+			
+			$updateFailed = false;
+		}
+		
+		function GetRecordID($result)
+		{
+			return $result->perfID;
+		}
+		
+		function OutputList($results, $updateFailed)
+		{
+			$this->updateFailed = $updateFailed;
+			parent::OutputList($results);
+		}
+		
+		function AddResult($result)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+
+			if ($this->updateFailed)
+			{
+				// Get value(s) from form controls
+				$perfDateTime = stripslashes($_POST['perfDateTime'.$result->perfID]);
+				$perfRef = stripslashes($_POST['perfRef'.$result->perfID]);
+				$perfSeats = stripslashes($_POST['perfSeats'.$result->perfID]);
+			}
+			else
+			{
+				// Get value(s) from database
+				$perfDateTime = $result->perfDateTime;
+				$perfRef = $result->perfRef;
+				$perfSeats = $result->perfSeats;
+			}
+			
+			if ($result->totalQty > 0)
+			{
+				$perfSalesLink = 'admin.php?page=stageshow_sales&action=perf&id='.$result->perfID;
+				$perfSalesLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($perfSalesLink, plugin_basename($this->caller)) : $perfSalesLink;
+				$perfSalesLink = '<a href="'.$perfSalesLink.'">'.$result->totalQty.'</a>';
+			}
+			else
+				$perfSalesLink = '0';
+				
+			$perfState = $myDBaseObj->IsStateActive($result->perfState) ? __("Active", STAGESHOW_DOMAIN_NAME) : __("INACTIVE", STAGESHOW_DOMAIN_NAME);
+			
+			$rowAttr = '';
+			$this->NewRow($result, $rowAttr);
+			
+			$this->AddInputToTable($result, 'perfDateTime', 28, $perfDateTime);
+			$this->AddInputToTable($result, 'perfRef', STAGESHOW_PERFREF_TEXTLEN, $perfRef);
+			$this->AddInputToTable($result, 'perfSeats', 4, $perfSeats);
+			$this->AddToTable($result, $perfSalesLink);
+			$this->AddToTable($result, $perfState);
+		}		
+	}
+}
+
+include STAGESHOW_INCLUDE_PATH.'mjslib_admin.php';      
+
+if (!class_exists('StageShowPerformancesAdminClass')) 
+{
+	class StageShowPerformancesAdminClass extends MJSLibAdminClass // Define class
+	{
+		function __construct($env) //constructor	
     {
-			global $stageShowObj;
-			global $myPayPalAPILiveObj;
-			global $myPayPalAPITestObj;
+			// Call base constructor
+			parent::__construct($env);
+			
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj = $this->myDBaseObj;
       
 			$delperfId = 0;
 			
@@ -36,24 +133,24 @@ Copyright 2011 Malcolm Shergold
 		    'perfDelete' => __(' ', STAGESHOW_DOMAIN_NAME)
 	    );
 	
-			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
+			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
 			{
 				// Add the ID column
 				$columns = array_merge(array('perfID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
 			}
 			
-      register_column_headers('sshow_perfs_list', $columns);	
+      //TODO-Remove register_column_headers('sshow_perfs_list', $columns);	
 
 			$perfsMsg = '';
 				 
 			echo '<div class="wrap">';
 			if (isset($_POST['savebutton']))
 			{
-				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
 				
 				// Save Settings Request ....
 				$showID = $_POST['showID'];
-				$results = $stageShowDBaseObj->GetPerformancesListByShowID($showID);
+				$results = $myDBaseObj->GetPerformancesListByShowID($showID);
 						
 				// Verify that performance Refs are unique 
 						
@@ -95,7 +192,7 @@ Copyright 2011 Malcolm Shergold
 						
 				if ($perfsMsg !== '')
 				{
-					echo '<div id="message" class="updated"><p>'.__('Settings have NOT been saved', STAGESHOW_DOMAIN_NAME).'. '.$perfsMsg.'</p></div>';
+					echo '<div id="message" class="error"><p>'.__('Settings have NOT been saved', STAGESHOW_DOMAIN_NAME).'. '.$perfsMsg.'</p></div>';
 				}
         else 
 				{
@@ -116,7 +213,7 @@ Copyright 2011 Malcolm Shergold
 							
 							if ($newPerfDateTime != $result->perfDateTime)
 							{
-								$stageShowDBaseObj->UpdatePerformanceTime($result->perfID, $newPerfDateTime);
+								$myDBaseObj->UpdatePerformanceTime($result->perfID, $newPerfDateTime);
 								$result->perfDateTime = $newPerfDateTime;
 								$perfUpdated = true;
 							}
@@ -124,7 +221,7 @@ Copyright 2011 Malcolm Shergold
 							$newPerfRef = stripslashes($_POST['perfRef'.$result->perfID]);
 							if ($newPerfRef != $result->perfRef)
 							{
-								$stageShowDBaseObj->UpdatePerformanceRef($result->perfID, $newPerfRef);
+								$myDBaseObj->UpdatePerformanceRef($result->perfID, $newPerfRef);
 								$result->perfRef = $newPerfRef;
 								$perfUpdated = true;
 							}
@@ -132,7 +229,7 @@ Copyright 2011 Malcolm Shergold
 							$newPerfSeats = stripslashes($_POST['perfSeats'.$result->perfID]);
 							if ($newPerfSeats != $result->perfSeats)
 							{
-								$stageShowDBaseObj->UpdatePerformanceSeats($result->perfID, $newPerfSeats);
+								$myDBaseObj->UpdatePerformanceSeats($result->perfID, $newPerfSeats);
 								$result->perfSeats = $newPerfSeats;
 								$perfUpdated = true;
 							}
@@ -143,208 +240,171 @@ Copyright 2011 Malcolm Shergold
 						
 						// Add this entry to the list of entries to be updated
 						if (count($perfsList) > 0)
-							$stageShowDBaseObj->UpdateCartButtons($perfsList);
+							$myDBaseObj->UpdateCartButtons($perfsList);
 					} 
 					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
 				}
 			}			
 			else if (isset($_POST['addperfbutton']) && isset($_POST['showID']))
 			{
-				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
 				
 				$showID = $_POST['showID'];
 				
 				$statusMsg = '';
-				$stageShowDBaseObj->CreateNewPerformance($statusMsg, $showID, date(STAGESHOW_DATETIME_MYSQL_FORMAT));				
-				echo '<div id="message" class="updated"><p>'.$statusMsg.'.</p></div>';
+				$myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowDBaseClass::MYSQL_DATETIME_FORMAT));				
+				echo '<div id="message" class="updated"><p>'.$statusMsg.'.</p></div>';		// TODO - Check return status "class"
 			}			 
-			else if (isset($_GET['action']))
-			{
-				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+
+			if ( isset( $_POST['action'] ) && (-1 != $_POST['action']) )
+				$bulkAction = $_POST['action'];
+			else if ( isset( $_POST['action2'] ) && (-1 != $_POST['action2']) )
+				$bulkAction =  $_POST['action2'];
+			else
+				$bulkAction = '';
 				
-				$actionID = $_GET['action'];
-				switch ($actionID)
+			if (($bulkAction !== '') && isset($_POST['rowSelect']))
+			{
+				// Bulk Action Apply button actions
+				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				
+				$actionMsg = '';
+					
+				switch ($bulkAction)
 				{
-					case 'delete':
-						$delperfId = $_GET['id']; 
+					case 'delete':		
+						$errorCount = 0;
+						$blockCount = 0;							
+						foreach($_POST['rowSelect'] as $perfID)
+						{
+							// Don't delete if any tickets have been sold for this performance
+							$delPerfEntry = $myDBaseObj->GetPerformancesListByPerfID($perfID);
+							if (count($delPerfEntry) == 0)
+								$errorCount++;
+							else if (!$myDBaseObj->CanDeletePerformance($delPerfEntry[0]))
+								$blockCount++;
+						}
+						
+						if (($errorCount > 0) || ($blockCount > 0))
+						{
+							if ($errorCount > 0)
+							{
+								$actionMsg = ($errorCount == 1) ? __("1 Performance has a Database Error", $this->pluginName) : $errorCount.' '.__("Performances have a Database Error", $this->pluginName); 
+								echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
+							}
+							if ($blockCount > 0)
+							{
+								$actionMsg = ($blockCount == 1) ? __("1 Performance cannot be deleted - Tickets already sold!", $this->pluginName) : $blockCount.' '.__("Performances cannot be deleted - Tickets already sold!", $this->pluginName); 
+								echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
+							}
+							break;
+						}
+						
+						// Delete performances
+						$actionCount = 0;
+						foreach($_POST['rowSelect'] as $perfID)
+						{
+							// Delete all prices for this performance
+							$myDBaseObj->DeletePriceByPerfID($perfID);
+							
+							// Get the performance entry
+							$results = $myDBaseObj->GetPerformancesListByPerfID($perfID);
+					
+							// Delete any PayPal buttons ....
+							$myDBaseObj->payPalAPIObj->DeleteButton($results[0]->perfPayPalButtonID);	
+										
+							// Delete a performance entry
+							$myDBaseObj->DeletePerformanceByPerfID($perfID);
+
+							$actionCount++;
+						}
+						
+						if ($actionCount > 0)
+						{
+							$actionMsg = ($actionCount == 1) ? __("1 Performance has been deleted", $this->pluginName) : $actionCount.' '.__("Performances have been deleted", $this->pluginName); 
+							echo '<div id="message" class="updated"><p>'.$actionMsg.'</p></div>';
+						}
+						else
+						{
+							$actionMsg = __("Nothing to Delete", $this->pluginName);
+							echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
+						}
 						break;
 						
 					case 'activate':
-					case 'deactivate':
-						$perfId = $_GET['id']; 
-						$stageShowDBaseObj->SetPerfActivated($perfId, $actionID);
+						$actionCount = 0;
+						foreach($_POST['rowSelect'] as $perfID)
+						{
+							$perfEntry = $myDBaseObj->GetPerformancesListByPerfID($perfID);
+							if ($myDBaseObj->IsStateActive($perfEntry[0]->perfState))
+								$myDBaseObj->SetPerfActivated($perfID, 'deactivate');
+							else
+								$myDBaseObj->SetPerfActivated($perfID, 'activate');
+						}
 						break;
 				}
-				
-				$_GET['action'] = '';
 			}
-
-			if ($delperfId > 0)
-			{
-				// Don't delete if any tickets have been sold for this performance
-				if (!$stageShowDBaseObj->CanDeletePerformance($perfSales, $delperfId))
-				{
-					echo '<div id="message" class="updated"><p>'.__('Performance cannot be deleted - Tickets already sold!', STAGESHOW_DOMAIN_NAME).'</p></div>';
-				}
-				else
-				{
-					$showID = $_GET['showID'];
-
-					// Delete a performance
-					
-					// Delete all prices for this performance
-					$stageShowDBaseObj->DeletePriceByPerfID($delperfId);
-					
-					// Get the performance entry
-					$results = $stageShowDBaseObj->GetPerformancesListByPerfID($delperfId);
 			
-					// Delete any PayPal buttons ....
-					$myPayPalAPITestObj->DeleteButton($results[0]->perfPayPalTESTButtonID);	
-					$myPayPalAPILiveObj->DeleteButton($results[0]->perfPayPalLIVEButtonID);	
-								
-					// Delete a performance entry
-					$stageShowDBaseObj->DeletePerformanceByPerfID($delperfId);
-
-					// Delete 
-					echo '<div id="message" class="updated"><p>'.__('Performance entry deleted', STAGESHOW_DOMAIN_NAME).'.</p></div>';
-				}
-			}
-
+			$this->Output_MainPage($env, $perfsMsg !== '');
+		}		
+		
+		function Output_MainPage($env, $updateFailed)
+		{			
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj = $this->myDBaseObj;
+			
 			// Stage Show Performances HTML Output - Start 
 ?>
-    <div class="wrap">
-      <div id="icon-stageshow" class="icon32"></div>
-      <h2><?php echo $stageShowObj->pluginName.' - '.__('Performance Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
-<?php
-$showLists = $stageShowDBaseObj->GetAllShowsList();
+<div class="wrap">
+	<div id="icon-stageshow" class="icon32"></div>
+      <h2><?php echo $myPluginObj->pluginName.' - '.__('Performance Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
+	<?php
+$showLists = $myDBaseObj->GetAllShowsList();
 if (count($showLists) == 0)
 {
 	echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
 }
 foreach ($showLists as $showList)
 {
-	$results = $stageShowDBaseObj->GetPerformancesListByShowID($showList->showID);
+	$results = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
-<br></br>
-<form method="post" action="admin.php?page=sshow_performances"> 
+	<br></br>
+	<form method="post" action="admin.php?page=stageshow_performances">
 	<h3><?php echo($showList->showName); ?></h3>
-<?php 
-	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__));
+		<?php 
+	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
 	if (count($results) == 0) 
 	{ 
 		echo __('Show has NO Performances', STAGESHOW_DOMAIN_NAME)."<br>\n";
 	} 
 	else 
 	{ 
-?>
-	<table class="widefat" cellspacing="0">
-	<thead>
-		<tr>
-			<?php print_column_headers('sshow_perfs_list'); ?>
-		</tr>
-	</thead>
-
-	<tfoot>
-		<tr>
-			<?php print_column_headers('sshow_perfs_list', false); ?>
-		</tr>
-	</tfoot>
-	<tbody>
-<?php
-// TODO-WISHLIST: Add date and time picker
-		foreach($results as $result)
-		{
-			if (($perfsMsg !== '') && ($showList->showID == $showID))
-			{
-				// Get value(s) from form controls
-				$perfDateTime = stripslashes($_POST['perfDateTime'.$result->perfID]);
-				$perfRef = stripslashes($_POST['perfRef'.$result->perfID]);
-				$perfSeats = stripslashes($_POST['perfSeats'.$result->perfID]);
-			}
-			else
-			{
-				// Get value(s) from database
-				$perfDateTime = $result->perfDateTime;
-				$perfRef = $result->perfRef;
-				$perfSeats = $result->perfSeats;
-			}
-			
-			$actionLinks = '';
-			
-			if ($stageShowDBaseObj->IsPerfActivated($result->perfID))
-			{
-				$actionId = 'deactivate';
-				$actionText = __('Deactivate', STAGESHOW_DOMAIN_NAME);
-			}
-			else
-			{
-				$actionId = 'activate';
-				$actionText = __('Activate', STAGESHOW_DOMAIN_NAME);
-			}
-			$actionLinks = 'admin.php?page=sshow_performances&action='.$actionId.'&id='.$result->perfID;
-			$actionLinks = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($actionLinks, plugin_basename(__FILE__)) : $actionLinks;
-			$actionLinks = '<a href="'.$actionLinks.'">'.$actionText.'</a>';
-			echo "<!-- actionText=$actionText actionId=$actionId -->\n";
-			
-			// Performances can be deleted if there are no tickets sold or 24 hours after start date/time
-			if ($stageShowDBaseObj->CanDeletePerformance($perfSales, $result->perfID, $perfDateTime))
-			{
-				$deleteLink = 'admin.php?page=sshow_performances&showID='.$showList->showID.'&action=delete&id='.$result->perfID;
-				$deleteLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($deleteLink, plugin_basename(__FILE__)) : $deleteLink;
-				$deleteLink = '<a href="'.$deleteLink.'" onclick="javascript:return confirmDelete(\''.$perfRef.' ('.$perfDateTime.')\')">Delete</a>';
-				if ($actionLinks !== '') $actionLinks .= ', ';
-				$actionLinks .= $deleteLink;
-			}
-			
-			if ($actionLinks === '')
-				$actionLinks = '&nbsp';
-			
-			if ($perfSales > 0)
-			{
-				$perfSalesLink = 'admin.php?page=sshow_sales&action=perf&id='.$result->perfID;
-				$perfSalesLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($perfSalesLink, str_replace('performances.php', 'sales.php', plugin_basename(__FILE__))) : $perfSalesLink;
-				$perfSalesLink = '<a href="'.$perfSalesLink.'">'.$perfSales.'</a>';
-			}
-			else
-				$perfSalesLink = '0';
-			
-			echo '<tr>';
-			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
-				echo '<td>'.$result->perfID.'</td>';
-			echo '
-				<td><input name=perfDateTime'.$result->perfID.' type=text maxlength=28 size=29 style="text-align: center" value="'.$perfDateTime.'" /></td>
-				<td><input name=perfRef'.$result->perfID.' type=text maxlength='.STAGESHOW_PERFREF_TEXTLEN.' size='.STAGESHOW_PERFREF_TEXTLEN.' style="text-align: center" value="'.$perfRef.'" /></td>
-				<td><input name=perfSeats'.$result->perfID.' type=text maxlength=4 size=4 style="text-align: center" value="'.$perfSeats.'" /></td>
-				<td>'.$perfSalesLink.'</td>
-				<td style="background-color:#FFF">
-				'.$actionLinks.'
-				</td>
-				</tr>';
-		}	// End of foreach($results as $result)
-				
-?>
-</tbody>
-    </table>
-<?php
+		$thisUpdateFailed = (($updateFailed) && ($showList->showID == $showID));
+		$perfsList = new StageShowAdminPerformancesListClass($env);		
+		$perfsList->OutputList($results, $thisUpdateFailed);		
 	} // End of if (count($results) == 0) ... else ...
+
 ?>
-      <br></br>
+		<br></br>
       <input type="hidden" name="showID" value="<?php echo $showList->showID; ?>"/>
-<?php if ($stageShowDBaseObj->CanAddPerformance()) { ?>
+				<?php if ($myDBaseObj->CanAddPerformance()) { ?>
 			<input class="button-secondary" type="submit" name="addperfbutton" value="<?php _e('Add New Performance', STAGESHOW_DOMAIN_NAME) ?>"/>
-<?php } ?>						
-<?php
+						<?php } ?>
+						<?php
 	if(count($results) > 0)
 	{
 		echo '<input class="button-primary" type="submit" name="savebutton" value="'.__('Save Settings', STAGESHOW_DOMAIN_NAME).'"/>';
 	}
 ?>
-</form>
-<?php
+					</form>
+	<?php
 } // End of foreach ($showLists as $showList) ..
 ?>
 </div>
 <?php
 			// Stage Show Performances HTML Output - End 
-		}				 
+		}
+	}
+}
+
 ?>

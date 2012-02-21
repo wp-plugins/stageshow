@@ -2,7 +2,7 @@
 /* 
 Description: Code for Data Export functionality
  
-Copyright 2011 Malcolm Shergold
+Copyright 2012 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,9 +22,12 @@ Copyright 2011 Malcolm Shergold
 
 include '../../../../wp-config.php';
   
+	global $stageShowObj;
+	$myDBaseObj = $stageShowObj->myDBaseObj;
+	
   // Get the value of the "Delete Orphans" option and save it
-	$stageShowDBaseObj->adminOptions['DeleteOrphans'] = (isset($_GET['sshow_delete_orphans']) && ($_GET['sshow_delete_orphans'] == 1));
-	$stageShowDBaseObj->saveOptions();
+	$myDBaseObj->adminOptions['DeleteOrphans'] = (isset($_GET['sshow_delete_orphans']) && ($_GET['sshow_delete_orphans'] == 1));
+	$myDBaseObj->saveOptions();
 	
 	if ( isset( $_GET['download'] ) ) 
 	{
@@ -81,16 +84,18 @@ function export_sshow($dbList)
 
 function export_shows()
 {
-	global $stageShowDBaseObj;
+	global $stageShowObj;
+	$myDBaseObj = $stageShowObj->myDBaseObj;
 				
-	export_sshow($stageShowDBaseObj->GetSettings());
+	export_sshow($myDBaseObj->GetPricesList(null));
 }
 
 function export_tickets()
 {
-	global $stageShowDBaseObj;
+	global $stageShowObj;
+	$myDBaseObj = $stageShowObj->myDBaseObj;
 	
-	export_sshow($stageShowDBaseObj->GetAllTicketsList());
+	export_sshow($myDBaseObj->GetSalesList(null));
 }
 
 ?>

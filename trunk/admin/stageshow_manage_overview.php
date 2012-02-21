@@ -2,7 +2,7 @@
 /* 
 Description: Code for Overview Page
  
-Copyright 2011 Malcolm Shergold
+Copyright 2012 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,92 +20,172 @@ Copyright 2011 Malcolm Shergold
 
 */
 
+include STAGESHOW_INCLUDE_PATH.'mjslib_table.php';
+
+if (!class_exists('StageShowOverviewListClass')) 
+{
+	class StageShowOverviewListClass extends MJSLibAdminListClass // Define class
+	{		
+		function __construct($env) //constructor
 		{
-			global $stageShowObj;
-			global $stageShowDBaseObj;
-      
-      $columns = array(
+			// Call base constructor
+			parent::__construct($env);
+			
+			$myDBaseObj = $this->myDBaseObj;
+			
+			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
+
+			$columns = array(
 		    'showName' => __('Show', STAGESHOW_DOMAIN_NAME),
 		    'perfCount' => __('Performances', STAGESHOW_DOMAIN_NAME),
 		    'showSales' => __('Tickets Sold', STAGESHOW_DOMAIN_NAME)
-	    );
-	
-			if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
-			{
-				// Add the ID column
-				$columns = array_merge(array('showID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
-			}
-			
-      register_column_headers('sshow_overview_list', $columns);	
+			);			
+			$this->SetListHeaders($this->pluginName.'_overview_list', $columns, MJSLibTableClass::HEADERPOSN_TOP);
+		}
+		
+		function GetRecordID($result)
+		{
+			return $result->saleID;
+		}
+		
+		function AddResult($result)
+		{
+			$myDBaseObj = $this->myDBaseObj;
 
-			echo '<div class="wrap">';
+			$results2 = $myDBaseObj->GetPerformancesListByShowID($result->showID);
+			$showSales = $myDBaseObj->GetSalesQtyByShowID($result->showID);
+			
+			$rowAttr = '';
+			$this->NewRow($result, $rowAttr);
+
+			$this->AddToTable($result, $result->showName);
+			$this->AddToTable($result, count($results2));
+			$this->AddToTable($result, $showSales);
+		}		
+	}
+}
+
+include STAGESHOW_INCLUDE_PATH.'mjslib_admin.php';      
+
+if (!class_exists('StageShowOverviewAdminClass')) 
+{
+	class StageShowOverviewAdminClass extends MJSLibAdminClass // Define class
+	{
+		function __construct($env)
+		{
+			parent::__construct($env);
+
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj = $this->myDBaseObj;
+			
+?>			
+			<div class="wrap">
+			<div id="icon-stageshow" class="icon32"></div>
+			<h2>
+				<?php echo $myPluginObj->pluginName.' - '.__('Overview', STAGESHOW_DOMAIN_NAME); ?>
+			</h2>
+<?php
 
 			if(isset($_POST['createsample']))
 			{
-        $this->CreateSample();
+				$myPluginObj->CreateSample();
 			}
-
+			
 			// Stage Show Overview HTML Output - Start 
-?>
-		<div class="wrap">
-			<div id="icon-stageshow" class="icon32"></div>
-			<h2><?php echo $stageShowObj->pluginName.' - '.__('Overview', STAGESHOW_DOMAIN_NAME); ?></h2>
-			<br></br>
-			<form method="post" action="admin.php?page=sshow_adminmenu">
-						<?php
-if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__));
-$results = $stageShowDBaseObj->GetAllShowsList();
-if(count($results) == 0)
-{
-	echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
-}
-else
-{
-?>
-		<table class="widefat" cellspacing="0">
-      <thead>
-        <tr>
-          <?php print_column_headers('sshow_overview_list'); ?>
-        </tr>
-      </thead>
-
-      <tfoot>
-        <tr>
-          <?php print_column_headers('sshow_overview_list', false); ?>
-        </tr>
-      </tfoot>
-      <tbody>
-        <?php
-	foreach($results as $result)
-	{
-		// For each show .... find the number of performances
-		$results2 = $stageShowDBaseObj->GetPerformancesListByShowID($result->showID);
-		$showSales = $stageShowDBaseObj->GetSalesQtyByShowID($result->showID);
-
-		echo '<tr>';
-		if ($stageShowDBaseObj->adminOptions['Dev_ShowDBIds'])
-			echo '<td>'.$result->showID.'</td>';
-		echo '
-		<td>'.$result->showName.'</td>
-		<td>'.count($results2).'</td>
-		<td>'.$showSales.'</td>
-		</tr>';
-	}				
-}
-?>
-      </tbody>
-    </table>
-      <br></br>
-<?php
-if(count($results) == 0)
-{
-	echo '<input class="button-primary" type="submit" name="createsample" value="'.__('Create Sample', STAGESHOW_DOMAIN_NAME).'"/>';
-}
-?>
-    </form>
-</div>
-
-<?php
-        // Stage Show Overview HTML Output - End
+			$this->Output_Overview($env);
+			$this->Output_ShortcodeHelp();
+			$this->Output_UpdateInfo();
+			
+			echo '</div>';
 		}
+		
+		function Output_Overview($env)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			$results = $myDBaseObj->GetAllShowsList();
+						
+?>
+		<br>
+			<h2>Shows</h2>
+			<br>
+				<?php	
+	
+			if(count($results) == 0)
+			{
+				echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
+				echo '
+				<form method="post" action="admin.php?page=stageshow_adminmenu">
+				<br>
+					<input class="button-primary" type="submit" name="createsample" value="'.__('Create Sample', STAGESHOW_DOMAIN_NAME).'"/>
+				<br>
+				</form>';
+			}
+			else
+			{
+				$overviewList = new StageShowOverviewListClass($env);		
+				$overviewList->OutputList($results);		
+			}
+		}
+		
+		function Output_ShortcodeHelp()
+		{
+?>
+			<br>			
+				<h2>Shortcodes</h2>
+				StageShow generates output to your Wordpress pages for the following shortcodes:
+			<br><br>
+			<table class="widefat" cellspacing="0">
+				<thead>
+					<tr>
+						<th>Shortcode</th>
+						<th>Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>[sshow-boxoffice]</td>
+						<td>Add Box Office for all performances</td>
+					</tr>
+				</tbody>
+			</table>
+<?php
+		}
+
+		function Output_UpdateInfo()
+		{
+			// Get News entry from server
+			$myDBaseObj = $this->myDBaseObj;
+			$latest = $myDBaseObj->GetLatestNews();
+
+			// Deal with "Not Found" error ....
+			if ($latest === '')
+				return;
+			
+?>
+		<br>
+			<h2>StageShow Updates</h2>
+			<br>
+				<br>
+					<table class="widefat" cellspacing="0">
+						<thead>
+							<tr>
+								<th>Latest Updates</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>
+<?php
+				echo $latest;
+?>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+<?php
+		}
+
+	}
+}
+
 ?>

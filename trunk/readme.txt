@@ -95,6 +95,7 @@ The following tags can be used in the EMail template:
 * [salePaid]	Sale Details: Paid
 * [saleTxnId]	Sale Details: PayPal Transaction ID (TxnId)
 * [saleStatus]	Sale Details: PayPal Transaction Status
+* [saleBarcode] Sale Details: PayPa; Transaction ID converted to a Barcodes
 
 * [startloop]	Marker for the start of a loop for each ticket type purchased
 * [endloop]	Marker for the end of the loop 
@@ -142,6 +143,23 @@ The following tags can be used in the EMail template:
 
 = 0.9.3.1 =
 * Fixed "Function name must be a string" error when changing Admin EMail ( stageshow_manage_settings.php)
+
+= 0.9.4 =
+* Added StageShow specific capabilities (StageShow_Sales, StageShow_Admin and StageShow_Settings) to WP roles 
+* Added Facility to manually add a sale
+* Added Facility to activate/deactivate selected performances
+* Box Office page elements formatted by stageshow.css stylesheet
+* Duplicate dates on BoxOffice output supressed (STAGESHOW_BOXOFFICE_ALLDATES overrides)
+
+= 0.9.5 =
+* Dual PayPal Credentials merged - Live or Test (Sandbox) mode must be set before adding performances
+
+= 1.0.0 =
+* Bug Fix: Call to wp_enqueue_style() updated for compatibility with WP 3.3
+* AutoComplete disabled on Settings page
+* PayPal Account EMail address added to settings (PayPal may not report it correctly)
+* Shortcodes Summary added to Overview page
+* Added support of "User Roles" to admin pages
 
 == Upgrade Notice ==
 
