@@ -166,6 +166,8 @@ The following tags can be used in the EMail template:
 * PayPal Account EMail address added to settings (PayPal may not report it correctly)
 * Shortcodes Summary added to Overview page
 * Added support of "User Roles" to admin pages
+* Added Ticket Sale Reference Validation to "Tools" Admin page
+* Added Pagination to all admin screen lists
 
 == Upgrade Notice ==
 
