@@ -169,6 +169,9 @@ The following tags can be used in the EMail template:
 * Added Ticket Sale Reference Validation to "Tools" Admin page
 * Added Pagination to all admin screen lists
 
+= 1.0.1 =
+* Bug Fix: include folder missing from archive in 1.0.0
+
 == Upgrade Notice ==
 
 = 0.9 =
