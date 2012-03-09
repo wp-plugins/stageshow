@@ -10,27 +10,33 @@ The StageShow plugin adds an online Box-Office for websites of Small Theatres an
 
 == Description ==
 
-One or more performances can be defined, each with a specified start date/time, maximum number of places, ticket types and prices. 
+StageShow allows for a single show, for which up to 4 performances can be defined, each with a specified start date/time, maximum number of places, ticket types and prices. 
 
 A [sshow-boxoffice] tag added to a Page on the website adds the Box Office entry to the site.
 
 StageShow uses the PayPal API to interface to PayPal to create "Saved Buttons" which are used to collect ticket payments and to control the maximum number of tickets sold for each performance. PayPal IPN (Instant Payment Notification) is used to verify payments and to collect buyer information. 
 
-Each sale is fully recorded, with contact and payment details, and the seats purchased. Confirmation emails, which can be customised as required, are sent to each purchaser and copied to the system administrator.
+Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and copied to the system administrator.
 
-StageShow includes the facility to export both settings and sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
+EMails are in text only format, and the PayPal transaction number if included for validation purposes.  StageShow includes the facility on the admin pages to verify the transaction number for use at show time 
+
+StageShow includes the facility to export sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
 
 Features Summary
 
 * Adds a online BoxOffice for a Single Show 
-* Multiple Performances with Specified start Date/Time and Maximum Number of Tickets
+* Up to 4 Performances with Specified start Date/Time and Maximum Number of Tickets 
 * Unlimited number of Ticket Types for each performance with individually defined prices
 * Integrated PayPal Payment Collection
 * EMail confirmation of Booking to Client and Administrator
+* Manual entry of ticket sales for telephone sales etc.
+* Online Transaction ID validation
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
-* Enhanced version with many additional features now available for a small fee - for details see webpage
+* Enhanced version with many additional features now available - for details see http://corondeck.co.uk/StageShow/Plus 
 
 == Installation ==
+
+First Time Installation
 
 * Download stageshow.zip
 * Navigate to the plugins page in your administrator panel.
@@ -38,6 +44,12 @@ Features Summary
 * Under "Install a plugin in .zip format" choose the stageshow.zip file
 * Click Install Now.
 * After it has installed, activate the plugin.
+
+Upgrade
+
+* On the WP Plugins Page deactivate StageShow
+* Using FTP (or your ISPs file manager) delete the stageshow plugins folder in wp-content/plugins folder
+* Now Proceed as for the First Time Installation
 
 == Frequently Asked Questions ==
 
@@ -50,9 +62,11 @@ Features Summary
 		
 = What PayPal settings are required? =
 
-PayPal API Access must be enabled - and the associated User, Password and Signature entries added to "Stageshow" settings. The PayPal API EMail for the live PayPal site will be read from PayPal server when settings are saved. API EMail for the PayPal Sandbox site cannot be determined programatically, and must be entered on the settings page.
+PayPal API Access must be enabled - and the associated User, Password, Signature and EMail entries added to "Stageshow" settings. 
 		
 IPN Notification must be enabled for Sales to be recorded by the PlugIn. Payment will still be accepted and the sale will be recorded by PayPal if IPN is disabled.
+	
+StageShow can be used with a PayPal developer account (the "SandBox"). Select "SandBox" as the Environment option, and then enter the PayPal account parameters in the usual way.
 	
 = Why can't I edit the PayPal settings? =
 
@@ -95,7 +109,6 @@ The following tags can be used in the EMail template:
 * [salePaid]	Sale Details: Paid
 * [saleTxnId]	Sale Details: PayPal Transaction ID (TxnId)
 * [saleStatus]	Sale Details: PayPal Transaction Status
-* [saleBarcode] Sale Details: PayPa; Transaction ID converted to a Barcodes
 
 * [startloop]	Marker for the start of a loop for each ticket type purchased
 * [endloop]	Marker for the end of the loop 
@@ -150,13 +163,8 @@ The following tags can be used in the EMail template:
 * Added Facility to activate/deactivate selected performances
 * Box Office page elements formatted by stageshow.css stylesheet
 * Duplicate dates on BoxOffice output supressed (STAGESHOW_BOXOFFICE_ALLDATES overrides)
-* Added Facility to activate/deactivate selected shows (StageShow-Plus only)
-* Added Transaction ID Barcode to HTML Email (StageShow-Plus only)
-* Added Plugin update from custom server (StageShow-Plus only)
-* Added facility to add a "Note" to any Show (StageShow-Plus only)
 
 = 0.9.5 =
-* Bug Fix: Preserves show name when upgrading to StageShow-Plus (StageShow-Plus only)
 * Dual PayPal Credentials merged - Live or Test (Sandbox) mode must be set before adding performances
 * StageShow-Plus renamed StageShow+
 
@@ -176,3 +184,6 @@ The following tags can be used in the EMail template:
 
 = 0.9 =
 * First public release
+
+= 1.0.0 =
+* Earlier versions not compatible with WP 3.3 - Style sheets may not load
