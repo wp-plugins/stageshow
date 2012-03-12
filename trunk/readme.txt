@@ -1,7 +1,7 @@
 === StageShow ===
 Contributors: Malcolm-OPH
-Donate link: http://www.corondeck.co.uk/wp/stageshow/
-Tags: posts, pages, calendar, events, admin, user, theatre, theater, payments, paypal, e-commerce, cart
+Donate link: http://www.corondeck.co.uk/stageshow/donate.html
+Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, user
 Requires at least: 3.0
 Tested up to: 3.3.1
 Stable tag: trunk
@@ -10,8 +10,7 @@ The StageShow plugin adds an online Box-Office for websites of Small Theatres an
 
 == Description ==
 
-Any number of Shows can be specified, each with an unlimited number of performances. For each performance the start date/time, maximum number of places, ticket types and prices can be specified.  (StageShow+ only)
-StageShow allows for a single show, for which up to 4 performances can be defined, each with a specified start date/time, maximum number of places, ticket types and prices. (StageShow only)
+StageShow allows for a single show, for which up to 4 performances can be defined, each with a specified start date/time, maximum number of places, ticket types and prices. 
 
 A [sshow-boxoffice] tag added to a Page on the website adds the Box Office entry to the site.
 
@@ -19,25 +18,21 @@ StageShow uses the PayPal API to interface to PayPal to create "Saved Buttons" w
 
 Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and copied to the system administrator.
 
-EMails are in MIME format and have both HTML and Text content. The PayPal transaction number if included in the standard email for validation purposes, both as text and as a Code39 barcode.  StageShow includes the facility on the admin pages to verify the transaction number (either entered via the keyboard or with a barcode reader) for use at show time (StageShow+ only)
-EMails are in text only format, and the PayPal transaction number if included for validation purposes.  StageShow includes the facility on the admin pages to verify the transaction number for use at show time (StageShow only)
+EMails are in text only format, and the PayPal transaction number if included for validation purposes.  StageShow includes the facility on the admin pages to verify the transaction number for use at show time 
 
 StageShow includes the facility to export sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
 
 Features Summary
 
-* Adds a online BoxOffice for a Single Show (StageShow only)
-* Adds a online BoxOffice for unlimited number of Shows (StageShow+ only) 
-* Up to 4 Performances with Specified start Date/Time and Maximum Number of Tickets (StageShow only)
-* Unlimited Performances with Specified start Date/Time and Maximum Number of Tickets (StageShow+ only)
+* Adds a online BoxOffice for a Single Show 
+* Up to 4 Performances with Specified start Date/Time and Maximum Number of Tickets 
 * Unlimited number of Ticket Types for each performance with individually defined prices
 * Integrated PayPal Payment Collection
 * EMail confirmation of Booking to Client and Administrator
-* Optional Barcode of Transaction ID in EMails (StageShow+ only) 
 * Manual entry of ticket sales for telephone sales etc.
 * Online Transaction ID validation
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
-* Enhanced version with many additional features now available - for details see http://corondeck.co.uk/StageShow/Plus (StageShow only)
+* Enhanced version with many additional features now available - for details see http://corondeck.co.uk/StageShow/Plus 
 
 == Installation ==
 
@@ -49,7 +44,6 @@ First Time Installation
 * Under "Install a plugin in .zip format" choose the stageshow.zip file
 * Click Install Now.
 * After it has installed, activate the plugin.
-* Add sale details to the StageShow+ Auto Update Settings to enable Auto Update (StageShow+ only)
 
 Upgrade
 
@@ -115,7 +109,6 @@ The following tags can be used in the EMail template:
 * [salePaid]	Sale Details: Paid
 * [saleTxnId]	Sale Details: PayPal Transaction ID (TxnId)
 * [saleStatus]	Sale Details: PayPal Transaction Status
-* [saleBarcode] Sale Details: PayPal Transaction ID converted to a Barcodes (StageShow+ only)
 
 * [startloop]	Marker for the start of a loop for each ticket type purchased
 * [endloop]	Marker for the end of the loop 
@@ -171,13 +164,8 @@ The following tags can be used in the EMail template:
 * Added Facility to activate/deactivate selected performances
 * Box Office page elements formatted by stageshow.css stylesheet
 * Duplicate dates on BoxOffice output supressed (STAGESHOW_BOXOFFICE_ALLDATES overrides)
-* Added Facility to activate/deactivate selected shows (StageShow+ only)
-* Added Transaction ID Barcode to HTML Email (StageShow+ only)
-* Added Plugin update from custom server (StageShow+ only)
-* Added facility to add a "Note" to any Show (StageShow+ only)
 
 = 0.9.5 =
-* Bug Fix: Preserves show name when upgrading to StageShow-Plus (StageShow+ only)
 * Dual PayPal Credentials merged - Live or Test (Sandbox) mode must be set before adding performances
 * StageShow-Plus renamed StageShow+
 
@@ -194,8 +182,6 @@ The following tags can be used in the EMail template:
 * Bug Fix: include folder missing from archive in 1.0.0
 
 = 1.0.2 =
-* Items per page added to settings (StageShow+ only)
-* Performance expire limit time added to settings (StageShow+ only)
 * Negative/Non-Numeric max number of seats converted to unlimited (displayed as infinite)
 * New Performance defaults to unlimited number of seats
 
