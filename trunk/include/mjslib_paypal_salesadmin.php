@@ -215,7 +215,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 			<h2>
 					<?php echo $myPluginObj->pluginName.' '.$this->salesFor.' - '.__('Sales Log', $this->pluginName); ?>
 			</h2>
-			<br></br>
 				<form method="post" action="admin.php?page=<?php echo $this->pluginName; ?>_sales">
 				<h3>
 					<?php 
@@ -277,7 +276,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 }
 			else if(count($this->results) == 0)
 {
-				echo __('No Sales', $this->pluginName)."<br>\n";
+				echo "<div class='noconfig'>".__('NO Sales', STAGESHOW_DOMAIN_NAME)."</div>\n";
 }
 else 
 {
@@ -324,7 +323,7 @@ else
 			<td><?php echo($this->results[0]->salePaid) ?></td>
 		</tr>
 		<tr valign="top" id="tags">
-			<td><?php _e('Transaction Date/Time', $this->pluginName) ?>:&nbsp</td>
+			<td><?php _e('Transaction Date/Time', $this->pluginName) ?>:&nbsp;</td>
 			<td><?php echo($this->results[0]->saleDateTime).'&nbsp;UTC'; ?></td>
 		</tr>
 		<tr valign="top" id="tags">

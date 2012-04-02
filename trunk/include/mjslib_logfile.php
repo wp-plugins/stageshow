@@ -39,7 +39,9 @@ if (!class_exists('MJSLibLogFileClass'))
 		{
 			$Filepath = str_replace("\\", "/", $Filepath);			
 			if (strpos($Filepath, "/") === false)
-				$Filepath = ABSPATH . '/' . $this->LogsFolderPath . "/" . $Filepath;
+			{
+				$Filepath = $this->LogsFolderPath . "/" . $Filepath;
+			}
 			$Filepath = str_replace("//", "/", $Filepath);
 			
 			return self::LogToFileAbs($Filepath, $LogLine, $OpenMode, $LogHeader);			

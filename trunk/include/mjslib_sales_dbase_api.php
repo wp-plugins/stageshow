@@ -72,6 +72,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
         'PayPalLogoImageURL' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_URL,
         'PayPalHeaderImageURL' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_URL,
         
+        'MaxTicketQty' => STAGESHOW_MAXTICKETCOUNT,
+        
         'SalesID' => '',        
         'SalesEMail' => '',
                 
@@ -501,7 +503,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
     {	
 			$this->ShowSQL('URL:', $url.$urlParams);
 			$HTTPResponse = PayPalAPIClass::HTTPAction($url, $urlParams);
-			if ($this->adminOptions['Dev_ShowDBOutput'] == 1)
+			if ($this->adminOptions['Dev_ShowMiscDebug'] == 1)
 				MJSLibUtilsClass::print_r($HTTPResponse, 'HTTPResponse:');
 			return $HTTPResponse; 
     }

@@ -28,11 +28,9 @@ include 'include/stageshow_dbase_api.php';
 if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
 	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'templates/stageshow_EMail.php');
 
-// TODO Move STAGESHOW_SALES_PER_PAGE to Settings
-if (!defined('STAGESHOW_SALES_PER_PAGE'))
-	define('STAGESHOW_SALES_PER_PAGE', 12);
+if (!defined('STAGESHOW_ITEMS_PER_PAGE'))
+	define('STAGESHOW_ITEMS_PER_PAGE', 12);
 
-// TODO Move STAGESHOW_MAXTICKETCOUNT to Settings
 if (!defined('STAGESHOW_MAXTICKETCOUNT'))
 	define('STAGESHOW_MAXTICKETCOUNT', 4);
 
@@ -107,12 +105,23 @@ if (!class_exists('StageShowPluginClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
       
+			$defaultOptions = $myDBaseObj->GetDefaultOptions();
+			foreach ($defaultOptions as $optionKey => $optionValue)
+			{
+				// Add default values to settings that are not already set
+				if (!isset($myDBaseObj->adminOptions[$optionKey]) || ($myDBaseObj->adminOptions[$optionKey] == ''))
+					$myDBaseObj->adminOptions[$optionKey] = $optionValue;
+			}
+			
       // Initialise PayPal target ....
 			if (defined('PAYPAL_APILIB_ACTIVATE_TESTMODE'))
-				$myDBaseObj->adminOptions['PayPalEnv']  = 'sandbox';
-			else
-				$myDBaseObj->adminOptions['PayPalEnv']  = 'live';
-				
+			{
+				if (defined('PAYPAL_APILIB_ACTIVATE_TESTMODE'))
+					$myDBaseObj->adminOptions['PayPalEnv']  = 'sandbox';
+				else
+					$myDBaseObj->adminOptions['PayPalEnv']  = 'live';
+			}
+			
 			if ($myDBaseObj->adminOptions['PayPalEnv']  == 'sandbox')
 			{
 				// Pre-configured PayPal Sandbox settings - can be defined in wp-config.php
@@ -146,8 +155,6 @@ if (!class_exists('StageShowPluginClass'))
 				$myDBaseObj->adminOptions['AdminEMail'] = STAGESHOW_ACTIVATE_ADMIN_EMAIL;
 				$myDBaseObj->adminOptions['AuthTxnEMail'] = STAGESHOW_ACTIVATE_ADMIN_EMAIL;
       }
-      
-      $myDBaseObj->adminOptions['EMailTemplatePath'] = STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH;
       
 			$LogsFolder = ABSPATH . '/' . $myDBaseObj->adminOptions['LogsFolderPath'];
 			if (!is_dir($LogsFolder))
@@ -224,20 +231,28 @@ if (!class_exists('StageShowPluginClass'))
 				'style' => 'normal' 
 			), $atts );
         
+			ob_start();
+			
       $showID = $atts['id'];
       if ( $showID !== '' )
       {
 				$this->OutputContent_ShowBoxOffice($showID);
-				return;
       }
-      
-      // Get the ID of the show(s)
-      $shows = $myDBaseObj->GetAllShowsList();
-      
-      foreach ( $shows as $show )
-      {
-				$this->OutputContent_ShowBoxOffice($show->showID);
-      }
+      else
+			{
+				// Get the ID of the show(s)
+				$shows = $myDBaseObj->GetAllShowsList();
+	      
+				foreach ( $shows as $show )
+				{
+					$this->OutputContent_ShowBoxOffice($show->showID);
+				}
+			}
+			
+			$boxOfficeOutput = ob_get_contents();
+			ob_end_clean();
+			
+			return $boxOfficeOutput;			
     }
      
 		function OutputContent_ShowBoxOffice( $showID )
@@ -282,9 +297,6 @@ if (!class_exists('StageShowPluginClass'))
 					<?php echo $results[0]->showName; ?>
 				</h2>
 					<?php      
-			
-			if (($myDBaseObj->CanSetNotes()) && (strlen($results[0]->showNote) > 0))
-				echo '<div class="stageshow-note">'.$results[0]->showNote.'</div>';
 			
 			$widthCol1 = '25%';
 			$widthCol2 = '25%';
@@ -350,7 +362,7 @@ if (!class_exists('StageShowPluginClass'))
 							<select name="quantity">
 								<option value="1" selected="">1</option>
 					';
-					for ($no=2; $no<=STAGESHOW_MAXTICKETCOUNT; $no++)
+					for ($no=2; $no<=$myDBaseObj->adminOptions['MaxTicketQty']; $no++)
 						echo '<option value="'.$no.'">'.$no.'</option>'."\n";
 					echo '
 							</select>
@@ -396,41 +408,44 @@ if (!class_exists('StageShowPluginClass'))
 			$pageSubTitle = $_GET['page'];			
       switch ($pageSubTitle)
       {
-				case STAGESHOW_CODE_PREFIX.'_adminmenu':
-				case STAGESHOW_CODE_PREFIX.'_overview':
+				case STAGESHOW_MENUPAGE_ADMINMENU:
+				case STAGESHOW_MENUPAGE_OVERVIEW:
 				default :
 					include 'admin/stageshow_manage_overview.php';
 					new StageShowOverviewAdminClass($this->env);						
 					break;
 					
-        case STAGESHOW_CODE_PREFIX.'_shows':
+        case STAGESHOW_MENUPAGE_SHOWS:
 					include 'admin/stageshow_manage_shows.php';      
 					new StageShowShowsAdminClass($this->env);
           break;
           
-        case STAGESHOW_CODE_PREFIX.'_performances' :
+        case STAGESHOW_MENUPAGE_PERFORMANCES :
 					include 'admin/stageshow_manage_performances.php';      
 					new StageShowPerformancesAdminClass($this->env);
 					break;
 					
-				case STAGESHOW_CODE_PREFIX.'_prices' :
+				case STAGESHOW_MENUPAGE_PRICES :
 					include 'admin/stageshow_manage_prices.php';      
 					new StageShowPricesAdminClass($this->env);
 					break;
 					
-				case STAGESHOW_CODE_PREFIX.'_sales' :
+				case STAGESHOW_MENUPAGE_PRESETS :
+					include 'admin/stageshow_manage_presets.php';      
+					new StageShowPresetsAdminClass($this->env);
+					break;
+					
+				case STAGESHOW_MENUPAGE_SALES :
 					include 'admin/stageshow_manage_sales.php';      
 					new StageShowAdminSalesClass($this->env);
 					break;
 					
-				case STAGESHOW_CODE_PREFIX.'_buttons' :
+				case STAGESHOW_MENUPAGE_BUTTONS :
 					global $salesManDBaseObj;
 					$salesManDBaseObj = $this->myDBaseObj;
 					
 					if (!defined('SALESMAN_INCLUDE_PATH'))
 						define ('SALESMAN_INCLUDE_PATH', STAGESHOW_INCLUDE_PATH);
-					if (!defined('SALESMAN_SALES_PER_PAGE'))
-						define ('SALESMAN_SALES_PER_PAGE', STAGESHOW_SALES_PER_PAGE);
 					if (!defined('SALESMAN_DOMAIN_NAME'))
 						define ('SALESMAN_DOMAIN_NAME', STAGESHOW_DOMAIN_NAME);
 						
@@ -438,22 +453,22 @@ if (!class_exists('StageShowPluginClass'))
 					new ButtonsManAdminButtonsClass($this->env);
 					break;
 					
-				case STAGESHOW_CODE_PREFIX.'_settings' :
+				case STAGESHOW_MENUPAGE_SETTINGS :
 					include 'admin/stageshow_manage_settings.php';      
 					new StageShowManageSettingsClass($this->env);
 					break;
           
-				case STAGESHOW_CODE_PREFIX.'_tools':
+				case STAGESHOW_MENUPAGE_TOOLS:
 					include 'admin/stageshow_manage_tools.php';      
 					new StageShowToolsAdminClass($this->env);
 					break;
 							
-				case STAGESHOW_CODE_PREFIX.'_test':
+				case STAGESHOW_MENUPAGE_TEST:
 		      include 'admin/stageshow_test.php';   
 					new StageShowTestAdminClass($this->env);
 					break;
 							
-				case STAGESHOW_CODE_PREFIX.'_debug':
+				case STAGESHOW_MENUPAGE_DEBUG:
 		      include 'admin/stageshow_debug.php';    
 					new StageShowDebugAdminClass($this->env);
 					break;							
@@ -481,24 +496,30 @@ if (!class_exists('StageShowPluginClass'))
 				$pluginName = $myDBaseObj->get_name();
 				
 				$icon_url = STAGESHOW_ADMIN_IMAGES_URL.'stageshow16grey.png';
-				add_menu_page($pluginName, $pluginName, STAGESHOW_SALESUSER_ROLE, STAGESHOW_CODE_PREFIX.'_adminmenu', array(&$this, 'printAdminPage'), $icon_url);
-				add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('StageShow Overview', STAGESHOW_DOMAIN_NAME),__('Overview', STAGESHOW_DOMAIN_NAME),    STAGESHOW_SALESUSER_ROLE, STAGESHOW_CODE_PREFIX.'_adminmenu',    array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('Show Editor', STAGESHOW_DOMAIN_NAME),       __('Show', STAGESHOW_DOMAIN_NAME),        STAGESHOW_ADMINUSER_ROLE, STAGESHOW_CODE_PREFIX.'_shows',        array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('Performance Editor', STAGESHOW_DOMAIN_NAME),__('Performance', STAGESHOW_DOMAIN_NAME), STAGESHOW_ADMINUSER_ROLE, STAGESHOW_CODE_PREFIX.'_performances', array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('Price Edit', STAGESHOW_DOMAIN_NAME),        __('Price', STAGESHOW_DOMAIN_NAME),       STAGESHOW_ADMINUSER_ROLE, STAGESHOW_CODE_PREFIX.'_prices',       array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('Sales Admin', STAGESHOW_DOMAIN_NAME),       __('Sales', STAGESHOW_DOMAIN_NAME),       STAGESHOW_SALESUSER_ROLE, STAGESHOW_CODE_PREFIX.'_sales',        array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('Admin Tools', STAGESHOW_DOMAIN_NAME),       __('Tools', STAGESHOW_DOMAIN_NAME),       STAGESHOW_ADMINUSER_ROLE, STAGESHOW_CODE_PREFIX.'_tools',        array(&$this, 'printAdminPage'));
-				if ( file_exists(STAGESHOW_ADMIN_PATH.'salesman_manage_buttons.php') ) 
-					add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('Manage Buttons', STAGESHOW_DOMAIN_NAME),    __('Buttons', STAGESHOW_DOMAIN_NAME),   STAGESHOW_ADMINUSER_ROLE, STAGESHOW_CODE_PREFIX.'_buttons',      array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('Edit Settings', STAGESHOW_DOMAIN_NAME),     __('Settings', STAGESHOW_DOMAIN_NAME),    STAGESHOW_SETUPUSER_ROLE, STAGESHOW_CODE_PREFIX.'_settings',     array(&$this, 'printAdminPage'));
+				add_menu_page($pluginName, $pluginName, STAGESHOW_SALESUSER_ROLE, STAGESHOW_MENUPAGE_ADMINMENU, array(&$this, 'printAdminPage'), $icon_url);
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('StageShow Overview', STAGESHOW_DOMAIN_NAME),__('Overview', STAGESHOW_DOMAIN_NAME),    STAGESHOW_SALESUSER_ROLE, STAGESHOW_MENUPAGE_ADMINMENU,    array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Show Editor', STAGESHOW_DOMAIN_NAME),       __('Show', STAGESHOW_DOMAIN_NAME),        STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_SHOWS,        array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', STAGESHOW_DOMAIN_NAME),__('Performance', STAGESHOW_DOMAIN_NAME), STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
+				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_manage_presets.php') ) 
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Presets Editor', STAGESHOW_DOMAIN_NAME),  __('Presets', STAGESHOW_DOMAIN_NAME),     STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_PRESETS,      array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', STAGESHOW_DOMAIN_NAME),        __('Price', STAGESHOW_DOMAIN_NAME),       STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Sales Admin', STAGESHOW_DOMAIN_NAME),       __('Sales', STAGESHOW_DOMAIN_NAME),       STAGESHOW_SALESUSER_ROLE, STAGESHOW_MENUPAGE_SALES,        array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Admin Tools', STAGESHOW_DOMAIN_NAME),       __('Tools', STAGESHOW_DOMAIN_NAME),       STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_TOOLS,        array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', STAGESHOW_DOMAIN_NAME),     __('Settings', STAGESHOW_DOMAIN_NAME),    STAGESHOW_SETUPUSER_ROLE, STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
 
-				// Show test menu if stageshow_test.php is present
-				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_test.php') )
-					add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('TEST', STAGESHOW_DOMAIN_NAME), __('TEST', STAGESHOW_DOMAIN_NAME), STAGESHOW_DEVUSER_ROLE, STAGESHOW_CODE_PREFIX.'_test', array(&$this, 'printAdminPage'));
-	      
-				// Show debug menu if stageshow_debug.php is present
-				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_debug.php') )
-					add_submenu_page( STAGESHOW_CODE_PREFIX.'_adminmenu', __('DEBUG', STAGESHOW_DOMAIN_NAME), __('DEBUG', STAGESHOW_DOMAIN_NAME), STAGESHOW_DEVUSER_ROLE, STAGESHOW_CODE_PREFIX.'_debug', array(&$this, 'printAdminPage'));
+				if (defined('STAGESHOW_ENABLE_TEST') && (STAGESHOW_ENABLE_TEST === true))
+				{
+					if ( file_exists(STAGESHOW_ADMIN_PATH.'salesman_manage_buttons.php') ) 
+						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', STAGESHOW_DOMAIN_NAME),    __('Buttons', STAGESHOW_DOMAIN_NAME),   STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));
+						
+					// Show test menu if stageshow_test.php is present
+					if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_test.php') )
+						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('TEST', STAGESHOW_DOMAIN_NAME), __('TEST', STAGESHOW_DOMAIN_NAME), STAGESHOW_DEVUSER_ROLE, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
+		      
+					// Show debug menu if stageshow_debug.php is present
+					if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_debug.php') )
+						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEBUG', STAGESHOW_DOMAIN_NAME), __('DEBUG', STAGESHOW_DOMAIN_NAME), STAGESHOW_DEVUSER_ROLE, STAGESHOW_MENUPAGE_DEBUG, array(&$this, 'printAdminPage'));
+				}
 			}	
 		}
 		

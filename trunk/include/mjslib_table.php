@@ -35,6 +35,7 @@ if (!class_exists('MJSLibTableClass'))
 
 		var $tableContents = array();
 		var $rowAttr = array();
+		var $tableName = '';
 		var $tableTags;
 		var $divClass;
 		var $colId;
@@ -44,11 +45,13 @@ if (!class_exists('MJSLibTableClass'))
 		
 		var $colWidth = array();
 		var $colAlign = array();
+		var $colClass = array();
 		var $bulkActions;
 		var $hideEmptyRows;
 		var $spanEmptyCells;
 		var $useTHTags;
 		var $noAutoComplete;
+		var $hasHiddenRows;
 		
 		var $currRow;
 		var $currCol;
@@ -60,6 +63,8 @@ if (!class_exists('MJSLibTableClass'))
 		var $maxRowsShown;
 		
 		var $rowCount = 0;
+		
+		var $scriptsOutput;
 		
 		var $tableType;
 		
@@ -90,6 +95,8 @@ if (!class_exists('MJSLibTableClass'))
 			$this->rowsPerPage = 0;
 			$this->useTHTags = false;
 			$this->noAutoComplete = true;
+			$this->scriptsOutput = false;
+			$this->hasHiddenRows = false;
 		}
 		
 		function SetRowsPerPage($rowsPerPage)
@@ -100,6 +107,12 @@ if (!class_exists('MJSLibTableClass'))
 			$this->currentPage = MJSLibUtilsClass::GetArrayElement($_GET, 'paged', $this->currentPage);
 			
 			$this->firstRowShown = 1 + (($this->currentPage - 1) * $this->rowsPerPage);
+		}
+
+		function AddHiddenRows($result, $hiddenRowsID, $hiddenRows)
+		{
+			$this->NewRow($result, 'id="'.$hiddenRowsID.'" style="display: none;" class="hiddenRow"');
+			$this->AddToTable($result, $hiddenRows);	
 		}
 
 		function NewRow($result, $rowAttr = '')
@@ -123,6 +136,11 @@ if (!class_exists('MJSLibTableClass'))
 			$this->colAlign = split(',', ','.$newColAlign);
 		}
 
+		function SetColClass($newColClass)
+		{			
+			$this->colClass = split(',', ','.$newColClass);
+		}
+
 		function SetListHeaders($headerId, $columns, $headerPosn = MJSLibTableClass::HEADERPOSN_BOTH)
 		{
 			if ($this->showDBIds)
@@ -135,6 +153,12 @@ if (!class_exists('MJSLibTableClass'))
 			{
 				// Add the Checkbox column
 				$columns = array_merge(array('eventCb' => '<input name="checkall" id="checkall" type="checkbox"  onClick="updateCheckboxes(this)" />'), $columns); 
+			}
+			
+			if ($this->hasHiddenRows)
+			{
+				$optionsColId = __('Options');
+				$columns = array_merge($columns, array('eventOptions' => $optionsColId)); 
 			}
 				
 			$this->columnHeadersId = $headerId;
@@ -155,10 +179,12 @@ if (!class_exists('MJSLibTableClass'))
 		{
 			$inputName .= $this->GetRecordID($result);
 
+			$size = $maxlength+1;
+			
 			$content  = "name=$inputName ";
 			$content .= "id=$inputName ";
 			$content .= "maxlength=\"$maxlength\" ";
-			$content .= "size=\"$maxlength+1\" ";
+			$content .= "size=\"$size\" ";
 			$content .= "value=\"$value\" ";
 			
 			if ($this->noAutoComplete)
@@ -187,6 +213,19 @@ if (!class_exists('MJSLibTableClass'))
 		function AddLinkToTable($result, $content, $link, $col=0, $newRow = false)
 		{
 			$content = '<a href="'.$link.'">'.$content.'</a>';
+			$this->AddToTable($result, $content, $col, $newRow);
+		}
+	
+		function AddShowOrHideButtonToTable($result, $tableId, $rowId, $content, $col=0, $newRow = false)
+		{
+			$recordID = $this->GetRecordID($result);
+			$moreName = 'more'.$recordID;
+			
+			// TODO - Pass number of row to show/hide in call
+			$firstRow = $this->currRow + 1;
+			$lastRow = $this->currRow + 1;
+			
+			$content = '<a id="'.$moreName.'" class="more-button" onClick="HideOrShowRows(\''.$moreName.'\', \''.$rowId.'\')">'.$content.'</a>';
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
@@ -245,7 +284,12 @@ if (!class_exists('MJSLibTableClass'))
 				case 'html':
 					if ($this->divClass)
 						echo "<div class=$this->divClass>\n";
-					echo "<table $this->tableTags>\n";
+						
+					echo "<table ";
+					if ($this->tableName !== '')
+						echo 'id="'.$this->tableName.'" ';
+					echo "$this->tableTags>\n";
+					
 					echo "<tbody>\n";
 					break;
 				case 'RTF':
@@ -283,7 +327,7 @@ if (!class_exists('MJSLibTableClass'))
 			
 			$output  = "<div class='alignleft actions'>\n";
 			$output .= "<select name='action$tagNo'>\n"; 
-			$output .= "<option value='-1' selected='selected'>Bulk Actions&nbsp&nbsp</option>\n"; 
+			$output .= "<option value='-1' selected='selected'>Bulk Actions&nbsp;&nbsp;</option>\n"; 
 			foreach ($this->bulkActions as $action => $actionID)
 				$output .= "<option value='$action'>$actionID</option>\n"; 
 			$output .= "</select>\n"; 
@@ -295,23 +339,50 @@ if (!class_exists('MJSLibTableClass'))
 		
 		function OutputCheckboxScript()
 		{
+			if ($this->scriptsOutput) return;
+			$this->scriptsOutput = true;
+			
+			$moreText = $this->moreText;
+			$lessText = $this->lessText;
+			
 			echo "
 <script>
 
 function getParentNode(obj, nodeName)
 {
 	var pobj = obj;
-	while (pobj != null)
+	while (pobj !== null)
 	{
 		pobj = pobj.parentNode;
-		if (pobj == null)
+		if (pobj === null)
 			break;
 		pName = pobj.nodeName;
-		if (pName == nodeName)
+		if (pName === nodeName)
 			break;
 	}
 	
 	return pobj;
+}
+
+function HideOrShowRows(buttonId, rowId)
+{
+	var rowObj = document.getElementById(rowId);
+	var buttonObj = document.getElementById(buttonId);
+
+	// Toggle display state
+	if (rowObj.style.display === '')
+	{
+		rowObj.style.display = 'none';	
+		buttonObj.innerHTML = '$moreText';
+		rowsVisible = false;
+	}
+	else
+	{
+		rowObj.style.display = '';
+		buttonObj.innerHTML = '$lessText';
+		rowsVisible = true;	
+	}
+	
 }
 
 function updateCheckboxes(obj)
@@ -437,7 +508,7 @@ function updateCheckboxes(obj)
 		
 		function Display()
 		{
-			$rowTag = $this->useTHTags ? 'th' : 'td';
+			$colTag = $this->useTHTags ? 'th' : 'td';
 			
 			$this->ShowPageControls();
 			$this->Header();
@@ -473,6 +544,8 @@ function updateCheckboxes(obj)
 						$setId = ($this->colId !== '') ? ' id="'.$this->colId.$col.'"' : '';
 					}
 					
+					$setClass = (isset($this->colClass[$col]) && $this->colClass[$col] != '') ? ' class="'.$this->colClass[$col].'"' : '';
+					
 					$colSpan = '';
 					$colSpanCount = 1;
 					if ($this->spanEmptyCells)
@@ -489,7 +562,7 @@ function updateCheckboxes(obj)
 					switch ($this->tableType)
 					{
 						case 'html':
-							echo '<'.$rowTag.$colSpan.$setWidth.$setAlign.$setId.'>';
+							echo '<'.$colTag.$colSpan.$setWidth.$setAlign.$setId.$setClass.'>';
 							break;
 						case 'RTF':
 							if ($col > 1) echo '\tab ';
@@ -501,7 +574,7 @@ function updateCheckboxes(obj)
 					switch ($this->tableType)
 					{
 						case 'html':
-							echo "</$rowTag>\n";
+							echo "</$colTag>\n";
 							break;
 						case 'RTF':
 							break;
@@ -549,7 +622,11 @@ if (!class_exists('MJSLibAdminListClass'))
 		var $filterRowCounts;
 		var $defaultFilterIndex;
 		var $showDBIds;
+		var $lastCBId;
 		var $currResult;
+		var $options;
+		var $moreText;
+		var $lessText;
 		
 		function __construct($env, $newTableType = 'html') //constructor
 		{
@@ -569,11 +646,26 @@ if (!class_exists('MJSLibAdminListClass'))
 			$this->pluginName = $callerFolders[0];
 
 			$this->tableTags = 'class="widefat" cellspacing="0"';
-			$this->SetRowsPerPage(MJSLIB_EVENTS_PER_PAGE);
+			if (isset($this->myDBaseObj->adminOptions['PageLength']))
+				$this->SetRowsPerPage($this->myDBaseObj->adminOptions['PageLength']);
+			else
+				$this->SetRowsPerPage(MJSLIB_EVENTS_PER_PAGE);
 			$this->useTHTags = true;
-			$this->showDBIds = false;
+			if (isset($this->myDBaseObj->adminOptions['Dev_ShowDBIds']))
+				$this->showDBIds = $this->myDBaseObj->adminOptions['Dev_ShowDBIds'];					
+			else
+				$this->showDBIds = false;
+			$this->lastCBId = '';
 			
-			$this->defaultFilterIndex = 0;			
+			$this->defaultFilterIndex = 0;	
+			
+			if (isset($this->myDBaseObj))
+				$this->options = $this->myDBaseObj->GetExtendedSettings();
+			else
+				$this->options = array();		
+				
+			$this->moreText = __('Show');
+			$this->lessText = __('Hide');
 		}
 		
 		function NewRow($result, $rowAttr = '')
@@ -582,20 +674,37 @@ if (!class_exists('MJSLibAdminListClass'))
 			
 			$col=1;
 			
+			$recordID = $this->GetRecordID($result);
+			$isFirstLine = ($this->lastCBId !== $recordID);
+			$this->lastCBId = $recordID;
+			
 			if ($this->showDBIds)
-				$this->AddToTable($result, $this->GetRecordID($result), $col++);
-
+			{
+				if ($isFirstLine)
+					$this->AddToTable($result, $recId, $col++);
+				else	
+					$this->AddToTable($result, ' ', $col++);
+			}
+			
 			if (isset($this->bulkActions))
 			{
 				//echo "Adding Checkbox - Col = $col<br>";				
-				$recordID = $this->GetRecordID($result);	
-				$this->AddCheckBoxToTable($result, 'rowSelect[]', $col++, $recordID);
+				if ($isFirstLine)
+					$this->AddCheckBoxToTable($result, 'rowSelect[]', $col++, $recordID);
+				else	
+					$this->AddToTable($result, ' ', $col++);
 			}
+		}
+		
+		function GetTableID($result)
+		{
+			echo "function GetTableID() must be defined in ".get_class($this)." class<br>\n";
+			die;
 		}
 		
 		function GetRecordID($result)
 		{
-			echo "function GetRecordID() must be defined in MJSLibAdminListClass derived class<br>\n";
+			echo "function GetRecordID() must be defined in ".get_class($this)." class<br>\n";
 			die;
 		}
 		
@@ -660,6 +769,44 @@ if (!class_exists('MJSLibAdminListClass'))
 			echo "</div>\n";
 		}
 		
+		function AddOptions($result)
+		{
+			$hiddenRowsID = 'record'.$this->GetRecordID($result).'options';
+			
+			if (count($this->options) > 0)
+			{
+				$this->AddShowOrHideButtonToTable($result, $this->tableName, $hiddenRowsID, $this->moreText);
+				
+				$colClassList = '';
+				for ($c=1; $c<$this->maxCol; $c++)
+					$colClassList .= ',';
+				$colClassList .= 'optionsCol';
+				$this->SetColClass($colClassList);
+												
+				$hiddenRows = "<table>\n";
+				foreach ($this->options as $option)
+				{
+					$optionId = $option['Id'];
+					$option['Id'] = $option['Id'].$this->GetRecordID($result);
+					
+					$hiddenRows .= '<tr>'."\n";
+					$hiddenRows .= '<td>'.$option['Label']."</td>\n";;
+					$hiddenRows .= '<td>'.SettingsAdminClass::GetHTMLTag($option, $result->$optionId)."</td>\n";
+					$hiddenRows .= "</tr>\n";
+				}
+				$hiddenRows .= "</table>\n";
+				
+				/*
+				echo "<!-- \n";
+				echo "$hiddenRows\n";
+				echo "--> \n";
+				*/
+				
+				$this->spanEmptyCells = true;
+				$this->AddHiddenRows($result, $hiddenRowsID, $hiddenRows);					
+			}			
+		}
+		
 		function OutputList($results)
 		{
 			if (isset($this->filterRowCounts))
@@ -687,6 +834,10 @@ if (!class_exists('MJSLibAdminListClass'))
 										
 			$this->rowNo = 0;
 			$this->rowCount = 0;
+			
+			if (count($results) > 0)
+				$this->tableName = $this->GetTableID($results[0]);			
+	
 			foreach($results as $result)
 			{
 				if (!$this->IsRowInView($result, $rowFilter))
@@ -696,8 +847,9 @@ if (!class_exists('MJSLibAdminListClass'))
 				
 				if (!$this->ShowRow($result, $rowFilter))
 					continue;
-					
+				
 				$this->AddResult($result);
+				$this->AddOptions($result);
 				$this->rowCount++;
 			}
 			

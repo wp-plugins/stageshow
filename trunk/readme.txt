@@ -182,8 +182,15 @@ The following tags can be used in the EMail template:
 * Bug Fix: include folder missing from archive in 1.0.0
 
 = 1.0.2 =
+* Items per page added to settings
 * Negative/Non-Numeric max number of seats converted to unlimited (displayed as infinite)
 * New Performance defaults to unlimited number of seats
+* Number of seats available can be set to unlimited using negative value (default value)
+
+= 1.0.3 =
+* Bug Fix: Input Edit box size value fixed
+* Bug Fix: Box Office shortcode output was always at top of page.
+* Max Ticket Count added to settings
 
 == Upgrade Notice ==
 

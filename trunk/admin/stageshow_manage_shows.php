@@ -36,7 +36,8 @@ if (!class_exists('StageShowAdminShowsListClass'))
 			
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
-			$this->SetRowsPerPage(STAGESHOW_SALES_PER_PAGE);
+			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
+			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$this->bulkActions = array(
 				'activate' => __('Activate/Deactivate', STAGESHOW_DOMAIN_NAME),
@@ -45,15 +46,16 @@ if (!class_exists('StageShowAdminShowsListClass'))
 
 			$columns = array(
 		    'showName'  => __('Show Name', STAGESHOW_DOMAIN_NAME),
-			);			
-			if ($myDBaseObj->CanSetNotes()) 
-				$columns = array_merge($columns, array('showNotes' => __('Note', STAGESHOW_DOMAIN_NAME))); 
-			$columns = array_merge($columns, array(
 		    'showSales' => __('Tickets Sold', STAGESHOW_DOMAIN_NAME),
 		    'showState' => __('State', STAGESHOW_DOMAIN_NAME)
-				)); 
+				); 
 				
 			$this->SetListHeaders('stageshow_sales_list', $columns);
+		}
+		
+		function GetTableID($result)
+		{
+			return "showtab";
 		}
 		
 		function GetRecordID($result)
@@ -90,14 +92,6 @@ if (!class_exists('StageShowAdminShowsListClass'))
 
 			$editNoteLink = $linkBackURL.'&action=note&id='.$result->showID;
 			
-			if ($myDBaseObj->CanSetNotes())
-			{
-				if (strlen($result->showNote) > 0)
-					$shortNote = substr($result->showNote, 0, STAGESHOW_SHORTNOTE_TEXTLEN);
-				else
-					$shortNote = __('Add a note', STAGESHOW_DOMAIN_NAME);
-			}
-			
 			if ($showSales > 0)
 			{
 				$showSalesLink = 'admin.php?page=stageshow_sales&action=show&id='.$result->showID;
@@ -107,11 +101,9 @@ if (!class_exists('StageShowAdminShowsListClass'))
 			else
 				$showSalesLink = '0';
 				
-			$rowAttr = '';
-			$this->NewRow($result, $rowAttr);
+			$this->NewRow($result);
 			
 			$this->AddInputToTable($result, 'showName', STAGESHOW_SHOWNAME_TEXTLEN, $showName);
-			if ($myDBaseObj->CanSetNotes()) $this->AddLinkToTable($result, $shortNote, $editNoteLink);
 			$this->AddToTable($result, $showSalesLink);
 			$this->AddToTable($result, $showState);
 		}		
@@ -160,14 +152,6 @@ if (!class_exists('StageShowShowsAdminClass'))
 			$showsMsg = '';
 				 
 			echo '<div class="wrap">';
-			if (isset($_POST['savenotebutton']) && $myDBaseObj->CanSetNotes())
-			{
-				$newNoteId = $_POST['id']; 
-				$showNote = $_POST['showNote']; 
-				$myDBaseObj->SetShowNotes($newNoteId, $showNote);
-				echo '<div id="message" class="updated"><p>'.__('Show Note Saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
-			}
-			
 			if (isset($_POST['saveshowbutton']))
 			{
 				// Save Settings Request ....
@@ -187,7 +171,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 							$entriesList[$showEntry] = true;
 					}
 				}				
-						
+				
 				if ($showsMsg !== '')
 				{
 					echo '<div id="message" class="error"><p>'.__('Settings have NOT been saved', STAGESHOW_DOMAIN_NAME).'. '.$showsMsg.'</p></div>';
@@ -203,6 +187,9 @@ if (!class_exists('StageShowShowsAdminClass'))
 							{
 								$myDBaseObj->UpdateShowName($result->showID, $newShowName);
 							}
+				
+							// TODO-BEFORE-RELEASE Save option extensions
+							$myDBaseObj->UpdateExtendedSettings($result, $result->showID);											
 						}
 					}
 					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
@@ -212,7 +199,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 			if (isset($_POST['addshowbutton']))
 			{
 				// Add Show with unique Show Name 
-				$showID = $myDBaseObj->AddShow('New Show');
+				$showID = $myDBaseObj->AddShow('');
 				
 				if ($showID == 0)
 					echo '<div id="message" class="error"><p>'.__('Cannot add a new show - Only one show allowed', STAGESHOW_DOMAIN_NAME).'.</p></div>';
@@ -321,7 +308,6 @@ if (!class_exists('StageShowShowsAdminClass'))
 				<div class="wrap">
 					<div id="icon-stageshow" class="icon32"></div>
 					<h2><?php echo $myPluginObj->pluginName.' - '.__('Show Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
-					<br></br>
 					<form method="post" action="admin.php?page=stageshow_shows">
 <?php
 	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
@@ -340,20 +326,6 @@ if (!class_exists('StageShowShowsAdminClass'))
 						<td><?php _e('Show', STAGESHOW_DOMAIN_NAME); ?></td>
 						<td><?php echo $result->showName ?></td>
 					</tr>
-<?php
-			if ($myDBaseObj->CanSetNotes()) 
-			{
-
-?>
-					<tr>
-						<td><?php _e('Note above', STAGESHOW_DOMAIN_NAME); ?></td>
-						<td>
-							<textarea name="showNote" cols="<?php echo STAGESHOW_NOTE_COLCOUNT; ?>" rows="<?php echo STAGESHOW_NOTE_ROWCOUNT; ?>"><?php echo $result->showNote ?></textarea>
-						</td>
-					</tr>
-<?php
-			}
-?>
 				</table>
 				
 				<br></br>
@@ -377,10 +349,13 @@ if (!class_exists('StageShowShowsAdminClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
+			if (!$myDBaseObj->CheckIsConfigured())
+				return;
+
 			$results = $myDBaseObj->GetAllShowsList();
 			if(count($results) == 0)
 			{
-				echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
+				echo "<div class='noconfig'>".__('No Show Configured', STAGESHOW_DOMAIN_NAME)."</div>\n";
 			}
 			else
 			{
@@ -391,7 +366,6 @@ if (!class_exists('StageShowShowsAdminClass'))
 			if ($myDBaseObj->CanAddShow()) 
 			{ 
 ?>						
-      <br></br>
       <input class="button-secondary" type="submit" name="addshowbutton" value="<?php _e('Add New Show', STAGESHOW_DOMAIN_NAME) ?>"/>
 <?php 
 			} 

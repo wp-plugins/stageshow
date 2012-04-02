@@ -10,7 +10,7 @@ if (!class_exists('NotifyURLClass'))
 	class NotifyURLClass // Define class
 	{
     // Class variables:
-    var		$notifyDBaseObj;		//  Database access Object
+    var		$notifyDBaseObj;			//  Database access Object
     var		$notifyPayPalAPIObj;	//	PayPal API access Object
     
 		function GetQueryString()
@@ -32,13 +32,10 @@ if (!class_exists('NotifyURLClass'))
 			return $req;
 		}
 
-		function LogDebugToFile($DebugMessage)
+		function LogDebugToFile($LogNotifyFile, $DebugMessage)
 		{
-			global $LogsFolder;
-			global $LogNotifyFile;
-			
-			$logFileObj = new MJSLibLogFileClass($LogsFolder);
-			$logFileObj->LogToFile($LogsFolder . $LogNotifyFile, $DebugMessage, MJSLibDBaseClass::ForAppending);
+			$logFileObj = new MJSLibLogFileClass($this->LogsFolder);
+			$logFileObj->LogToFile($LogNotifyFile, $DebugMessage, MJSLibDBaseClass::ForAppending);
 		}
 
 		function AddToLog($LogLine)
@@ -80,16 +77,15 @@ if (!class_exists('NotifyURLClass'))
 			$this->notifyDBaseObj = $ourDBaseObj;
 			$this->notifyPayPalAPIObj = $ourDBaseObj->payPalAPIObj;
 
-			$LogNotifyFile = 'IPNNotify.txt';
 			$LogIPNCallFile = 'LastIPNCall.txt';
 
-			$ourOptions = get_option(PAYPAL_APILIB_OPTIONS_NAME);
+			$ourOptions = $this->notifyDBaseObj->adminOptions;
 
-			$LogsFolder = $ourOptions['LogsFolderPath'].'/';
-			if (!strpos($LogsFolder, ':'))
-				$LogsFolder = ABSPATH . $LogsFolder;
+			$this->LogsFolder = $ourOptions['LogsFolderPath'].'/';
+			if (!strpos($this->LogsFolder, ':'))
+				$this->LogsFolder = ABSPATH . $this->LogsFolder;
 				
-			$LogsFolder = ABSPATH . '/logs/';
+			//$LogsFolder = ABSPATH . '/logs/';
 				
 			$LogMessage = '';
 
@@ -127,8 +123,7 @@ if (!class_exists('NotifyURLClass'))
 				}
 				
 				$LogIPNContent = "IPN Verify Request Parameters: \n" . $decodedParams . "\n";
-				$logFileObj = new MJSLibLogFileClass($LogsFolder);
-				$logFileObj->LogToFile($LogsFolder . $LogIPNCallFile, $LogIPNContent, MJSLibDBaseClass::ForAppending);
+				$this->LogDebugToFile('LastIPNCall.txt', $LogIPNContent);
 			}
 
 			if (defined('PAYPAL_APILIB_IPNPARAMS_ON_SCREEN'))
@@ -279,7 +274,7 @@ if (!class_exists('NotifyURLClass'))
 			$this->AddToLog("---------------------------------------------------------------------");
 
 			if (defined('PAYPAL_APILIB_ENABLE_IPNLOG'))
-				$this->LogDebugToFile($LogMessage);
+				$this->LogDebugToFile('IPNNotify.txt', $LogMessage);
 		}
 	}
 }

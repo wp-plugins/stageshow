@@ -70,10 +70,11 @@ if (!class_exists('StageShowDebugAdminClass'))
 		<h3>Debug Settings</h3>
 		<table class="form-table">			
 			<tr valign="top">
-				<td align="left" width="25%">Show SQL&nbsp<input name="cbShowSQL" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowSQL') == 1 ? 'checked="yes" ' : ''  ?> /></td>
-				<td align="left" width="25%">Show PayPal IO&nbsp<input name="cbShowPayPalIO" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowPayPalIO') == 1 ? 'checked="yes" ' : ''  ?> /></td>
-				<td align="left" width="25%">Show EMail Msgs&nbsp<input name="cbShowEMailMsgs" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowEMailMsgs') == 1 ? 'checked="yes" ' : ''  ?> /></td>
-				<td align="left" width="25%">Show DB Ids&nbsp<input name="cbShowDBIds" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowDBIds') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="20%">Enable Debug&nbsp;<input name="cbEnableDebug" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_EnableDebug') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="20%">Show SQL&nbsp;<input name="cbShowSQL" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowSQL') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="20%">Show PayPal IO&nbsp;<input name="cbShowPayPalIO" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowPayPalIO') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="20%">Show EMail Msgs&nbsp;<input name="cbShowEMailMsgs" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowEMailMsgs') == 1 ? 'checked="yes" ' : ''  ?> /></td>
+				<td align="left" width="20%">Show DB Ids&nbsp;<input name="cbShowDBIds" type="checkbox" value="1" <?php echo MJSLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,'Dev_ShowDBIds') == 1 ? 'checked="yes" ' : ''  ?> /></td>
 			</tr>
 			<tr valign="top" colspan="4">
 				<td>
@@ -139,7 +140,7 @@ foreach($results as $result) {
 			<td>
 				<input class="button-primary" type="submit" name="testbutton_EMailSale" value="EMail Sale Test"/>
 			</td>
-			<td>&nbsp</td>
+			<td>&nbsp;</td>
 		</tr>
 	</table>			
 		
