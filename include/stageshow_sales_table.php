@@ -35,7 +35,8 @@ if (!class_exists('StageShowAdminSalesListClass'))
 			
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
-			$this->SetRowsPerPage(STAGESHOW_SALES_PER_PAGE);
+			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
+			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$this->bulkActions = array(
 				'delete' => __('Delete', STAGESHOW_DOMAIN_NAME),
@@ -50,6 +51,11 @@ if (!class_exists('StageShowAdminSalesListClass'))
 			$this->SetListHeaders('stageshow_sales_list', $columns);
 		}
 		
+		function GetTableID($result)
+		{
+			return "salestab";
+		}
+		
 		function GetRecordID($result)
 		{
 			return $result->saleID;
@@ -57,8 +63,7 @@ if (!class_exists('StageShowAdminSalesListClass'))
 		
 		function AddResult($result)
 		{
-			$rowAttr = '';
-			$this->NewRow($result, $rowAttr);
+			$this->NewRow($result);
 
 			$modLink = 'admin.php?page=stageshow_sales&action=details&id='.$result->saleID;
 			$modLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($modLink, plugin_basename($this->caller)) : $modLink;
@@ -89,7 +94,8 @@ if (!class_exists('StageShowAdminSaleDetailsListClass'))
 
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
-			$this->SetRowsPerPage(STAGESHOW_SALES_PER_PAGE);
+			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
+			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$columns = array(
 				'saleShowName' => __('Show', STAGESHOW_DOMAIN_NAME),
@@ -102,6 +108,11 @@ if (!class_exists('StageShowAdminSaleDetailsListClass'))
 			$this->isInput = $isInput;
 		}
 		
+		function GetTableID($result)
+		{
+			return "salestab";
+		}
+		
 		function GetRecordID($result)
 		{
 			return $result->priceID;
@@ -109,8 +120,7 @@ if (!class_exists('StageShowAdminSaleDetailsListClass'))
 		
 		function AddResult($result)
 		{
-			$rowAttr = '';
-			$this->NewRow($result, $rowAttr);
+			$this->NewRow($result);
 			
 			if ($this->isInput)
 			{

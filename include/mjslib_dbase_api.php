@@ -24,6 +24,9 @@ include "mjslib_utils.php";
 
 if (!class_exists('MJSLibDBaseClass')) 
 {
+	if (!defined('MJSLIB_EVENTS_PER_PAGE'))
+		define('MJSLIB_EVENTS_PER_PAGE', 20);
+	
   class MJSLibDBaseClass // Define class
   {
 		const MYSQL_DATE_FORMAT = 'Y-m-d';	
@@ -146,7 +149,7 @@ if (!class_exists('MJSLibDBaseClass'))
         'EMailTemplatePath' => '',        
         
         'LogsFolderPath' => '../logs',
-        'PageLength' => 10,
+        'PageLength' => MJSLIB_EVENTS_PER_PAGE,
         
         'Dev_EnableDebug' => '',
         'Dev_ShowSQL' => '',
@@ -154,7 +157,8 @@ if (!class_exists('MJSLibDBaseClass'))
         'Dev_ShowCallStack' => '',				
         'Dev_ShowPayPalIO' => '',
         'Dev_ShowEMailMsgs' => '',
-        'Dev_ShowDBIds' => '',    
+        'Dev_ShowDBIds' => '',   
+        'Dev_ShowMiscDebug' => '', 
         
         'Unused_EndOfList' => ''
       );

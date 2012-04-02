@@ -24,13 +24,10 @@ if (!class_exists('StageShowManageSettingsClass'))
 {
 	define('STAGESHOW_ADMINID_TEXTLEN',110);
 	define('STAGESHOW_ADMINMAIL_TEXTLEN',127);
-	define('STAGESHOW_FILEPATH_TEXTLEN',255);
-	define('STAGESHOW_URL_TEXTLEN',110);
 	define('STAGESHOW_ORGANISATIONID_TEXTLEN',60);
 		
 	define('STAGESHOW_ADMINMAIL_EDITLEN', 60);
 	define('STAGESHOW_ADMINID_EDITLEN', 60);
-	define('STAGESHOW_FILEPATH_EDITLEN', 95);
 	define('STAGESHOW_URL_EDITLEN', 95);
 	
 	class StageShowManageSettingsClass extends MJSLibAdminClass // Define class

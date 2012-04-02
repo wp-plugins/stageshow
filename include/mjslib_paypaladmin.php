@@ -78,13 +78,13 @@ if (!class_exists('PayPalSettingsAdminClass'))
 			parent::__construct($settings);
 		}
 				
-		function GetHTMLTags($adminOptions, $settingOption)
+		function GetSettingHTMLTag($adminOptions, $settingOption)
 		{
 			$controlId = $settingOption['Id'];	
 			$currValue = MJSLibUtilsClass::GetArrayElement($adminOptions, $controlId);
 
 			if (!isset($settingOption['PayPalLock']) || ($currValue === ''))
-				return parent::GetHTMLTags($adminOptions, $settingOption);
+				return parent::GetSettingHTMLTag($adminOptions, $settingOption);
 			
 			$htmlTags =  '';
 
@@ -95,7 +95,6 @@ if (!class_exists('PayPalSettingsAdminClass'))
 					{
 						$settingOption['Type'] = 'value';
 						$settingOption['Value'] = $currValue;
-						//$htmlTags =  parent::GetHTMLTags($adminOptions, $settingOption);
 					}
 					break;
 					
@@ -108,13 +107,11 @@ if (!class_exists('PayPalSettingsAdminClass'))
 							$settingOption['Value'] = $selectOpts[$currValue];
 						else
 							$settingOption['Value'] = '';
-						
-						//$htmlTags =  parent::GetHTMLTags($adminOptions, $settingOption);
 					}
 					break;
 			}
 			
-			$htmlTags = parent::GetHTMLTags($adminOptions, $settingOption);
+			$htmlTags = parent::GetSettingHTMLTag($adminOptions, $settingOption);
 				
 			return $htmlTags;
 		}

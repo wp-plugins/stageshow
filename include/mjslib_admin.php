@@ -116,24 +116,37 @@ if (!class_exists('SettingsAdminClass'))
 			return $selectOptsArray;
 		}
 		
-		function GetHTMLTags($adminOptions, $settingOption)
+		function GetSettingHTMLTag($adminOptions, $settingOption)
 		{
-			$editControl = '';
-					
 			$controlId = $settingOption['Id'];
-			$controlName = $controlId;
 
 			if ($this->reloadMode)
 				$controlValue = stripslashes(MJSLibUtilsClass::GetArrayElement($_POST, $controlId));		// Reuse value from submitted form
 			else
 				$controlValue = MJSLibUtilsClass::GetArrayElement($adminOptions, $controlId);					// Get saved value from database
 
+			return $this->GetHTMLTag($settingOption, $controlValue);
+		}
+		
+		static function GetHTMLTag($settingOption, $controlValue)
+		{
+			$autocompleteTag = ' autocomplete="off"';
+			$controlName = $settingOption['Id'];
+			
+			$editControl = '';
+			
 			switch ($settingOption['Type'])
 			{
 				case 'text':
 					$editLen = $settingOption['Len'];
 					$editSize = isset($settingOption['Size']) ? $settingOption['Size'] : $editLen+1;
-					$editControl = '<input type="text"'.$this->autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" name="'.$controlName.'" value="'.$controlValue.'" />'."\n";
+					$editControl = '<input type="text"'.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" name="'.$controlName.'" value="'.$controlValue.'" />'."\n";
+					break;
+
+				case 'textbox':
+					$editRows = $settingOption['Rows'];
+					$editCols = $settingOption['Cols'];
+					$editControl = '<textarea rows="'.$editRows.'" cols="'.$editCols.'" name="'.$controlName.'">'.$controlValue."</textarea>\n";
 					break;
 
 				case 'select':
@@ -178,7 +191,7 @@ if (!class_exists('SettingsAdminClass'))
 				foreach ($settingOpts as $settingOption)
 				{			
 					$settingLabel = $settingOption['Label'];
-					$editControl = $this->GetHTMLTags($adminOptions, $settingOption);
+					$editControl = $this->GetSettingHTMLTag($adminOptions, $settingOption);
 					if ($editControl != '')
 					{
 						$sectionOutput .= '<tr valign="top">'."\n";
@@ -255,7 +268,27 @@ if (!class_exists('MJSLibAdminClass'))
 			return false;
 		}
 		
+		function WPNonceField()	 // output nonce as hidden value tag
+		{
+			$referer = plugin_basename($this->caller);
+			
+			if ( function_exists('wp_nonce_field') ) 
+			{
+				if ($this->myDBaseObj->adminOptions['Dev_EnableDebug'])
+					echo "<!-- wp_nonce_field($referer) -->\n";
+				wp_nonce_field($referer);
+			}
+		}
 		
+		function CheckAdminReferer()	 // check nonce created by wp_nonce_field()
+		{
+			$referer = plugin_basename($this->caller);
+			
+			if ($this->myDBaseObj->adminOptions['Dev_EnableDebug'])
+				echo "<!-- check_admin_referer($referer) -->\n";
+			check_admin_referer($referer);
+		}
+
   }
 }
 

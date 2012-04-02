@@ -37,7 +37,8 @@ if (!class_exists('StageShowAdminPricesListClass'))
 			
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
-			$this->SetRowsPerPage(STAGESHOW_SALES_PER_PAGE);
+			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
+			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$this->bulkActions = array(
 				'delete' => __('Delete', STAGESHOW_DOMAIN_NAME),
@@ -49,6 +50,11 @@ if (!class_exists('StageShowAdminPricesListClass'))
 		    'priceValue' => __('Price', STAGESHOW_DOMAIN_NAME),
 			);			
 			$this->SetListHeaders('stageshow_sales_list', $columns);
+		}
+		
+		function GetTableID($result)
+		{
+			return "showtab".$result->showID;;
 		}
 		
 		function GetRecordID($result)
@@ -89,10 +95,7 @@ if (!class_exists('StageShowAdminPricesListClass'))
 				$perfDatesList[$perfsEntry->perfID] = $perfsEntry->perfDateTime;
 			}
 						
-			$rowAttr = '';
-			$this->NewRow($result, $rowAttr);
-			
-			$perfsList = array(1=>'DateTime_1',2=>'DateTime_2',3=>'DateTime_3',4=>'DateTime_4');
+			$this->NewRow($result);
 			
 			$this->AddSelectToTable($result, 'perfID',  $perfDatesList, $result->perfDateTime);	
 			$this->AddInputToTable($result, 'priceType',  STAGESHOW_PRICETYPE_TEXTLEN, $priceType);	
@@ -320,28 +323,27 @@ if (!class_exists('StageShowPricesAdminClass'))
 $showLists = $myDBaseObj->GetAllShowsList();
 if (count($showLists) == 0)
 {
-	echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
+	if ($myDBaseObj->CheckIsConfigured())
+		echo "<div class='noconfig'>".__('No Show Configured', STAGESHOW_DOMAIN_NAME)."</div>\n";
 }
 foreach ($showLists as $showList)
 {
 	$perfsLists = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
-	<br></br>
 	<form method="post" action="admin.php?page=stageshow_prices">
 		<h3><?php echo($showList->showName); ?></h3>
 <?php 
 if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
 if (count($perfsLists) == 0) 
 { 
-	_e('Show has NO Performances', STAGESHOW_DOMAIN_NAME); 
+	echo "<div class='noconfig'>".__('Show has NO Performances', STAGESHOW_DOMAIN_NAME)."</div>\n";
 } 
 else 
 { 
 $results = $myDBaseObj->GetPricesListByShowID($showList->showID);
 if(count($results) == 0)
 {
-	_e('Show has NO Prices', STAGESHOW_DOMAIN_NAME); 
-	echo "<br>\n";
+	echo "<div class='noconfig'>".__('Show has NO Prices', STAGESHOW_DOMAIN_NAME)."</div>\n";
 }
 else
 {
@@ -349,7 +351,6 @@ else
 	$showsList->OutputList($results, $updateFailed);	
 } // if(count($results) > 0) ....
 ?>
-      <br></br>
       <input type="hidden" name="showID" value="<?php echo $showList->showID; ?>"/>
       <input type="hidden" name="perfID" value="<?php echo $perfsLists[0]->perfID; ?>"/>
       <input class="button-secondary" type="submit" name="addpricebutton" value="<?php _e('Add New Price', STAGESHOW_DOMAIN_NAME) ?>"/>

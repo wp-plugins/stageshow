@@ -43,6 +43,11 @@ if (!class_exists('StageShowOverviewListClass'))
 			$this->SetListHeaders($this->pluginName.'_overview_list', $columns, MJSLibTableClass::HEADERPOSN_TOP);
 		}
 		
+		function GetTableID($result)
+		{
+			return "salestab";
+		}
+		
 		function GetRecordID($result)
 		{
 			return $result->saleID;
@@ -55,8 +60,7 @@ if (!class_exists('StageShowOverviewListClass'))
 			$results2 = $myDBaseObj->GetPerformancesListByShowID($result->showID);
 			$showSales = $myDBaseObj->GetSalesQtyByShowID($result->showID);
 			
-			$rowAttr = '';
-			$this->NewRow($result, $rowAttr);
+			$this->NewRow($result);
 
 			$this->AddToTable($result, $result->showName);
 			$this->AddToTable($result, count($results2));
@@ -105,20 +109,23 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			$results = $myDBaseObj->GetAllShowsList();
 						
 ?>
-		<br>
-			<h2>Shows</h2>
 			<br>
-				<?php	
+				<h2>Shows</h2>
+				<br>
+					<?php	
 	
 			if(count($results) == 0)
 			{
-				echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
-				echo '
-				<form method="post" action="admin.php?page=stageshow_adminmenu">
-				<br>
-					<input class="button-primary" type="submit" name="createsample" value="'.__('Create Sample', STAGESHOW_DOMAIN_NAME).'"/>
-				<br>
-				</form>';
+				if ($myDBaseObj->CheckIsConfigured())
+				{
+					echo "<div class='noconfig'>".__('No Show Configured', STAGESHOW_DOMAIN_NAME)."</div>\n";
+					echo '
+					<form method="post" action="admin.php?page=stageshow_adminmenu">
+					<br>
+						<input class="button-primary" type="submit" name="createsample" value="'.__('Create Sample', STAGESHOW_DOMAIN_NAME).'"/>
+					<br>
+					</form>';
+				}
 			}
 			else
 			{

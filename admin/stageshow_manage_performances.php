@@ -37,7 +37,8 @@ if (!class_exists('StageShowAdminPerformancesListClass'))
 			
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
-			$this->SetRowsPerPage(STAGESHOW_SALES_PER_PAGE);
+			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
+			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$this->bulkActions = array(
 				'activate' => __('Activate/Deactivate', STAGESHOW_DOMAIN_NAME),
@@ -54,6 +55,11 @@ if (!class_exists('StageShowAdminPerformancesListClass'))
 			$this->SetListHeaders('stageshow_sales_list', $columns);
 			
 			$updateFailed = false;
+		}
+		
+		function GetTableID($result)
+		{
+			return "showtab".$result->showID;
 		}
 		
 		function GetRecordID($result)
@@ -86,6 +92,8 @@ if (!class_exists('StageShowAdminPerformancesListClass'))
 				$perfSeats = $result->perfSeats;
 			}
 			
+			if ($perfSeats < 0) $perfSeats = '&#8734';
+			
 			if ($result->totalQty > 0)
 			{
 				$perfSalesLink = 'admin.php?page=stageshow_sales&action=perf&id='.$result->perfID;
@@ -97,14 +105,14 @@ if (!class_exists('StageShowAdminPerformancesListClass'))
 				
 			$perfState = $myDBaseObj->IsStateActive($result->perfState) ? __("Active", STAGESHOW_DOMAIN_NAME) : __("INACTIVE", STAGESHOW_DOMAIN_NAME);
 			
-			$rowAttr = '';
-			$this->NewRow($result, $rowAttr);
+			$this->NewRow($result);
 			
 			$this->AddInputToTable($result, 'perfDateTime', 28, $perfDateTime);
 			$this->AddInputToTable($result, 'perfRef', STAGESHOW_PERFREF_TEXTLEN, $perfRef);
 			$this->AddInputToTable($result, 'perfSeats', 4, $perfSeats);
 			$this->AddToTable($result, $perfSalesLink);
 			$this->AddToTable($result, $perfState);
+
 		}		
 	}
 }
@@ -227,6 +235,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 							}
 							
 							$newPerfSeats = stripslashes($_POST['perfSeats'.$result->perfID]);
+							if (!is_numeric($newPerfSeats) || ($newPerfSeats < 0)) $newPerfSeats = -1;
 							if ($newPerfSeats != $result->perfSeats)
 							{
 								$myDBaseObj->UpdatePerformanceSeats($result->perfID, $newPerfSeats);
@@ -234,6 +243,9 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 								$perfUpdated = true;
 							}
 								
+							// TODO-BEFORE-RELEASE Save option extensions
+							$myDBaseObj->UpdateExtendedSettings($result, $result->perfID);											
+							
 							if ($perfUpdated)
 								$perfsList[count($perfsList)] = $result;									
 						} // End of foreach($results as $result)
@@ -362,13 +374,13 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 $showLists = $myDBaseObj->GetAllShowsList();
 if (count($showLists) == 0)
 {
-	echo __('No Show Configured', STAGESHOW_DOMAIN_NAME)."<br>\n";
+	if ($myDBaseObj->CheckIsConfigured())
+		echo "<div class='noconfig'>".__('No Show Configured', STAGESHOW_DOMAIN_NAME)."</div>\n";
 }
 foreach ($showLists as $showList)
 {
 	$results = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
-	<br></br>
 	<form method="post" action="admin.php?page=stageshow_performances">
 	<h3><?php echo($showList->showName); ?></h3>
 		<?php 
@@ -385,7 +397,6 @@ foreach ($showLists as $showList)
 	} // End of if (count($results) == 0) ... else ...
 
 ?>
-		<br></br>
       <input type="hidden" name="showID" value="<?php echo $showList->showID; ?>"/>
 				<?php if ($myDBaseObj->CanAddPerformance()) { ?>
 			<input class="button-secondary" type="submit" name="addperfbutton" value="<?php _e('Add New Performance', STAGESHOW_DOMAIN_NAME) ?>"/>

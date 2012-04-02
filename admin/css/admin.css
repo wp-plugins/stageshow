@@ -16,6 +16,40 @@
 }
 
 /* ----------------------------------------------------------------------------------------------------------------
+	Styles for "Options" button
+---------------------------------------------------------------------------------------------------------------- */
+
+a.more-button
+{
+	XX_background: url("../images/menu-bits.gif") repeat-x scroll left -379px #EEEEEE;
+	background-color:#EEEEEE;
+	border-color: #E3E3E3;
+	border-radius: 3px 3px 3px 3px;
+	border-style: solid;
+	border-width: 2px;
+	padding: 5px 5px 5px 5px !important;
+}
+
+.optionsCol
+{
+	margin: 5px 5px 5px 5px !important;
+}
+
+/* ----------------------------------------------------------------------------------------------------------------
+	Styles for "Hidden" rows
+---------------------------------------------------------------------------------------------------------------- */
+
+.hiddenRow td
+{
+	border-color: #F9F9F9;
+}
+
+.hiddenRow th input 
+{
+    margin: 0;
+}
+
+/* ----------------------------------------------------------------------------------------------------------------
 	Styles for Debug Messages
 ---------------------------------------------------------------------------------------------------------------- */
 
@@ -23,4 +57,12 @@
     font-size: 16px;
 }
 
-	
+.wrap h2
+{
+	padding-bottom: 20px;
+}	
+
+div.noconfig 
+{
+	padding-bottom: 20px;
+}

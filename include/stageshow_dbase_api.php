@@ -34,8 +34,10 @@ if (!class_exists('StageShowSettingsAdminClass'))
 			$controlsOpts = array
 			(
 				array('Label' => 'Organisation ID',        'Id' => 'OrganisationID',  'Type' => 'text', 'Len' => STAGESHOW_ORGANISATIONID_TEXTLEN, 'Size' => 60, ),				
-				array('Label' => 'Bcc EMails to WP Admin', 'Id' => 'BccEMailsToAdmin','Type' => 'checkbox',   'Text' => 'Send EMail confirmation to Administrator' ),
 				array('Label' => 'StageShow Sales EMail',  'Id' => 'AdminEMail',      'Type' => 'text', 'Len' => STAGESHOW_ADMINMAIL_TEXTLEN,      'Size' => STAGESHOW_ADMINMAIL_EDITLEN, ),
+				array('Label' => 'Bcc EMails to WP Admin', 'Id' => 'BccEMailsToAdmin','Type' => 'checkbox',   'Text' => 'Send EMail confirmation to Administrator' ),
+				array('Label' => 'Items per Page',         'Id' => 'PageLength',      'Type' => 'text', 'Len' => 3, 'Default' => STAGESHOW_ITEMS_PER_PAGE),
+				array('Label' => 'Max Ticket Qty',         'Id' => 'MaxTicketQty',    'Type' => 'text', 'Len' => 2, 'Default' => STAGESHOW_MAXTICKETCOUNT),
 			);
 			$settings['StageShow Settings'] = $controlsOpts;
 			
@@ -125,6 +127,15 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 			
 			$this->GetLatestNews();
+		}
+
+    function GetDefaultOptions()
+    {
+			$defOptions = array(
+		    'EMailTemplatePath' => STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH,
+			);
+			
+			return $defOptions;
 		}
 
 		function DeleteCapability($capID)
@@ -286,6 +297,7 @@ if (!class_exists('StageShowDBaseClass'))
 					perfPayPalButtonID VARCHAR('.STAGESHOW_PPBUTTONID_TEXTLEN.'),
 					perfOpens DATETIME,
 					perfExpires DATETIME,				
+					perfNote TEXT,
 					UNIQUE KEY perfID (perfID)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
 
@@ -318,24 +330,6 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			return new StageShowSettingsAdminClass();	
 		}
-    
-    // TODO - ShowSettings function may be redundant - Remove It?
-    function ShowSettings($isUpdated)
-    {			
-			if ($isUpdated)
-			{
-				$OrganisationID = $this->adminOptions['OrganisationID'];				
-				$AdminEMail = $this->adminOptions['AdminEMail'];				
-				$SetupUserRole = $this->adminOptions['SetupUserRole'];				
-			}
-			else
-			{				
-				$OrganisationID = stripslashes($_POST['OrganisationID']);
-				$AdminEMail = stripslashes($_POST['AdminEMail']);
-				$SetupUserRole = stripslashes($_POST['SetupUserRole']);
-			}
-			
-    }
     
 		function DBField($fieldName)
 		{
@@ -418,7 +412,7 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 		}
 		
-		function CreateNewPerformance(&$rtnMsg, $showID, $perfDateTime, $perfRef = '', $perfSeats = 0)
+		function CreateNewPerformance(&$rtnMsg, $showID, $perfDateTime, $perfRef = '', $perfSeats = -1)
 		{
 			if ($showID <= 0) return 0;
 			
@@ -560,6 +554,60 @@ if (!class_exists('StageShowDBaseClass'))
 			return $results;
 		}
 		
+		function GetExtendedSettings()
+		{
+			// No extended settings
+			return array();
+		}
+		
+		function HasHiddenRows()
+		{
+			// No extended settings
+			return (count($this->GetExtendedSettings()) > 0);
+		}
+		
+		function ExtendedSettingsDBOpts()
+		{
+			$menuPage = $_GET['page'];
+			switch ($menuPage)
+			{
+				case STAGESHOW_MENUPAGE_PERFORMANCES:
+					$dbOpts['Table'] = STAGESHOW_PERFORMANCES_TABLE;
+					$dbOpts['Index'] = 'perfID';
+					break;	
+							
+				default:
+					$dbOpts = array();
+					break;								
+			}
+			
+			return $dbOpts;
+		}
+		
+		function UpdateExtendedSettings($result, $index)
+		{
+			global $wpdb;
+			
+			// Get the extended settings array
+			$settings = $this->GetExtendedSettings();
+			$dbOpts = $this->ExtendedSettingsDBOpts();
+			
+			// TODO-BEFORE-RELEASE Save option extensions
+			foreach ($settings as $setting)
+			{
+				$settingId = $setting['Id'];
+				if ($_POST[$settingId.$index] != $result->$settingId)
+				{
+					$sql  = 'UPDATE '.$dbOpts['Table'];
+					$sql .= ' SET '.$settingId.'="'.$_POST[$settingId.$index].'"';
+					$sql .= ' WHERE '.$dbOpts['Index'].'='.$index;;
+					$this->ShowSQL($sql); 
+
+					$wpdb->query($sql);	
+				}
+			}
+		}
+		
 		function IsShowNameUnique($showName)
 		{
 			return true;
@@ -570,11 +618,6 @@ if (!class_exists('StageShowDBaseClass'))
 			// Set Show Activated Flag in Options
 			$this->adminOptions['showState'] = $showState;
 			$this->saveOptions();
-		}
-		
-		function CanSetNotes()
-		{
-			return false;
 		}
 		
 		function SetShowNotes($showID, $showNote = '')
@@ -596,6 +639,8 @@ if (!class_exists('StageShowDBaseClass'))
 			if ( (isset($this->adminOptions['showName'])) && (strlen($this->adminOptions['showName']) > 0) )
 				return 0;
 				
+			if ($showName === '') $showName = 'New Show';
+			
 			$this->adminOptions['showName'] = $showName;
 			$this->saveOptions();
 			
@@ -644,7 +689,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$showSales = $showEntry->totalQty;
 			$canDelete |= ($showSales == 0);		
 			
-			if ($this->adminOptions['Dev_ShowDBOutput'] == 1) 
+			if ($this->adminOptions['Dev_ShowMiscDebug'] == 1) 
 			{
 				echo "CanDeleteShow(".$showEntry->showID.") returns $canDelete <br>\n";
 			}
@@ -1472,7 +1517,13 @@ if (!class_exists('StageShowDBaseClass'))
 				
 			return $rtnVal;
 		}
-		
+
+		function CheckIsConfigured()
+		{
+			$this->GetLatestNews();
+			return $this->payPalAPIObj->CheckIsConfigured();
+		}
+				
 		function GetLatestNews()
 		{
 			$latest = '';
