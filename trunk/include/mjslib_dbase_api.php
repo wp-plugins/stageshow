@@ -145,6 +145,7 @@ if (!class_exists('MJSLibDBaseClass'))
         'AdminID' => '',        
         'AdminEMail' => '',
         'BccEMailsToAdmin' => true,
+        'UseCurrencySymbol' => false,
         
         'EMailTemplatePath' => '',        
         
@@ -193,6 +194,23 @@ if (!class_exists('MJSLibDBaseClass'))
 			// Function must be overloaded in derived class ....
 		}
 		
+		function GetExtendedSettings()
+		{
+			// No extended settings
+			return array();
+		}
+		
+		function HasHiddenRows()
+		{
+			// No extended settings
+			return (count($this->GetExtendedSettings()) > 0);
+		}
+		
+		function GetOurButtonsList()
+		{
+			return array();
+		}
+
 	}
 }
 

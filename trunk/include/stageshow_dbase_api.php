@@ -33,11 +33,12 @@ if (!class_exists('StageShowSettingsAdminClass'))
 		{
 			$controlsOpts = array
 			(
-				array('Label' => 'Organisation ID',        'Id' => 'OrganisationID',  'Type' => 'text', 'Len' => STAGESHOW_ORGANISATIONID_TEXTLEN, 'Size' => 60, ),				
-				array('Label' => 'StageShow Sales EMail',  'Id' => 'AdminEMail',      'Type' => 'text', 'Len' => STAGESHOW_ADMINMAIL_TEXTLEN,      'Size' => STAGESHOW_ADMINMAIL_EDITLEN, ),
-				array('Label' => 'Bcc EMails to WP Admin', 'Id' => 'BccEMailsToAdmin','Type' => 'checkbox',   'Text' => 'Send EMail confirmation to Administrator' ),
-				array('Label' => 'Items per Page',         'Id' => 'PageLength',      'Type' => 'text', 'Len' => 3, 'Default' => STAGESHOW_ITEMS_PER_PAGE),
-				array('Label' => 'Max Ticket Qty',         'Id' => 'MaxTicketQty',    'Type' => 'text', 'Len' => 2, 'Default' => STAGESHOW_MAXTICKETCOUNT),
+				array('Label' => 'Organisation ID',       'Id' => 'OrganisationID',		'Type' => 'text', 'Len' => STAGESHOW_ORGANISATIONID_TEXTLEN, 'Size' => 60, ),				
+				array('Label' => 'StageShow Sales EMail', 'Id' => 'AdminEMail',				'Type' => 'text', 'Len' => STAGESHOW_ADMINMAIL_TEXTLEN,      'Size' => STAGESHOW_ADMINMAIL_EDITLEN, ),
+				array('Label' => 'Bcc EMails to WP Admin','Id' => 'BccEMailsToAdmin',	'Type' => 'checkbox',   'Text' => 'Send EMail confirmation to Administrator' ),
+				array('Label' => 'Currency Symbol',				'Id' => 'UseCurrencySymbol','Type' => 'checkbox',   'Text' => 'Include in Box Office Output' ),
+				array('Label' => 'Items per Page',        'Id' => 'PageLength',				'Type' => 'text', 'Len' => 3, 'Default' => STAGESHOW_ITEMS_PER_PAGE),
+				array('Label' => 'Max Ticket Qty',        'Id' => 'MaxTicketQty',			'Type' => 'text', 'Len' => 2, 'Default' => STAGESHOW_MAXTICKETCOUNT),
 			);
 			$settings['StageShow Settings'] = $controlsOpts;
 			
@@ -71,7 +72,7 @@ if (!class_exists('StageShowDBaseClass'))
 	define('STAGESHOW_SHOWNAME_TEXTLEN', 80);
 	define('STAGESHOW_PERFREF_TEXTLEN', 16);
 	define('STAGESHOW_PRICETYPE_TEXTLEN', 10);
-	define('STAGESHOW_PRICEREF_TEXTLEN', 16);
+	define('STAGESHOW_PRICEREF_TEXTLEN', 20);
 	define('STAGESHOW_TICKETNAME_TEXTLEN', 110);
 	define('STAGESHOW_TICKETTYPE_TEXTLEN', 32);
 	define('STAGESHOW_TICKETSEAT_TEXTLEN', 10);
@@ -188,6 +189,8 @@ if (!class_exists('StageShowDBaseClass'))
         'SLen' => 0,                
         'PLen' => 4,
         
+        'MaxTicketQty' => STAGESHOW_MAXTICKETCOUNT,
+        
         'LatestNews' => '',
         'NewsUpdateTime' => '',
         
@@ -298,6 +301,7 @@ if (!class_exists('StageShowDBaseClass'))
 					perfOpens DATETIME,
 					perfExpires DATETIME,				
 					perfNote TEXT,
+					perfNotePosn VARCHAR(6),
 					UNIQUE KEY perfID (perfID)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
 
@@ -371,12 +375,11 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 			
 	    // Populate prices table
-	    $priceID1_A1 = $this->AddPrice($perfID1, 'Adult', '5.50');
+	    $priceID1_A1 = $this->AddPrice($perfID1, 'Adult', '12.50');
 	    $priceID1_A2 = $this->AddPrice($perfID2, 'Adult', '5.50');
 	    $priceID1_A3 = $this->AddPrice($perfID3, 'Adult', '4.00');
-	    $priceID1_A4 = $this->AddPrice($perfID4, 'Adult', '12.00');
+	    $priceID1_A4 = $this->AddPrice($perfID4, 'Adult', '6.00');
 	    
-	    $priceID1_C1 = $this->AddPrice($perfID1, 'Child', '3.00');
 	    $priceID1_C2 = $this->AddPrice($perfID2, 'Child', '3.00');
 	    $priceID1_C3 = $this->AddPrice($perfID3, 'Child', '2.00');
                  
@@ -400,6 +403,25 @@ if (!class_exists('StageShowDBaseClass'))
 			$saleID = $this->AddSale(date(self::STAGESHOW_DATE_FORMAT, strtotime("-2 days"))." 10:14:51", 'M.Y.Brother', $saleEMail, 48.00, '87654321qa', 'Pending',
 								'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
 			$this->AddSaleItem($saleID, $priceID1_A4, 4);
+			
+			$timeStamp = time();
+			
+			if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
+			{
+				// Add a lot of ticket sales
+				for ($sampleSaleNo = 1; $sampleSaleNo<=STAGESHOW_EXTRA_SAMPLE_SALES; $sampleSaleNo++)
+				{
+					$saleDate = date(self::MYSQL_DATETIME_FORMAT, $timeStamp);
+					$saleName = 'Sample Buyer'.$sampleSaleNo;
+					$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
+					
+					$saleID = $this->AddSale($saleDate, $saleName, $saleEMail, 12.50, 'TXNID_'.$sampleSaleNo, 'Completed',
+										'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
+					$this->AddSaleItem($saleID, $priceID1_A3, 3);
+					
+					$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
+				}
+			}
 		}
 		
 		function prepareBoxOffice($showID)
@@ -554,18 +576,6 @@ if (!class_exists('StageShowDBaseClass'))
 			return $results;
 		}
 		
-		function GetExtendedSettings()
-		{
-			// No extended settings
-			return array();
-		}
-		
-		function HasHiddenRows()
-		{
-			// No extended settings
-			return (count($this->GetExtendedSettings()) > 0);
-		}
-		
 		function ExtendedSettingsDBOpts()
 		{
 			$menuPage = $_GET['page'];
@@ -592,7 +602,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$settings = $this->GetExtendedSettings();
 			$dbOpts = $this->ExtendedSettingsDBOpts();
 			
-			// TODO-BEFORE-RELEASE Save option extensions
+			// Save option extensions
 			foreach ($settings as $setting)
 			{
 				$settingId = $setting['Id'];
@@ -608,6 +618,13 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 		}
 		
+		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
+		{
+			$buttonText = __($buttonText, STAGESHOW_DOMAIN_NAME);
+			
+			echo "<input class=\"$buttonClass\" type=\"submit\" name=\"$buttonId\" value=\"$buttonText\" />\n";
+		}
+		
 		function IsShowNameUnique($showName)
 		{
 			return true;
@@ -618,10 +635,6 @@ if (!class_exists('StageShowDBaseClass'))
 			// Set Show Activated Flag in Options
 			$this->adminOptions['showState'] = $showState;
 			$this->saveOptions();
-		}
-		
-		function SetShowNotes($showID, $showNote = '')
-		{
 		}
 		
 		function CanAddShow()
@@ -830,6 +843,21 @@ if (!class_exists('StageShowDBaseClass'))
 			return $perfsListArray;
 		}
 		
+		function GetOurButtonsList()
+		{
+			$sql = "SELECT perfPayPalButtonID FROM ".STAGESHOW_PERFORMANCES_TABLE;
+			
+			$this->ShowSQL($sql); 
+			
+			$results = $this->get_results($sql);
+
+			$buttonsListArray = array();			
+			for($index=0; $index<count($results); $index++)
+				$buttonsListArray[$index] = $results[$index]->perfPayPalButtonID;
+				
+			return $buttonsListArray;
+		}
+
 		function CanDeletePerformance($perfsEntry)
 		{
 			$perfDateTime = $perfsEntry->perfDateTime;

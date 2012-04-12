@@ -276,7 +276,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 }
 			else if(count($this->results) == 0)
 {
-				echo "<div class='noconfig'>".__('NO Sales', STAGESHOW_DOMAIN_NAME)."</div>\n";
+				echo "<div class='noconfig'>".__('NO Sales', $this->pluginName)."</div>\n";
 }
 else 
 {

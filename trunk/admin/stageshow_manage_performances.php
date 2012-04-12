@@ -147,12 +147,10 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				$columns = array_merge(array('perfID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
 			}
 			
-      //TODO-Remove register_column_headers('sshow_perfs_list', $columns);	
-
 			$perfsMsg = '';
 				 
 			echo '<div class="wrap">';
-			if (isset($_POST['savebutton']))
+			if (isset($_POST['saveperfbutton']))
 			{
 				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
 				
@@ -243,7 +241,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 								$perfUpdated = true;
 							}
 								
-							// TODO-BEFORE-RELEASE Save option extensions
+							// Save option extensions
 							$myDBaseObj->UpdateExtendedSettings($result, $result->perfID);											
 							
 							if ($perfUpdated)
@@ -381,6 +379,7 @@ foreach ($showLists as $showList)
 {
 	$results = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
+	<div class="stageshow-admin-form">
 	<form method="post" action="admin.php?page=stageshow_performances">
 	<h3><?php echo($showList->showName); ?></h3>
 		<?php 
@@ -391,23 +390,22 @@ foreach ($showLists as $showList)
 	} 
 	else 
 	{ 
-		$thisUpdateFailed = (($updateFailed) && ($showList->showID == $showID));
+		$thisUpdateFailed = (($updateFailed) && ($showList->showID == $_POST['showID']));
 		$perfsList = new StageShowAdminPerformancesListClass($env);		
 		$perfsList->OutputList($results, $thisUpdateFailed);		
 	} // End of if (count($results) == 0) ... else ...
 
 ?>
       <input type="hidden" name="showID" value="<?php echo $showList->showID; ?>"/>
-				<?php if ($myDBaseObj->CanAddPerformance()) { ?>
-			<input class="button-secondary" type="submit" name="addperfbutton" value="<?php _e('Add New Performance', STAGESHOW_DOMAIN_NAME) ?>"/>
-						<?php } ?>
-						<?php
+<?php 
+	if ($myDBaseObj->CanAddPerformance()) 
+		$myDBaseObj->OutputButton("addperfbutton", "Add New Performance");
+
 	if(count($results) > 0)
-	{
-		echo '<input class="button-primary" type="submit" name="savebutton" value="'.__('Save Settings', STAGESHOW_DOMAIN_NAME).'"/>';
-	}
+		$myDBaseObj->OutputButton("saveperfbutton", "Save Changes", "button-primary");
 ?>
-					</form>
+</form>
+</div>		
 	<?php
 } // End of foreach ($showLists as $showList) ..
 ?>

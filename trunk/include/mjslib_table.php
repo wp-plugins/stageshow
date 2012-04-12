@@ -221,10 +221,6 @@ if (!class_exists('MJSLibTableClass'))
 			$recordID = $this->GetRecordID($result);
 			$moreName = 'more'.$recordID;
 			
-			// TODO - Pass number of row to show/hide in call
-			$firstRow = $this->currRow + 1;
-			$lastRow = $this->currRow + 1;
-			
 			$content = '<a id="'.$moreName.'" class="more-button" onClick="HideOrShowRows(\''.$moreName.'\', \''.$rowId.'\')">'.$content.'</a>';
 			$this->AddToTable($result, $content, $col, $newRow);
 		}

@@ -45,12 +45,12 @@ if (!class_exists('StageShowOverviewListClass'))
 		
 		function GetTableID($result)
 		{
-			return "salestab";
+			return "overviewtab";
 		}
 		
 		function GetRecordID($result)
 		{
-			return $result->saleID;
+			return $result->showID;
 		}
 		
 		function AddResult($result)

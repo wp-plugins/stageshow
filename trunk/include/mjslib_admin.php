@@ -30,6 +30,7 @@ if (!class_exists('SettingsAdminClass'))
 		var $incTableTags;
 		var $reloadMode;
 		var $autocompleteTag;
+		var $settings;
 		
 		function __construct($settings)
 		{
@@ -107,7 +108,7 @@ if (!class_exists('SettingsAdminClass'))
 				else
 				{
 					$selectOptValue = $selectAttrs[0];
-					$selectOptText = $selectAttrs[1];
+					$selectOptText = __($selectAttrs[1]);
 				}
 				
 				$selectOptsArray[$selectOptValue] = $selectOptText;
@@ -152,7 +153,7 @@ if (!class_exists('SettingsAdminClass'))
 				case 'select':
 					$selectOpts = $settingOption['Items'];
 					$editControl  = '<select name="'.$controlName.'">'."\n";
-					$selectOptsArray = $this->GetSelectOptsArray($selectOpts);
+					$selectOptsArray = self::GetSelectOptsArray($selectOpts);
 					foreach ($selectOptsArray as $selectOptValue => $selectOptText)
 					{
 						$selected = ($controlValue == $selectOptValue) ? ' selected=""' : '';

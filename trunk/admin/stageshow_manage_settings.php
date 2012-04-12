@@ -55,7 +55,7 @@ if (!class_exists('StageShowManageSettingsClass'))
 			$results = $myDBaseObj->GetAllPerformancesList();		
 			$perfsConfigured = (count($results) > 0);
 			
-			if (isset($_POST['savebutton']))
+			if (isset($_POST['savesettingsbutton']))
 			{
 				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
 				
@@ -146,7 +146,9 @@ if (!class_exists('StageShowManageSettingsClass'))
 	$genSettingsObj->Output_Form($myDBaseObj);
 ?>
 	<br></br>
-	<input class="button-primary" type="submit" name="savebutton" value="<?php _e('Save Settings', STAGESHOW_DOMAIN_NAME) ?>"/>
+<?php 
+	$myDBaseObj->OutputButton("savesettingsbutton", "Save Settings", "button-primary");
+?>
 	<br></br>
 
 </form>
