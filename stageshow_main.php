@@ -147,6 +147,12 @@ if (!class_exists('StageShowPluginClass'))
 					$myDBaseObj->adminOptions['PayPalAPIEMail']  = PAYPAL_APILIB_ACTIVATE_LIVEEMAIL;				
 			}      
 				
+      // Add Sample PayPal shopping cart Images and URLs
+      if (defined('STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL'))
+				$myDBaseObj->adminOptions['PayPalLogoImageURL'] = STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL;
+      if (defined('STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL'))
+	      $myDBaseObj->adminOptions['PayPalHeaderImageURL'] = STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL;
+			
       if (defined('STAGESHOW_ACTIVATE_ORGANISATION_ID'))
 				$myDBaseObj->adminOptions['OrganisationID'] = STAGESHOW_ACTIVATE_ORGANISATION_ID;
 
@@ -205,12 +211,6 @@ if (!class_exists('StageShowPluginClass'))
 		{
       $myDBaseObj = $this->myDBaseObj;
       
-      // Add Sample PayPal shopping cart Images and URLs
-      if (defined('STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL'))
-				$myDBaseObj->adminOptions['PayPalLogoImageURL'] = STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL;
-      if (defined('STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL'))
-	      $myDBaseObj->adminOptions['PayPalHeaderImageURL'] = STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL;
-
       $this->saveStageshowOptions();
       
       $myDBaseObj->CreateSample();
@@ -297,6 +297,10 @@ if (!class_exists('StageShowPluginClass'))
 					<?php echo $results[0]->showName; ?>
 				</h2>
 					<?php      
+			if (isset($results[0]->showNote) && ($results[0]->showNote !== ''))
+			{
+				echo '<div class="stageshow-boxoffice-shownote">'.$results[0]->showNote . "</div><br>\n"; 
+			}
 			
 			$widthCol1 = '25%';
 			$widthCol2 = '25%';
@@ -306,9 +310,15 @@ if (!class_exists('StageShowPluginClass'))
 			
 			$lastPerfDateTime = '';
 			
+			$currencySymbol = '';
+			if ($myDBaseObj->adminOptions['UseCurrencySymbol'])
+				$currencySymbol = $myDBaseObj->adminOptions['CurrencySymbol'];
+				
 			$oddPage = true;
-      foreach($results as $result)
+			for ($perfIndex = 0; $perfIndex<count($results); $perfIndex++)
 			{
+				$result = $results[$perfIndex];
+				
 				if ($myDBaseObj->IsPerfEnabled($result))
 				{
 					$perfCount++;
@@ -317,12 +327,12 @@ if (!class_exists('StageShowPluginClass'))
 			 <tr>
 				 <td>
 					<table width="100%" cellspacing="0">
-						<tr class="boxoffice-header">
-							<td width="'.$widthCol1.'" class="boxoffice-datetime">Date/Time</td>
-							<td width="'.$widthCol2.'" class="boxoffice-type">Ticket Type</td>
-							<td width="'.$widthCol3.'" class="boxoffice-price">Price</td>
-							<td width="'.$widthCol4.'" class="boxoffice-qty">Qty</td>
-							<td width="'.$widthCol5.'" class="boxoffice-add">&nbsp;</td>
+						<tr class="stageshow-boxoffice-header">
+							<td width="'.$widthCol1.'" class="stageshow-boxoffice-datetime">Date/Time</td>
+							<td width="'.$widthCol2.'" class="stageshow-boxoffice-type">Ticket Type</td>
+							<td width="'.$widthCol3.'" class="stageshow-boxoffice-price">Price</td>
+							<td width="'.$widthCol4.'" class="stageshow-boxoffice-qty">Qty</td>
+							<td width="'.$widthCol5.'" class="stageshow-boxoffice-add">&nbsp;</td>
 						</tr>
 					</table>
 				 </td>
@@ -342,12 +352,18 @@ if (!class_exists('StageShowPluginClass'))
 					else
 						$formattedPerfDateTime = '&nbsp;';
 						
-					$rowClass = $oddPage ? "boxoffice-oddrow" : "boxoffice-evenrow";
+					if (($result->perfNote !== '') && ($result->perfNotePosn === 'above'))
+					{
+						if ($lastPerfDateTime !== $result->perfDateTime)
+							echo '<tr><td class="stageshow-boxoffice-perfnote">'.$result->perfNote . "<td><tr>\n"; 
+					}
+					
+					$rowClass = $oddPage ? "stageshow-boxoffice-oddrow" : "stageshow-boxoffice-evenrow";
 					$oddPage = !$oddPage;
 					
 					echo '
-			 <tr class="boxoffice-row .'.$rowClass.'">
-				 <td class="boxoffice-data">
+			 <tr class="stageshow-boxoffice-row .'.$rowClass.'">
+				 <td class="stageshow-boxoffice-data">
 					<form target="paypal" action="'.$payPalAPIObj->PayPalURL.'" method="post">
 					<input type="hidden" name="os0" value="'.$result->priceType.'"/>
 					<input type="hidden" name="hosted_button_id" value="'.$perfPayPalButtonID.'"/>
@@ -355,10 +371,10 @@ if (!class_exists('StageShowPluginClass'))
 						<tr>
 						'.$hiddenTags.'
 						'.$notifyTag.'
-						<td width="'.$widthCol1.'" class="boxoffice-datetime">'.$formattedPerfDateTime.'</td>
-						<td width="'.$widthCol2.'" class="boxoffice-type">'.$result->priceType.'</td>
-						<td width="'.$widthCol3.'" class="boxoffice-price">'.$result->priceValue.'</td>
-						<td width="'.$widthCol4.'" class="boxoffice-qty">
+						<td width="'.$widthCol1.'" class="stageshow-boxoffice-datetime">'.$formattedPerfDateTime.'</td>
+						<td width="'.$widthCol2.'" class="stageshow-boxoffice-type">'.$result->priceType.'</td>
+						<td width="'.$widthCol3.'" class="stageshow-boxoffice-price">'.$currencySymbol.$result->priceValue.'</td>
+						<td width="'.$widthCol4.'" class="stageshow-boxoffice-qty">
 							<select name="quantity">
 								<option value="1" selected="">1</option>
 					';
@@ -382,6 +398,12 @@ if (!class_exists('StageShowPluginClass'))
 				 </td>
 			 </tr>
 					';
+					
+					if (($result->perfNote !== '') && ($result->perfNotePosn === 'below'))
+					{
+						if (($perfIndex == count($results)-1) || ($results[$perfIndex+1]->perfID != $result->perfID))
+							echo '<tr><td class="stageshow-boxoffice-perfnote">'.$result->perfNote . "<td><tr>\n"; 
+					}
 					
 					$lastPerfDateTime = $result->perfDateTime;
 				}
@@ -431,8 +453,8 @@ if (!class_exists('StageShowPluginClass'))
 					break;
 					
 				case STAGESHOW_MENUPAGE_PRESETS :
-					include 'admin/stageshow_manage_presets.php';      
-					new StageShowPresetsAdminClass($this->env);
+					include 'admin/stageshow_manage_priceplans.php';      
+					new StageShowPricePlansAdminClass($this->env);
 					break;
 					
 				case STAGESHOW_MENUPAGE_SALES :
@@ -448,9 +470,9 @@ if (!class_exists('StageShowPluginClass'))
 						define ('SALESMAN_INCLUDE_PATH', STAGESHOW_INCLUDE_PATH);
 					if (!defined('SALESMAN_DOMAIN_NAME'))
 						define ('SALESMAN_DOMAIN_NAME', STAGESHOW_DOMAIN_NAME);
-						
-					include 'admin/salesman_manage_buttons.php';      
-					new ButtonsManAdminButtonsClass($this->env);
+										
+					include STAGESHOW_TEST_PATH.'salesman_manage_buttons.php';      
+					new ButtonsManAdminButtonsClass($this->env, $salesManDBaseObj->GetOurButtonsList());
 					break;
 					
 				case STAGESHOW_MENUPAGE_SETTINGS :
@@ -464,7 +486,7 @@ if (!class_exists('StageShowPluginClass'))
 					break;
 							
 				case STAGESHOW_MENUPAGE_TEST:
-		      include 'admin/stageshow_test.php';   
+		      include STAGESHOW_TEST_PATH.'stageshow_test.php';   
 					new StageShowTestAdminClass($this->env);
 					break;
 							
@@ -499,9 +521,9 @@ if (!class_exists('StageShowPluginClass'))
 				add_menu_page($pluginName, $pluginName, STAGESHOW_SALESUSER_ROLE, STAGESHOW_MENUPAGE_ADMINMENU, array(&$this, 'printAdminPage'), $icon_url);
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('StageShow Overview', STAGESHOW_DOMAIN_NAME),__('Overview', STAGESHOW_DOMAIN_NAME),    STAGESHOW_SALESUSER_ROLE, STAGESHOW_MENUPAGE_ADMINMENU,    array(&$this, 'printAdminPage'));
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Show Editor', STAGESHOW_DOMAIN_NAME),       __('Show', STAGESHOW_DOMAIN_NAME),        STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_SHOWS,        array(&$this, 'printAdminPage'));
+				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_manage_priceplans.php') ) 
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Plan Editor', STAGESHOW_DOMAIN_NAME),  __('Price Plans', STAGESHOW_DOMAIN_NAME),STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_PRESETS,      array(&$this, 'printAdminPage'));
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', STAGESHOW_DOMAIN_NAME),__('Performance', STAGESHOW_DOMAIN_NAME), STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
-				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_manage_presets.php') ) 
-					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Presets Editor', STAGESHOW_DOMAIN_NAME),  __('Presets', STAGESHOW_DOMAIN_NAME),     STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_PRESETS,      array(&$this, 'printAdminPage'));
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', STAGESHOW_DOMAIN_NAME),        __('Price', STAGESHOW_DOMAIN_NAME),       STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Sales Admin', STAGESHOW_DOMAIN_NAME),       __('Sales', STAGESHOW_DOMAIN_NAME),       STAGESHOW_SALESUSER_ROLE, STAGESHOW_MENUPAGE_SALES,        array(&$this, 'printAdminPage'));
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Admin Tools', STAGESHOW_DOMAIN_NAME),       __('Tools', STAGESHOW_DOMAIN_NAME),       STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_TOOLS,        array(&$this, 'printAdminPage'));
@@ -509,11 +531,11 @@ if (!class_exists('StageShowPluginClass'))
 
 				if (defined('STAGESHOW_ENABLE_TEST') && (STAGESHOW_ENABLE_TEST === true))
 				{
-					if ( file_exists(STAGESHOW_ADMIN_PATH.'salesman_manage_buttons.php') ) 
+					if ( file_exists(STAGESHOW_TEST_PATH.'salesman_manage_buttons.php') ) 
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', STAGESHOW_DOMAIN_NAME),    __('Buttons', STAGESHOW_DOMAIN_NAME),   STAGESHOW_ADMINUSER_ROLE, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));
 						
 					// Show test menu if stageshow_test.php is present
-					if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_test.php') )
+					if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_test.php') )
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('TEST', STAGESHOW_DOMAIN_NAME), __('TEST', STAGESHOW_DOMAIN_NAME), STAGESHOW_DEVUSER_ROLE, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
 		      
 					// Show debug menu if stageshow_debug.php is present

@@ -15,6 +15,7 @@ define('STAGESHOW_DIR_NAME', basename(STAGESHOW_FILE_PATH));
 define('STAGESHOW_ADMIN_PATH', STAGESHOW_FILE_PATH . '/admin/');
 define('STAGESHOW_INCLUDE_PATH', STAGESHOW_FILE_PATH . '/include/');
 define('STAGESHOW_ADMINICON_PATH', STAGESHOW_ADMIN_PATH . 'images/');
+define('STAGESHOW_TEST_PATH', STAGESHOW_FILE_PATH . '/test/');
 
 define('STAGESHOW_CODE_PREFIX', 'stageshow');
 define('STAGESHOW_DOMAIN_NAME', 'stageshow');

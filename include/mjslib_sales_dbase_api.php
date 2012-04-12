@@ -72,8 +72,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
         'PayPalLogoImageURL' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_URL,
         'PayPalHeaderImageURL' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_URL,
         
-        'MaxTicketQty' => STAGESHOW_MAXTICKETCOUNT,
-        
+        'CurrencySymbol' => '',
+
         'SalesID' => '',        
         'SalesEMail' => '',
                 

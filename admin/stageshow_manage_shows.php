@@ -188,7 +188,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 								$myDBaseObj->UpdateShowName($result->showID, $newShowName);
 							}
 				
-							// TODO-BEFORE-RELEASE Save option extensions
+							// Save option extensions
 							$myDBaseObj->UpdateExtendedSettings($result, $result->showID);											
 						}
 					}
@@ -364,15 +364,10 @@ if (!class_exists('StageShowShowsAdminClass'))
 			}
 			
 			if ($myDBaseObj->CanAddShow()) 
-			{ 
-?>						
-      <input class="button-secondary" type="submit" name="addshowbutton" value="<?php _e('Add New Show', STAGESHOW_DOMAIN_NAME) ?>"/>
-<?php 
-			} 
+				$myDBaseObj->OutputButton("addpricebutton", "Add New Price");
+				
 			if(count($results) > 0)
-			{
-				echo '<input class="button-primary" type="submit" name="saveshowbutton" value="'.__('Save Settings', STAGESHOW_DOMAIN_NAME).'"/>';
-			}
+				$myDBaseObj->OutputButton("saveshowbutton", "Save Changes", "button-primary");
 ?>
 		</form>
 </div>

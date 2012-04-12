@@ -137,7 +137,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			$showID = 0;
 			
 			echo '<div class="wrap">';
-			if (isset($_POST['savebutton']))
+			if (isset($_POST['savepricebutton']))
 			{
 				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
 				
@@ -330,6 +330,7 @@ foreach ($showLists as $showList)
 {
 	$perfsLists = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
+	<div class="stageshow-admin-form">
 	<form method="post" action="admin.php?page=stageshow_prices">
 		<h3><?php echo($showList->showName); ?></h3>
 <?php 
@@ -356,12 +357,11 @@ else
       <input class="button-secondary" type="submit" name="addpricebutton" value="<?php _e('Add New Price', STAGESHOW_DOMAIN_NAME) ?>"/>
 <?php 
 	if(count($results) > 0)
-	{
-		echo '<input class="button-primary" type="submit" name="savebutton" value="'.__('Save Settings', STAGESHOW_DOMAIN_NAME).'"/>';
-	}
+		$myDBaseObj->OutputButton("savepricebutton", "Save Changes", "button-primary");
 } 
 ?>
 		</form>
+		</div>
 <?php
 }
 ?>

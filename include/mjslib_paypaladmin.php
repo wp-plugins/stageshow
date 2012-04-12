@@ -41,29 +41,28 @@ if (!class_exists('PayPalSettingsAdminClass'))
 				array('Label' => 'Currency',      'Id' => 'PayPalCurrency', 'PayPalLock' => true, 'Type' => 'select', 
 					'Items' => array
 					(
-						'AUD|Australian Dollars',
-						'CAD|Canadian Dollars',
-						'EUR|Euros',
-						'GBP|Pounds Sterling',
-						'JYP|Yen',
-						'USD|U.S. Dollars',
-						'NZD|New Zealand Dollar',
-						'CHF|Swiss Franc',
-						'HKD|Hong Kong Dollar',
-						'SGD|Singapore Dollar',
-						'SEK|Swedish Krona',
-						'DKK|Danish Krone',
-						'PLN|Polish Zloty',
-						'NOK|Norwegian Krone',
-						'HUF|Hungarian Forint',
-						'CZK|Czech Koruna',
-						'ILS|Israeli Shekel',
-						'MXN|Mexican Peso',
-						'BRL|Brazilian Real',
-						'MYR|Malaysian Ringgits',
-						'PHP|Philippine Pesos',
-						'TWD|Taiwan New Dollars',
-						'THB|Thai Baht',					
+						'AUD|Australian Dollars (&#36;)',
+						'BRL|Brazilian Real (R&#36;)',
+						'CAD|Canadian Dollars (&#36;)',
+						'CZK|Czech Koruna (&#75;&#269;)',
+						'DKK|Danish Krone (kr)',
+						'EUR|Euros (&#8364;)',
+						'HKD|Hong Kong Dollar (&#36;)',
+						'HUF|Hungarian Forint (Ft)',
+						'ILS|Israeli Shekel (&#x20aa;)',
+						'MXN|Mexican Peso (&#36;)',
+						'NZD|New Zealand Dollar (&#36;)',
+						'NOK|Norwegian Krone (kr)',
+						'PHP|Philippine Pesos (P)',
+						'PLN|Polish Zloty (&#122;&#322;)',
+						'GBP|Pounds Sterling (&#x20a4;)',
+						'SGD|Singapore Dollar (&#36;)',
+						'SEK|Swedish Krona (kr)',
+						'CHF|Swiss Franc (CHF)',
+						'TWD|Taiwan New Dollars (NT&#36;)',
+						'THB|Thai Baht (&#xe3f;)',
+						'USD|U.S. Dollars (&#36;)',
+						'JYP|Yen (&#xa5;)',
 					)
 				),
 				array('Label' => 'PayPal Checkout Logo Image URL', 'Id' => 'PayPalLogoImageURL',   'Type' => 'text',   'Len' => PAYPAL_APILIB_URL_TEXTLEN,   'Size' => PAYPAL_APILIB_URL_EDITLEN, ),
@@ -78,6 +77,44 @@ if (!class_exists('PayPalSettingsAdminClass'))
 			parent::__construct($settings);
 		}
 				
+		function SaveSettings($dbObj)
+		{
+			$currency = $dbObj->adminOptions['PayPalCurrency'];
+			
+			parent::SaveSettings($dbObj);
+			
+			if (($currency !== $dbObj->adminOptions['PayPalCurrency']) || ($dbObj->adminOptions['CurrencySymbol'] === ''))
+			{
+				$dbObj->adminOptions['CurrencySymbol'] = $this->GetCurrencySymbol($dbObj->adminOptions['PayPalCurrency']);
+				$dbObj->saveOptions();			
+			}			
+		}
+		
+		function GetCurrencySymbol($currency)
+		{
+			$currencySymbol = '';
+			
+			foreach ($this->paypalOpts as $payPalSetting)
+			{
+				if ($payPalSetting['Id'] === 'PayPalCurrency')
+				{					
+					// Found the settings Opts for currentcy settings
+					$selectOpts = $this->GetSelectOptsArray($payPalSetting['Items']);
+					
+					if (!isset($selectOpts[$currency]))
+						break;
+						
+					$currencyName = $selectOpts[$currency];					
+					$rtnArray = preg_split("/[\(\)]+/", $currencyName);
+					
+					if (count($rtnArray) >= 2)
+						$currencySymbol = $rtnArray[1];
+				}
+			}
+			
+			return $currencySymbol;
+		}
+		
 		function GetSettingHTMLTag($adminOptions, $settingOption)
 		{
 			$controlId = $settingOption['Id'];	

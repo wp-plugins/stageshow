@@ -150,7 +150,7 @@ if (!class_exists('PayPalAPIClass')) {
 				return true;
 				
 			$settingsPageURL = get_option('siteurl').'/wp-admin/admin.php?page=stageshow_settings';
-			$actionMsg = __('Set PayPal Settings First - <a href='.$settingsPageURL.'>Here</a>', STAGESHOW_DOMAIN_NAME);
+			$actionMsg = __('Set PayPal Settings First - <a href='.$settingsPageURL.'>Here</a>');
 			echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
 			
 			return false;

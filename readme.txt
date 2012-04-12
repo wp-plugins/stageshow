@@ -122,18 +122,18 @@ The following tags can be used in the EMail template:
 
 == Screenshots ==
 
-1. Screenshot 1: Stageshow and PayPal Settings Page
-2. Screenshot 2: Overview Page
-3. Screenshot 3: Shows Setup
-4. Screenshot 4: Performances Setup
-5. Screenshot 5: Ticket Types and Prices Setup
-6. Screenshot 6: Sales Log Summary
-7. Screenshot 7: Sales Log Sale Details
-8. Screenshot 8: Sales Log Show Summary
-9. Screenshot 9: Sales Log Performance Summary
-10. Screenshot 10: Admin Tools Page
-11. Screenshot 11: Shows Box Office Page
-12. Screenshot 12: Sample EMail
+1. Screenshot 1: Stageshow and PayPal Settings Page 
+2. Screenshot 2: Overview Page 
+3. Screenshot 3: Shows Setup 
+4. Screenshot 4: Performances Setup 
+5. Screenshot 5: Ticket Types and Prices Setup 
+6. Screenshot 6: Sales Log Summary 
+7. Screenshot 7: Sales Log Sale Details 
+8. Screenshot 8: Sales Log Show Summary 
+9. Screenshot 9: Sales Log Performance Summary 
+10. Screenshot 10: Admin Tools Page 
+11. Screenshot 11: Shows Box Office Page 
+12. Screenshot 12: Sample EMail 
 
 == Changelog ==
 
@@ -191,6 +191,14 @@ The following tags can be used in the EMail template:
 * Bug Fix: Input Edit box size value fixed
 * Bug Fix: Box Office shortcode output was always at top of page.
 * Max Ticket Count added to settings
+
+= 1.0.4 =
+* Added Currency Symbols to currency options
+* Added option to output currency symbol in Box Office
+* Cosmetic: Added separator line between admin screen entries
+* Bug Fix: HTML Select element options on some admin screens not retrieved
+* Bug Fix: Undefined variable error generated on Performances update error
+* Class of BoxOffice output HTML elements changed from boxoffice-**** to stageshow-boxoffice-****
 
 == Upgrade Notice ==
 
