@@ -38,7 +38,6 @@ if (!class_exists('StageShowAdminPricesListClass'))
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
 			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
-			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$this->bulkActions = array(
 				'delete' => __('Delete', STAGESHOW_DOMAIN_NAME),

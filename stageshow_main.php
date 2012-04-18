@@ -43,6 +43,9 @@ if (!class_exists('StageShowPluginClass'))
 		var	$env;
 		var $dbaseObj;
 		
+		var	$adminClassFilePrefix;
+		var $adminClassPrefix;
+		
 		function __construct($dbaseObj) 
 		{
 			add_action('wp_enqueue_scripts', array(&$this, 'load_user_styles') );
@@ -51,6 +54,9 @@ if (!class_exists('StageShowPluginClass'))
 			// Add a reference to the header
 			add_action('wp_head', array(&$this, 'OutputMetaTag'));
 
+			$this->adminClassFilePrefix = 'stageshow';
+			$this->adminClassPrefix = 'StageShow';
+			
 			$this->myDBaseObj = $dbaseObj;
 			
 			$this->env = array(
@@ -433,18 +439,21 @@ if (!class_exists('StageShowPluginClass'))
 				case STAGESHOW_MENUPAGE_ADMINMENU:
 				case STAGESHOW_MENUPAGE_OVERVIEW:
 				default :
-					include 'admin/stageshow_manage_overview.php';
-					new StageShowOverviewAdminClass($this->env);						
+					include 'admin/'.$this->adminClassFilePrefix.'_manage_overview.php';
+					$classId = $this->adminClassPrefix.'OverviewAdminClass';
+					new $classId($this->env);
 					break;
 					
         case STAGESHOW_MENUPAGE_SHOWS:
-					include 'admin/stageshow_manage_shows.php';      
-					new StageShowShowsAdminClass($this->env);
+					include 'admin/'.$this->adminClassFilePrefix.'_manage_shows.php';     
+					$classId = $this->adminClassPrefix.'ShowsAdminClass';
+					new $classId($this->env);
           break;
           
         case STAGESHOW_MENUPAGE_PERFORMANCES :
-					include 'admin/stageshow_manage_performances.php';      
-					new StageShowPerformancesAdminClass($this->env);
+					include 'admin/'.$this->adminClassFilePrefix.'_manage_performances.php';
+					$classId = $this->adminClassPrefix.'PerformancesAdminClass';
+					new $classId($this->env);
 					break;
 					
 				case STAGESHOW_MENUPAGE_PRICES :
@@ -458,8 +467,9 @@ if (!class_exists('StageShowPluginClass'))
 					break;
 					
 				case STAGESHOW_MENUPAGE_SALES :
-					include 'admin/stageshow_manage_sales.php';      
-					new StageShowAdminSalesClass($this->env);
+					include 'admin/'.$this->adminClassFilePrefix.'_manage_sales.php';
+					$classId = $this->adminClassPrefix.'SalesAdminClass';
+					new $classId($this->env);
 					break;
 					
 				case STAGESHOW_MENUPAGE_BUTTONS :

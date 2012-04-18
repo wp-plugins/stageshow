@@ -51,7 +51,11 @@ if (!class_exists('MJSLibTableClass'))
 		var $spanEmptyCells;
 		var $useTHTags;
 		var $noAutoComplete;
-		var $hasHiddenRows;
+		
+		var $hiddenRowsDef;
+		var $moreText;
+		var $lessText;
+		var $hiddenRowsButtonId = '';
 		
 		var $currRow;
 		var $currCol;
@@ -96,7 +100,14 @@ if (!class_exists('MJSLibTableClass'))
 			$this->useTHTags = false;
 			$this->noAutoComplete = true;
 			$this->scriptsOutput = false;
-			$this->hasHiddenRows = false;
+			
+			if ($this->hiddenRowsButtonId === '')
+				$this->hiddenRowsButtonId = 'Options';
+
+			$this->hiddenRowsDef = $this->GetHiddenRowsDefinition();
+				
+			$this->moreText = __('Show');
+			$this->lessText = __('Hide');
 		}
 		
 		function SetRowsPerPage($rowsPerPage)
@@ -115,6 +126,22 @@ if (!class_exists('MJSLibTableClass'))
 			$this->AddToTable($result, $hiddenRows);	
 		}
 
+		function GetHiddenRowsDefinition()
+		{
+			return array();
+		}
+		
+		function HasHiddenRows()
+		{
+			// No extended settings
+			return (count($this->hiddenRowsDef) > 0);
+		}
+		
+		function ExtendedSettingsDBOpts()
+		{
+			return array();
+		}
+		
 		function NewRow($result, $rowAttr = '')
 		{
 			// Increment Row ... but only if the current row has data
@@ -155,10 +182,9 @@ if (!class_exists('MJSLibTableClass'))
 				$columns = array_merge(array('eventCb' => '<input name="checkall" id="checkall" type="checkbox"  onClick="updateCheckboxes(this)" />'), $columns); 
 			}
 			
-			if ($this->hasHiddenRows)
+			if ($this->HasHiddenRows())
 			{
-				$optionsColId = __('Options');
-				$columns = array_merge($columns, array('eventOptions' => $optionsColId)); 
+				$columns = array_merge($columns, array('eventOptions' => $this->hiddenRowsButtonId)); 
 			}
 				
 			$this->columnHeadersId = $headerId;
@@ -221,7 +247,7 @@ if (!class_exists('MJSLibTableClass'))
 			$recordID = $this->GetRecordID($result);
 			$moreName = 'more'.$recordID;
 			
-			$content = '<a id="'.$moreName.'" class="more-button" onClick="HideOrShowRows(\''.$moreName.'\', \''.$rowId.'\')">'.$content.'</a>';
+			$content = '<a id="'.$moreName.'" class="button-secondary Xmore-button" onClick="HideOrShowRows(\''.$moreName.'\', \''.$rowId.'\')">'.$content.'</a>';
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
@@ -620,9 +646,6 @@ if (!class_exists('MJSLibAdminListClass'))
 		var $showDBIds;
 		var $lastCBId;
 		var $currResult;
-		var $options;
-		var $moreText;
-		var $lessText;
 		
 		function __construct($env, $newTableType = 'html') //constructor
 		{
@@ -654,14 +677,6 @@ if (!class_exists('MJSLibAdminListClass'))
 			$this->lastCBId = '';
 			
 			$this->defaultFilterIndex = 0;	
-			
-			if (isset($this->myDBaseObj))
-				$this->options = $this->myDBaseObj->GetExtendedSettings();
-			else
-				$this->options = array();		
-				
-			$this->moreText = __('Show');
-			$this->lessText = __('Hide');
 		}
 		
 		function NewRow($result, $rowAttr = '')
@@ -769,7 +784,7 @@ if (!class_exists('MJSLibAdminListClass'))
 		{
 			$hiddenRowsID = 'record'.$this->GetRecordID($result).'options';
 			
-			if (count($this->options) > 0)
+			if (count($this->hiddenRowsDef) > 0)
 			{
 				$this->AddShowOrHideButtonToTable($result, $this->tableName, $hiddenRowsID, $this->moreText);
 				
@@ -780,13 +795,13 @@ if (!class_exists('MJSLibAdminListClass'))
 				$this->SetColClass($colClassList);
 												
 				$hiddenRows = "<table>\n";
-				foreach ($this->options as $option)
+				foreach ($this->hiddenRowsDef as $option)
 				{
 					$optionId = $option['Id'];
 					$option['Id'] = $option['Id'].$this->GetRecordID($result);
 					
 					$hiddenRows .= '<tr>'."\n";
-					$hiddenRows .= '<td>'.$option['Label']."</td>\n";;
+					$hiddenRows .= '<td>'.$option['Label']."</td>\n";
 					$hiddenRows .= '<td>'.SettingsAdminClass::GetHTMLTag($option, $result->$optionId)."</td>\n";
 					$hiddenRows .= "</tr>\n";
 				}

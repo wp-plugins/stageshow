@@ -528,6 +528,13 @@ if (!class_exists('PayPalAPIClass')) {
       if (strlen($hostedButtonID) == 0)
         return 'ERROR';	// Cannot Get Button Details - Zero Length Button ID 
 
+      $APIStatus = $this->GetInventoryAction($hostedButtonID, $quantity);
+      
+      return $APIStatus;
+    }
+    
+    function GetInventoryAction($hostedButtonID, &$quantity)
+    {
       $this->Reset();
       $this->AddGetInventoryParams($hostedButtonID);
 
@@ -552,18 +559,39 @@ if (!class_exists('PayPalAPIClass')) {
       if (strlen($hostedButtonID) == 0)
         return;	// Cannot Update Inventory - Zero Length Button ID 
 
+      return $this->UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl = '', $reference = 'X');
+    }    
+
+    function UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl = '', $reference = 'X')
+    {
       $this->Reset();
       
       if ($quantity < 0)
       {
 				$this->AddSetInventoryParams($hostedButtonID, -100, $soldOutUrl, $reference);
-				$this->APIAction('Inventory ' . $hostedButtonID);
-				return;
+				return $this->APIAction('Inventory ' . $hostedButtonID);
       }
       
       $this->AddSetInventoryParams($hostedButtonID, $quantity, $soldOutUrl, $reference);
       return $this->APIAction('Inventory ' . $hostedButtonID);
     }
+
+    function AdjustInventory($hostedButtonID, $qtyOffset)
+    {
+      // Check that the PayPal login parameters have been set
+      if (!$this->IsConfigured())
+        return;	// Cannot Update Inventory - API Not Configured 
+
+      if (strlen($hostedButtonID) == 0)
+        return;	// Cannot Update Inventory - Zero Length Button ID 
+
+      $APIStatus = $this->GetInventoryAction($hostedButtonID, $quantity);
+      if ($APIStatus !== 'OK') return $APIStatus;
+     
+			$quantity += $qtyOffset;
+			
+			return $this->UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl, $reference);
+   }
 
     function GetButton($hostedButtonID)
     {

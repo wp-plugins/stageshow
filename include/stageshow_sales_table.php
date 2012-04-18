@@ -36,17 +36,16 @@ if (!class_exists('StageShowAdminSalesListClass'))
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
 			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
-			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$this->bulkActions = array(
 				'delete' => __('Delete', STAGESHOW_DOMAIN_NAME),
 				);
 
 			$columns = array(
-				'saleName'   => __('Name', STAGESHOW_DOMAIN_NAME),
-				'saleDate'   => __('Transaction Date', STAGESHOW_DOMAIN_NAME),
-				'saleStatus' => __('Status', STAGESHOW_DOMAIN_NAME),
-				'saleQty'    => __('Qty', STAGESHOW_DOMAIN_NAME),
+				'saleName'    => __('Name', STAGESHOW_DOMAIN_NAME),
+				'saleDate'    => __('Transaction Date', STAGESHOW_DOMAIN_NAME),
+				'saleStatus'  => __('Status', STAGESHOW_DOMAIN_NAME),
+				'saleQty'		  => __('Qty', STAGESHOW_DOMAIN_NAME),
 			);			
 			$this->SetListHeaders('stageshow_sales_list', $columns);
 		}
@@ -95,7 +94,6 @@ if (!class_exists('StageShowAdminSaleDetailsListClass'))
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
 			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
-			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$columns = array(
 				'saleShowName' => __('Show', STAGESHOW_DOMAIN_NAME),
