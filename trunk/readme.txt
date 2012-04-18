@@ -200,6 +200,9 @@ The following tags can be used in the EMail template:
 * Bug Fix: Undefined variable error generated on Performances update error
 * Class of BoxOffice output HTML elements changed from boxoffice-**** to stageshow-boxoffice-****
 
+= 1.0.5 =
+* Bug Fix: "Add New Show" not displayed on Shows Admin Page (Add New Price ahown instead)
+
 == Upgrade Notice ==
 
 = 0.9 =

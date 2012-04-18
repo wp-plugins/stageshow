@@ -167,6 +167,10 @@ if (!class_exists('SettingsAdminClass'))
 					$editControl = '<input type="checkbox" name="'.$controlName.'" id="'.$controlName.'" value="1" '.$checked.'" />&nbsp;'.$settingOption['Text']."\n";
 					break;
 
+				case 'view':
+					$editControl = $controlValue;
+					break;
+
 				case 'value':
 					$editControl = $settingOption['Value'];
 					break;
@@ -290,6 +294,20 @@ if (!class_exists('MJSLibAdminClass'))
 			check_admin_referer($referer);
 		}
 
+		function UpdateHiddenRowValues($result, $index, $settings, $dbOpts)
+		{
+			// Save option extensions
+			foreach ($settings as $setting)
+			{
+				$settingId = $setting['Id'];
+				$newVal = $_POST[$settingId.$index];
+				if ($newVal != $result->$settingId)
+				{
+					$this->myDBaseObj->UpdateSettings($result, $dbOpts['Table'], $settingId, $dbOpts['Index'], $index);					
+				}
+			}
+		}
+				
   }
 }
 

@@ -23,9 +23,9 @@ Copyright 2012 Malcolm Shergold
 include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 include STAGESHOW_INCLUDE_PATH.'mjslib_paypal_salesadmin.php';      
 
-if (!class_exists('StageShowAdminSalesClass')) 
+if (!class_exists('StageShowSalesAdminClass')) 
 {
-	class StageShowAdminSalesClass extends PayPalSalesAdminClass // Define class
+	class StageShowSalesAdminClass extends PayPalSalesAdminClass // Define class
 	{		
 		function __construct($env)
 		{
@@ -80,7 +80,8 @@ if (!class_exists('StageShowAdminSalesClass'))
 		
 		function OutputSalesList($env)
 		{
-			$salesList = new StageShowAdminSalesListClass($env);		
+			$classId = $env['PluginObj']->adminClassPrefix.'AdminSalesListClass';
+			$salesList = new $classId($env);		
 			$salesList->OutputList($this->results);		
 		}
 				

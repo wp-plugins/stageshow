@@ -576,46 +576,20 @@ if (!class_exists('StageShowDBaseClass'))
 			return $results;
 		}
 		
-		function ExtendedSettingsDBOpts()
-		{
-			$menuPage = $_GET['page'];
-			switch ($menuPage)
-			{
-				case STAGESHOW_MENUPAGE_PERFORMANCES:
-					$dbOpts['Table'] = STAGESHOW_PERFORMANCES_TABLE;
-					$dbOpts['Index'] = 'perfID';
-					break;	
-							
-				default:
-					$dbOpts = array();
-					break;								
-			}
-			
-			return $dbOpts;
-		}
-		
-		function UpdateExtendedSettings($result, $index)
+		function UpdateSettings($result, $tableId, $settingId, $indexId, $index)
 		{
 			global $wpdb;
 			
-			// Get the extended settings array
-			$settings = $this->GetExtendedSettings();
-			$dbOpts = $this->ExtendedSettingsDBOpts();
-			
-			// Save option extensions
-			foreach ($settings as $setting)
-			{
-				$settingId = $setting['Id'];
-				if ($_POST[$settingId.$index] != $result->$settingId)
-				{
-					$sql  = 'UPDATE '.$dbOpts['Table'];
-					$sql .= ' SET '.$settingId.'="'.$_POST[$settingId.$index].'"';
-					$sql .= ' WHERE '.$dbOpts['Index'].'='.$index;;
-					$this->ShowSQL($sql); 
+			$newVal = $_POST[$settingId.$index];
+			if ($newVal == $result->$settingId)
+				return;
+				
+			$sql  = 'UPDATE '.$tableId;
+			$sql .= ' SET '.$settingId.'="'.$newVal.'"';
+			$sql .= ' WHERE '.$indexId.'='.$index;;
+			$this->ShowSQL($sql); 
 
-					$wpdb->query($sql);	
-				}
-			}
+			$wpdb->query($sql);	
 		}
 		
 		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")

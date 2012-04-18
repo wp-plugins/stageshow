@@ -38,7 +38,6 @@ if (!class_exists('StageShowAdminPerformancesListClass'))
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
 			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
-			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$this->bulkActions = array(
 				'activate' => __('Activate/Deactivate', STAGESHOW_DOMAIN_NAME),
@@ -206,6 +205,13 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				
 					if(count($results) > 0)
 					{
+						$classId = $env['PluginObj']->adminClassPrefix.'AdminPerformancesListClass';
+						$adminTableObj = new $classId($env);		
+						
+						// Get the extended settings array
+						$settings = $adminTableObj->GetHiddenRowsDefinition();
+						$dbOpts = $adminTableObj->ExtendedSettingsDBOpts();
+			
 						foreach($results as $result)
 						{
 							$perfUpdated = false;
@@ -242,7 +248,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 							}
 								
 							// Save option extensions
-							$myDBaseObj->UpdateExtendedSettings($result, $result->perfID);											
+							$this->UpdateHiddenRowValues($result, $result->perfID, $settings, $dbOpts);											
 							
 							if ($perfUpdated)
 								$perfsList[count($perfsList)] = $result;									
@@ -391,8 +397,9 @@ foreach ($showLists as $showList)
 	else 
 	{ 
 		$thisUpdateFailed = (($updateFailed) && ($showList->showID == $_POST['showID']));
-		$perfsList = new StageShowAdminPerformancesListClass($env);		
-		$perfsList->OutputList($results, $thisUpdateFailed);		
+		$classId = $env['PluginObj']->adminClassPrefix.'AdminPerformancesListClass';
+		$adminTableObj = new $classId($env);		
+		$adminTableObj->OutputList($results, $thisUpdateFailed);		
 	} // End of if (count($results) == 0) ... else ...
 
 ?>

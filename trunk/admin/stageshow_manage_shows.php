@@ -37,7 +37,6 @@ if (!class_exists('StageShowAdminShowsListClass'))
 			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
 
 			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
-			$this->hasHiddenRows = $myDBaseObj->HasHiddenRows();
 			
 			$this->bulkActions = array(
 				'activate' => __('Activate/Deactivate', STAGESHOW_DOMAIN_NAME),
@@ -180,6 +179,13 @@ if (!class_exists('StageShowShowsAdminClass'))
 				{
 					if (count($results) > 0)
 					{
+						$classId = $env['PluginObj']->adminClassPrefix.'AdminShowsListClass';
+						$adminTableObj = new $classId($env);		
+						
+						// Get the extended settings array
+						$settings = $adminTableObj->GetHiddenRowsDefinition();
+						$dbOpts = $adminTableObj->ExtendedSettingsDBOpts();
+			
 						foreach($results as $result)
 						{
 							$newShowName = stripslashes($_POST['showName'.$result->showID]);
@@ -189,7 +195,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 							}
 				
 							// Save option extensions
-							$myDBaseObj->UpdateExtendedSettings($result, $result->showID);											
+							$this->UpdateHiddenRowValues($result, $result->perfID, $settings, $dbOpts);											
 						}
 					}
 					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
@@ -359,12 +365,13 @@ if (!class_exists('StageShowShowsAdminClass'))
 			}
 			else
 			{
-				$showsList = new StageShowAdminShowsListClass($env);		
-				$showsList->OutputList($results, $updateFailed);	
+				$classId = $env['PluginObj']->adminClassPrefix.'AdminShowsListClass';
+				$adminTableObj = new $classId($env);		
+				$adminTableObj->OutputList($results, $updateFailed);	
 			}
 			
 			if ($myDBaseObj->CanAddShow()) 
-				$myDBaseObj->OutputButton("addpricebutton", "Add New Price");
+				$myDBaseObj->OutputButton("addshowbutton", "Add New Show");
 				
 			if(count($results) > 0)
 				$myDBaseObj->OutputButton("saveshowbutton", "Save Changes", "button-primary");

@@ -333,14 +333,11 @@ else
 								</table>
 								<br></br>
 								<?php						
-	}
-	if ($this->detailsSaleId > 0)
-	{
-					$this->OutputSalesDetailsList($env);
+		$this->OutputSalesDetailsList($env);
 	}
 	else
 	{
-					$this->OutputSalesList($env);
+		$this->OutputSalesList($env);
 	}
 }
 
