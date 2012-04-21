@@ -21,9 +21,9 @@ Copyright 2012 Malcolm Shergold
 */
 include STAGESHOW_INCLUDE_PATH.'mjslib_table.php';
 
-if (!class_exists('StageShowAdminShowsListClass')) 
+if (!class_exists('StageShowShowsAdminListClass')) 
 {
-	class StageShowAdminShowsListClass extends MJSLibAdminListClass // Define class
+	class StageShowShowsAdminListClass extends MJSLibAdminListClass // Define class
 	{		
 		var $updateFailed;
 		
@@ -179,7 +179,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 				{
 					if (count($results) > 0)
 					{
-						$classId = $env['PluginObj']->adminClassPrefix.'AdminShowsListClass';
+						$classId = $env['PluginObj']->adminClassPrefix.'ShowsAdminListClass';
 						$adminTableObj = new $classId($env);		
 						
 						// Get the extended settings array
@@ -195,7 +195,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 							}
 				
 							// Save option extensions
-							$this->UpdateHiddenRowValues($result, $result->perfID, $settings, $dbOpts);											
+							$this->UpdateHiddenRowValues($result, $result->showID, $settings, $dbOpts);											
 						}
 					}
 					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
@@ -365,7 +365,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 			}
 			else
 			{
-				$classId = $env['PluginObj']->adminClassPrefix.'AdminShowsListClass';
+				$classId = $env['PluginObj']->adminClassPrefix.'ShowsAdminListClass';
 				$adminTableObj = new $classId($env);		
 				$adminTableObj->OutputList($results, $updateFailed);	
 			}

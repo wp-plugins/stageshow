@@ -559,12 +559,15 @@ if (!class_exists('PayPalAPIClass')) {
       if (strlen($hostedButtonID) == 0)
         return;	// Cannot Update Inventory - Zero Length Button ID 
 
-      return $this->UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl = '', $reference = 'X');
+      return $this->UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl, $reference);
     }    
 
     function UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl = '', $reference = 'X')
     {
       $this->Reset();
+      
+      // Inventory only works if SOLDOUTURL is set ...
+      if ($soldOutUrl == '') $soldOutUrl = get_option('siteurl');
       
       if ($quantity < 0)
       {
@@ -576,7 +579,7 @@ if (!class_exists('PayPalAPIClass')) {
       return $this->APIAction('Inventory ' . $hostedButtonID);
     }
 
-    function AdjustInventory($hostedButtonID, $qtyOffset)
+    function AdjustInventory($hostedButtonID, $qtyOffset, $soldOutUrl = '', $reference = 'X')
     {
       // Check that the PayPal login parameters have been set
       if (!$this->IsConfigured())
@@ -587,7 +590,13 @@ if (!class_exists('PayPalAPIClass')) {
 
       $APIStatus = $this->GetInventoryAction($hostedButtonID, $quantity);
       if ($APIStatus !== 'OK') return $APIStatus;
-     
+
+			if (($qtyOffset == 0) && (isset($this->APIResponses['SOLDOUTURL'])))
+			{
+				if ($soldOutUrl == '') $soldOutUrl = get_option('siteurl');
+				if ($this->APIResponses['SOLDOUTURL'] === $soldOutUrl) return 'OK';
+			}
+			     
 			$quantity += $qtyOffset;
 			
 			return $this->UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl, $reference);
@@ -612,65 +621,26 @@ if (!class_exists('PayPalAPIClass')) {
 
 		function GetButtonParams($hostedButtonID)
 		{
-			$buttonParamIDs = array(
-				'BUTTON',
-				'BUTTONSUBTYPE',
-				'L_BUTTONVAR*',
-				'OPTION*NAME',
-				'L_OPTION*SELECT*',
-				'L_OPTION*PRICE*',
-				'BUTTONIMAGE',
-				'BUTTONCOUNTRY',
-				'BUTTONLANGUAGE',
-				'TIMESTAMP',
-				'CORRELATIONID',
-				'ACK',
-				'VERSION',
-				'BUILD',
-				);
-				
 			if ($this->GetButton($hostedButtonID) !== 'OK')
 				return null;
-					
-			$buttonParams = new stdClass();
-			foreach ($this->APIResponses as $key => $value)
-			{
-				if ($key === 'WEBSITECODE') continue;
-				
-				$buttonPosn = strpos($key, "BUTTON");
-				if ($buttonPosn === false)	
-					$buttonPosn = -1;
-				else
-					$buttonPosn += 5;
-				
-				$varId = substr($key,0,1);
-				$nextLC = true;
-				for ($i=1; $i<strlen($key); $i++)
-				{
-					$nextChar = substr($key,$i,1);
-					if ($nextLC)
-						$varId .= strtolower($nextChar);
-					else
-						$varId .= $nextChar;
-					
-					$nextLC = true;
-					
-					if ($i == $buttonPosn)
-						$nextLC = false;
-					else if (is_numeric($nextChar))
-						$nextLC = false;
-					else if ($nextChar === '_')
-						$nextLC = false;						
-				}
-				$varId = str_replace('id','Id',$varId);
-				$varId = str_replace('button','Button',$varId);				
-				
-				$buttonParams->$varId = $value;
-			}
 			
-			return $buttonParams;	
-		}
-		
+			$buttonParams = $this->APIResponses;
+			
+			$unusedQty = 0;
+			if ($this->GetInventory($hostedButtonID, $unusedQty) === 'OK')
+			{
+				$inventoryParams = $this->APIResponses;
+				unset($inventoryParams['HOSTEDBUTTONID']);
+			}
+			else
+				$inventoryParams['INVENTORY'] = 'ERROR - Not Available';
+			
+			$buttonParams = array_merge($buttonParams, $inventoryParams);
+						
+			unset($buttonParams['WEBSITECODE']);
+			return $buttonParams;
+    }
+
     function UpdateButton($hostedButtonID, $description, $reference, $optPrices, $optIDs = '')
     {
       // Check that the PayPal login parameters have been set

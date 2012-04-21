@@ -22,9 +22,9 @@ Copyright 2012 Malcolm Shergold
 
 include STAGESHOW_INCLUDE_PATH.'mjslib_table.php';
 
-if (!class_exists('StageShowOverviewListClass')) 
+if (!class_exists('StageShowOverviewAdminListClass')) 
 {
-	class StageShowOverviewListClass extends MJSLibAdminListClass // Define class
+	class StageShowOverviewAdminListClass extends MJSLibAdminListClass // Define class
 	{		
 		function __construct($env) //constructor
 		{
@@ -129,7 +129,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			}
 			else
 			{
-				$overviewList = new StageShowOverviewListClass($env);		
+				$overviewList = new StageShowOverviewAdminListClass($env);		
 				$overviewList->OutputList($results);		
 			}
 		}

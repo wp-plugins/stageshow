@@ -72,6 +72,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
         'PayPalLogoImageURL' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_URL,
         'PayPalHeaderImageURL' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_URL,
         
+        'PayPalInvChecked' => false,	// Set to true when SS is activated and Inventory URLs have been verified
+        
         'CurrencySymbol' => '',
 
         'SalesID' => '',        

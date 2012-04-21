@@ -300,6 +300,7 @@ if (!class_exists('MJSLibAdminClass'))
 			foreach ($settings as $setting)
 			{
 				$settingId = $setting['Id'];
+				
 				$newVal = $_POST[$settingId.$index];
 				if ($newVal != $result->$settingId)
 				{
