@@ -203,6 +203,11 @@ The following tags can be used in the EMail template:
 = 1.0.5 =
 * Bug Fix: "Add New Show" not displayed on Shows Admin Page (Add New Price ahown instead)
 
+= 1.0.6 =
+* Implemented "Hidden Rows" for Details Fields in Sales Screen
+* Bug Fix: Inventory Control not working in v1.0.5 - Fixed (includes PayPal buttons update on activation)
+* Added check for zero ticket prices - new price entries initialised to 1.00
+
 == Upgrade Notice ==
 
 = 0.9 =

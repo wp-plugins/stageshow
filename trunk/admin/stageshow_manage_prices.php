@@ -22,9 +22,9 @@ Copyright 2012 Malcolm Shergold
 
 include STAGESHOW_INCLUDE_PATH.'mjslib_table.php';
 
-if (!class_exists('StageShowAdminPricesListClass')) 
+if (!class_exists('StageShowPricesAdminListClass')) 
 {
-	class StageShowAdminPricesListClass extends MJSLibAdminListClass // Define class
+	class StageShowPricesAdminListClass extends MJSLibAdminListClass // Define class
 	{		
 		var $updateFailed;
 		
@@ -175,6 +175,13 @@ if (!class_exists('StageShowPricesAdminClass'))
 							if (!is_numeric($newPriceValue))
 							{
 								$pricesMsg = __('Invalid Price Entry', STAGESHOW_DOMAIN_NAME).' ('.$newPriceValue.')';
+								break;
+							}
+							
+							// Verify that the price value is non-zero
+							if ($newPriceValue == 0.0)
+							{
+								$pricesMsg = __('Price Entry cannot be zero', STAGESHOW_DOMAIN_NAME);
 								break;
 							}
 							
@@ -347,7 +354,7 @@ if(count($results) == 0)
 }
 else
 {
-	$showsList = new StageShowAdminPricesListClass($env);		
+	$showsList = new StageShowPricesAdminListClass($env);		
 	$showsList->OutputList($results, $updateFailed);	
 } // if(count($results) > 0) ....
 ?>

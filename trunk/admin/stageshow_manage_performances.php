@@ -22,9 +22,9 @@ Copyright 2012 Malcolm Shergold
 
 include STAGESHOW_INCLUDE_PATH.'mjslib_table.php';
 
-if (!class_exists('StageShowAdminPerformancesListClass')) 
+if (!class_exists('StageShowPerformancesAdminListClass')) 
 {
-	class StageShowAdminPerformancesListClass extends MJSLibAdminListClass // Define class
+	class StageShowPerformancesAdminListClass extends MJSLibAdminListClass // Define class
 	{				
 		var $updateFailed;
 		
@@ -205,7 +205,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				
 					if(count($results) > 0)
 					{
-						$classId = $env['PluginObj']->adminClassPrefix.'AdminPerformancesListClass';
+						$classId = $env['PluginObj']->adminClassPrefix.'PerformancesAdminListClass';
 						$adminTableObj = new $classId($env);		
 						
 						// Get the extended settings array
@@ -397,7 +397,7 @@ foreach ($showLists as $showList)
 	else 
 	{ 
 		$thisUpdateFailed = (($updateFailed) && ($showList->showID == $_POST['showID']));
-		$classId = $env['PluginObj']->adminClassPrefix.'AdminPerformancesListClass';
+		$classId = $env['PluginObj']->adminClassPrefix.'PerformancesAdminListClass';
 		$adminTableObj = new $classId($env);		
 		$adminTableObj->OutputList($results, $thisUpdateFailed);		
 	} // End of if (count($results) == 0) ... else ...

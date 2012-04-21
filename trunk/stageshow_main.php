@@ -172,6 +172,16 @@ if (!class_exists('StageShowPluginClass'))
 			if (!is_dir($LogsFolder))
 				mkdir($LogsFolder, 0644, TRUE);
 
+			if (!$myDBaseObj->adminOptions['PayPalInvChecked'])
+			{
+				// Check that all PayPal buttons have the SOLDOUTURL set			
+				$results = $myDBaseObj->GetAllPerformancesList();
+				foreach ($results as $result)
+					$myDBaseObj->payPalAPIObj->AdjustInventory($result->perfPayPalButtonID, 0);
+				
+				$myDBaseObj->adminOptions['PayPalInvChecked'] = true;
+			}
+			
       $this->saveStageshowOptions();
       
 			$setupUserRole = $myDBaseObj->adminOptions['SetupUserRole'];
@@ -194,7 +204,7 @@ if (!class_exists('StageShowPluginClass'))
 			
 			MJSLibUtilsClass::DeleteFile(STAGESHOW_ADMIN_PATH.'stageshow_dbase_api.php');
 			MJSLibUtilsClass::DeleteFile(STAGESHOW_ADMIN_PATH.'stageshow_paypal_api.php');
-			
+						
       $myDBaseObj->activate();
 		}
 
@@ -269,7 +279,7 @@ if (!class_exists('StageShowPluginClass'))
 			
       // Get all database entries for this show ... ordered by date/time then ticket type
 			$myDBaseObj->prepareBoxOffice($showID);			
-      $results = $myDBaseObj->GetPricesListByShowID($showID);
+      $results = $myDBaseObj->GetPricesListByShowID($showID, true);
 			$perfCount = 0;
 			
       if (count($results) == 0) 
@@ -482,7 +492,7 @@ if (!class_exists('StageShowPluginClass'))
 						define ('SALESMAN_DOMAIN_NAME', STAGESHOW_DOMAIN_NAME);
 										
 					include STAGESHOW_TEST_PATH.'salesman_manage_buttons.php';      
-					new ButtonsManAdminButtonsClass($this->env, $salesManDBaseObj->GetOurButtonsList());
+					new PayPalButtonsAdminClass($this->env, $salesManDBaseObj->GetOurButtonsList());
 					break;
 					
 				case STAGESHOW_MENUPAGE_SETTINGS :

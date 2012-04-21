@@ -80,14 +80,14 @@ if (!class_exists('StageShowSalesAdminClass'))
 		
 		function OutputSalesList($env)
 		{
-			$classId = $env['PluginObj']->adminClassPrefix.'AdminSalesListClass';
-			$salesList = new $classId($env);		
+			$classId = $env['PluginObj']->adminClassPrefix.'SalesAdminListClass';
+			$salesList = new $classId($env);	// StageShowSalesAdminListClass etc.
 			$salesList->OutputList($this->results);		
 		}
 				
 		function OutputSalesDetailsList($env, $isInput = false)
 		{
-			$salesList = new StageShowAdminSaleDetailsListClass($env, $isInput);		
+			$salesList = new StageShowSalesAdminDetailsListClass($env, $isInput);		
 			$salesList->OutputList($this->results);	
 		}
 		

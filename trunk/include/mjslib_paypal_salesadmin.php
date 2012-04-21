@@ -24,6 +24,33 @@ include 'mjslib_admin.php';
 
 if (!class_exists('PayPalSalesAdminClass')) 
 {
+	class PayPalSalesAdminListClass extends MJSLibAdminListClass // Define class
+	{		
+		function GetHiddenRowsDefinition()	// TODO - Sales Hidden Rows Disabled for Distribution
+		{
+			$ourOptions = array(
+				array('Label' => 'Name',	                     'Id' => 'saleName',      'Type' => 'view'),
+				array('Label' => 'EMail',	                     'Id' => 'saleEMail',     'Type' => 'view'),
+				array('Label' => 'PayPal Username',	           'Id' => 'salePPName',    'Type' => 'view'),
+				array('Label' => PAYPAL_APILIB_STREET_LABEL,	 'Id' => 'salePPStreet',  'Type' => 'view'),
+				array('Label' => PAYPAL_APILIB_CITY_LABEL,	   'Id' => 'salePPCity',    'Type' => 'view'),
+				array('Label' => PAYPAL_APILIB_STATE_LABEL,	   'Id' => 'salePPState',   'Type' => 'view'),
+				array('Label' => PAYPAL_APILIB_ZIP_LABEL,	     'Id' => 'salePPZip',     'Type' => 'view'),
+				array('Label' => PAYPAL_APILIB_COUNTRY_LABEL,	 'Id' => 'salePPCountry', 'Type' => 'view'),
+				array('Label' => 'Paid',                       'Id' => 'salePaid',      'Type' => 'view'),
+				array('Label' => 'Transaction Date/Time',      'Id' => 'saleDateTime',  'Type' => 'view'),
+				array('Label' => 'Transaction ID',             'Id' => 'saleTxnId',     'Type' => 'view'),						
+			);
+			
+			$ourOptions = array_merge(parent::GetHiddenRowsDefinition(), $ourOptions);
+			return $ourOptions;
+		}
+		
+	}
+}
+
+if (!class_exists('PayPalSalesAdminClass')) 
+{
 	class PayPalSalesAdminClass extends MJSLibAdminClass // Define class
 	{		
 		var $addingSale;
@@ -378,7 +405,7 @@ else
 			}
 				
 			return $rtnVal;
-	}
+		}
 		
 		function OutputSalesList($env)
 		{

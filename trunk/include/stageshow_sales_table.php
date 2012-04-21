@@ -21,13 +21,17 @@ Copyright 2012 Malcolm Shergold
 */
 
 include 'mjslib_table.php';
+include 'mjslib_paypal_salesadmin.php';      
 
-if (!class_exists('StageShowAdminSalesListClass')) 
+if (!class_exists('StageShowSalesAdminListClass')) 
 {
-	class StageShowAdminSalesListClass extends MJSLibAdminListClass // Define class
+	class StageShowSalesAdminListClass extends PayPalSalesAdminListClass // Define class
 	{		
 		function __construct($env) //constructor
 		{
+			$this->hiddenRowsButtonId = 'Details';
+			$this->env = $env;
+			
 			// Call base constructor
 			parent::__construct($env);
 			
@@ -64,23 +68,64 @@ if (!class_exists('StageShowAdminSalesListClass'))
 		{
 			$this->NewRow($result);
 
-			$modLink = 'admin.php?page=stageshow_sales&action=details&id='.$result->saleID;
-			$modLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($modLink, plugin_basename($this->caller)) : $modLink;
-			//$modLink = '<a href="'.$modLink.'">'.$result->saleName.'</a>';
+/*
+			// TODO - Code for links on Sales List Page - Remove
+			if (false)
+			{
+				$modLink = 'admin.php?page=stageshow_sales&action=details&id='.$result->saleID;
+				$modLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($modLink, plugin_basename($this->caller)) : $modLink;
 
-			$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleName.'</a>');
-			$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleDateTime.'</a>');
-			$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleStatus.'</a>');
-			$this->AddToTable($result, $result->totalQty);
+				$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleName.'</a>');
+				$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleDateTime.'</a>');
+				$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleStatus.'</a>');
+			}
+			else
+*/
+			{
+				$this->AddToTable($result, $result->saleName);
+				$this->AddToTable($result, $result->saleDateTime);
+				$this->AddToTable($result, $result->saleStatus);
+				$this->AddToTable($result, $result->totalQty);
+			}
+			
 			//<td style="background-color:#FFF">
-
 		}		
+		
+		function GetHiddenRowsDefinition()	// TODO - Sales Hidden Rows Disabled for Distribution
+		{
+			$ourOptions = array(
+				array('Type' => 'function', 'Show' => 'ShowSaleDetails', 'Save' => 'SaveSaleDetails'),						
+			);
+			
+			$ourOptions = array_merge(parent::GetHiddenRowsDefinition(), $ourOptions);
+			return $ourOptions;
+		}
+		
+		function ShowSaleDetails($result)
+		{
+			$env = $this->env;
+			
+			$myDBaseObj = $this->myDBaseObj;
+			$saleResults = $myDBaseObj->GetSale($result->saleID);
+			$salesList = new StageShowSalesAdminDetailsListClass($env);	
+
+			// Set Rows per page to disable paging used on main page
+			$salesList->enableFilter = false;
+			
+			ob_start();	
+			$salesList->OutputList($saleResults);	
+			$saleDetailsOoutput = ob_get_contents();
+			ob_end_clean();
+
+			return $saleDetailsOoutput;
+		}
+		
 	}
 }
 
-if (!class_exists('StageShowAdminSaleDetailsListClass')) 
+if (!class_exists('StageShowSalesAdminDetailsListClass')) 
 {
-	class StageShowAdminSaleDetailsListClass extends MJSLibAdminListClass // Define class
+	class StageShowSalesAdminDetailsListClass extends MJSLibAdminListClass // Define class
 	{		
 		var $isInput;
 		

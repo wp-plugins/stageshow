@@ -105,7 +105,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 						{
 							include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 
-							$salesList = new StageShowAdminSaleDetailsListClass($env);		
+							$salesList = new StageShowSalesAdminDetailsListClass($env);		
 							
 							echo '<tr><td colspan="2">'."\n";
 							$salesList->OutputList($results);	

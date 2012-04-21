@@ -635,6 +635,7 @@ if (!class_exists('MJSLibAdminListClass'))
 {
 	class MJSLibAdminListClass extends MJSLibTableClass // Define class
 	{		
+		var $env;
 		var $caller;
 		var $myPluginObj;
 		var $myDBaseObj;
@@ -646,11 +647,14 @@ if (!class_exists('MJSLibAdminListClass'))
 		var $showDBIds;
 		var $lastCBId;
 		var $currResult;
+		var $enableFilter;
 		
 		function __construct($env, $newTableType = 'html') //constructor
 		{
 			// Call base constructor
 			parent::__construct($newTableType);
+			
+			$this->end = $env;
 			
 			if (is_array($env))
 			{
@@ -661,6 +665,8 @@ if (!class_exists('MJSLibAdminListClass'))
 			else
 				$this->caller = $env;
 				
+			$this->enableFilter = true;
+			
 			$callerFolders = explode("/", plugin_basename($this->caller));
 			$this->pluginName = $callerFolders[0];
 
@@ -727,6 +733,9 @@ if (!class_exists('MJSLibAdminListClass'))
 		function ShowRow($result, $rowFilter)
 		{
 			$rtnVal = true;
+
+			if (!$this->enableFilter) 
+				return $rtnVal;
 			
 			if ($this->rowNo < $this->firstRowShown) 
 			{				
@@ -794,24 +803,31 @@ if (!class_exists('MJSLibAdminListClass'))
 				$colClassList .= 'optionsCol';
 				$this->SetColClass($colClassList);
 												
-				$hiddenRows = "<table>\n";
+				$hiddenRows = "<table width=\"100%\">\n";
 				foreach ($this->hiddenRowsDef as $option)
 				{
-					$optionId = $option['Id'];
-					$option['Id'] = $option['Id'].$this->GetRecordID($result);
-					
-					$hiddenRows .= '<tr>'."\n";
-					$hiddenRows .= '<td>'.$option['Label']."</td>\n";
-					$hiddenRows .= '<td>'.SettingsAdminClass::GetHTMLTag($option, $result->$optionId)."</td>\n";
-					$hiddenRows .= "</tr>\n";
+					switch ($option['Type'])
+					{
+						case 'function':
+							$functionId = $option['Show'];
+							$content = $this->$functionId($result);
+							$hiddenRows .= '<tr>'."\n";
+							$hiddenRows .= '<td colspan=2>'.$content."</td>\n";
+							$hiddenRows .= "</tr>\n";
+							break;
+							
+						default:
+							$optionId = $option['Id'];
+							$option['Id'] = $option['Id'].$this->GetRecordID($result);
+											
+							$hiddenRows .= '<tr>'."\n";
+							$hiddenRows .= '<td>'.$option['Label']."</td>\n";
+							$hiddenRows .= '<td>'.SettingsAdminClass::GetHTMLTag($option, $result->$optionId)."</td>\n";
+							$hiddenRows .= "</tr>\n";
+							break;
+					}
 				}
 				$hiddenRows .= "</table>\n";
-				
-				/*
-				echo "<!-- \n";
-				echo "$hiddenRows\n";
-				echo "--> \n";
-				*/
 				
 				$this->spanEmptyCells = true;
 				$this->AddHiddenRows($result, $hiddenRowsID, $hiddenRows);					

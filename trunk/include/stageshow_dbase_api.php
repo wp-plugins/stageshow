@@ -491,6 +491,7 @@ if (!class_exists('StageShowDBaseClass'))
 
 		function UpdateCartButtons($perfsList)
 		{
+			$siteurl = get_option('siteurl');
 			foreach($perfsList as $perfEntry)
 			{
 				$description = $perfEntry->showName.' - '.$this->FormatDateForDisplay($perfEntry->perfDateTime);
@@ -511,7 +512,7 @@ if (!class_exists('StageShowDBaseClass'))
 				}
 								
 				$this->payPalAPIObj->UpdateButton($perfEntry->perfPayPalButtonID, $description, $reference, $ticketPrices, $priceIDs);
-				$this->payPalAPIObj->UpdateInventory($perfEntry->perfPayPalButtonID, $quantity, '', $reference);
+				$this->payPalAPIObj->UpdateInventory($perfEntry->perfPayPalButtonID, $quantity, $siteurl, $reference);
 			}
 		}
 		
@@ -904,6 +905,11 @@ if (!class_exists('StageShowDBaseClass'))
 			return (($this->adminOptions['PLen']==0) || ($results[0]->perfLen<$this->adminOptions['PLen']));
 		}
 
+		function GetAllPlansList()
+		{
+			return array();
+		}
+		
 		function AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats, $perfPayPalButtonID)
 		{
       global $wpdb;
@@ -971,7 +977,7 @@ if (!class_exists('StageShowDBaseClass'))
 			return "OK";							
 		}
 		
-		function GetPricesListByShowID($showID)
+		function GetPricesListByShowID($showID, $activeOnly = false)
 		{
 			if (!is_numeric($showID))
 			{
@@ -980,6 +986,9 @@ if (!class_exists('StageShowDBaseClass'))
 					return array();
 			}
 			
+			if ($activeOnly)
+				$sqlFilters['activePrices'] = true;
+				
 			$sqlFilters['showID'] = $showID;
 			return $this->GetPricesList($sqlFilters);
 		}
@@ -1196,6 +1205,12 @@ if (!class_exists('StageShowDBaseClass'))
 			if (isset($sqlFilters['perfID']) && ($sqlFilters['perfID'] > 0))
 			{
 				$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfID="'.$sqlFilters['perfID'].'"';
+				$sqlCmd = ' AND ';
+			}
+			
+			if (isset($sqlFilters['activePrices']))
+			{
+				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceValue>"0"';
 				$sqlCmd = ' AND ';
 			}
 			
