@@ -31,27 +31,12 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 		function __construct($env) //constructor
 		{
 			// Call base constructor
-			parent::__construct($env);
-			
-			$myDBaseObj = $this->myDBaseObj;
-			
-			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
-
-			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
+			parent::__construct($env, true);
 			
 			$this->bulkActions = array(
 				'activate' => __('Activate/Deactivate', STAGESHOW_DOMAIN_NAME),
 				'delete'   => __('Delete', STAGESHOW_DOMAIN_NAME),
 				);
-
-			$columns = array(
-		    'perfDateTime' => __('Date & Time', STAGESHOW_DOMAIN_NAME),
-		    'perfRef' => __('Reference', STAGESHOW_DOMAIN_NAME),
-		    'perfSeats' => __('Max Seats', STAGESHOW_DOMAIN_NAME),
-		    'perfSales' => __('Tickets Sold', STAGESHOW_DOMAIN_NAME),
-		    'perfState' => __('State', STAGESHOW_DOMAIN_NAME),
-			);			
-			$this->SetListHeaders('stageshow_sales_list', $columns);
 			
 			$updateFailed = false;
 		}
@@ -66,53 +51,36 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 			return $result->perfID;
 		}
 		
+		function GetMainRowsDefinition()
+		{
+			return array(
+				array('Label' => 'Date & Time',  'Id' => 'perfDateTime', 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,  'Len' => 28, ),
+				array('Label' => 'Reference',    'Id' => 'perfRef',      'Type' => MJSLibTableClass::TABLEENTRY_TEXT,  'Len' => STAGESHOW_PERFREF_TEXTLEN, ),
+				array('Label' => 'Max Seats',    'Id' => 'perfSeats',    'Type' => MJSLibTableClass::TABLEENTRY_TEXT,  'Decode' => 'GetPerfMaxSeats',  'Len' => 4, ),						
+				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VALUE, 'Link' => 'admin.php?page=stageshow_sales&action=perf&id=', ),						
+				array('Label' => 'State',        'Id' => 'perfState',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE, 'Decode' => 'GetPerfState'),						
+			);
+		}
+		
+		function GetPerfMaxSeats($result)
+		{
+			$perfSeats = $result->perfSeats;
+			if ($perfSeats < 0) $perfSeats = '&#8734';
+			return $perfSeats;
+		}
+		
+		function GetPerfState($result)
+		{
+			$perfState = $this->myDBaseObj->IsStateActive($result->perfState) ? __("Active", STAGESHOW_DOMAIN_NAME) : __("INACTIVE", STAGESHOW_DOMAIN_NAME);
+			return $perfState;
+		}
+		
 		function OutputList($results, $updateFailed)
 		{
 			$this->updateFailed = $updateFailed;
 			parent::OutputList($results);
 		}
 		
-		function AddResult($result)
-		{
-			$myDBaseObj = $this->myDBaseObj;
-
-			if ($this->updateFailed)
-			{
-				// Get value(s) from form controls
-				$perfDateTime = stripslashes($_POST['perfDateTime'.$result->perfID]);
-				$perfRef = stripslashes($_POST['perfRef'.$result->perfID]);
-				$perfSeats = stripslashes($_POST['perfSeats'.$result->perfID]);
-			}
-			else
-			{
-				// Get value(s) from database
-				$perfDateTime = $result->perfDateTime;
-				$perfRef = $result->perfRef;
-				$perfSeats = $result->perfSeats;
-			}
-			
-			if ($perfSeats < 0) $perfSeats = '&#8734';
-			
-			if ($result->totalQty > 0)
-			{
-				$perfSalesLink = 'admin.php?page=stageshow_sales&action=perf&id='.$result->perfID;
-				$perfSalesLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($perfSalesLink, plugin_basename($this->caller)) : $perfSalesLink;
-				$perfSalesLink = '<a href="'.$perfSalesLink.'">'.$result->totalQty.'</a>';
-			}
-			else
-				$perfSalesLink = '0';
-				
-			$perfState = $myDBaseObj->IsStateActive($result->perfState) ? __("Active", STAGESHOW_DOMAIN_NAME) : __("INACTIVE", STAGESHOW_DOMAIN_NAME);
-			
-			$this->NewRow($result);
-			
-			$this->AddInputToTable($result, 'perfDateTime', 28, $perfDateTime);
-			$this->AddInputToTable($result, 'perfRef', STAGESHOW_PERFREF_TEXTLEN, $perfRef);
-			$this->AddInputToTable($result, 'perfSeats', 4, $perfSeats);
-			$this->AddToTable($result, $perfSalesLink);
-			$this->AddToTable($result, $perfState);
-
-		}		
 	}
 }
 
@@ -131,20 +99,6 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			$myDBaseObj = $this->myDBaseObj;
       
 			$delperfId = 0;
-			
-      $columns = array(
-		    'perfDateTime' => __('Date & Time', STAGESHOW_DOMAIN_NAME),
-		    'perfRef' => __('Reference', STAGESHOW_DOMAIN_NAME),
-		    'perfSeats' => __('Max Seats', STAGESHOW_DOMAIN_NAME),
-		    'perfSales' => __('Tickets Sold', STAGESHOW_DOMAIN_NAME),
-		    'perfDelete' => __(' ', STAGESHOW_DOMAIN_NAME)
-	    );
-	
-			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
-			{
-				// Add the ID column
-				$columns = array_merge(array('perfID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
-			}
 			
 			$perfsMsg = '';
 				 
@@ -209,7 +163,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 						$adminTableObj = new $classId($env);		
 						
 						// Get the extended settings array
-						$settings = $adminTableObj->GetHiddenRowsDefinition();
+						$settings = $adminTableObj->GetDetailsRowsDefinition();
 						$dbOpts = $adminTableObj->ExtendedSettingsDBOpts();
 			
 						foreach($results as $result)
@@ -258,7 +212,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 						if (count($perfsList) > 0)
 							$myDBaseObj->UpdateCartButtons($perfsList);
 					} 
-					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
+					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'</p></div>';
 				}
 			}			
 			else if (isset($_POST['addperfbutton']) && isset($_POST['showID']))
@@ -269,98 +223,9 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				
 				$statusMsg = '';
 				$myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowDBaseClass::MYSQL_DATETIME_FORMAT));				
-				echo '<div id="message" class="updated"><p>'.$statusMsg.'.</p></div>';		// TODO - Check return status "class"
+				echo '<div id="message" class="updated"><p>'.$statusMsg.'</p></div>';		// TODO - Check return status "class"
 			}			 
 
-			if ( isset( $_POST['action'] ) && (-1 != $_POST['action']) )
-				$bulkAction = $_POST['action'];
-			else if ( isset( $_POST['action2'] ) && (-1 != $_POST['action2']) )
-				$bulkAction =  $_POST['action2'];
-			else
-				$bulkAction = '';
-				
-			if (($bulkAction !== '') && isset($_POST['rowSelect']))
-			{
-				// Bulk Action Apply button actions
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
-				
-				$actionMsg = '';
-					
-				switch ($bulkAction)
-				{
-					case 'delete':		
-						$errorCount = 0;
-						$blockCount = 0;							
-						foreach($_POST['rowSelect'] as $perfID)
-						{
-							// Don't delete if any tickets have been sold for this performance
-							$delPerfEntry = $myDBaseObj->GetPerformancesListByPerfID($perfID);
-							if (count($delPerfEntry) == 0)
-								$errorCount++;
-							else if (!$myDBaseObj->CanDeletePerformance($delPerfEntry[0]))
-								$blockCount++;
-						}
-						
-						if (($errorCount > 0) || ($blockCount > 0))
-						{
-							if ($errorCount > 0)
-							{
-								$actionMsg = ($errorCount == 1) ? __("1 Performance has a Database Error", $this->pluginName) : $errorCount.' '.__("Performances have a Database Error", $this->pluginName); 
-								echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
-							}
-							if ($blockCount > 0)
-							{
-								$actionMsg = ($blockCount == 1) ? __("1 Performance cannot be deleted - Tickets already sold!", $this->pluginName) : $blockCount.' '.__("Performances cannot be deleted - Tickets already sold!", $this->pluginName); 
-								echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
-							}
-							break;
-						}
-						
-						// Delete performances
-						$actionCount = 0;
-						foreach($_POST['rowSelect'] as $perfID)
-						{
-							// Delete all prices for this performance
-							$myDBaseObj->DeletePriceByPerfID($perfID);
-							
-							// Get the performance entry
-							$results = $myDBaseObj->GetPerformancesListByPerfID($perfID);
-					
-							// Delete any PayPal buttons ....
-							$myDBaseObj->payPalAPIObj->DeleteButton($results[0]->perfPayPalButtonID);	
-										
-							// Delete a performance entry
-							$myDBaseObj->DeletePerformanceByPerfID($perfID);
-
-							$actionCount++;
-						}
-						
-						if ($actionCount > 0)
-						{
-							$actionMsg = ($actionCount == 1) ? __("1 Performance has been deleted", $this->pluginName) : $actionCount.' '.__("Performances have been deleted", $this->pluginName); 
-							echo '<div id="message" class="updated"><p>'.$actionMsg.'</p></div>';
-						}
-						else
-						{
-							$actionMsg = __("Nothing to Delete", $this->pluginName);
-							echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
-						}
-						break;
-						
-					case 'activate':
-						$actionCount = 0;
-						foreach($_POST['rowSelect'] as $perfID)
-						{
-							$perfEntry = $myDBaseObj->GetPerformancesListByPerfID($perfID);
-							if ($myDBaseObj->IsStateActive($perfEntry[0]->perfState))
-								$myDBaseObj->SetPerfActivated($perfID, 'deactivate');
-							else
-								$myDBaseObj->SetPerfActivated($perfID, 'activate');
-						}
-						break;
-				}
-			}
-			
 			$this->Output_MainPage($env, $perfsMsg !== '');
 		}		
 		
@@ -420,6 +285,89 @@ foreach ($showLists as $showList)
 <?php
 			// Stage Show Performances HTML Output - End 
 		}
+		
+		function DoBulkPreAction($bulkAction, $recordId)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			if (!isset($this->errorCount)) $this->errorCount = 0;
+			if (!isset($this->blockCount)) $this->blockCount = 0;
+						
+			switch ($bulkAction)
+			{
+				case 'delete':		
+					// Don't delete if any tickets have been sold for this performance
+					$delPerfEntry = $myDBaseObj->GetPerformancesListByPerfID($recordId);
+					if (count($delPerfEntry) == 0)
+						$this->errorCount++;
+					else if (!$myDBaseObj->CanDeletePerformance($delPerfEntry[0]))
+						$this->blockCount++;
+					return ( ($this->errorCount > 0) || ($this->errorCount > 0) );
+			}
+				
+			return false;
+		}
+		
+		function DoBulkAction($bulkAction, $recordId)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			switch ($bulkAction)
+			{
+				case 'delete':		
+					// Delete all prices for this performance
+					$myDBaseObj->DeletePriceByPerfID($recordId);
+							
+					// Get the performance entry
+					$results = $myDBaseObj->GetPerformancesListByPerfID($recordId);
+					
+					// Delete any PayPal buttons ....
+					$myDBaseObj->payPalAPIObj->DeleteButton($results[0]->perfPayPalButtonID);	
+										
+					// Delete a performance entry
+					$myDBaseObj->DeletePerformanceByPerfID($recordId);
+					return true;
+					
+				case 'activate':
+					$perfEntry = $myDBaseObj->GetPerformancesListByPerfID($recordId);
+					if ($myDBaseObj->IsStateActive($perfEntry[0]->perfState))
+						$myDBaseObj->SetPerfActivated($recordId, 'deactivate');
+					else
+						$myDBaseObj->SetPerfActivated($recordId, 'activate');
+					return true;
+			}
+				
+			return false;
+		}
+		
+		function GetBulkActionMsg($bulkAction, $actionCount)
+		{
+			$actionMsg = '';
+			
+			switch ($bulkAction)
+			{
+				case 'delete':		
+					if ($this->errorCount > 0)
+						$actionMsg = ($this->errorCount == 1) ? __("1 Performance has a Database Error", $this->pluginName) : $errorCount.' '.__("Performances have a Database Error", $this->pluginName); 
+					else if ($this->blockCount > 0)
+						$actionMsg = ($this->blockCount == 1) ? __("1 Performance cannot be deleted - Tickets already sold!", $this->pluginName) : $this->blockCount.' '.__("Performances cannot be deleted - Tickets already sold!", $this->pluginName); 
+					else if ($actionCount > 0)		
+						$actionMsg = ($actionCount == 1) ? __("1 Performance has been deleted", $this->pluginName) : $actionCount.' '.__("Performances have been deleted", $this->pluginName); 
+					else
+						$actionMsg = __("Nothing to Delete", $this->pluginName);
+					break;
+					
+				case 'activate':		
+					if ($actionCount > 0)		
+						$actionMsg = ($actionCount == 1) ? __("1 Performance has been Activated/Deactivated", $this->pluginName) : $actionCount.' '.__("Performances have been Activated/Deactivated", $this->pluginName); 
+					else
+						$actionMsg = __("Nothing to Delete", $this->pluginName);
+					break;
+			}
+			
+			return $actionMsg;
+		}
+		
 	}
 }
 

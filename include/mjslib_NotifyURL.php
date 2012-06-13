@@ -87,6 +87,7 @@ if (!class_exists('NotifyURLClass'))
 				
 			//$LogsFolder = ABSPATH . '/logs/';
 				
+			global $LogMessage;
 			$LogMessage = '';
 
 			if (defined('NOTIFYURL_CALLER'))
@@ -204,9 +205,9 @@ if (!class_exists('NotifyURLClass'))
 						else
 						{
 							$results['Txnid'] = $this->HTTPParam('txn_id');
-							$results['PayerName'] = $this->HTTPParam('first_name') . ' ' . $this->HTTPParam('last_name');
-							$results['PayerEmail'] = $this->HTTPParam('payer_email');
-							$results['SaleStatus'] = $this->HTTPParam('payment_status');
+							$results['saleName'] = $this->HTTPParam('first_name') . ' ' . $this->HTTPParam('last_name');
+							$results['saleEmail'] = $this->HTTPParam('payer_email');
+							$results['saleStatus'] = $this->HTTPParam('payment_status');
 							$results['salePrice'] = $this->HTTPParam('mc_gross');
 							$results['salePPName'] = $this->HTTPParam('address_name');
 							$results['salePPStreet'] = $this->HTTPParam('address_street');

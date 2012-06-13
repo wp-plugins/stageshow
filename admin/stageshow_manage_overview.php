@@ -29,18 +29,10 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		function __construct($env) //constructor
 		{
 			// Call base constructor
-			parent::__construct($env);
-			
-			$myDBaseObj = $this->myDBaseObj;
-			
-			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
-
-			$columns = array(
-		    'showName' => __('Show', STAGESHOW_DOMAIN_NAME),
-		    'perfCount' => __('Performances', STAGESHOW_DOMAIN_NAME),
-		    'showSales' => __('Tickets Sold', STAGESHOW_DOMAIN_NAME)
-			);			
-			$this->SetListHeaders($this->pluginName.'_overview_list', $columns, MJSLibTableClass::HEADERPOSN_TOP);
+			$editMode = false;
+			parent::__construct($env, $editMode);
+				
+			$this->HeadersPosn = MJSLibTableClass::HEADERPOSN_TOP;
 		}
 		
 		function GetTableID($result)
@@ -53,19 +45,15 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			return $result->showID;
 		}
 		
-		function AddResult($result)
+		function GetMainRowsDefinition()
 		{
-			$myDBaseObj = $this->myDBaseObj;
-
-			$results2 = $myDBaseObj->GetPerformancesListByShowID($result->showID);
-			$showSales = $myDBaseObj->GetSalesQtyByShowID($result->showID);
-			
-			$this->NewRow($result);
-
-			$this->AddToTable($result, $result->showName);
-			$this->AddToTable($result, count($results2));
-			$this->AddToTable($result, $showSales);
-		}		
+			return array(
+				array('Label' => 'Show',         'Id' => 'showName',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),
+				array('Label' => 'Performances', 'Id' => 'perfCount',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array('Label' => 'Tickets Sold', 'Id' => 'salesCount',  'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+			);
+		}
+		
 	}
 }
 
@@ -98,6 +86,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			// Stage Show Overview HTML Output - Start 
 			$this->Output_Overview($env);
 			$this->Output_ShortcodeHelp();
+			$this->Output_UpdateServerHelp();
 			$this->Output_UpdateInfo();
 			
 			echo '</div>';
@@ -109,10 +98,9 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			$results = $myDBaseObj->GetAllShowsList();
 						
 ?>
-			<br>
-				<h2>Shows</h2>
-				<br>
-					<?php	
+						<br>
+							<h2>Shows</h2>
+							<?php	
 	
 			if(count($results) == 0)
 			{
@@ -129,6 +117,14 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			}
 			else
 			{
+				foreach ($results as $key=>$result)
+				{
+					$perfsList = $myDBaseObj->GetPerformancesListByShowID($result->showID);
+					
+					$results[$key]->perfCount = count($perfsList);
+					$results[$key]->salesCount = $myDBaseObj->GetSalesQtyByShowID($result->showID);
+				}
+			
 				$overviewList = new StageShowOverviewAdminListClass($env);		
 				$overviewList->OutputList($results);		
 			}
@@ -140,7 +136,6 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			<br>			
 				<h2>Shortcodes</h2>
 				StageShow generates output to your Wordpress pages for the following shortcodes:
-			<br><br>
 			<table class="widefat" cellspacing="0">
 				<thead>
 					<tr>
@@ -158,6 +153,10 @@ if (!class_exists('StageShowOverviewAdminClass'))
 <?php
 		}
 
+		function Output_UpdateServerHelp()
+		{
+		}
+		
 		function Output_UpdateInfo()
 		{
 			// Get News entry from server
@@ -169,10 +168,15 @@ if (!class_exists('StageShowOverviewAdminClass'))
 				return;
 			
 ?>
-		<br>
-			<h2>StageShow Updates</h2>
 			<br>
-				<br>
+				<h2>StageShow Updates</h2>
+<?php
+			if (defined('STAGESHOW_PLUS_UPDATE_SERVER_PATH'))
+			{
+				$msg = "<strong>Using Custom Update Server - Root URL=".STAGESHOW_PLUS_UPDATE_SERVER_PATH."<br>\n";
+				echo '<div id="message" class="error"><p>'.$msg.'</p></div>';
+			}
+?>
 					<table class="widefat" cellspacing="0">
 						<thead>
 							<tr>

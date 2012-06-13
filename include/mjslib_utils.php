@@ -72,6 +72,80 @@ if (!class_exists('MJSLibUtilsClass'))
 			return false;
 		}
 
+		static function check_admin_referer($action = -1, $query_arg = '_wpnonce')
+		{
+			if (!wp_verify_nonce($_REQUEST[$query_arg], $action))
+			{
+				echo "NOnce check failed - Call Stack Follows:<br>\n";
+				MJSLibUtilsClass::ShowCallStack();
+			}
+			
+			return check_admin_referer($action, $query_arg);
+		}
+		
+		static function xxShowCallStack($echoOut = true, $showParams = true)
+		{
+			$lineBreak = $echoOut ? "<br>\n" : "\n";
+			
+			ob_start();		
+			debug_print_backtrace();			
+			$callStack = ob_get_contents();
+			ob_end_clean();
+
+			// Typical Entry: #2 OurClass->TheFunction(FParams) called at [D:\Internet\StageShow+\Web\wp-content\plugins\stageshow\include\mjslib_sales_dbase_api.php:286] 
+			
+			$callStack = preg_split('/#[0-9]+[ ]+/', $callStack, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+			$showEntry = false;
+			
+			ob_start();		
+			echo $lineBreak."Callstack";
+			if (!$showParams) echo " (no params)";
+			echo ":".$lineBreak;
+			
+			foreach ($callStack as $fncall)
+			{
+				if (strlen($fncall) == 0) continue;
+				
+				$fields = explode(' called at ', $fncall);
+
+				// Separate Function Parameters
+				$params = explode('(', $fields[0], 2);
+				
+				if (!$showEntry)
+				{
+					// Suppress this function itself
+					if (strpos($fncall,'::ShowCallStack('))
+						continue;
+					if (strpos($fncall,'->ShowCallStack('))
+						continue;
+					
+					$showEntry = true;
+				}
+					
+				echo $params[0].'()';		// Output the function name
+				
+				if (count($fields) > 1)
+				{
+					// Extract the filename and output it
+					$fileName = basename(str_replace('[', '', str_replace(']', '', $fields[1])));
+					echo ' - '.$fileName;
+				}
+				
+				if ($showParams) echo $lineBreak.$params[1];
+							
+				//echo $lineBreak;
+			}
+			
+			$rtnVal = ob_get_contents();
+			ob_end_clean();
+			
+			$rtnVal = str_replace("\n","<br>\n",$rtnVal);
+			
+			if ($echoOut) echo $rtnVal;
+			
+			return $rtnVal;
+		}		
+		
 		static function ShowCallStack($echoOut = true)
 		{
 			$lineBreak = $echoOut ? "<br>\n" : "\n";
@@ -121,6 +195,14 @@ if (!class_exists('MJSLibUtilsClass'))
 			
 			return $rtnVal;
 		}		
+		
+		static function UndefinedFuncCallError($classObj, $funcName)
+		{
+			$classId = get_class($classObj);
+			MJSLibUtilsClass::ShowCallStack();
+			echo "<strong><br>function $funcName() must be defined in $classId class<br></strong>\n";
+			die;
+		}
 		
 		static function print_r($obj, $name='', $return = false)
 		{

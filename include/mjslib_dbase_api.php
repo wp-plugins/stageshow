@@ -39,6 +39,7 @@ if (!class_exists('MJSLibDBaseClass'))
 		var $ordersDBTableID;
 		var $optionsID;
 		
+		var $adminOptions;
 		var $pluginInfo;		
 		var $opts;
 		
@@ -100,14 +101,14 @@ if (!class_exists('MJSLibDBaseClass'))
 		
 		function ShowCallStack()
 		{
-			MJSLibUtilsClass::ShowCallStack();
+			MJSLibUtilsClass::ShowCallStack(true, $this->getOption('Dev_CallStackParams'));
 		}
 		
     function ShowSQL($sql, $values = null)
     {
-			if ($this->adminOptions['Dev_ShowSQL'] <= 0) return;
-						
-			if ($this->adminOptions['Dev_ShowCallStack'])
+			if ($this->getOption('Dev_ShowSQL') <= 0) return;
+			
+			if ($this->getOption('Dev_ShowCallStack'))
 				$this->ShowCallStack();
 			
 			echo "<br>$sql<br>\n"; 
@@ -122,18 +123,22 @@ if (!class_exists('MJSLibDBaseClass'))
 		{
 			global $wpdb;
       
-			$results = $wpdb->get_results($sql);
+			$results = $wpdb->get_results($sql);			
+			$this->show_results($results);
 			
-			if ($this->adminOptions['Dev_ShowDBOutput'] == 1) 
+			return $results;
+		}
+		
+		function show_results($results)
+		{
+			if ($this->getOption('Dev_ShowDBOutput') == 1) 
 			{
 				echo "<br>Database Results:<br>\n"; 
 				for ($i=0; $i<count($results); $i++)
 					echo "Array[$i] = ".print_r($results[$i], true)."<br>\n"; 
 			}
-			
-			return $results;
 		}
-		
+
 		//Returns an array of admin options
 		function getOptions($childOptions = array()) 
 		{
@@ -151,15 +156,6 @@ if (!class_exists('MJSLibDBaseClass'))
         
         'LogsFolderPath' => '../logs',
         'PageLength' => MJSLIB_EVENTS_PER_PAGE,
-        
-        'Dev_EnableDebug' => '',
-        'Dev_ShowSQL' => '',
-        'Dev_ShowDBOutput' => '',
-        'Dev_ShowCallStack' => '',				
-        'Dev_ShowPayPalIO' => '',
-        'Dev_ShowEMailMsgs' => '',
-        'Dev_ShowDBIds' => '',   
-        'Dev_ShowMiscDebug' => '', 
         
         'Unused_EndOfList' => ''
       );
@@ -180,6 +176,14 @@ if (!class_exists('MJSLibDBaseClass'))
 			return $this->adminOptions;
 		}
     
+    function getOption($optionID)
+    {
+			if (!isset($this->adminOptions[$optionID]))
+				return '';
+				
+			return $this->adminOptions[$optionID];
+    }
+    
 		// Saves the admin options to the options data table
 		function saveOptions($newOptions = null) 
 		{			
@@ -191,7 +195,6 @@ if (!class_exists('MJSLibDBaseClass'))
     
 		function createDB($dropTable = false)
 		{
-			// Function must be overloaded in derived class ....
 		}
 		
 		function GetOurButtonsList()

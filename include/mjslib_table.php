@@ -33,6 +33,16 @@ if (!class_exists('MJSLibTableClass'))
 		const HEADERPOSN_BOTTOM = 2;
 		const HEADERPOSN_BOTH = 3;
 
+		const TABLEENTRY_ARRAY = 'array';
+		const TABLEENTRY_BUTTON = 'button';
+		const TABLEENTRY_CHECKBOX = 'checkbox';
+		const TABLEENTRY_FUNCTION = 'function';
+		const TABLEENTRY_SELECT = 'select';
+		const TABLEENTRY_TEXT = 'text';
+		const TABLEENTRY_TEXTBOX = 'textbox';
+		const TABLEENTRY_VIEW = 'view';
+		const	TABLEENTRY_VALUE = 'value';
+		
 		var $tableContents = array();
 		var $rowAttr = array();
 		var $tableName = '';
@@ -40,22 +50,25 @@ if (!class_exists('MJSLibTableClass'))
 		var $divClass;
 		var $colId;
 		var $rowsPerPage;
-		var $columnHeadersId;
+		var $columnHeadersId = '';
 		var $HeadersPosn;
 		
 		var $colWidth = array();
 		var $colAlign = array();
 		var $colClass = array();
+		var $columns;
 		var $bulkActions;
 		var $hideEmptyRows;
 		var $spanEmptyCells;
 		var $useTHTags;
 		var $noAutoComplete;
+		var $ignoreEmptyCells;
 		
-		var $hiddenRowsDef;
+		var $detailsRowsDef;
 		var $moreText;
 		var $lessText;
-		var $hiddenRowsButtonId = '';
+		var $hiddenRowsButtonId;
+		var $hiddenRowStyle = 'style="display: none;"';
 		
 		var $currRow;
 		var $currCol;
@@ -80,7 +93,12 @@ if (!class_exists('MJSLibTableClass'))
 				case 'html':
 				case 'RTF':
 				case 'text':
+					break;
+					
 				default:
+					MJSLibUtilsClass::ShowCallStack();
+					echo "<strong><br>Invalid table type ($newTableType) ".get_class($this)." class<br></strong>\n";
+					die;
 					break;
 			}
 			
@@ -99,15 +117,14 @@ if (!class_exists('MJSLibTableClass'))
 			$this->rowsPerPage = 0;
 			$this->useTHTags = false;
 			$this->noAutoComplete = true;
+			$this->ignoreEmptyCells = true;
 			$this->scriptsOutput = false;
 			
-			if ($this->hiddenRowsButtonId === '')
-				$this->hiddenRowsButtonId = 'Options';
-
-			$this->hiddenRowsDef = $this->GetHiddenRowsDefinition();
+			$this->detailsRowsDef = array_merge($this->GetDetailsRowsDefinition(), $this->GetHiddenRowsFooter());
 				
 			$this->moreText = __('Show');
 			$this->lessText = __('Hide');
+			
 		}
 		
 		function SetRowsPerPage($rowsPerPage)
@@ -122,11 +139,21 @@ if (!class_exists('MJSLibTableClass'))
 
 		function AddHiddenRows($result, $hiddenRowsID, $hiddenRows)
 		{
-			$this->NewRow($result, 'id="'.$hiddenRowsID.'" style="display: none;" class="hiddenRow"');
+			$this->NewRow($result, 'id="'.$hiddenRowsID.'" '.$this->hiddenRowStyle.' class="hiddenRow"');
 			$this->AddToTable($result, $hiddenRows);	
 		}
 
-		function GetHiddenRowsDefinition()
+		function GetMainRowsDefinition()
+		{
+			MJSLibUtilsClass::UndefinedFuncCallError($this, 'GetMainRowsDefinition');
+		}
+		
+		function GetDetailsRowsDefinition()
+		{
+			return array();
+		}
+		
+		function GetHiddenRowsFooter()
 		{
 			return array();
 		}
@@ -134,7 +161,7 @@ if (!class_exists('MJSLibTableClass'))
 		function HasHiddenRows()
 		{
 			// No extended settings
-			return (count($this->hiddenRowsDef) > 0);
+			return (count($this->detailsRowsDef) > 0);
 		}
 		
 		function ExtendedSettingsDBOpts()
@@ -168,8 +195,24 @@ if (!class_exists('MJSLibTableClass'))
 			$this->colClass = split(',', ','.$newColClass);
 		}
 
-		function SetListHeaders($headerId, $columns, $headerPosn = MJSLibTableClass::HEADERPOSN_BOTH)
+		function SetListHeaders($headerId, $columns = null, $headerPosn = MJSLibTableClass::HEADERPOSN_BOTH)
 		{
+			// Save the settings, the headers are actually set by the EnableListHeaders function			
+			$this->columnHeadersId = $headerId;
+
+			if ($columns != null)
+				$this->columns = $columns;	// Save for possible next call
+				
+			$this->HeadersPosn = $headerPosn;
+		}
+
+		function EnableListHeaders()
+		{
+			if ($this->columnHeadersId === '') return;
+			if ($this->columns === null) return;
+			
+			$columns = $this->columns;	// Use columns from last call
+				
 			if ($this->showDBIds)
 			{
 				// Add the ID column
@@ -182,15 +225,12 @@ if (!class_exists('MJSLibTableClass'))
 				$columns = array_merge(array('eventCb' => '<input name="checkall" id="checkall" type="checkbox"  onClick="updateCheckboxes(this)" />'), $columns); 
 			}
 			
-			if ($this->HasHiddenRows())
+			if ($this->HasHiddenRows() && ($this->hiddenRowsButtonId !== ''))
 			{
 				$columns = array_merge($columns, array('eventOptions' => $this->hiddenRowsButtonId)); 
 			}
 				
-			$this->columnHeadersId = $headerId;
-			$this->HeadersPosn = $headerPosn;
 			register_column_headers($this->columnHeadersId, $columns);	
-			
 		}
 		
 		function AddCheckBoxToTable($result, $inputName, $col=0, $value='checked', $checked=false, $label='', $newRow = false)
@@ -228,7 +268,7 @@ if (!class_exists('MJSLibTableClass'))
 			$content = "<select name=$inputName>"."\n";
 			foreach ($options as $index => $option)
 			{
-				$selected = ($option == $value) ? ' selected=""' : '';
+				$selected = ($index == $value) ? ' selected=""' : '';
 				$content .= '<option value="'.$index.'"'.$selected.'>'.$option.'&nbsp;&nbsp;</option>'."\n";
 			}
 			$content .= "</select>"."\n";
@@ -253,7 +293,10 @@ if (!class_exists('MJSLibTableClass'))
 
 		function AddToTable($result, $content, $col=0, $newRow = false)
 		{
+			if ($this->ignoreEmptyCells)
+			{
 			if (!isset($content) || (strlen($content) == 0)) return;
+			}
 			
 			// Increment Row ... but only if the current row has data
 			if ($newRow) 
@@ -274,6 +317,12 @@ if (!class_exists('MJSLibTableClass'))
 			if (!isset($this->columnHeadersId)) 
 				return;
 
+			if ($this->columnHeadersId === '') 
+				return;
+
+			if ( !function_exists( 'print_column_headers' ) )
+				return;
+			
 			if ($atTop)
 			{
 				if ($this->HeadersPosn === MJSLibTableClass::HEADERPOSN_BOTTOM) 
@@ -577,10 +626,8 @@ function updateCheckboxes(obj)
 							if (isset($this->tableContents[$row][$nextCol])) break;
 						}
 						if ($colSpanCount > 1) 
-						{
 							$colSpan = ' colspan="'.$colSpanCount.'"';
 						}							
-					}
 					switch ($this->tableType)
 					{
 						case 'html':
@@ -592,7 +639,10 @@ function updateCheckboxes(obj)
 						default:
 							break;
 					}
-					echo isset($this->tableContents[$row][$col]) ? $this->tableContents[$row][$col] : "&nbsp;";
+					$tableContents = isset($this->tableContents[$row][$col]) ? $this->tableContents[$row][$col] : "";
+					$tableContents = trim($tableContents);
+					echo (strlen($tableContents) > 0) ? $tableContents : "&nbsp;";
+					
 					switch ($this->tableType)
 					{
 						case 'html':
@@ -635,8 +685,14 @@ if (!class_exists('MJSLibAdminListClass'))
 {
 	class MJSLibAdminListClass extends MJSLibTableClass // Define class
 	{		
+		const VIEWMODE = false;
+		const EDITMODE = true;
+		
 		var $env;
 		var $caller;
+		var $results;
+		var $dataAux;
+	
 		var $myPluginObj;
 		var $myDBaseObj;
 		var $pluginName;
@@ -649,12 +705,20 @@ if (!class_exists('MJSLibAdminListClass'))
 		var $currResult;
 		var $enableFilter;
 		
-		function __construct($env, $newTableType = 'html') //constructor
+		var $editMode;
+		
+		var $updateFailed;
+		
+		function __construct($env, $editMode /* = false */, $newTableType = 'html') //constructor
 		{
+			$this->editMode = $editMode;
+			
 			// Call base constructor
 			parent::__construct($newTableType);
 			
-			$this->end = $env;
+			$this->ignoreEmptyCells = false;
+			
+			$this->env = $env;
 			
 			if (is_array($env))
 			{
@@ -671,18 +735,33 @@ if (!class_exists('MJSLibAdminListClass'))
 			$this->pluginName = $callerFolders[0];
 
 			$this->tableTags = 'class="widefat" cellspacing="0"';
+			
 			if (isset($this->myDBaseObj->adminOptions['PageLength']))
 				$this->SetRowsPerPage($this->myDBaseObj->adminOptions['PageLength']);
 			else
 				$this->SetRowsPerPage(MJSLIB_EVENTS_PER_PAGE);
+				
 			$this->useTHTags = true;
-			if (isset($this->myDBaseObj->adminOptions['Dev_ShowDBIds']))
-				$this->showDBIds = $this->myDBaseObj->adminOptions['Dev_ShowDBIds'];					
-			else
-				$this->showDBIds = false;
+			$this->showDBIds = $this->myDBaseObj->getOption('Dev_ShowDBIds');					
 			$this->lastCBId = '';
 			
 			$this->defaultFilterIndex = 0;	
+			$this->updateFailed = false;
+			
+			$this->columnDefs = $this->GetMainRowsDefinition();			
+			
+			if (!isset($this->HeadersPosn)) $this->HeadersPosn = MJSLibTableClass::HEADERPOSN_BOTH;
+			if (!isset($this->hiddenRowsButtonId)) 
+			{
+				if (!$this->editMode)
+					$this->hiddenRowsButtonId = 'Details';
+				else
+				{
+					$this->hiddenRowStyle = '';
+					$this->hiddenRowsButtonId = '';
+					$this->moreText = '';
+				}
+			}
 		}
 		
 		function NewRow($result, $rowAttr = '')
@@ -698,7 +777,7 @@ if (!class_exists('MJSLibAdminListClass'))
 			if ($this->showDBIds)
 			{
 				if ($isFirstLine)
-					$this->AddToTable($result, $recId, $col++);
+					$this->AddToTable($result, $recordID, $col++);
 				else	
 					$this->AddToTable($result, ' ', $col++);
 			}
@@ -715,14 +794,17 @@ if (!class_exists('MJSLibAdminListClass'))
 		
 		function GetTableID($result)
 		{
-			echo "function GetTableID() must be defined in ".get_class($this)." class<br>\n";
-			die;
+			MJSLibUtilsClass::UndefinedFuncCallError($this, 'GetTableID');
 		}
 		
 		function GetRecordID($result)
 		{
-			echo "function GetRecordID() must be defined in ".get_class($this)." class<br>\n";
-			die;
+			MJSLibUtilsClass::UndefinedFuncCallError($this, 'GetRecordID');
+		}
+		
+		function GetRowClass($result)
+		{
+			return '';
 		}
 		
 		function IsRowInView($result, $rowFilter)
@@ -743,7 +825,7 @@ if (!class_exists('MJSLibAdminListClass'))
 			}	
 			else if (($this->rowCount >= $this->rowsPerPage) && ($this->rowsPerPage > 0))
 			{
-				$rtnVal = false;	// TODO - Return tri-state output? ... this should terminate the loop
+				$rtnVal = false;
 			}
 				
 			return $rtnVal;
@@ -789,13 +871,137 @@ if (!class_exists('MJSLibAdminListClass'))
 			echo "</div>\n";
 		}
 		
+		function AddResult($result)
+		{
+			// TODO - Use Table defined in GetMainRowsDefinition() to determine table output
+		}
+		
+		function AddResultFromTable($result)
+		{		
+			$canDisplayTable = true;
+			
+			// Check if this row CAN be output using data from the columnDefs table
+			foreach ($this->columnDefs as $key => $columnDef)
+			{
+				if (!isset($columnDef['Type']))
+					return true;
+				
+				switch ($columnDef['Type'])
+				{
+					//case MJSLibTableClass::TABLEENTRY_CHECKBOX:
+					case MJSLibTableClass::TABLEENTRY_TEXT:
+					//case MJSLibTableClass::TABLEENTRY_TEXTBOX:
+					case MJSLibTableClass::TABLEENTRY_SELECT:
+					case MJSLibTableClass::TABLEENTRY_VALUE:
+					case MJSLibTableClass::TABLEENTRY_VIEW:
+						break;
+						
+					default:
+						$canDisplayTable = false;
+echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['Id']." Column Type:".$columnDef['Type']."<br>\n";						
+						break 2;
+				}
+			}
+			
+			if ($canDisplayTable)
+			{
+				$rowClass = $this->GetRowClass($result);
+				$rowAttr = ($rowClass != '') ? 'class="'.$rowClass.'"' : '';
+				$this->NewRow($result, $rowAttr);
+				
+				foreach ($this->columnDefs as $columnDef)
+				{
+					$columnId = $columnDef['Id'];
+					
+					if ($this->updateFailed)
+					{
+						// Error updating values - Get value(s) from form controls
+						$recId = $this->GetRecordID($result);
+						$currVal = stripslashes($_POST[$columnId.$recId]);
+					}
+					else
+					{
+						// Get value(s) from database
+						$currVal = $result->$columnId;
+					}
+
+					if (isset($columnDef['Decode']))
+					{
+						$funcName = $columnDef['Decode'];
+						$currVal = $this->$funcName($result);
+					}
+					
+					if ($this->editMode)
+						$columnType = $columnDef['Type'];
+					else
+						$columnType = MJSLibTableClass::TABLEENTRY_VIEW;
+						
+					switch ($columnType)
+					{
+						//case MJSLibTableClass::TABLEENTRY_CHECKBOX:
+						//case MJSLibTableClass::TABLEENTRY_TEXTBOX:
+						
+						case MJSLibTableClass::TABLEENTRY_SELECT:
+							if (isset($columnDef['Items']))
+								$options = $columnDef['Items'];
+							else
+							{
+								$functionId = $columnDef['Func'];
+								$options = $this->$functionId($result);
+							}
+							
+							$this->AddSelectToTable($result, $columnId, $options, $currVal);
+							break;
+						
+						case MJSLibTableClass::TABLEENTRY_TEXT:
+							if (!isset($columnDef['Len']))
+							{
+								echo "No Len entry in Column Definition<br>\n";
+								MJSLibUtilsClass::print_r($columnDef, 'columnDef');
+							}
+							
+							$this->AddInputToTable($result, $columnId, $columnDef['Len'], $currVal);
+							break;
+
+						case MJSLibTableClass::TABLEENTRY_VALUE:
+						case MJSLibTableClass::TABLEENTRY_VIEW:
+							if (isset($columnDef['Link']))
+							{
+								$currValLink = $columnDef['Link'];
+								if (isset($columnDef['LinkTo']))
+								{
+									$currValLink .= "http://";		// Make link absolute
+									$currValLink .= $result->$columnDef['LinkTo'];
+								}
+								else
+								{
+									$currValLink .= $this->GetRecordID($result);
+									$currValLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($currValLink, plugin_basename($this->caller)) : $currValLink;
+								}
+								$currVal = '<a href="'.$currValLink.'">'.$currVal.'</a>';
+							}
+							$this->AddToTable($result, $currVal);
+							break;
+							
+						default:
+							break;
+					}
+				}
+			}
+						
+			return $canDisplayTable;
+		}
+		
 		function AddOptions($result)
 		{
 			$hiddenRowsID = 'record'.$this->GetRecordID($result).'options';
 			
-			if (count($this->hiddenRowsDef) > 0)
+			if (count($this->detailsRowsDef) > 0)
 			{
-				$this->AddShowOrHideButtonToTable($result, $this->tableName, $hiddenRowsID, $this->moreText);
+				if ($this->moreText != '')
+					$this->AddShowOrHideButtonToTable($result, $this->tableName, $hiddenRowsID, $this->moreText);
+				else
+					$this->AddToTable($result, '');
 				
 				$colClassList = '';
 				for ($c=1; $c<$this->maxCol; $c++)
@@ -803,17 +1009,36 @@ if (!class_exists('MJSLibAdminListClass'))
 				$colClassList .= 'optionsCol';
 				$this->SetColClass($colClassList);
 												
+				$hiddenRowsColId = $this->GetTableID($result).'-hiddenCol';
+				
 				$hiddenRows = "<table width=\"100%\">\n";
-				foreach ($this->hiddenRowsDef as $option)
+				foreach ($this->detailsRowsDef as $option)
 				{
 					switch ($option['Type'])
 					{
-						case 'function':
-							$functionId = $option['Show'];
+						case MJSLibTableClass::TABLEENTRY_FUNCTION:
+							$functionId = $option['Func'];
 							$content = $this->$functionId($result);
 							$hiddenRows .= '<tr>'."\n";
 							$hiddenRows .= '<td colspan=2>'.$content."</td>\n";
 							$hiddenRows .= "</tr>\n";
+							break;
+							
+						case MJSLibTableClass::TABLEENTRY_ARRAY:
+							if (isset($option['Label']))
+							{
+								$hiddenRows .= '<tr>'."\n";
+								$hiddenRows .= '<td colspan=2>'.$option['Label']."</td>\n";
+								$hiddenRows .= "</tr>\n";
+							}
+							$arrayId = $option['Id'];
+							foreach ($result->$arrayId as $elemId => $elemValue)
+							{
+								$hiddenRows .= '<tr>'."\n";
+								$hiddenRows .= '<td class='.$hiddenRowsColId.'1>'.$elemId."</td>\n";
+								$hiddenRows .= '<td class='.$hiddenRowsColId.'2>'.$elemValue."</td>\n";
+								$hiddenRows .= "</tr>\n";
+							}
 							break;
 							
 						default:
@@ -821,8 +1046,8 @@ if (!class_exists('MJSLibAdminListClass'))
 							$option['Id'] = $option['Id'].$this->GetRecordID($result);
 											
 							$hiddenRows .= '<tr>'."\n";
-							$hiddenRows .= '<td>'.$option['Label']."</td>\n";
-							$hiddenRows .= '<td>'.SettingsAdminClass::GetHTMLTag($option, $result->$optionId)."</td>\n";
+							$hiddenRows .= '<td class='.$hiddenRowsColId.'1>'.$option['Label']."</td>\n";
+							$hiddenRows .= '<td class='.$hiddenRowsColId.'2>'.SettingsAdminClass::GetHTMLTag($option, $result->$optionId, $this->editMode)."</td>\n";
 							$hiddenRows .= "</tr>\n";
 							break;
 					}
@@ -834,8 +1059,20 @@ if (!class_exists('MJSLibAdminListClass'))
 			}			
 		}
 		
-		function OutputList($results)
+		function OutputList($results, $dataAux = array())
 		{
+			$tableId = $this->GetTableID($results[0]);
+			
+			$headerColumns = array();
+			foreach ($this->columnDefs as $column)
+				$headerColumns = array_merge($headerColumns, array($column['Id'] => $column['Label']));
+			$this->SetListHeaders($tableId, $headerColumns, $this->HeadersPosn);
+			
+			$this->results = $results;
+			$this->dataAux = $dataAux;
+			
+			$this->EnableListHeaders();
+			
 			if (isset($this->filterRowCounts))
 			{
 				$filterKeys = array_keys($this->filterRowCounts);
@@ -875,7 +1112,17 @@ if (!class_exists('MJSLibAdminListClass'))
 				if (!$this->ShowRow($result, $rowFilter))
 					continue;
 				
-				$this->AddResult($result);
+				if (!$this->AddResultFromTable($result))
+				{
+					if (!isset($this->usedAddResult))
+					{
+						$this->usedAddResult = true;
+						echo "<br>Using AddResult function in ".get_class($this)." class<br>\n";
+						MJSLibUtilsClass::ShowCallStack();
+					}
+					
+					$this->AddResult($result);
+				}
 				$this->AddOptions($result);
 				$this->rowCount++;
 			}
@@ -904,10 +1151,6 @@ if (!class_exists('Template_For_ClassDerivedFrom_MJSLibAdminListClass'))
 		}
 
 		function ShowRow($result, $rowFilter)
-		{
-		}
-		
-		function AddResult($result)
 		{
 		}
 		

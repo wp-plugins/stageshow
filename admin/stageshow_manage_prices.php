@@ -31,24 +31,11 @@ if (!class_exists('StageShowPricesAdminListClass'))
 		function __construct($env) //constructor
 		{
 			// Call base constructor
-			parent::__construct($env);
-			
-			$myDBaseObj = $this->myDBaseObj;
-			
-			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
-
-			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
+			parent::__construct($env, true);
 			
 			$this->bulkActions = array(
 				'delete' => __('Delete', STAGESHOW_DOMAIN_NAME),
 				);
-
-			$columns = array(
-		    'perfID' => __('Performance', STAGESHOW_DOMAIN_NAME),
-		    'priceType' => __('Type', STAGESHOW_DOMAIN_NAME),
-		    'priceValue' => __('Price', STAGESHOW_DOMAIN_NAME),
-			);			
-			$this->SetListHeaders('stageshow_sales_list', $columns);
 		}
 		
 		function GetTableID($result)
@@ -61,45 +48,32 @@ if (!class_exists('StageShowPricesAdminListClass'))
 			return $result->priceID;
 		}
 		
+		function GetMainRowsDefinition()
+		{
+			return array(
+				array('Label' => 'Performance',  'Id' => 'perfID',    'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Func' => 'PerfDates'),
+				array('Label' => 'Type',         'Id' => 'priceType', 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => STAGESHOW_PRICETYPE_TEXTLEN, ),						
+				array('Label' => 'Price',        'Id' => 'priceValue','Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => 9, ),						
+			);
+		}
+		
+		function PerfDates($result)
+		{
+			$perfDatesList = array();
+			$perfsLists = $this->myDBaseObj->GetPerformancesListByShowID($result->showID);
+			foreach($perfsLists as $perfsEntry)
+			{
+				$perfDatesList[$perfsEntry->perfID] = $perfsEntry->perfDateTime; // .'|' . $result->perfID;				
+			}
+			
+			return $perfDatesList;
+		}
+		
 		function OutputList($results, $updateFailed)
 		{
 			$this->updateFailed = $updateFailed;
 			parent::OutputList($results);
 		}
-		
-		function AddResult($result)
-		{
-			global $myPluginObj;
-			$myDBaseObj = $this->myDBaseObj;
-
-			if ($this->updateFailed)
-			{
-				// Error updating values - Get value(s) from form controls
-				$perfID = $_POST['perfID'.$result->priceID];;
-				$priceType = stripslashes($_POST['priceType'.$result->priceID]);
-				$priceValue = stripslashes($_POST['priceValue'.$result->priceID]);
-			}
-			else
-			{
-				// Get value(s) from database
-				$perfID = $result->perfID;
-				$priceType = $result->priceType;
-				$priceValue = $result->priceValue;
-			}
-
-			$perfDatesList = array();
-			$perfsLists = $myDBaseObj->GetPerformancesListByShowID($result->showID);
-			foreach($perfsLists as $perfsEntry)
-			{
-				$perfDatesList[$perfsEntry->perfID] = $perfsEntry->perfDateTime;
-			}
-						
-			$this->NewRow($result);
-			
-			$this->AddSelectToTable($result, 'perfID',  $perfDatesList, $result->perfDateTime);	
-			$this->AddInputToTable($result, 'priceType',  STAGESHOW_PRICETYPE_TEXTLEN, $priceType);	
-			$this->AddInputToTable($result, 'priceValue', 9, $priceValue);	
-		}		
 	}
 }
 
@@ -118,20 +92,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			$myDBaseObj = $this->myDBaseObj;
       
 			$delpriceId = 0;
-			
-      $columns = array(
-		    'perfID' => __('Performance', STAGESHOW_DOMAIN_NAME),
-		    'priceType' => __('Type', STAGESHOW_DOMAIN_NAME),
-		    'priceValue' => __('Price', STAGESHOW_DOMAIN_NAME),
-		    'priceDelete' => ' '
-	    );
-	
-			if ($myDBaseObj->adminOptions['Dev_ShowDBIds'])
-			{
-				// Add the ID column
-				$columns = array_merge(array('priceID' => __('ID', STAGESHOW_DOMAIN_NAME)), $columns); 
-			}
-			
+
 			$pricesMsg = '';
 			$showID = 0;
 			
@@ -235,7 +196,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 						if (count($perfsList) > 0)
 							$myDBaseObj->UpdateCartButtons($perfsList);
 					}
-					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
+					echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'</p></div>';
 				}
 			}			
 			else if(isset($_POST['addpricebutton']))
@@ -248,67 +209,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 				$perfID = $_POST['perfID'];
 				$myDBaseObj->AddPrice($perfID, '', '0.00');
 				
-				echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'.</p></div>';
-			}
-
-			if ( isset( $_POST['action'] ) && (-1 != $_POST['action']) )
-				$bulkAction = $_POST['action'];
-			else if ( isset( $_POST['action2'] ) && (-1 != $_POST['action2']) )
-				$bulkAction =  $_POST['action2'];
-			else
-				$bulkAction = '';
-				
-			if (($bulkAction !== '') && isset($_POST['rowSelect']))
-			{
-				// Bulk Action Apply button actions
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
-				
-				$actionMsg = '';
-				switch ($bulkAction)
-				{
-					case 'delete':		
-						$blockCount = 0;							
-						foreach($_POST['rowSelect'] as $delpriceId)
-						{
-							// Don't delete if any tickets have been sold for this performance
-							$results = $myDBaseObj->GetSalesListByPriceID($delpriceId);
-							if (count($results) > 0)
-								$blockCount++;
-						}
-						
-						if ($blockCount > 0)
-						{
-							if ($blockCount > 0)
-							{
-								$actionMsg = ($blockCount == 1) ? __("1 Price cannot be deleted - Tickets already sold!", $this->pluginName) : $blockCount.' '.__("Prices cannot be deleted - Tickets already sold!", $this->pluginName); 
-								echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
-							}
-							break;
-						}
-						
-						// Delete shows
-						$actionCount = 0;
-						foreach($_POST['rowSelect'] as $delpriceId)
-						{
-							// Now delete the entry in the SHOWS table
-							$delShowName = $myDBaseObj->DeletePriceByPriceID($delpriceId);
-
-							$actionCount++;
-						}
-						
-						if ($actionCount > 0)	
-						{						
-							$actionMsg = ($actionCount == 1) ? __("1 Price has been deleted", $this->pluginName) : $actionCount.' '.__("Prices have been deleted", $this->pluginName); 
-							echo '<div id="message" class="updated"><p>'.$actionMsg.'</p></div>';
-						}
-						else
-						{
-							$actionMsg = __("Nothing to Delete", $this->pluginName);
-							echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
-						}
-						break;
-						
-				}
+				echo '<div id="message" class="updated"><p>'.__('Settings have been saved', STAGESHOW_DOMAIN_NAME).'</p></div>';
 			}
 			
 			$this->Output_MainPage($env, $pricesMsg !== '');
@@ -376,6 +277,63 @@ else
 <?php
 			// Stage Show Prices HTML Output - End 
 		}				 
+		
+		function DoBulkPreAction($bulkAction, $recordId)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			if (!isset($this->errorCount)) $this->errorCount = 0;
+			if (!isset($this->blockCount)) $this->blockCount = 0;
+						
+			switch ($bulkAction)
+			{
+				case 'delete':		
+					// Don't delete if any tickets have been sold for this performance
+					$results = $myDBaseObj->GetSalesListByPriceID($recordId);
+					if (count($results) > 0)
+						$this->blockCount++;
+					return ( ($this->errorCount > 0) || ($this->errorCount > 0) );
+			}
+				
+			return false;
+		}
+		
+		function DoBulkAction($bulkAction, $recordId)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			switch ($bulkAction)
+			{
+				case 'delete':		
+					// Now delete the entry in the PRICES table
+					$delShowName = $myDBaseObj->DeletePriceByPriceID($recordId);
+					return true;
+			}
+				
+			return false;
+		}
+		
+		function GetBulkActionMsg($bulkAction, $actionCount)
+		{
+			$actionMsg = '';
+			
+			switch ($bulkAction)
+			{
+				case 'delete':		
+					if ($this->errorCount > 0)
+						$actionMsg = ($this->errorCount == 1) ? __("1 Price has a Database Error", $this->pluginName) : $errorCount.' '.__("Prices have a Database Error", $this->pluginName); 
+					else if ($this->blockCount > 0)
+						$actionMsg = ($this->blockCount == 1) ? __("1 Price cannot be deleted - Tickets already sold!", $this->pluginName) : $this->blockCount.' '.__("Prices cannot be deleted - Tickets already sold!", $this->pluginName); 
+					else if ($actionCount > 0)		
+						$actionMsg = ($actionCount == 1) ? __("1 Price has been deleted", $this->pluginName) : $actionCount.' '.__("Prices have been deleted", $this->pluginName); 
+					else
+						$actionMsg = __("Nothing to Delete", $this->pluginName);
+					break;
+			}
+			
+			return $actionMsg;
+		}
+		
 	}
 }
 

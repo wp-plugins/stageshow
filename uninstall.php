@@ -9,8 +9,8 @@
 	define('STAGESHOW_PLUGIN_FILE', __FILE__);
 	include 'stageshow_defs.php';      
 
-	if ( file_exists(STAGESHOW_INCLUDE_PATH.'stageshow_extns.php') )
-		include('include/stageshow_extns.php');
+	if ( file_exists(STAGESHOW_INCLUDE_PATH.'stageshowplus_extns.php') )
+		include('include/stageshowplus_extns.php');
 
 	if (!class_exists('StageShowDBaseClass'))
 		include 'include/stageshow_dbase_api.php';      

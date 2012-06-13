@@ -1,5 +1,5 @@
 /* 
-Description: StageShow Admin Style Sheet
+Description: MJSLib Admin Style Sheet
  
 Copyright 2012 Malcolm Shergold
 
@@ -19,30 +19,12 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-
-#adminmenu #toplevel_page_sshow_adminmenu div.wp-menu-image,
-#oam_toplevel_page_sshow_adminmenu div.wp-menu-image {
-	background: transparent url('../images/stageshow16grey.png') no-repeat scroll 6px 6px;
-}
-
-#adminmenu #toplevel_page_sshow_adminmenu:hover div.wp-menu-image,
-#adminmenu #toplevel_page_sshow_adminmenu.wp-has-current-submenu div.wp-menu-image,
-#adminmenu #toplevel_page_sshow_adminmenu.current div.wp-menu-image,
-#oam_toplevel_page_sshow_adminmenu:hover div.wp-menu-image {
-	background: transparent url('../images/stageshow16colour.png') no-repeat scroll 6px 6px;
-}
-
-#icon-stageshow  {
-    background: transparent url(../images/stageshow32grey.png) no-repeat;
-}
-
 /* ----------------------------------------------------------------------------------------------------------------
 	Styles for "Options" button
 ---------------------------------------------------------------------------------------------------------------- */
 
 a.more-button
 {
-	XX_background: url("../images/menu-bits.gif") repeat-x scroll left -379px #EEEEEE;
 	background-color:#EEEEEE;
 	border-color: #E3E3E3;
 	border-radius: 11px 11px 11px 11px;
@@ -57,21 +39,8 @@ a.more-button
 }
 
 /* ----------------------------------------------------------------------------------------------------------------
-	Styles for Admin Tables
+	Styles for "Button" Admin Tables
 ---------------------------------------------------------------------------------------------------------------- */
-
-div.stageshow-admin-form
-{
-	padding: 0 0 20px 0;
-	border-bottom: 1px solid #DFDFDF;
-	margin: 0 0 20px 0;
-}
-
-div.stageshow-edit-planref
-{
-	font-size: 16px;
-	font-weight: bold;
-}
 
 tr.buttons-ourbutton
 {
@@ -89,7 +58,45 @@ tr.buttons-ourbutton
 
 .hiddenRow th input 
 {
-    margin: 0;
+	margin: 0;
+}
+
+div.edit-entry-button
+{
+	padding: 10px 0px 10px 0px;
+}
+
+/* ----------------------------------------------------------------------------------------------------------------
+	Styles for Debug Messages
+---------------------------------------------------------------------------------------------------------------- */
+
+.form-table td 
+{
+    XXfont-size: 12px;
+    line-height: 14px;
+    XXmargin-bottom: 9px;
+    Xxpadding: 8px 10px;
+}
+
+/* ----------------------------------------------------------------------------------------------------------------
+	Styles for Debug Messages
+---------------------------------------------------------------------------------------------------------------- */
+
+div.notice
+{
+	padding: 0 0.6em;
+	margin: 5px 0 15px;
+  
+	background-color: #FFFFE0;
+	border-color: #E6DB55;
+}
+
+div.notice p
+{
+	margin: 0.5em 0;
+	padding: 2px;
+	border-style: solid;
+	border-color: #DFDFDF;
 }
 
 /* ----------------------------------------------------------------------------------------------------------------
