@@ -421,7 +421,7 @@ if (!class_exists('StageShowPluginClass'))
 				}
 			}
 			if ($perfCount == 0) 
-				echo __('Bookings closed', STAGESHOW_DOMAIN_NAME)."<br>\n";
+				echo __('Bookings Not Currently Available', STAGESHOW_DOMAIN_NAME)."<br>\n";
 			else echo '
 			  </table>';
 				
