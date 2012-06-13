@@ -291,9 +291,9 @@ if (!class_exists('StageShowShowsAdminClass'))
 					$actionCount = 0;
 					$showEntry = $myDBaseObj->GetShowsList($recordId);
 					if ($myDBaseObj->IsStateActive($showEntry[0]->showState))
-						$myDBaseObj->SetShowActivated($showID, 'deactivate');
+						$myDBaseObj->SetShowActivated($recordId, 'deactivate');
 					else
-						$myDBaseObj->SetShowActivated($showID, 'activate');
+						$myDBaseObj->SetShowActivated($recordId, 'activate');
 						
 					// TODO-BEFORE-RELEASE - Update Inventory Settings for Performance Buttons
 					break;
