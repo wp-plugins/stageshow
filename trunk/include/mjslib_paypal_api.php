@@ -352,7 +352,7 @@ if (!class_exists('PayPalAPIClass')) {
       $this->AddAPIButtonVar('item_name', $description);
       $this->AddAPIButtonVar('item_number', $reference);
 
-      $this->AddAPIButtonVar('button_xref', $hostedButtonID);
+      $this->AddAPIButtonVar('button_xref', get_site_url());
       $this->AddAPIButtonVar('currency_code', $this->PayPalCurrency);
     }
 
@@ -583,7 +583,7 @@ if (!class_exists('PayPalAPIClass')) {
     {
       // Check that the PayPal login parameters have been set
       if (!$this->IsConfigured())
-        return;	// Cannot Update Inventory - API Not Configured 
+        return 'CONFIG-ERROR';	// Cannot Update Inventory - API Not Configured 
 
       if (strlen($hostedButtonID) == 0)
         return;	// Cannot Update Inventory - Zero Length Button ID 
@@ -704,6 +704,9 @@ if (!class_exists('PayPalAPIClass')) {
 						break;
 					
 					$lButtonVar = $this->APIResponses['L_BUTTONVAR'.$varNo];
+					if (get_magic_quotes_gpc())
+						$lButtonVar = stripslashes($lButtonVar);
+						
 					if (substr($lButtonVar, 0, 1) === '"')
 					{
 						// Remove double quotes ....

@@ -106,7 +106,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 				$this->adminOptions['PayPalAPIEMail']);
 			$this->payPalAPIObj->SetIPNListener($OurIPNListener);
 				
-			if ($this->adminOptions['Dev_ShowPayPalIO'] == 1)
+			if ($this->getOption('Dev_ShowPayPalIO') == 1)
 				$this->payPalAPIObj->EnableDebug();
 		}
     
@@ -182,18 +182,79 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		}
 		
 		// Add Sale - Address details are optional
-		function AddSale($SaleDateTime, $PayerName, $PayerEmail, $salePrice, $Txnid, $Status, $salePPName = '', $salePPStreet = '', $salePPCity = '', $salePPState = '', $salePPZip = '', $salePPCountry = '')
+		function AddSale($SaleDateTime, $saleName, $saleEMail, $salePaid, $Txnid, $Status, $salePPName = '', $salePPStreet = '', $salePPCity = '', $salePPState = '', $salePPZip = '', $salePPCountry = '')
 		{
 			global $wpdb;
 			
 			$sql  = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime, saleName, saleEMail, salePaid, saleTxnId, saleStatus, salePPName, salePPStreet, salePPCity, salePPState, salePPZip, salePPCountry)';
-			$sql .= ' VALUES("'.$SaleDateTime.'", "'.$PayerName.'", "'.$PayerEmail.'", "'.$salePrice.'", "'.$Txnid.'", "'.$Status.'", "'.$salePPName.'", "'.$salePPStreet.'", "'.$salePPCity.'", "'.$salePPState.'", "'.$salePPZip.'", "'.$salePPCountry.'")';
+			$sql .= ' VALUES("'.$SaleDateTime.'", "'.$saleName.'", "'.$saleEMail.'", "'.$salePaid.'", "'.$Txnid.'", "'.$Status.'", "'.$salePPName.'", "'.$salePPStreet.'", "'.$salePPCity.'", "'.$salePPState.'", "'.$salePPZip.'", "'.$salePPCountry.'")';
 			$this->ShowSQL($sql); 
 			$wpdb->query($sql);
 			$saleID = mysql_insert_id();
 	
 			return $saleID;
+		}
+		
+		// Edit Sale
+		function EditSale($saleID, $saleName, $saleEMail, $salePaid, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry)
+		{
+			global $wpdb;
+			
+			$sql  = 'UPDATE '.$this->opts['SalesTableName'];
+			$sql .= ' SET saleName="'.$saleName.'"';
+			$sql .= ' ,   saleEMail="'.$saleEMail.'"';
+			$sql .= ' ,   salePaid="'.$salePaid.'"';
+			$sql .= ' ,   salePPStreet="'.$salePPStreet.'"';
+			$sql .= ' ,   salePPCity="'.$salePPCity.'"';
+			$sql .= ' ,   salePPState="'.$salePPState.'"';
+			$sql .= ' ,   salePPZip="'.$salePPZip.'"';
+			$sql .= ' ,   salePPCountry="'.$salePPCountry.'"';
+			
+			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleID='.$saleID;;
+			$this->ShowSQL($sql); 
+
+			$wpdb->query($sql);	
 		}			
+		
+		function AddSaleItem($saleID, $stockID, $qty)
+		{
+			global $wpdb;
+			
+			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').')';
+			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'")';
+			$this->ShowSQL($sql); 
+			$wpdb->query($sql);
+			$orderID = mysql_insert_id();
+	
+			return $orderID;
+		}			
+		
+		function UpdateSaleItem($saleID, $stockID, $qty)
+		{
+			global $wpdb;
+
+			// Delete a show entry
+			$sql  = 'UPDATE '.$this->opts['OrdersTableName'];
+			$sql .= ' SET '.$this->DBField('orderQty').'="'.$qty.'"';
+			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
+			$sql .= ' AND   '.$this->opts['OrdersTableName'].".".$this->DBField('stockID')."=$stockID";
+
+			$this->ShowSQL($sql); 
+			$wpdb->query($sql);
+		}
+		
+		function DeleteSaleItem($saleID, $stockID)
+		{
+			global $wpdb;
+
+			// Delete a show entry
+			$sql  = 'DELETE FROM '.$this->opts['OrdersTableName'];
+			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
+			$sql .= ' AND   '.$this->opts['OrdersTableName'].".".$this->DBField('stockID')."=$stockID";
+
+			$this->ShowSQL($sql); 
+			$wpdb->query($sql);
+		}
 		
 		function GetSalesQty($sqlFilters)
 		{
@@ -208,6 +269,11 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 					return 0;
 							 
 			return $salesListArray[0]->totalQty;
+		}
+		
+		function GetPricesListWithSales($saleID)
+		{	
+			MJSLibUtilsClass::UndefinedFuncCallError($this, 'GetPricesListWithSales');
 		}
 		
 		function DeleteSale($saleID)
@@ -233,6 +299,23 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			$wpdb->query($sql);
 		}			
 
+		function GetSaleBuyer($saleID)
+		{
+			$sqlFilters['saleID'] = $saleID;
+			$sql  = 'SELECT * FROM '.$this->opts['SalesTableName'];	
+			$sql .= $this->GetWhereSQL($sqlFilters);
+					
+			$this->ShowSQL($sql); 
+			
+			$salesListArray = $this->get_results($sql);
+			
+			return $salesListArray;
+		}
+		
+		function AddSaleFields(&$salesListArray)
+		{
+		}
+		
 		function GetSalesList($sqlFilters)
 		{
 			$selectFields  = '*';
@@ -264,8 +347,15 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			
 			$this->ShowSQL($sql); 
 			
-			$salesListArray = $this->get_results($sql);
+			$showOutput = $this->getOption('Dev_ShowDBOutput'); 
+			$this->adminOptions['Dev_ShowDBOutput'] = '';
 			
+			$salesListArray = $this->get_results($sql);			
+			$this->AddSaleFields($salesListArray);
+			
+			$this->adminOptions['Dev_ShowDBOutput'] = $showOutput;
+			$this->show_results($salesListArray);
+					
 			return $salesListArray;
 		}			
 
@@ -446,9 +536,9 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			
 			$TxdDate  = $results['TxdDate'];
 			$Txnid  = $results['Txnid'];
-			$PayerName  = $results['PayerName'];
-			$PayerEmail  = $results['PayerEmail'];
-			$SaleStatus  = $results['SaleStatus'];
+			$saleName  = $results['saleName'];
+			$saleEmail  = $results['saleEmail'];
+			$saleStatus  = $results['saleStatus'];
 			$salePrice  = $results['salePrice'];
 			$salePPName  = $results['salePPName'];
 			$salePPStreet  = $results['salePPStreet'];
@@ -460,11 +550,11 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			// Log sale to Database
 			$saleID = $this->AddSale(
 				$TxdDate, 
-				$PayerName, 
-				$PayerEmail, 
+				$saleName, 
+				$saleEmail, 
 				$salePrice, 
 				$Txnid,
-				$SaleStatus, 
+				$saleStatus, 
 				$salePPName, 
 				$salePPStreet, 
 				$salePPCity, 
@@ -503,9 +593,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 
     function HTTPAction($url, $urlParams = '')
     {	
-			$this->ShowSQL('URL:', $url.$urlParams);
 			$HTTPResponse = PayPalAPIClass::HTTPAction($url, $urlParams);
-			if ($this->adminOptions['Dev_ShowMiscDebug'] == 1)
+			if ($this->getOption('Dev_ShowMiscDebug') == 1)
 				MJSLibUtilsClass::print_r($HTTPResponse, 'HTTPResponse:');
 			return $HTTPResponse; 
     }

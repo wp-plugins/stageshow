@@ -22,6 +22,9 @@ Copyright 2012 Malcolm Shergold
 
 include 'mjslib_admin.php';      
 
+if (!class_exists('MJSLibTableClass'))
+	include 'mjslib_table.php';
+
 if (!class_exists('PayPalSettingsAdminClass'))
 {
 	class PayPalSettingsAdminClass extends SettingsAdminClass // Define class
@@ -33,12 +36,12 @@ if (!class_exists('PayPalSettingsAdminClass'))
 		{
 			$this->paypalOpts = array
 			(
-				array('Label' => 'Environment',   'Id' => 'PayPalEnv',      'PayPalLock' => true, 'Type' => 'select', 'Items' => array('live|Live', 'sandbox|Sandbox'), ),
-				array('Label' => 'API User',      'Id' => 'PayPalAPIUser',  'PayPalLock' => true, 'Type' => 'text',   'Len' => PAYPAL_APILIB_PPLOGIN_USER_TEXTLEN,  'Size' => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
-				array('Label' => 'API Password',  'Id' => 'PayPalAPIPwd',   'PayPalLock' => true, 'Type' => 'text',   'Len' => PAYPAL_APILIB_PPLOGIN_PWD_TEXTLEN,   'Size' => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
-				array('Label' => 'API Signature', 'Id' => 'PayPalAPISig',   'PayPalLock' => true, 'Type' => 'text',   'Len' => PAYPAL_APILIB_PPLOGIN_SIG_TEXTLEN,   'Size' => PAYPAL_APILIB_PPLOGIN_EDITLEN,  ),
-				array('Label' => 'Account EMail', 'Id' => 'PayPalAPIEMail', 'PayPalLock' => true, 'Type' => 'text',   'Len' => PAYPAL_APILIB_PPLOGIN_EMAIL_TEXTLEN, 'Size' => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
-				array('Label' => 'Currency',      'Id' => 'PayPalCurrency', 'PayPalLock' => true, 'Type' => 'select', 
+				array('Label' => 'Environment',   'Id' => 'PayPalEnv',      'PayPalLock' => true, 'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Items' => array('live|Live', 'sandbox|Sandbox'), ),
+				array('Label' => 'API User',      'Id' => 'PayPalAPIUser',  'PayPalLock' => true, 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => PAYPAL_APILIB_PPLOGIN_USER_TEXTLEN,  'Size' => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
+				array('Label' => 'API Password',  'Id' => 'PayPalAPIPwd',   'PayPalLock' => true, 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => PAYPAL_APILIB_PPLOGIN_PWD_TEXTLEN,   'Size' => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
+				array('Label' => 'API Signature', 'Id' => 'PayPalAPISig',   'PayPalLock' => true, 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => PAYPAL_APILIB_PPLOGIN_SIG_TEXTLEN,   'Size' => PAYPAL_APILIB_PPLOGIN_EDITLEN,  ),
+				array('Label' => 'Account EMail', 'Id' => 'PayPalAPIEMail', 'PayPalLock' => true, 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => PAYPAL_APILIB_PPLOGIN_EMAIL_TEXTLEN, 'Size' => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
+				array('Label' => 'Currency',      'Id' => 'PayPalCurrency', 'PayPalLock' => true, 'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 
 					'Items' => array
 					(
 						'AUD|Australian Dollars (&#36;)',
@@ -65,8 +68,8 @@ if (!class_exists('PayPalSettingsAdminClass'))
 						'JYP|Yen (&#xa5;)',
 					)
 				),
-				array('Label' => 'PayPal Checkout Logo Image URL', 'Id' => 'PayPalLogoImageURL',   'Type' => 'text',   'Len' => PAYPAL_APILIB_URL_TEXTLEN,   'Size' => PAYPAL_APILIB_URL_EDITLEN, ),
-				array('Label' => 'PayPal Header Image URL',        'Id' => 'PayPalHeaderImageURL', 'Type' => 'text',   'Len' => PAYPAL_APILIB_URL_TEXTLEN,   'Size' => PAYPAL_APILIB_URL_EDITLEN, ),				
+				array('Label' => 'PayPal Checkout Logo Image URL', 'Id' => 'PayPalLogoImageURL',   'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => PAYPAL_APILIB_URL_TEXTLEN,   'Size' => PAYPAL_APILIB_URL_EDITLEN, ),
+				array('Label' => 'PayPal Header Image URL',        'Id' => 'PayPalHeaderImageURL', 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => PAYPAL_APILIB_URL_TEXTLEN,   'Size' => PAYPAL_APILIB_URL_EDITLEN, ),				
 			);
 			
 			$settings['PayPal Settings'] = $this->paypalOpts;			

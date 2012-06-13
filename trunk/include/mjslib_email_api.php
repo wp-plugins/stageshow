@@ -46,7 +46,7 @@ if (!class_exists('MJSLibEMailAPIClass'))
       if (strlen($BccEMail) > 0) $headers .= "\r\nbcc: $BccEMail";
 			$headers .= "\r\nReply-To: $replyTo";	
 				
-			if ($this->parentObj->adminOptions['Dev_ShowEMailMsgs'])
+			if ($this->parentObj->getOption('Dev_ShowEMailMsgs'))
 			{
 				echo "To:<br>\n";
 				echo htmlspecialchars($to);

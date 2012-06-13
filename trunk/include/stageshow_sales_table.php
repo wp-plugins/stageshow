@@ -27,97 +27,34 @@ if (!class_exists('StageShowSalesAdminListClass'))
 {
 	class StageShowSalesAdminListClass extends PayPalSalesAdminListClass // Define class
 	{		
-		function __construct($env) //constructor
+		var $showZeroQtyEntries;
+		var	$salesList;
+		
+		function __construct($env, $editMode = false) //constructor
 		{
-			$this->hiddenRowsButtonId = 'Details';
-			$this->env = $env;
-			
 			// Call base constructor
-			parent::__construct($env);
-			
-			$myDBaseObj = $this->myDBaseObj;
-			
-			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
+			parent::__construct($env, $editMode);
 
-			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
-			
-			$this->bulkActions = array(
-				'delete' => __('Delete', STAGESHOW_DOMAIN_NAME),
-				);
-
-			$columns = array(
-				'saleName'    => __('Name', STAGESHOW_DOMAIN_NAME),
-				'saleDate'    => __('Transaction Date', STAGESHOW_DOMAIN_NAME),
-				'saleStatus'  => __('Status', STAGESHOW_DOMAIN_NAME),
-				'saleQty'		  => __('Qty', STAGESHOW_DOMAIN_NAME),
-			);			
-			$this->SetListHeaders('stageshow_sales_list', $columns);
+			$this->showZeroQtyEntries = false;
 		}
 		
-		function GetTableID($result)
+		function GetMainRowsDefinition()
 		{
-			return "salestab";
-		}
-		
-		function GetRecordID($result)
-		{
-			return $result->saleID;
-		}
-		
-		function AddResult($result)
-		{
-			$this->NewRow($result);
-
-/*
-			// TODO - Code for links on Sales List Page - Remove
-			if (false)
-			{
-				$modLink = 'admin.php?page=stageshow_sales&action=details&id='.$result->saleID;
-				$modLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($modLink, plugin_basename($this->caller)) : $modLink;
-
-				$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleName.'</a>');
-				$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleDateTime.'</a>');
-				$this->AddToTable($result, '<a href="'.$modLink.'">'.$result->saleStatus.'</a>');
-			}
-			else
-*/
-			{
-				$this->AddToTable($result, $result->saleName);
-				$this->AddToTable($result, $result->saleDateTime);
-				$this->AddToTable($result, $result->saleStatus);
-				$this->AddToTable($result, $result->totalQty);
-			}
-			
-			//<td style="background-color:#FFF">
-		}		
-		
-		function GetHiddenRowsDefinition()	// TODO - Sales Hidden Rows Disabled for Distribution
-		{
-			$ourOptions = array(
-				array('Type' => 'function', 'Show' => 'ShowSaleDetails', 'Save' => 'SaveSaleDetails'),						
+			$columnDefs = array(
+				array('Label' => 'Qty', 'Id' => 'totalQty', 'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),		
 			);
 			
-			$ourOptions = array_merge(parent::GetHiddenRowsDefinition(), $ourOptions);
-			return $ourOptions;
+			return array_merge(parent::GetMainRowsDefinition(), $columnDefs);
+		}		
+		
+		function GetDetailsRowsDefinition()
+		{
+			return parent::GetDetailsRowsDefinition();
 		}
 		
-		function ShowSaleDetails($result)
+		function CreateSalesAdminDetailsListObject($env, $editMode = false)
 		{
-			$env = $this->env;
-			
-			$myDBaseObj = $this->myDBaseObj;
-			$saleResults = $myDBaseObj->GetSale($result->saleID);
-			$salesList = new StageShowSalesAdminDetailsListClass($env);	
-
-			// Set Rows per page to disable paging used on main page
-			$salesList->enableFilter = false;
-			
-			ob_start();	
-			$salesList->OutputList($saleResults);	
-			$saleDetailsOoutput = ob_get_contents();
-			ob_end_clean();
-
-			return $saleDetailsOoutput;
+			return new StageShowSalesAdminDetailsListClass($env, $editMode);	
 		}
 		
 	}
@@ -125,35 +62,17 @@ if (!class_exists('StageShowSalesAdminListClass'))
 
 if (!class_exists('StageShowSalesAdminDetailsListClass')) 
 {
-	class StageShowSalesAdminDetailsListClass extends MJSLibAdminListClass // Define class
+	class StageShowSalesAdminDetailsListClass extends PayPalSalesDetailsAdminClass // Define class
 	{		
-		var $isInput;
-		
-		function __construct($env, $isInput = false) //constructor
+		function __construct($env, $editMode = false) //constructor
 		{
 			// Call base constructor
-			parent::__construct($env);
-			
-			$myDBaseObj = $this->myDBaseObj;
-
-			$this->showDBIds = $myDBaseObj->adminOptions['Dev_ShowDBIds'];					
-
-			$this->SetRowsPerPage($myDBaseObj->adminOptions['PageLength']);
-			
-			$columns = array(
-				'saleShowName' => __('Show', STAGESHOW_DOMAIN_NAME),
-				'ticketType'   => __('Type', STAGESHOW_DOMAIN_NAME),
-				'price'        => __('Price', STAGESHOW_DOMAIN_NAME),
-				'quantity'     => __('Quantity', STAGESHOW_DOMAIN_NAME)
-			);			
-			$this->SetListHeaders('stageshow_saledetails_list', $columns, MJSLibTableClass::HEADERPOSN_TOP);
-			
-			$this->isInput = $isInput;
+			parent::__construct($env, $editMode);
 		}
 		
 		function GetTableID($result)
 		{
-			return "salestab";
+			return "stageshow_saledetails_list";
 		}
 		
 		function GetRecordID($result)
@@ -161,28 +80,16 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 			return $result->priceID;
 		}
 		
-		function AddResult($result)
+		function GetMainRowsDefinition()
 		{
-			$this->NewRow($result);
-			
-			if ($this->isInput)
-			{
-				$show_and_perf = $result->showName.' - '.$result->perfDateTime;
+			return array(
+				array('Label' => 'Show',     'Id' => 'ticketName',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array('Label' => 'Type',     'Id' => 'ticketType',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array('Label' => 'Price',    'Id' => 'priceValue',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),						
+				array('Label' => 'Quantity', 'Id' => 'ticketQty',    'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => 4, ),						
+			);
+		}		
 				
-				$this->AddToTable($result, $show_and_perf);
-				$this->AddToTable($result, $result->priceType);
-				$this->AddToTable($result, $result->priceValue);
-				$this->AddInputToTable($result, 'addSaleItem', 4, 0);	
-			}
-			else
-			{
-				$this->AddToTable($result, $result->ticketName);
-				$this->AddToTable($result, $result->ticketType);
-				$this->AddToTable($result, $result->priceValue);
-				$this->AddToTable($result, $result->ticketQty);
-			}
-		}
-		
 	}
 }
 

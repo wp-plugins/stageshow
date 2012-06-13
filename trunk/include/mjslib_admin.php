@@ -76,10 +76,10 @@ if (!class_exists('SettingsAdminClass'))
 				{		
 					switch ($settingOption['Type'])
 					{
-						case 'value':
+						case MJSLibTableClass::TABLEENTRY_VIEW:
 							break;
 							
-						case 'checkbox':
+						case MJSLibTableClass::TABLEENTRY_CHECKBOX:
 							$controlId = $settingOption['Id'];
 							$dbObj->adminOptions[$controlId] = isset($_POST[$controlId]) ? true : false;
 							break;
@@ -129,28 +129,43 @@ if (!class_exists('SettingsAdminClass'))
 			return $this->GetHTMLTag($settingOption, $controlValue);
 		}
 		
-		static function GetHTMLTag($settingOption, $controlValue)
+		static function GetHTMLTag($settingOption, $controlValue, $editMode = true)
 		{
 			$autocompleteTag = ' autocomplete="off"';
 			$controlName = $settingOption['Id'];
 			
 			$editControl = '';
 			
-			switch ($settingOption['Type'])
+			$settingType= $settingOption['Type'];
+			
+			if (!$editMode)
 			{
-				case 'text':
+				switch ($settingType)
+				{
+					case MJSLibTableClass::TABLEENTRY_TEXT:
+					case MJSLibTableClass::TABLEENTRY_TEXTBOX:
+					case MJSLibTableClass::TABLEENTRY_SELECT:
+					case MJSLibTableClass::TABLEENTRY_CHECKBOX:
+						$settingType = MJSLibTableClass::TABLEENTRY_VIEW;
+						break;
+				}
+			}
+				
+			switch ($settingType)
+			{
+				case MJSLibTableClass::TABLEENTRY_TEXT:
 					$editLen = $settingOption['Len'];
 					$editSize = isset($settingOption['Size']) ? $settingOption['Size'] : $editLen+1;
 					$editControl = '<input type="text"'.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" name="'.$controlName.'" value="'.$controlValue.'" />'."\n";
 					break;
 
-				case 'textbox':
+				case MJSLibTableClass::TABLEENTRY_TEXTBOX:
 					$editRows = $settingOption['Rows'];
 					$editCols = $settingOption['Cols'];
 					$editControl = '<textarea rows="'.$editRows.'" cols="'.$editCols.'" name="'.$controlName.'">'.$controlValue."</textarea>\n";
 					break;
 
-				case 'select':
+				case MJSLibTableClass::TABLEENTRY_SELECT:
 					$selectOpts = $settingOption['Items'];
 					$editControl  = '<select name="'.$controlName.'">'."\n";
 					$selectOptsArray = self::GetSelectOptsArray($selectOpts);
@@ -162,16 +177,16 @@ if (!class_exists('SettingsAdminClass'))
 					$editControl .= '</select>'."\n";
 					break;
 
-				case 'checkbox':
+				case MJSLibTableClass::TABLEENTRY_CHECKBOX:
 					$checked = ($controlValue === true) ? 'checked="yes"' : '';
 					$editControl = '<input type="checkbox" name="'.$controlName.'" id="'.$controlName.'" value="1" '.$checked.'" />&nbsp;'.$settingOption['Text']."\n";
 					break;
 
-				case 'view':
+				case MJSLibTableClass::TABLEENTRY_VIEW:
 					$editControl = $controlValue;
 					break;
 
-				case 'value':
+				case MJSLibTableClass::TABLEENTRY_VALUE:
 					$editControl = $settingOption['Value'];
 					break;
 
@@ -227,12 +242,17 @@ if (!class_exists('MJSLibAdminClass'))
 {
   class MJSLibAdminClass // Define class
   {
+		var $env;
+		
 		var $caller;				// File Path of descendent class
 		var $pluginName;
 		var $currentPage;		
 		var $salesPerPage;
 		var $myPluginObj;
 		var $myDBaseObj;
+		var $adminOptions;
+
+		var $editingRecord;
       		
 		function __construct($env)	 //constructor	
 		{
@@ -241,12 +261,61 @@ if (!class_exists('MJSLibAdminClass'))
 				$this->caller = $env['caller'];
 				$this->myPluginObj = $env['PluginObj'];
 				$this->myDBaseObj = $env['DBaseObj'];
+				$this->adminOptions = $this->myDBaseObj->adminOptions;
 			}
 			else
-				$this->caller = $env;
+			{
+				MJSLibUtilsClass::ShowCallStack();
+				die("Env must be an array in ".get_class()." constructor. ".__FILE__." at line ".__LINE__."\n");
+			}
 				
+			$this->env = $env;
+			
+			$this->editingRecord = false;
+			
 			$callerFolders = explode("/", plugin_basename($this->caller));
 			$this->pluginName = $callerFolders[0];
+			
+			if ( isset( $_POST['action'] ) && (-1 != $_POST['action']) )
+				$bulkAction = $_POST['action'];
+			else if ( isset( $_POST['action2'] ) && (-1 != $_POST['action2']) )
+				$bulkAction =  $_POST['action2'];
+			else
+				$bulkAction = '';
+				
+ 			if (($bulkAction !== '') && isset($_POST['rowSelect']))
+ 			{
+				// Bulk Action Apply button actions
+				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				
+				$actionError = false;
+				foreach($_POST['rowSelect'] as $recordId)
+				{
+					$actionError |= $this->DoBulkPreAction($bulkAction, $recordId);
+				}
+						
+				$actionCount = 0;
+				if (!$actionError)
+				{
+					foreach($_POST['rowSelect'] as $recordId)
+					{
+						if ($this->DoBulkAction($bulkAction, $recordId))
+							$actionCount++;
+					}
+					if ($actionCount > 0)
+					{
+						$actionMsg = $this->GetBulkActionMsg($bulkAction, $actionCount);
+						echo '<div id="message" class="updated"><p>'.$actionMsg.'</p></div>';	// TODO - Check return status "class"
+					}
+				}
+				else
+				{										
+					$actionMsg = $this->GetBulkActionMsg($bulkAction, $actionCount);
+					echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';	// TODO - Check return status "class"
+				}
+				
+ 			}
+ 			
 		}
 		
 		static function ValidateEmail($ourEMail)
@@ -279,7 +348,7 @@ if (!class_exists('MJSLibAdminClass'))
 			
 			if ( function_exists('wp_nonce_field') ) 
 			{
-				if ($this->myDBaseObj->adminOptions['Dev_EnableDebug'])
+				if ($this->myDBaseObj->getOption('Dev_EnableDebug'))
 					echo "<!-- wp_nonce_field($referer) -->\n";
 				wp_nonce_field($referer);
 			}
@@ -289,7 +358,7 @@ if (!class_exists('MJSLibAdminClass'))
 		{
 			$referer = plugin_basename($this->caller);
 			
-			if ($this->myDBaseObj->adminOptions['Dev_EnableDebug'])
+			if ($this->myDBaseObj->getOption('Dev_EnableDebug'))
 				echo "<!-- check_admin_referer($referer) -->\n";
 			check_admin_referer($referer);
 		}
@@ -308,7 +377,35 @@ if (!class_exists('MJSLibAdminClass'))
 				}
 			}
 		}
+		
+		function DoBulkPreAction($bulkAction, $recordId)
+		{
+			return false;
+		}
 				
+		function DoBulkAction($bulkAction, $recordId)
+		{
+			echo "DoBulkAction() function not defined in ".get_class()."<br>\n";
+			return false;
+		}
+		
+		function GetBulkActionMsg($bulkAction, $actionCount)
+		{
+			echo "GetBulkActionMsg() function not defined in ".get_class()."<br>\n";
+		}
+		
+		static function AddActionButton($caller, $buttonText, $buttonClass, $saleID = 0)
+		{
+				$buttonAction = strtolower(str_replace(" ", "", $buttonText));
+				$page = $_GET['page'];
+				
+				$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
+				if ($saleID !== 0) $editLink .= '&id='.$saleID;
+				$editLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($editLink, plugin_basename($caller)) : $editLink;
+				$editControl = '<div class='.$buttonClass.'><a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a></div>'."\n";  
+				return $editControl;    
+		}
+		
   }
 }
 

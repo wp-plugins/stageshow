@@ -29,6 +29,7 @@ if (!class_exists('StageShowSalesAdminClass'))
 	{		
 		function __construct($env)
 		{
+			$env['saleQtyInputID'] = 'ticketQty';
 			parent::__construct($env);
 		}
 		
@@ -42,9 +43,24 @@ if (!class_exists('StageShowSalesAdminClass'))
 			return $pricesEntry->priceValue;
 		}
 		
+		function GetItemDesc($pricesEntry)
+		{
+			return StageShowDBaseClass::FormatDateForDisplay($pricesEntry->perfDateTime).' - '.$pricesEntry->priceType;
+		}
+		
 		function GetButtonID($pricesEntry)
 		{
 			return $pricesEntry->perfPayPalButtonID;
+		}
+		
+		function GetSaleQty($ticketsEntry)
+		{
+			return $ticketsEntry->ticketQty;
+		}
+		
+		function SetSaleQty(&$ticketsEntry, $qty)
+		{
+			$ticketsEntry->ticketQty = $qty;
 		}
 		
 		function DoActions()
@@ -60,7 +76,8 @@ if (!class_exists('StageShowSalesAdminClass'))
 					$this->salesFor = '- '.$this->results[0]->showName.' ';
 					for ($i=0; $i<count($this->results); $i++)
 						$this->results[$i]->ticketQty = $this->myDBaseObj->GetSalesQtyBySaleID($this->results[$i]->saleID);
-					return;
+					$rtnVal = true;
+					break;
 						
 				case 'perf':
 					// List Sales for Performance
@@ -69,26 +86,34 @@ if (!class_exists('StageShowSalesAdminClass'))
 					$this->salesFor = '- '.$this->results[0]->showName.' ('.$this->myDBaseObj->FormatDateForDisplay($this->results[0]->perfDateTime).') ';
 					for ($i=0; $i<count($this->results); $i++)
 						$this->results[$i]->ticketQty = $this->myDBaseObj->GetSalesQtyBySaleID($this->results[$i]->saleID);
+					$rtnVal = true;
+					break;
 					
-					return;						
+				default:
+					$rtnVal = parent::DoActions();
+					break;
+					
 			}
-			
-			PayPalSalesAdminClass::DoActions();
-			
+				
 			return $rtnVal;
 		}
 		
-		function OutputSalesList($env)
+		function GetEditSaleFormEntries($saleID)
 		{
-			$classId = $env['PluginObj']->adminClassPrefix.'SalesAdminListClass';
-			$salesList = new $classId($env);	// StageShowSalesAdminListClass etc.
-			$salesList->OutputList($this->results);		
-		}
+			$prices = parent::GetEditSaleFormEntries($saleID);
+			$this->myDBaseObj->AddTicketNameAndType($prices);
 				
-		function OutputSalesDetailsList($env, $isInput = false)
-		{
-			$salesList = new StageShowSalesAdminDetailsListClass($env, $isInput);		
-			$salesList->OutputList($this->results);	
+			// Put the POST values into the prices (if they exist)
+			foreach ($prices as $key => $priceItem)
+			{
+				$postId = 'ticketQty'.$priceItem->priceID;
+				if (isset($_POST[$postId]))
+					$prices[$key]->ticketQty = $_POST[$postId];
+				else if (!isset($prices[$key]->ticketQty))
+					$prices[$key]->ticketQty = 0;
+			}			
+			
+			return $prices;
 		}
 		
 	}
