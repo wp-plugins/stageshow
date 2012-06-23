@@ -344,10 +344,43 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 		}
 		
-		function CreateSample()
+		function SendSaleReport()
 		{
+			if (!isset($this->adminOptions['EMailSummaryTemplatePath']) || ($this->adminOptions['EMailSummaryTemplatePath'] == '')) 
+				return 'EMailSummaryTemplatePath not defined';			
+			$templatePath = $this->adminOptions['EMailSummaryTemplatePath'];
+			
+			if (!isset($this->adminOptions['SaleSummaryEMail']) || ($this->adminOptions['SaleSummaryEMail'] == '')) 
+				return 'SaleSummaryEMail not defined';			
+			$EMailTo = $this->adminOptions['SaleSummaryEMail'];
+	
+			$salesSummary = $this->GetAllSalesQty();
+			return $this->SendEMailFromTemplate($salesSummary, $templatePath, $EMailTo);
+		}
+		
+		function LogSale($results)
+		{
+			$saleID = parent::LogSale($results);
+			
+			$this->SendSaleReport();		
+				
+			return $saleID;
+		}
+		
+		function GetSiteID()
+		{
+			$siteURL = get_option('siteurl');
+			$slashPosn = strrpos($siteURL, '/');
+			$siteURL = substr($siteURL, $slashPosn+1);
+			
+			return $siteURL;
+		}
+		
+		function CreateSample()
+		{			
       $showName1 = "The Wordpress Show";
-      
+			if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_test.php') ) { $showName1 .= " (".$this->GetSiteID().")"; }
+
       // Sample dates to reflect current date/time
       $showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-1 days"))." 20:00:00";
       $showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-0 days"))." 20:00:00";
@@ -1153,6 +1186,26 @@ if (!class_exists('StageShowDBaseClass'))
 			$wpdb->query($sql);
 		}			
 		
+		function GetAllSalesQty($sqlFilters = null)
+		{
+			$sqlFilters['groupBy'] = 'perfID';
+			$sqlFilters['JoinType'] = 'RIGHT JOIN';
+
+			$sql  = 'SELECT *,'.$this->TotalSalesField($sqlFilters).' FROM '.STAGESHOW_SALES_TABLE;	
+			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
+			$sql .= $this->GetWhereSQL($sqlFilters);
+			$sql .= $this->GetOptsSQL($sqlFilters);
+			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+					
+			$this->ShowSQL($sql); 
+			
+			$salesListArray = $this->get_results($sql);
+			if (count($salesListArray) == 0)
+					return 0;
+							 
+			return $salesListArray;
+		}
+		
 // ----------------------------------------------------------------------
 //
 //			Start of CUSTOM SALES functions
@@ -1525,19 +1578,28 @@ if (!class_exists('StageShowDBaseClass'))
 				return $optionURL;
 		}
 		
-		function GetSalesEMail($currOptions)
+		function GetSalesEMail()
 		{
-			return $currOptions['AdminEMail'];
+			return $this->adminOptions['AdminEMail'];
 		}
 		
-		function AddSalesDetailsEMailFields($currOptions, $EMailTemplate, $saleDetails)
+		function AddSalesDetailsEMailFields($EMailTemplate, $saleDetails)
 		{
+			foreach ($saleDetails as $key => $value)
+			{
+				$EMailTemplate = str_replace("[$key]", $value, $EMailTemplate);
+			}
+/*			
 			$EMailTemplate = str_replace('[ticketName]', $saleDetails->ticketName, $EMailTemplate);
 			$EMailTemplate = str_replace('[ticketType]', $saleDetails->ticketType, $EMailTemplate);
 			$EMailTemplate = str_replace('[ticketQty]', $saleDetails->ticketQty, $EMailTemplate);
 			$EMailTemplate = str_replace('[ticketSeat]', $saleDetails->ticketSeat, $EMailTemplate);
 			
-			return parent::AddSalesDetailsEMailFields($currOptions, $EMailTemplate, $saleDetails);
+			$EMailTemplate = str_replace('[showName]', $saleDetails->showName, $EMailTemplate);
+			$EMailTemplate = str_replace('[perfRef]', $saleDetails->perfRef, $EMailTemplate);
+			$EMailTemplate = str_replace('[perfDateTime]', $saleDetails->perfDateTime, $EMailTemplate);
+*/			
+			return parent::AddSalesDetailsEMailFields($EMailTemplate, $saleDetails);
 		}
 		
 		function echoHTML($html)
@@ -1570,8 +1632,8 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			$filename = $pagename.'.php';
 			
-			if (defined('STAGESHOW_PLUS_UPDATE_SERVER_PATH'))
-				$updateCheckURL = STAGESHOW_PLUS_UPDATE_SERVER_PATH;
+			if (defined('STAGESHOW_PLUS_UPDATE_SERVER_URL'))
+				$updateCheckURL = STAGESHOW_PLUS_UPDATE_SERVER_URL;
 			else
 				$updateCheckURL = $this->get_pluginURI().'/';
 			$updateCheckURL .= $filename;
@@ -1609,29 +1671,54 @@ if (!class_exists('StageShowDBaseClass'))
 				
 		function GetLatestNews()
 		{
-			$latest = '';
-			if (isset($this->adminOptions['LatestNews']))
+			$news = $this->CheckLatestNews();
+			return $news['LatestNews'];
+		}
+				
+		function CheckLatestNews()
+		{
+			$latest['LatestNews'] = '';
+			$latest['Status'] = "UNKNOWN";
+			$getUpdate = true;
+			
+			if (isset($this->adminOptions['NewsUpdateTime']) && ($this->adminOptions['NewsUpdateTime'] !== '') )
 			{
 				$lastUpdate = $this->adminOptions['NewsUpdateTime'];
+				$latest['LastUpdate'] = date(MJSLibDBaseClass::MYSQL_DATETIME_FORMAT, $lastUpdate);
+				
 				$updateInterval = STAGESHOW_NEWS_UPDATE_INTERVAL*24*60*60;
-				if ($lastUpdate + $updateInterval > time())
-					$latest = $this->adminOptions['LatestNews'];			
+				$nextUpdate = $lastUpdate + $updateInterval;
+				$latest['NextUpdate'] = date(MJSLibDBaseClass::MYSQL_DATETIME_FORMAT, $nextUpdate);
+				
+				if ($nextUpdate > time())
+				{
+					$latest['Status'] = "UpToDate";
+					$latest['LatestNews'] = $this->adminOptions['LatestNews'];
+					$getUpdate = false;
+				}			
 			}
 			
-			if ($latest === '')
+			if ($getUpdate)
 			{
 				// Get URL of StagsShow News server from Plugin Info
 				$updateCheckURL = $this->GetVersionServerURL('news');
-				$latest = $this->GetHTTPPage($updateCheckURL);	
-				if (strlen($latest) <= 2)
-					$latest = '';
+				$latest['LatestNews'] = $this->GetHTTPPage($updateCheckURL);	
+				if (strlen($latest['LatestNews']) <= 2)
+				{
+					$latest['Status'] = "HTTP_Empty";
+					$latest['LatestNews'] = '';
+				}
+				else
+				{
+					$latest['Status'] = "HTTP_OK";
+				}
 					
-				$this->adminOptions['LatestNews'] = $latest;
+				$this->adminOptions['LatestNews'] = $latest['LatestNews'];
 					
 				$this->adminOptions['NewsUpdateTime'] = time();
 				$this->saveOptions();
 				//echo "News Updated<br>\n";
-			}
+			}				
 			
 			return $latest;
 		}

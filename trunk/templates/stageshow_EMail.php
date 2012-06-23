@@ -3,6 +3,8 @@
 
 Thank you for your booking online with [organisation]
 
+The booking below is confirmed. Please bring a copy of this email with you to the event.
+
 Order Details:
 
 Reference:      [saleTxnId]

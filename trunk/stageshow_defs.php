@@ -28,17 +28,17 @@ define('STAGESHOW_OPTIONS_NAME', 'stageshowsettings');
 define('STAGESHOW_DEFAULT_SETUPUSER', 'administrator');
 
 define('STAGESHOW_CAPABILITY_VALIDATEUSER', 'StageShow_Validate');
-define('STAGESHOW_CAPABILITY_SALESUSER', 'StageShow_Sales');			// A user that can in addition view and edit sales
-define('STAGESHOW_CAPABILITY_ADMINUSER', 'StageShow_Admin');			// A user that can in addition edit shows, performances
-define('STAGESHOW_CAPABILITY_SETUPUSER', 'StageShow_Setup');			// A user that can in addition edit stageshow settings
-define('STAGESHOW_CAPABILITY_DEVUSER', 'StageShow_Testing');			// A user that can in addition use test pages
+define('STAGESHOW_CAPABILITY_SALESUSER', 'StageShow_Sales');			// A user that can view and edit sales
+define('STAGESHOW_CAPABILITY_ADMINUSER', 'StageShow_Admin');			// A user that can edit shows, performances
+define('STAGESHOW_CAPABILITY_SETUPUSER', 'StageShow_Setup');			// A user that can edit stageshow settings
+define('STAGESHOW_CAPABILITY_DEVUSER', 'StageShow_Testing');			// A user that can use test pages
 
 define('STAGESHOW_MENUPAGE_ADMINMENU', STAGESHOW_CODE_PREFIX.'_adminmenu');
 define('STAGESHOW_MENUPAGE_OVERVIEW', STAGESHOW_CODE_PREFIX.'_overview');
 define('STAGESHOW_MENUPAGE_SHOWS', STAGESHOW_CODE_PREFIX.'_shows');
 define('STAGESHOW_MENUPAGE_PERFORMANCES', STAGESHOW_CODE_PREFIX.'_performances');
 define('STAGESHOW_MENUPAGE_PRICES', STAGESHOW_CODE_PREFIX.'_prices');
-define('STAGESHOW_MENUPAGE_PRICEPLANS', STAGESHOW_CODE_PREFIX.'_presets');
+define('STAGESHOW_MENUPAGE_PRICEPLANS', STAGESHOW_CODE_PREFIX.'_priceplans');
 define('STAGESHOW_MENUPAGE_SALES', STAGESHOW_CODE_PREFIX.'_sales');
 define('STAGESHOW_MENUPAGE_BUTTONS', STAGESHOW_CODE_PREFIX.'_buttons');
 define('STAGESHOW_MENUPAGE_SETTINGS', STAGESHOW_CODE_PREFIX.'_settings');

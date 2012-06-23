@@ -44,7 +44,8 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php
 			$this->Tools_Validate($env);
 			$this->Tools_Export();
-			$this->Tools_FlushSalesRecords();
+			if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER))
+				$this->Tools_FlushSalesRecords();
 ?>			
 	</div>
 </div>
@@ -79,7 +80,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 			?>
 
 <h3><?php _e('Validate Sale'); ?></h3>
-<form method="post" action="admin.php?page=stageshow_tools">
+<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_TOOLS; ?>">
 <?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
 <table class="form-table">
 	<tr>
@@ -175,7 +176,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 <h3><?php _e('Sales Records'); ?></h3>
 <p><?php _e('Sales records are not deleted when shows or performances are deleted.'); ?></p>
 <p><?php _e('Individual sales records can be deleted on the sales page. All sales records for sales where the corresponding show or performance has been removed can be deleted by clicking the button below.'); ?></p>
-<form method="post" action="admin.php?page=stageshow_tools">
+<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_TOOLS; ?>">
 	<?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
 <p>
 <p class="submit">

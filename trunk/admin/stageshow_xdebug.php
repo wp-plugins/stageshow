@@ -38,7 +38,7 @@ if (!class_exists('StageShowDebugAdminClass'))
 ?>
 <div class="wrap">
 <div id="icon-stageshow" class="icon32"></div>
-<form method="post" action="admin.php?page=stageshow_debug">
+<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_DEBUG; ?>">
 <?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
 	<h2><?php echo $myPluginObj->pluginName.' - TEST' ?></h2>
 	<?php 

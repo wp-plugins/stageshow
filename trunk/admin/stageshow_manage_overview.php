@@ -54,6 +54,80 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			);
 		}
 		
+		function GetDetailsRowsDefinition()
+		{
+			$ourOptions = array(
+//				array('Label' => 'Name',	                     'Id' => 'showName',      'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      'Size' => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+			);
+			
+			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
+			return $ourOptions;
+		}
+		
+		function GetDetailsRowsFooter()
+		{
+			$ourOptions = array(
+				array('Type' => MJSLibTableClass::TABLEENTRY_FUNCTION, 'Func' => 'ShowSaleDetails'),						
+			);
+			
+			$ourOptions = array_merge(parent::GetDetailsRowsFooter(), $ourOptions);
+			
+			return $ourOptions;
+		}
+		
+		function ShowSaleDetails($result)
+		{		
+			$saleResults = $this->myDBaseObj->GetPerformancesListByShowID($result->showID);
+
+			$env = $this->env;
+			$salesList = new StageShowOverviewAdminDetailsListClass($env, $this->editMode);	
+			
+			// Set Rows per page to disable paging used on main page
+			$salesList->enableFilter = false;
+			
+			ob_start();	
+			$salesList->OutputList($saleResults);	
+			$saleDetailsOoutput = ob_get_contents();
+			ob_end_clean();
+
+			return $saleDetailsOoutput;
+		}
+		
+	}
+}
+
+if (!class_exists('StageShowOverviewAdminDetailsListClass')) 
+{
+	class StageShowOverviewAdminDetailsListClass extends MJSLibAdminListClass // Define class
+	{		
+		function __construct($env, $editMode = false) //constructor
+		{
+			// Call base constructor
+			parent::__construct($env, $editMode);
+			
+			$this->HeadersPosn = MJSLibTableClass::HEADERPOSN_TOP;
+		}
+		
+		function GetTableID($result)
+		{
+			return "showtab".$result->showID;
+		}
+		
+		function GetRecordID($result)
+		{
+			return $result->perfID;
+		}
+		
+		function GetMainRowsDefinition()
+		{
+			$ourOptions = array(
+				array('Label' => 'Performance',  'Id' => 'perfDateTime', 'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array('Label' => 'Quantity',     'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),						
+			);
+			
+			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
+			return $ourOptions;
+		}
 	}
 }
 
@@ -108,7 +182,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 				{
 					echo "<div class='noconfig'>".__('No Show Configured', STAGESHOW_DOMAIN_NAME)."</div>\n";
 					echo '
-					<form method="post" action="admin.php?page=stageshow_adminmenu">
+					<form method="post" action="admin.php?page='.STAGESHOW_MENUPAGE_ADMINMENU.'">
 					<br>
 						<input class="button-primary" type="submit" name="createsample" value="'.__('Create Sample', STAGESHOW_DOMAIN_NAME).'"/>
 					<br>
@@ -159,6 +233,12 @@ if (!class_exists('StageShowOverviewAdminClass'))
 		
 		function Output_UpdateInfo()
 		{
+			if (defined('STAGESHOW_PLUS_UPDATE_SERVER_URL'))
+			{
+				$msg = "<strong>Using Custom Update Server - Root URL=".STAGESHOW_PLUS_UPDATE_SERVER_URL."<br>\n";
+				echo '<br><div id="message" class="error"><p>'.$msg.'</p></div>';
+			}
+			
 			// Get News entry from server
 			$myDBaseObj = $this->myDBaseObj;
 			$latest = $myDBaseObj->GetLatestNews();
@@ -170,13 +250,6 @@ if (!class_exists('StageShowOverviewAdminClass'))
 ?>
 			<br>
 				<h2>StageShow Updates</h2>
-<?php
-			if (defined('STAGESHOW_PLUS_UPDATE_SERVER_PATH'))
-			{
-				$msg = "<strong>Using Custom Update Server - Root URL=".STAGESHOW_PLUS_UPDATE_SERVER_PATH."<br>\n";
-				echo '<div id="message" class="error"><p>'.$msg.'</p></div>';
-			}
-?>
 					<table class="widefat" cellspacing="0">
 						<thead>
 							<tr>

@@ -82,6 +82,7 @@ if (!class_exists('MJSLibTableClass'))
 		var $rowCount = 0;
 		
 		var $scriptsOutput;
+		var $moreScriptsOutput;
 		
 		var $tableType;
 		
@@ -119,8 +120,9 @@ if (!class_exists('MJSLibTableClass'))
 			$this->noAutoComplete = true;
 			$this->ignoreEmptyCells = true;
 			$this->scriptsOutput = false;
+			$this->moreScriptsOutput = false;
 			
-			$this->detailsRowsDef = array_merge($this->GetDetailsRowsDefinition(), $this->GetHiddenRowsFooter());
+			$this->detailsRowsDef = array_merge($this->GetDetailsRowsDefinition(), $this->GetDetailsRowsFooter());
 				
 			$this->moreText = __('Show');
 			$this->lessText = __('Hide');
@@ -153,7 +155,7 @@ if (!class_exists('MJSLibTableClass'))
 			return array();
 		}
 		
-		function GetHiddenRowsFooter()
+		function GetDetailsRowsFooter()
 		{
 			return array();
 		}
@@ -284,6 +286,8 @@ if (!class_exists('MJSLibTableClass'))
 	
 		function AddShowOrHideButtonToTable($result, $tableId, $rowId, $content, $col=0, $newRow = false)
 		{
+			$this->OutputMoreButtonScript();
+			
 			$recordID = $this->GetRecordID($result);
 			$moreName = 'more'.$recordID;
 			
@@ -408,32 +412,16 @@ if (!class_exists('MJSLibTableClass'))
 			return $output;
 		}
 		
-		function OutputCheckboxScript()
+		function OutputMoreButtonScript()
 		{
-			if ($this->scriptsOutput) return;
-			$this->scriptsOutput = true;
+			if ($this->moreScriptsOutput) return;
+			$this->moreScriptsOutput = true;
 			
 			$moreText = $this->moreText;
 			$lessText = $this->lessText;
 			
 			echo "
 <script>
-
-function getParentNode(obj, nodeName)
-{
-	var pobj = obj;
-	while (pobj !== null)
-	{
-		pobj = pobj.parentNode;
-		if (pobj === null)
-			break;
-		pName = pobj.nodeName;
-		if (pName === nodeName)
-			break;
-	}
-	
-	return pobj;
-}
 
 function HideOrShowRows(buttonId, rowId)
 {
@@ -454,6 +442,34 @@ function HideOrShowRows(buttonId, rowId)
 		rowsVisible = true;	
 	}
 	
+}
+
+</script>
+			";
+		}
+		
+		function OutputCheckboxScript()
+		{
+			if ($this->scriptsOutput) return;
+			$this->scriptsOutput = true;
+			
+			echo "
+<script>
+
+function getParentNode(obj, nodeName)
+{
+	var pobj = obj;
+	while (pobj !== null)
+	{
+		pobj = pobj.parentNode;
+		if (pobj === null)
+			break;
+		pName = pobj.nodeName;
+		if (pName === nodeName)
+			break;
+	}
+	
+	return pobj;
 }
 
 function updateCheckboxes(obj)
