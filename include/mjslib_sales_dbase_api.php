@@ -225,7 +225,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			$this->ShowSQL($sql); 
 			$wpdb->query($sql);
 			$orderID = mysql_insert_id();
-	
+				
 			return $orderID;
 		}			
 		
@@ -359,12 +359,12 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			return $salesListArray;
 		}			
 
-		function GetSalesEMail($currOptions)
+		function GetSalesEMail()
 		{
-			return $currOptions['SalesEMail'];
+			return $this->adminOptions['SalesEMail'];
 		}
 		
-		function AddEMailFields($currOptions, $EMailTemplate, $saleDetails)
+		function AddEMailFields($EMailTemplate, $saleDetails)
 		{
 			$emailFields = array(
 				// Details from User Profile
@@ -386,15 +386,15 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			foreach ($emailFields as $tag => $field)
 				$EMailTemplate = str_replace($tag, $saleDetails->$field, $EMailTemplate);
 						
-			$EMailTemplate = str_replace('[organisation]', $currOptions['OrganisationID'], $EMailTemplate);
+			$EMailTemplate = str_replace('[organisation]', $this->adminOptions['OrganisationID'], $EMailTemplate);
 			
-			$EMailTemplate = str_replace('[salesEMail]', $this->GetSalesEMail($currOptions), $EMailTemplate);
+			$EMailTemplate = str_replace('[salesEMail]', $this->GetSalesEMail(), $EMailTemplate);
 			$EMailTemplate = str_replace('[url]', get_option('siteurl'), $EMailTemplate);
 			
 			return $EMailTemplate;
 		}
 		
-		function AddSalesDetailsEMailFields($currOptions, $EMailTemplate, $orderDetails)
+		function AddSalesDetailsEMailFields($EMailTemplate, $orderDetails)
 		{
 			return $EMailTemplate;
 		}			
@@ -421,19 +421,19 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		
 		function EMailSale($saleID, $EMailTo = '')
 		{
-			$ourOptions = get_option($this->opts['CfgOptionsID']);
+			$templatePath = $this->adminOptions['EMailTemplatePath'];
 	
 			// Get sale	and ticket details
 			$salesList = $this->GetSale($saleID);
 			if (count($salesList) < 1) 
 				return 'salesList Empty';
-			$saleDetails = $salesList[0];
-			
-			$orderDetails = $salesList;
-			if (count($orderDetails) < 1) 
-				return 'orderDetails Empty';
-				
-			$filePath = dirname($this->opts['PluginRootFilePath']).'/'.$ourOptions['EMailTemplatePath'];		
+
+			return $this->SendEMailFromTemplate($salesList, $templatePath, $EMailTo);
+		}
+		
+		function SendEMailFromTemplate($emailContent, $templatePath, $EMailTo = '')
+		{				
+			$filePath = dirname($this->opts['PluginRootFilePath']).'/'.$templatePath;		
 
 			$mailTemplate = $this->ReadTemplateFile($filePath);
 			if (strlen($mailTemplate) == 0)
@@ -447,7 +447,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			if ($posnPHP !== false) $posnEOL = strpos($mailTemplate, "\n", $posnPHP+1);
 			if (($posnPHP !== false) && ($posnEOL !== false)) 
 			{
-				$EMailSubject = $this->AddEMailFields($ourOptions, substr($mailTemplate, $posnPHP, $posnEOL-$posnPHP), $saleDetails);
+				$EMailSubject = $this->AddEMailFields(substr($mailTemplate, $posnPHP, $posnEOL-$posnPHP), $emailContent[0]);
 				$mailTemplate = substr($mailTemplate, $posnEOL);
 			}
 			
@@ -457,10 +457,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			if ($posnPHP !== false) $mailTemplate = substr($mailTemplate, 0, $posnPHP);
 
 			$loopCount = 0;
-//echo "<strong><br><br><h2>loopCount - $loopCount <br><br></h2></strong>\n";				
 			for (; $loopCount < 10; $loopCount++)
 			{
-//echo "loopCount - $loopCount <br>\n";				
 				$loopStart = stripos($mailTemplate, '[startloop]');
 				$loopEnd = stripos($mailTemplate, '[endloop]');
 
@@ -468,30 +466,28 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 					break;
 
 				$section = substr($mailTemplate, 0, $loopStart);
-				$saleConfirmation .= $this->AddEMailFields($ourOptions, $section, $saleDetails);
+				$saleConfirmation .= $this->AddEMailFields($section, $emailContent[0]);
 
 				$loopStart += strlen('[startloop]');
 				$loopLen = $loopEnd - $loopStart;
 
-				foreach($orderDetails as $ticket)
+				foreach($emailContent as $ticket)
 				{
 					$section = substr($mailTemplate, $loopStart, $loopLen);
-					$saleConfirmation .= $this->AddSalesDetailsEMailFields($ourOptions, $section, $ticket);
+					$saleConfirmation .= $this->AddSalesDetailsEMailFields($section, $ticket);
 				}
 
 				$loopEnd += strlen('[endloop]');
 				$mailTemplate = substr($mailTemplate, $loopEnd);
 			}
 
-//echo "<strong><br><br><h2>Abort EMailSale early? - $loopCount <br><br></h2></strong>\n";				
-//return "Test Complete";	
 			// Process the rest of the mail template
-			$saleConfirmation .= $this->AddEMailFields($ourOptions, $mailTemplate, $saleDetails);
+			$saleConfirmation .= $this->AddEMailFields($mailTemplate, $emailContent[0]);
 
 			// Get email address and organisation name from settings
-			$EMailFrom = $this->GetEmail($ourOptions, 'Sales');
+			$EMailFrom = $this->GetEmail($this->adminOptions, 'Sales');
 
-			if (strlen($EMailTo) == 0) $EMailTo = $saleDetails->saleEMail;
+			if (strlen($EMailTo) == 0) $EMailTo = $emailContent[0]->saleEMail;
 
 			if (isset($this->emailObj))
 				$this->emailObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);

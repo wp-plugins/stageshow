@@ -83,69 +83,6 @@ if (!class_exists('MJSLibUtilsClass'))
 			return check_admin_referer($action, $query_arg);
 		}
 		
-		static function xxShowCallStack($echoOut = true, $showParams = true)
-		{
-			$lineBreak = $echoOut ? "<br>\n" : "\n";
-			
-			ob_start();		
-			debug_print_backtrace();			
-			$callStack = ob_get_contents();
-			ob_end_clean();
-
-			// Typical Entry: #2 OurClass->TheFunction(FParams) called at [D:\Internet\StageShow+\Web\wp-content\plugins\stageshow\include\mjslib_sales_dbase_api.php:286] 
-			
-			$callStack = preg_split('/#[0-9]+[ ]+/', $callStack, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-			$showEntry = false;
-			
-			ob_start();		
-			echo $lineBreak."Callstack";
-			if (!$showParams) echo " (no params)";
-			echo ":".$lineBreak;
-			
-			foreach ($callStack as $fncall)
-			{
-				if (strlen($fncall) == 0) continue;
-				
-				$fields = explode(' called at ', $fncall);
-
-				// Separate Function Parameters
-				$params = explode('(', $fields[0], 2);
-				
-				if (!$showEntry)
-				{
-					// Suppress this function itself
-					if (strpos($fncall,'::ShowCallStack('))
-						continue;
-					if (strpos($fncall,'->ShowCallStack('))
-						continue;
-					
-					$showEntry = true;
-				}
-					
-				echo $params[0].'()';		// Output the function name
-				
-				if (count($fields) > 1)
-				{
-					// Extract the filename and output it
-					$fileName = basename(str_replace('[', '', str_replace(']', '', $fields[1])));
-					echo ' - '.$fileName;
-				}
-				
-				if ($showParams) echo $lineBreak.$params[1];
-							
-				//echo $lineBreak;
-			}
-			
-			$rtnVal = ob_get_contents();
-			ob_end_clean();
-			
-			$rtnVal = str_replace("\n","<br>\n",$rtnVal);
-			
-			if ($echoOut) echo $rtnVal;
-			
-			return $rtnVal;
-		}		
-		
 		static function ShowCallStack($echoOut = true)
 		{
 			$lineBreak = $echoOut ? "<br>\n" : "\n";
@@ -155,7 +92,9 @@ if (!class_exists('MJSLibUtilsClass'))
 			$callStack = ob_get_contents();
 			ob_end_clean();
 
-			$callStack = explode('#', $callStack);
+			$callStack = preg_split('/#[0-9]+[ ]+/', $callStack, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+			
+			// Set once this function has been "seen"
 			$showEntry = false;
 			
 			ob_start();		
@@ -163,24 +102,33 @@ if (!class_exists('MJSLibUtilsClass'))
 			
 			foreach ($callStack as $fncall)
 			{
-				$fields = explode(' called at ', $fncall);
-
 				// Separate Function Parameters
-				$params = explode('(', $fields[0]);
-				
-				if (!$showEntry)
+				$fields1 = explode('(', $fncall, 2);
+				if (count($fields1) > 1)
 				{
-					if (strpos($fncall,'::ShowCallStack('))
-						$showEntry = true;
+					// Separate Filename and Line No
+					$fields2 = explode(' called at ', $fields1[1]);
+				}
+				
+				if (strpos($fncall,'->ShowCallStack('))
+				{
+					$showEntry = true;
 					continue;
 				}
 					
-				echo $params[0].'()';
+				if (!$showEntry)
+					continue;
+					
+				echo $fields1[0].'()';
 				
-				if (count($fields) > 1)
+				if (count($fields2) > 1)
 				{
-					$fileName = basename(str_replace('[', '', str_replace(']', '', $fields[1])));
+					$fileName = basename(str_replace('[', '', str_replace(']', '', $fields2[1])));
 					echo ' - '.$fileName;
+/*					
+					if (adminOptions['cbCallStackParams'])
+						echo "    Params: ".$fields2[0]."\n";
+*/
 				}
 								
 				//echo $lineBreak;

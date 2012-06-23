@@ -52,7 +52,7 @@ if (!class_exists('StageShowShowsAdminListClass'))
 		{
 			return array(
 				array('Label' => 'Show Name',    'Id' => 'showName',   'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => STAGESHOW_SHOWNAME_TEXTLEN, ),
-				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE,  'Link' => 'admin.php?page=stageshow_sales&action=show&id=', ),						
+				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE,  'Link' => 'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
 				array('Label' => 'State',        'Id' => 'showState',  'Type' => MJSLibTableClass::TABLEENTRY_VALUE,  'Decode' => 'GetShowState', ),						
 			);
 		}
@@ -168,8 +168,8 @@ if (!class_exists('StageShowShowsAdminClass'))
 				<div class="wrap">
 					<div id="icon-stageshow" class="icon32"></div>
 					<h2><?php echo $myPluginObj->pluginName.' - '.__('Show Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
-					<form method="post" action="admin.php?page=stageshow_shows">
-<?php
+					<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_SHOWS ?>">
+					<?php
 	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
 
 	if (isset($noteID))

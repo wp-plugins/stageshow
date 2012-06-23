@@ -231,23 +231,32 @@ $showLists = $myDBaseObj->GetAllShowsList();
 if (count($showLists) == 0)
 {
 	if ($myDBaseObj->CheckIsConfigured())
-		echo "<div class='noconfig'>".__('No Show Configured', STAGESHOW_DOMAIN_NAME)."</div>\n";
+	{
+		$showsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.STAGESHOW_MENUPAGE_SHOWS;
+		echo "<div class='error'><p>".__('No Show Configured', STAGESHOW_DOMAIN_NAME).' - <a href='.$showsPageURL.'>'.__('Add one Here', STAGESHOW_DOMAIN_NAME).'</a>'."</p></div>\n";
+	}
 }
 foreach ($showLists as $showList)
 {
 	$perfsLists = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
 	<div class="stageshow-admin-form">
-	<form method="post" action="admin.php?page=stageshow_prices">
-		<h3><?php echo($showList->showName); ?></h3>
+	<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_PRICES; ?>">
 <?php 
 if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
-if (count($perfsLists) == 0) 
+if (count($perfsLists) == 0)
 { 
-	echo "<div class='noconfig'>".__('Show has NO Performances', STAGESHOW_DOMAIN_NAME)."</div>\n";
+	$showsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.STAGESHOW_MENUPAGE_PERFORMANCES;
+	$showsPageMsg = $showList->showName.' '.__('has NO Performances', STAGESHOW_DOMAIN_NAME).' - <a href='.$showsPageURL.'>'.__('Add one Here', STAGESHOW_DOMAIN_NAME).'</a>';
+?> 
+	<div class='error'><p><?php echo $showsPageMsg; ?></p></div>
+<?php 
 } 
 else 
 { 
+?>
+		<h3><?php echo($showList->showName); ?></h3>
+<?php 
 $results = $myDBaseObj->GetPricesListByShowID($showList->showID);
 if(count($results) == 0)
 {

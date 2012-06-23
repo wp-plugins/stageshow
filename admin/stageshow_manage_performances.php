@@ -57,7 +57,7 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 				array('Label' => 'Date & Time',  'Id' => 'perfDateTime', 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,  'Len' => 28, ),
 				array('Label' => 'Reference',    'Id' => 'perfRef',      'Type' => MJSLibTableClass::TABLEENTRY_TEXT,  'Len' => STAGESHOW_PERFREF_TEXTLEN, ),
 				array('Label' => 'Max Seats',    'Id' => 'perfSeats',    'Type' => MJSLibTableClass::TABLEENTRY_TEXT,  'Decode' => 'GetPerfMaxSeats',  'Len' => 4, ),						
-				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VALUE, 'Link' => 'admin.php?page=stageshow_sales&action=perf&id=', ),						
+				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VALUE, 'Link' => 'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
 				array('Label' => 'State',        'Id' => 'perfState',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE, 'Decode' => 'GetPerfState'),						
 			);
 		}
@@ -244,14 +244,17 @@ $showLists = $myDBaseObj->GetAllShowsList();
 if (count($showLists) == 0)
 {
 	if ($myDBaseObj->CheckIsConfigured())
-		echo "<div class='noconfig'>".__('No Show Configured', STAGESHOW_DOMAIN_NAME)."</div>\n";
+	{
+		$showsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.STAGESHOW_MENUPAGE_SHOWS;
+		echo "<div class='error'><p>".__('No Show Configured', STAGESHOW_DOMAIN_NAME).' - <a href='.$showsPageURL.'>'.__('Add one Here', STAGESHOW_DOMAIN_NAME).'</a>'."</p></div>\n";
+	}
 }
 foreach ($showLists as $showList)
 {
 	$results = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
 	<div class="stageshow-admin-form">
-	<form method="post" action="admin.php?page=stageshow_performances">
+	<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_PERFORMANCES; ?>">
 	<h3><?php echo($showList->showName); ?></h3>
 		<?php 
 	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));

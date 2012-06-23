@@ -92,13 +92,13 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			return $ourOptions;
 		}
 		
-		function GetHiddenRowsFooter()
+		function GetDetailsRowsFooter()
 		{
 			$ourOptions = array(
 				array('Type' => MJSLibTableClass::TABLEENTRY_FUNCTION, 'Func' => 'ShowSaleDetails'),						
 			);
 			
-			$ourOptions = array_merge(parent::GetHiddenRowsFooter(), $ourOptions);
+			$ourOptions = array_merge(parent::GetDetailsRowsFooter(), $ourOptions);
 			
 			return $ourOptions;
 		}
@@ -328,7 +328,13 @@ if (!class_exists('PayPalSalesAdminClass'))
 			<br><input class="button-primary" type="submit" name="savesale" value="'.__('Save Sale', $this->pluginName).'">
 			';
 	else if ($this->detailsSaleId <= 0)
+	{
+		$pricesList = $myDBaseObj->GetPricesList(null);
+		if (count($pricesList) > 0)
 			echo MJSLibAdminClass::AddActionButton($this->caller, __('Add Sale', $this->pluginName), 'tablenav_bottom_actions'); 
+		else
+			echo $this->NoStockMessage();
+	}
 	else
 	{
 			echo MJSLibAdminClass::AddActionButton($this->caller, __('Back to Sales Summary', $this->pluginName), 'tablenav_bottom_actions'); 
@@ -343,6 +349,11 @@ if (!class_exists('PayPalSalesAdminClass'))
         // HTML Output - End
 		}	
 		
+		function NoStockMessage()
+		{
+			return 'NO Stock';
+		}
+		
 		function DoActions()
 		{
 			$rtnVal = false;
@@ -353,6 +364,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 					check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
 					
 					$this->pricesList = $this->myDBaseObj->GetPricesListWithSales(0);
+					if (count($this->pricesList) == 0) break;
 					$this->editSaleEntry[0] = $this->pricesList[0];
 
 					$this->editingRecord = true;

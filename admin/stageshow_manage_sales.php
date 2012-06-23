@@ -63,6 +63,14 @@ if (!class_exists('StageShowSalesAdminClass'))
 			$ticketsEntry->ticketQty = $qty;
 		}
 		
+		function NoStockMessage()
+		{
+			$perfsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.STAGESHOW_MENUPAGE_PRICES;
+			$perfsPageMsg = __('NO Prices Defined', STAGESHOW_DOMAIN_NAME).' - <a href='.$perfsPageURL.'>'.__('Add one Here', STAGESHOW_DOMAIN_NAME).'</a>';
+			$perfsPageMsg = "<div class='error'><p>$perfsPageMsg</p></div>";
+			return $perfsPageMsg;
+		}
+		
 		function DoActions()
 		{
 			$rtnVal = false;
@@ -101,7 +109,6 @@ if (!class_exists('StageShowSalesAdminClass'))
 		function GetEditSaleFormEntries($saleID)
 		{
 			$prices = parent::GetEditSaleFormEntries($saleID);
-			$this->myDBaseObj->AddTicketNameAndType($prices);
 				
 			// Put the POST values into the prices (if they exist)
 			foreach ($prices as $key => $priceItem)

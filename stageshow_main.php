@@ -564,10 +564,15 @@ if (!class_exists('StageShowPluginClass'))
 					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Plan Editor', STAGESHOW_DOMAIN_NAME),  __('Price Plans', STAGESHOW_DOMAIN_NAME),STAGESHOW_CAPABILITY_ADMINUSER, STAGESHOW_MENUPAGE_PRICEPLANS,   array(&$this, 'printAdminPage'));
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', STAGESHOW_DOMAIN_NAME),__('Performance', STAGESHOW_DOMAIN_NAME), STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', STAGESHOW_DOMAIN_NAME),        __('Price', STAGESHOW_DOMAIN_NAME),       STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Sales Admin', STAGESHOW_DOMAIN_NAME),       __('Sales', STAGESHOW_DOMAIN_NAME),       STAGESHOW_CAPABILITY_SALESUSER,   STAGESHOW_MENUPAGE_SALES,        array(&$this, 'printAdminPage'));
+
+				if ( current_user_can(STAGESHOW_CAPABILITY_VALIDATEUSER)
+				  || current_user_can(STAGESHOW_CAPABILITY_SALESUSER))
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Sales Admin', STAGESHOW_DOMAIN_NAME),       __('Sales', STAGESHOW_DOMAIN_NAME),     $adminCap,                        STAGESHOW_MENUPAGE_SALES,        array(&$this, 'printAdminPage'));
+				
 				if ( current_user_can(STAGESHOW_CAPABILITY_VALIDATEUSER)
 				  || current_user_can(STAGESHOW_CAPABILITY_ADMINUSER))
 					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Admin Tools', STAGESHOW_DOMAIN_NAME),       __('Tools', STAGESHOW_DOMAIN_NAME),     $adminCap,                        STAGESHOW_MENUPAGE_TOOLS,        array(&$this, 'printAdminPage'));
+					
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', STAGESHOW_DOMAIN_NAME),     __('Settings', STAGESHOW_DOMAIN_NAME),    STAGESHOW_CAPABILITY_SETUPUSER,   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
 
 				{

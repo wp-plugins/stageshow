@@ -139,7 +139,7 @@ if (!class_exists('StageShowManageSettingsClass'))
 <div class="settings_page">
 <div id="icon-stageshow" class="icon32"></div>
 <h2><?php echo $myPluginObj->pluginName.' - '.__('Settings', STAGESHOW_DOMAIN_NAME); ?></h2>
-<form method="post" action="admin.php?page=stageshow_settings">
+<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_SETTINGS; ?>">
 <?php 
 	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__));
 	echo $hiddenTags; 

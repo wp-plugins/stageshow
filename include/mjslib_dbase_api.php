@@ -172,6 +172,8 @@ if (!class_exists('MJSLibDBaseClass'))
 					$this->adminOptions[$key] = $option;
 			}				
 			
+			//$this->adminOptions['EMailSummaryTemplatePath'] = STAGESHOWPLUS_ACTIVATE_EMAILSUMMARY_TEMPLATE_PATH;
+			
 			$this->saveOptions();
 			return $this->adminOptions;
 		}
