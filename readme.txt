@@ -6,7 +6,7 @@ Requires at least: 3.0
 Tested up to: 3.4
 Stable tag: 1.1.1
 
-The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups.
+The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups. 
 
 == Description ==
 
