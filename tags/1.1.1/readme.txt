@@ -10,7 +10,7 @@ The StageShow plugin adds an online Box-Office for websites of Small Theatres an
 
 == Description ==
 
-Any number of Shows can be specified, each with an unlimited number of performances. For each performance the start date/time, maximum number of places, ticket types and prices can be specified.  
+StageShow supports a single show, for which up to 4 performances can be defined, each with a specified start date/time, maximum number of places, ticket types and prices. 
 
 A [sshow-boxoffice] tag added to a Page on the website adds the Box Office entry to the site.
 
@@ -18,21 +18,21 @@ StageShow uses the PayPal API to interface to PayPal to create "Saved Buttons" w
 
 Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and copied to the system administrator.
 
-EMails are in MIME format and have both HTML and Text content. The PayPal transaction number if included in the standard email for validation purposes, both as text and as a Code39 barcode.  StageShow includes the facility on the admin pages to verify the transaction number (either entered via the keyboard or with a barcode reader) for use at show time 
+EMails are in text only format, and the PayPal transaction number if included for validation purposes.  StageShow includes the facility on the admin pages to verify the transaction number for use at show time 
 
 StageShow includes the facility to export sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
 
 Features Summary
 
-* Adds a online BoxOffice for unlimited number of Shows
-* Unlimited Performances with Specified start Date/Time and Maximum Number of Tickets 
+* Adds a online BoxOffice for a Single Show 
+* Up to 4 Performances with Specified start Date/Time and Maximum Number of Tickets 
 * Unlimited number of Ticket Types for each performance with individually defined prices
 * Integrated PayPal Payment Collection
 * EMail confirmation of Booking to Client and Administrator
-* Optional Barcode of Transaction ID in EMails  
 * Manual entry of ticket sales for telephone sales etc.
 * Online Transaction ID validation
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
+* Enhanced version with many additional features now available - for details see http://corondeck.co.uk/StageShow/Plus 
 
 == Installation ==
 
@@ -45,7 +45,6 @@ First Time Installation
 * Under "Install a plugin in .zip format" browse to the stageshow plugin archive file you downloaded
 * Click Install Now.
 * After it has installed, activate the plugin.
-* Add sale details to the StageShow+ Auto Update Settings to enable Auto Update 
 
 Upgrade
 
@@ -111,7 +110,6 @@ The following tags can be used in the EMail template:
 * [salePaid]	Sale Details: Paid
 * [saleTxnId]	Sale Details: PayPal Transaction ID (TxnId)
 * [saleStatus]	Sale Details: PayPal Transaction Status
-* [saleBarcode] Sale Details: PayPal Transaction ID converted to a Barcodes 
 
 * [startloop]	Marker for the start of a loop for each ticket type purchased
 * [endloop]	Marker for the end of the loop 
@@ -127,20 +125,16 @@ The following tags can be used in the EMail template:
 
 1. Screenshot 1: Stageshow and PayPal Settings Page 
 2. Screenshot 2: Overview Page 
-3. Screenshot 3: Shows Setup (Showing Options)
-4. Screenshot 4: Price Plans Setup 
-5. Screenshot 5: Performances Setup 
-6. Screenshot 6: Performances Setup (Showing Options)
-7. Screenshot 7: Ticket Types and Prices Setup 
-8. Screenshot 8: Sales Log Summary 
-9. Screenshot 9: Sales Log Summary (Showing Details)
-10. Screenshot 10: Sales Log Show Summary 
-11. Screenshot 11: Sales Log Show Summary (Showing Details)
-12. Screenshot 12: Sales Log Performance Summary 
-13. Screenshot 13: Sales Log Performance Summary (Showing Details)
-14. Screenshot 14: Admin Tools Page 
-15. Screenshot 15: Shows Box Office Page 
-16. Screenshot 16: Sample EMail 
+3. Screenshot 3: Shows Setup 
+4. Screenshot 4: Performances Setup 
+5. Screenshot 5: Ticket Types and Prices Setup 
+6. Screenshot 6: Sales Log Summary 
+7. Screenshot 7: Sales Log Sale Details 
+8. Screenshot 8: Sales Log Show Summary 
+9. Screenshot 9: Sales Log Performance Summary 
+10. Screenshot 10: Admin Tools Page 
+11. Screenshot 11: Shows Box Office Page 
+12. Screenshot 12: Sample EMail 
 
 == Changelog ==
 
@@ -171,13 +165,8 @@ The following tags can be used in the EMail template:
 * Added Facility to activate/deactivate selected performances
 * Box Office page elements formatted by stageshow.css stylesheet
 * Duplicate dates on BoxOffice output supressed (STAGESHOW_BOXOFFICE_ALLDATES overrides)
-* Added Facility to activate/deactivate selected shows 
-* Added Transaction ID Barcode to HTML Email 
-* Added Plugin update from custom server 
-* Added facility to add a "Note" to any Show 
 
 = 0.9.5 =
-* Bug Fix: Preserves show name when upgrading to StageShow-Plus 
 * Dual PayPal Credentials merged - Live or Test (Sandbox) mode must be set before adding performances
 * StageShow-Plus renamed StageShow+
 
@@ -195,23 +184,18 @@ The following tags can be used in the EMail template:
 
 = 1.0.2 =
 * Items per page added to settings
-* Performance expire limit time added to settings 
 * Negative/Non-Numeric max number of seats converted to unlimited (displayed as infinite)
 * New Performance defaults to unlimited number of seats
 * Number of seats available can be set to unlimited using negative value (default value)
 
 = 1.0.3 =
-* Show Notes text is displayed or hidden under control of a Show/Hide button on the edit shows page 
 * Bug Fix: Input Edit box size value fixed
 * Bug Fix: Box Office shortcode output was always at top of page.
 * Max Ticket Count added to settings
 
 = 1.0.4 =
-* Implemented option of a "Note" for each show output above entry in BoxOffice (supports HTML markup) 
-* Implemented option of a "Note" for each performance output above or below entry in BoxOffice(supports HTML markup) 
 * Added Currency Symbols to currency options
 * Added option to output currency symbol in Box Office
-* Added "Price Plans" setup for new performances 
 * Cosmetic: Added separator line between admin screen entries
 * Bug Fix: HTML Select element options on some admin screens not retrieved
 * Bug Fix: Undefined variable error generated on Performances update error
@@ -219,24 +203,19 @@ The following tags can be used in the EMail template:
 
 = 1.0.5 =
 * Bug Fix: "Add New Show" not displayed on Shows Admin Page (Add New Price ahown instead)
-* Implemented Hidden Rows for Extended Fields in Admin Screens 
 
 = 1.0.6 =
 * Implemented "Hidden Rows" for Details Fields in Sales Screen
 * Bug Fix: Inventory Control not working in v1.0.5 - Fixed (includes PayPal buttons update on activation)
 * Added check for zero ticket prices - new price entries initialised to 1.00
-* Bug Fix: Show note was not saved 
 
 = 1.0.7 =
 * Bug Fix: Sale Ticket Type was always recorded as the same type
 * Renamed "Presets" as "Price Plans"
 * Coding of Admin Pages restructured
-* Added sale editor 
 * Error notifications on Admin Pages improved
-* Price Plans included in Sample entries 
 * StageShow specific styles now defined in stageshow-admin.css
 * File Names rationised
-* Bug Fix: "Empty" Price Plans were not deleted 
 * Bug Fix: "Validate" Capability implemented
 
 = 1.1.0 =
@@ -244,12 +223,9 @@ The following tags can be used in the EMail template:
 * Compatible with WP 3.4
 
 = 1.1.1 =
-* Bug Fix: Undefined function call error on Save from Edit Sales with an invalid entry  
 * Added Performance Sales Summaries to Overview Page
 * Added "booking confirmed" message to email template
 * Missing Configuration messages now include links to the relevant admin page
-* References to "Group" changed to "Price Plan" 
-* Updates default Email template to HTML on activation 
 * Sales page accessible (non-edit) to users with StageShow_Validate capability
  
 == Upgrade Notice ==
