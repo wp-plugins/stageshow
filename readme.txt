@@ -24,7 +24,7 @@ StageShow includes the facility to export sales to a "TAB Separated Text" file f
 
 Features Summary
 
-* Adds a online BoxOffice for unlimited number of Shows  
+* Adds a online BoxOffice for unlimited number of Shows
 * Unlimited Performances with Specified start Date/Time and Maximum Number of Tickets 
 * Unlimited number of Ticket Types for each performance with individually defined prices
 * Integrated PayPal Payment Collection
