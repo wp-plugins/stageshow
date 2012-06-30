@@ -18,7 +18,9 @@ if (!class_exists('NotifyURLClass'))
 			// If this was a POST call ... get the QUERY_STRING from the POST request
 			if (isset($_SERVER['REQUEST_METHOD']) && ($_SERVER['REQUEST_METHOD'] === 'POST'))
 			{
-				$req = $_POST;
+				// Strip "slashes" from escaped POST data 
+				//   Note: Wordpress adds escapes even if magic_quotes is OFF - see call to add_magic_quotes($_POST) in load.php
+				$req = stripslashes_deep($_POST);
 			}
 			else
 			{
@@ -97,13 +99,21 @@ if (!class_exists('NotifyURLClass'))
 
 			// read post from PayPal server and add 'cmd'
 			$URLParamsArray = $this->GetQueryString();
+			
+			if (defined('PAYPAL_APILIB_ENABLE_IPNDUMP'))
+			{
+				$logFileObj = new MJSLibLogFileClass($this->LogsFolder);
+				$rawPostData = file_get_contents('php://input');
+				$logFileObj->DumpToFile("IPNPacket.txt", "IPN_RAW_POST_Data", $rawPostData);
+				$logFileObj->DumpToFile("IPNPacket.txt", "IPN_RX_Data", $URLParamsArray);
+			}			
 
 			$IPNRxdMsg = 'IPN Request Received at ' . date(DATE_RFC822);
 			$this->AddToLog($IPNRxdMsg);
 
 			// Add 'cmd' parameter to URL params array
 			$URLParamsArray['cmd'] = '_notify-validate';
-
+			
 			// Choose PayPal target environment
 			if (isset($_POST['test_ipn']))
 			{
@@ -134,6 +144,12 @@ if (!class_exists('NotifyURLClass'))
 					echo "$key=$param<br>\n";
 				echo "<br>\n";
 			}
+
+			if (defined('PAYPAL_APILIB_ENABLE_IPNDUMP'))
+			{
+				$logFileObj = new MJSLibLogFileClass($this->LogsFolder);
+				$logFileObj->DumpToFile("IPNPacket.txt", "IPN_TX_Data", $URLParamsArray);
+			}			
 
 			// Get URL to send verify message to PayPal
 			$VerifyURL = $this->notifyPayPalAPIObj->PayPalVerifyURL;

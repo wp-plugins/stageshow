@@ -35,7 +35,7 @@ if (!class_exists('MJSLibLogFileClass'))
 			$this->LogsFolderPath = $LogsFolderPath;
 		}
 
-		function LogToFile($Filepath, $LogLine, $OpenMode = self::ForAppending, $LogHeader = '')
+		function GetLogFilePath($Filepath)
 		{
 			$Filepath = str_replace("\\", "/", $Filepath);			
 			if (strpos($Filepath, "/") === false)
@@ -44,6 +44,12 @@ if (!class_exists('MJSLibLogFileClass'))
 			}
 			$Filepath = str_replace("//", "/", $Filepath);
 			
+			return $Filepath;			
+		}
+
+		function LogToFile($Filepath, $LogLine, $OpenMode = self::ForAppending, $LogHeader = '')
+		{
+			$Filepath = $this->GetLogFilePath($Filepath);			
 			return self::LogToFileAbs($Filepath, $LogLine, $OpenMode, $LogHeader);			
 		}
 
@@ -87,6 +93,52 @@ if (!class_exists('MJSLibLogFileClass'))
 			}
 
 			return $rtnStatus;
+		}
+		
+		function DumpToFile($Filepath, $dataId, $dataToDump)
+		{
+			$Filepath = $this->GetLogFilePath($Filepath);	
+					
+			if (is_array($dataToDump))
+			{
+				$arrayData = '';
+				foreach($dataToDump as $key => $value)
+					$arrayData .= "[$key]".$value;
+				$dataToDump = $arrayData;
+			}
+			
+			$dataLen = strlen($dataToDump);
+			
+			$dumpOutput = $dataId."\n";
+			for ($i=0;;$i++)
+			{
+				if (($i % 16) == 0)
+				{
+					if ($i > $dataLen) break;
+					$hexOutput = sprintf("%04x ", $i);
+					$asciiOutput = " ";
+				}
+				
+				$nextChar = substr($dataToDump, $i, 1);
+				if ($i < $dataLen)
+				{
+					$hexOutput .= sprintf("%02x ", ord($nextChar));
+					if ((ord($nextChar) >= 0x20) && (ord($nextChar) <= 0x7f))
+						$asciiOutput .= $nextChar;
+					else
+						$asciiOutput .= ".";
+				}
+				else
+				{
+					$hexOutput .= "   ";
+					$asciiOutput .= " ";
+				}
+
+				if (($i % 16) == 15)
+					$dumpOutput .= $hexOutput.$asciiOutput."\n";
+			}				
+			
+			$this->LogToFileAbs($Filepath, $dumpOutput);
 		}
 		
 		function AddToTestLog($LogLine)			

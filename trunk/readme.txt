@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 
 The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups.
 
@@ -65,7 +65,7 @@ Upgrade
 
 PayPal API Access must be enabled - and the associated User, Password, Signature and EMail entries added to "Stageshow" settings. 
 		
-IPN Notification must be enabled for Sales to be recorded by the PlugIn. Payment will still be accepted and the sale will be recorded by PayPal if IPN is disabled.
+IPN Notification must be enabled for Sales to be recorded by the PlugIn. Payment will still be accepted and the sale will be recorded by PayPal if IPN is disabled. Set the "IPN Listener" URL to http://{Your Site URL}/wp-content/plugins/stageshow/stageshow_NotifyURL.php.
 
 StageShow can be used with a PayPal developer account (the "SandBox"). Select "SandBox" as the Environment option, and then enter the PayPal account parameters in the usual way.
 	
@@ -138,76 +138,19 @@ The following tags can be used in the EMail template:
 
 == Changelog ==
 
-= 0.9 =
-* First public release
+= 1.1.2 =
+* Bug Fix: IPN Fails when sale has quotes in any field (including the Show name)
+* ReadMe file list changelog changed to reverse chronological order
 
-= 0.9.1 =
-* Added Pagination to Sales Summary
-* Added Uninstall
-* Added Activate/Deactivate options for shows and performances
-
-= 0.9.2 =
-* Bug Fix: Malformed &ltform&gt tag on BoxOffice page fixed
-* BoxOffice time/date format now uses WordPress settings
-* (Note: Private release)
-
-= 0.9.3 =
-* Fixed Distribution Error in ver0.9.1
-* Added Style Sheet (stageshow.css)
-* Added styles to BoxOffice page and updated default style
-
-= 0.9.3.1 =
-* Fixed "Function name must be a string" error when changing Admin EMail ( stageshow_manage_settings.php)
-
-= 0.9.4 =
-* Added StageShow specific capabilities (StageShow_Sales, StageShow_Admin and StageShow_Settings) to WP roles 
-* Added Facility to manually add a sale
-* Added Facility to activate/deactivate selected performances
-* Box Office page elements formatted by stageshow.css stylesheet
-* Duplicate dates on BoxOffice output supressed (STAGESHOW_BOXOFFICE_ALLDATES overrides)
-
-= 0.9.5 =
-* Dual PayPal Credentials merged - Live or Test (Sandbox) mode must be set before adding performances
-* StageShow-Plus renamed StageShow+
-
-= 1.0.0 =
-* Bug Fix: Call to wp_enqueue_style() updated for compatibility with WP 3.3
-* AutoComplete disabled on Settings page
-* PayPal Account EMail address added to settings (PayPal may not report it correctly)
-* Shortcodes Summary added to Overview page
-* Added support of "User Roles" to admin pages
-* Added Ticket Sale Reference Validation to "Tools" Admin page
-* Added Pagination to all admin screen lists
-
-= 1.0.1 =
-* Bug Fix: include folder missing from archive in 1.0.0
-
-= 1.0.2 =
-* Items per page added to settings
-* Negative/Non-Numeric max number of seats converted to unlimited (displayed as infinite)
-* New Performance defaults to unlimited number of seats
-* Number of seats available can be set to unlimited using negative value (default value)
-
-= 1.0.3 =
-* Bug Fix: Input Edit box size value fixed
-* Bug Fix: Box Office shortcode output was always at top of page.
-* Max Ticket Count added to settings
-
-= 1.0.4 =
-* Added Currency Symbols to currency options
-* Added option to output currency symbol in Box Office
-* Cosmetic: Added separator line between admin screen entries
-* Bug Fix: HTML Select element options on some admin screens not retrieved
-* Bug Fix: Undefined variable error generated on Performances update error
-* Class of BoxOffice output HTML elements changed from boxoffice-**** to stageshow-boxoffice-****
-
-= 1.0.5 =
-* Bug Fix: "Add New Show" not displayed on Shows Admin Page (Add New Price ahown instead)
-
-= 1.0.6 =
-* Implemented "Hidden Rows" for Details Fields in Sales Screen
-* Bug Fix: Inventory Control not working in v1.0.5 - Fixed (includes PayPal buttons update on activation)
-* Added check for zero ticket prices - new price entries initialised to 1.00
+= 1.1.1 =
+* Added Performance Sales Summaries to Overview Page
+* Added "booking confirmed" message to email template
+* Missing Configuration messages now include links to the relevant admin page
+* Sales page accessible (non-edit) to users with StageShow_Validate capability
+ 
+= 1.1.0 =
+* Bug Fix: Activate/Deactivate Show not working ...
+* Compatible with WP 3.4
 
 = 1.0.7 =
 * Bug Fix: Sale Ticket Type was always recorded as the same type
@@ -218,23 +161,85 @@ The following tags can be used in the EMail template:
 * File Names rationised
 * Bug Fix: "Validate" Capability implemented
 
-= 1.1.0 =
-* Bug Fix: Activate/Deactivate Show not working ...
-* Compatible with WP 3.4
+= 1.0.6 =
+* Implemented "Hidden Rows" for Details Fields in Sales Screen
+* Bug Fix: Inventory Control not working in v1.0.5 - Fixed (includes PayPal buttons update on activation)
+* Added check for zero ticket prices - new price entries initialised to 1.00
 
-= 1.1.1 =
-* Added Performance Sales Summaries to Overview Page
-* Added "booking confirmed" message to email template
-* Missing Configuration messages now include links to the relevant admin page
-* Sales page accessible (non-edit) to users with StageShow_Validate capability
- 
-== Upgrade Notice ==
+= 1.0.5 =
+* Bug Fix: "Add New Show" not displayed on Shows Admin Page (Add New Price ahown instead)
+
+= 1.0.4 =
+* Added Currency Symbols to currency options
+* Added option to output currency symbol in Box Office
+* Cosmetic: Added separator line between admin screen entries
+* Bug Fix: HTML Select element options on some admin screens not retrieved
+* Bug Fix: Undefined variable error generated on Performances update error
+* Class of BoxOffice output HTML elements changed from boxoffice-**** to stageshow-boxoffice-****
+
+= 1.0.3 =
+* Bug Fix: Input Edit box size value fixed
+* Bug Fix: Box Office shortcode output was always at top of page.
+* Max Ticket Count added to settings
+
+= 1.0.2 =
+* Items per page added to settings
+* Negative/Non-Numeric max number of seats converted to unlimited (displayed as infinite)
+* New Performance defaults to unlimited number of seats
+* Number of seats available can be set to unlimited using negative value (default value)
+
+= 1.0.1 =
+* Bug Fix: include folder missing from archive in 1.0.0
+
+= 1.0.0 =
+* Bug Fix: Call to wp_enqueue_style() updated for compatibility with WP 3.3
+* AutoComplete disabled on Settings page
+* PayPal Account EMail address added to settings (PayPal may not report it correctly)
+* Shortcodes Summary added to Overview page
+* Added support of "User Roles" to admin pages
+* Added Ticket Sale Reference Validation to "Tools" Admin page
+* Added Pagination to all admin screen lists
+
+= 0.9.5 =
+* Dual PayPal Credentials merged - Live or Test (Sandbox) mode must be set before adding performances
+* StageShow-Plus renamed StageShow+
+
+= 0.9.4 =
+* Added StageShow specific capabilities (StageShow_Sales, StageShow_Admin and StageShow_Settings) to WP roles 
+* Added Facility to manually add a sale
+* Added Facility to activate/deactivate selected performances
+* Box Office page elements formatted by stageshow.css stylesheet
+* Duplicate dates on BoxOffice output supressed (STAGESHOW_BOXOFFICE_ALLDATES overrides)
+
+= 0.9.3.1 =
+* Fixed "Function name must be a string" error when changing Admin EMail ( stageshow_manage_settings.php)
+
+= 0.9.3 =
+* Fixed Distribution Error in ver0.9.1
+* Added Style Sheet (stageshow.css)
+* Added styles to BoxOffice page and updated default style
+
+= 0.9.2 =
+* Bug Fix: Malformed &ltform&gt tag on BoxOffice page fixed
+* BoxOffice time/date format now uses WordPress settings
+* (Note: Private release)
+
+= 0.9.1 =
+* Added Pagination to Sales Summary
+* Added Uninstall
+* Added Activate/Deactivate options for shows and performances
 
 = 0.9 =
 * First public release
 
-= 1.0.0 =
-* Earlier versions not compatible with WP 3.3 - Style sheets may not load
+== Upgrade Notice ==
 
 = 1.0.7 =
 * Bug Fix: Sales were always recorded as the same Ticket Type
+
+= 1.0.0 =
+* Earlier versions not compatible with WP 3.3 - Style sheets may not load
+
+= 0.9 =
+* First public release
+

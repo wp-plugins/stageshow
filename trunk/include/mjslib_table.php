@@ -988,13 +988,15 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 								{
 									$currValLink .= "http://";		// Make link absolute
 									$currValLink .= $result->$columnDef['LinkTo'];
+									$target = 'target="_blank"';
 								}
 								else
 								{
 									$currValLink .= $this->GetRecordID($result);
 									$currValLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($currValLink, plugin_basename($this->caller)) : $currValLink;
+									$target = '';
 								}
-								$currVal = '<a href="'.$currValLink.'">'.$currVal.'</a>';
+								$currVal = '<a href="'.$currValLink.'" '.$target.'>'.$currVal.'</a>';
 							}
 							$this->AddToTable($result, $currVal);
 							break;
