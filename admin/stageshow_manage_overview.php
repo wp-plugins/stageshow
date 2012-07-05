@@ -50,7 +50,8 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			return array(
 				array('Label' => 'Show',         'Id' => 'showName',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),
 				array('Label' => 'Performances', 'Id' => 'perfCount',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
-				array('Label' => 'Tickets Sold', 'Id' => 'salesCount',  'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array('Label' => 'Sales Value',  'Id' => 'totalValue',  'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
 			);
 		}
 		
@@ -77,7 +78,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		
 		function ShowSaleDetails($result)
 		{		
-			$saleResults = $this->myDBaseObj->GetPerformancesListByShowID($result->showID);
+			$saleResults = $this->perfsList[$result->showID];
 
 			$env = $this->env;
 			$salesList = new StageShowOverviewAdminDetailsListClass($env, $this->editMode);	
@@ -91,6 +92,18 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			ob_end_clean();
 
 			return $saleDetailsOoutput;
+		}
+		
+		function OutputList($results)
+		{
+			foreach ($results as $key=>$result)
+			{
+				// Save Performances Lists in class object so it can be reused by ShowSaleDetails() function
+				$this->perfsList[$result->showID] = $this->myDBaseObj->GetPerformancesListByShowID($result->showID);				
+				$results[$key]->perfCount = count($this->perfsList[$result->showID]);
+			}
+			
+			parent::OutputList($results);
 		}
 		
 	}
@@ -122,7 +135,8 @@ if (!class_exists('StageShowOverviewAdminDetailsListClass'))
 		{
 			$ourOptions = array(
 				array('Label' => 'Performance',  'Id' => 'perfDateTime', 'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Quantity',     'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),						
+				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),						
+				array('Label' => 'Sales Value',  'Id' => 'totalValue',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
@@ -191,14 +205,6 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			}
 			else
 			{
-				foreach ($results as $key=>$result)
-				{
-					$perfsList = $myDBaseObj->GetPerformancesListByShowID($result->showID);
-					
-					$results[$key]->perfCount = count($perfsList);
-					$results[$key]->salesCount = $myDBaseObj->GetSalesQtyByShowID($result->showID);
-				}
-			
 				$overviewList = new StageShowOverviewAdminListClass($env);		
 				$overviewList->OutputList($results);		
 			}
@@ -229,16 +235,15 @@ if (!class_exists('StageShowOverviewAdminClass'))
 
 		function Output_UpdateServerHelp()
 		{
+			if (defined('STAGESHOW_INFO_SERVER_URL'))
+			{
+				$msg = "<strong>Using Custom Update Server - Root URL=".STAGESHOW_INFO_SERVER_URL."<br>\n";
+				echo '<br><div class="error inline"><p>'.$msg.'</p></div>';
+			}			
 		}
 		
 		function Output_UpdateInfo()
 		{
-			if (defined('STAGESHOW_PLUS_UPDATE_SERVER_URL'))
-			{
-				$msg = "<strong>Using Custom Update Server - Root URL=".STAGESHOW_PLUS_UPDATE_SERVER_URL."<br>\n";
-				echo '<br><div id="message" class="error"><p>'.$msg.'</p></div>';
-			}
-			
 			// Get News entry from server
 			$myDBaseObj = $this->myDBaseObj;
 			$latest = $myDBaseObj->GetLatestNews();

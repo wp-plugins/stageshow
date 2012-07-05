@@ -419,9 +419,30 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			return $ourEmail;
 		}
 		
+		function CheckEmailTemplatePath($templateID)
+		{
+			$templatePath = str_replace("\\", "/", $this->adminOptions[$templateID]);
+			$templatesFolder = 'templates/';
+			if (substr($templatePath, 0, strlen($templatesFolder)) === $templatesFolder)
+			{
+				// If the template starts with templates folder - just use the file name
+				$this->adminOptions[$templateID] = substr($templatePath, strlen($templatesFolder));
+			}
+		}
+		
+		function GetEmailTemplatePath($templateID)
+		{
+			// EMail Template defaults to templates folder
+			$templatePath = str_replace("\\", "/", $this->adminOptions[$templateID]);
+			if (preg_match('#[/]#', $templatePath) == 0)
+				$templatePath = 'templates/'.$templatePath;
+
+			return $templatePath;
+		}
+		
 		function EMailSale($saleID, $EMailTo = '')
 		{
-			$templatePath = $this->adminOptions['EMailTemplatePath'];
+			$templatePath = $this->GetEmailTemplatePath('EMailTemplatePath');
 	
 			// Get sale	and ticket details
 			$salesList = $this->GetSale($saleID);

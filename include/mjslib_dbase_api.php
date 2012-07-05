@@ -81,7 +81,7 @@ if (!class_exists('MJSLibDBaseClass'))
     
 		function get_name()
 		{
-			return $this->get_pluginInfo('Name');
+			return str_replace('Plus', '+', $this->get_pluginInfo('Name'));
 		}
 		
 		function get_version() 
@@ -145,10 +145,12 @@ if (!class_exists('MJSLibDBaseClass'))
 			// Initialise settings array with default values
 			
 			$ourOptions = array( 
-				'OrganisationID' => '',
+				'ActivationCount' => 0,
+				       
+				'OrganisationID' => get_bloginfo('name'),
 				       
         'AdminID' => '',        
-        'AdminEMail' => '',
+        'AdminEMail' => get_bloginfo('admin_email'),
         'BccEMailsToAdmin' => true,
         'UseCurrencySymbol' => false,
         
@@ -171,8 +173,6 @@ if (!class_exists('MJSLibDBaseClass'))
 				foreach ($currOptions as $key => $option)
 					$this->adminOptions[$key] = $option;
 			}				
-			
-			//$this->adminOptions['EMailSummaryTemplatePath'] = STAGESHOWPLUS_ACTIVATE_EMAILSUMMARY_TEMPLATE_PATH;
 			
 			$this->saveOptions();
 			return $this->adminOptions;

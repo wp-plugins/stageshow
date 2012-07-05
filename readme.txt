@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 
 The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups.
 
@@ -138,9 +138,20 @@ The following tags can be used in the EMail template:
 
 == Changelog ==
 
+* Version History for StageShow Plugin 
+
+= 1.1.3 =
+* Bug Fix: (Benign) Overview page generates "Undefined offset" error for Shows without any Performances
+* Total Sales values added to Overview Page
+* Effenciency improved on Overview page database queries 
+* Settings page layout improved
+* StageShow admin email defaults to WP admin email
+* StageShow Organisation ID defaults to WP Site Name
+* EMail template paths default to stageshow/templates folder
+
 = 1.1.2 =
 * Bug Fix: IPN Fails when sale has quotes in any field (including the Show name)
-* ReadMe file list changelog changed to reverse chronological order
+* ReadMe changelog changed to reverse chronological order
 
 = 1.1.1 =
 * Added Performance Sales Summaries to Overview Page

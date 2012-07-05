@@ -26,7 +26,7 @@ if (!defined('STAGESHOW_PAYPAL_IPN_NOTIFY_URL'))
 include 'include/stageshow_dbase_api.php';      
       
 if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
-	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'templates/stageshow_EMail.php');
+	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
 
 if (!defined('STAGESHOW_MAXTICKETCOUNT'))
 	define('STAGESHOW_MAXTICKETCOUNT', 4);
@@ -64,7 +64,7 @@ if (!class_exists('StageShowPluginClass'))
 			$this->getStageshowOptions();
 			
 			$myDBaseObj = $this->myDBaseObj;
-			$this->pluginName = str_replace('-', ' ', $myDBaseObj->get_name());
+			$this->pluginName = $myDBaseObj->get_name();
 			
 			//Actions
 			add_action('admin_menu', array(&$this, 'StageShow_ap'));
@@ -115,55 +115,65 @@ if (!class_exists('StageShowPluginClass'))
 					$myDBaseObj->adminOptions[$optionKey] = $optionValue;
 			}
 			
-      // Initialise PayPal target ....
-			if (defined('PAYPAL_APILIB_ACTIVATE_TESTMODE'))
+			// Bump the activation counter
+			$myDBaseObj->adminOptions['ActivationCount']++;
+			
+			if ( ($myDBaseObj->adminOptions['ActivationCount'] == 2)
+				&& ($myDBaseObj->adminOptions['PayPalAPIUser'] === '')
+				&& ($myDBaseObj->adminOptions['PayPalAPIPwd'] === '')
+				&& ($myDBaseObj->adminOptions['PayPalAPISig'] === '')
+				&& ($myDBaseObj->adminOptions['PayPalAPIEMail'] === '') )
 			{
+				// Initialise PayPal target ....
 				if (defined('PAYPAL_APILIB_ACTIVATE_TESTMODE'))
-					$myDBaseObj->adminOptions['PayPalEnv']  = 'sandbox';
-				else
-					$myDBaseObj->adminOptions['PayPalEnv']  = 'live';
-			}
-			
-			if ($myDBaseObj->adminOptions['PayPalEnv']  == 'sandbox')
-			{
-				// Pre-configured PayPal Sandbox settings - can be defined in wp-config.php
-				if (defined('PAYPAL_APILIB_ACTIVATE_TESTUSER'))
-					$myDBaseObj->adminOptions['PayPalAPIUser'] = PAYPAL_APILIB_ACTIVATE_TESTUSER;
-				if (defined('PAYPAL_APILIB_ACTIVATE_TESTPWD'))
-					$myDBaseObj->adminOptions['PayPalAPIPwd']  = PAYPAL_APILIB_ACTIVATE_TESTPWD;
-				if (defined('PAYPAL_APILIB_ACTIVATE_TESTSIG'))
-					$myDBaseObj->adminOptions['PayPalAPISig']  = PAYPAL_APILIB_ACTIVATE_TESTSIG;
-				if (defined('PAYPAL_APILIB_ACTIVATE_TESTEMAIL'))
-					$myDBaseObj->adminOptions['PayPalAPIEMail']  = PAYPAL_APILIB_ACTIVATE_TESTEMAIL;
-	    }
-			else
-			{
-				// Pre-configured PayPal "Live" settings - can be defined in wp-config.php
-				if (defined('PAYPAL_APILIB_ACTIVATE_LIVEUSER'))
-					$myDBaseObj->adminOptions['PayPalAPIUser'] = PAYPAL_APILIB_ACTIVATE_LIVEUSER;
-				if (defined('PAYPAL_APILIB_ACTIVATE_LIVEPWD'))
-					$myDBaseObj->adminOptions['PayPalAPIPwd']  = PAYPAL_APILIB_ACTIVATE_LIVEPWD;
-				if (defined('PAYPAL_APILIB_ACTIVATE_LIVESIG'))
-					$myDBaseObj->adminOptions['PayPalAPISig']  = PAYPAL_APILIB_ACTIVATE_LIVESIG;
-				if (defined('PAYPAL_APILIB_ACTIVATE_LIVEEMAIL'))
-					$myDBaseObj->adminOptions['PayPalAPIEMail']  = PAYPAL_APILIB_ACTIVATE_LIVEEMAIL;				
-			}      
+				{
+					if (defined('PAYPAL_APILIB_ACTIVATE_TESTMODE'))
+						$myDBaseObj->adminOptions['PayPalEnv']  = 'sandbox';
+					else
+						$myDBaseObj->adminOptions['PayPalEnv']  = 'live';
+				}
 				
-      // Add Sample PayPal shopping cart Images and URLs
-      if (defined('STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL'))
-				$myDBaseObj->adminOptions['PayPalLogoImageURL'] = STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL;
-      if (defined('STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL'))
-	      $myDBaseObj->adminOptions['PayPalHeaderImageURL'] = STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL;
+				if ($myDBaseObj->adminOptions['PayPalEnv']  == 'sandbox')
+				{
+					// Pre-configured PayPal Sandbox settings - can be defined in wp-config.php
+					if (defined('PAYPAL_APILIB_ACTIVATE_TESTUSER'))
+						$myDBaseObj->adminOptions['PayPalAPIUser'] = PAYPAL_APILIB_ACTIVATE_TESTUSER;
+					if (defined('PAYPAL_APILIB_ACTIVATE_TESTPWD'))
+						$myDBaseObj->adminOptions['PayPalAPIPwd']  = PAYPAL_APILIB_ACTIVATE_TESTPWD;
+					if (defined('PAYPAL_APILIB_ACTIVATE_TESTSIG'))
+						$myDBaseObj->adminOptions['PayPalAPISig']  = PAYPAL_APILIB_ACTIVATE_TESTSIG;
+					if (defined('PAYPAL_APILIB_ACTIVATE_TESTEMAIL'))
+						$myDBaseObj->adminOptions['PayPalAPIEMail']  = PAYPAL_APILIB_ACTIVATE_TESTEMAIL;
+				}
+				else
+				{
+					// Pre-configured PayPal "Live" settings - can be defined in wp-config.php
+					if (defined('PAYPAL_APILIB_ACTIVATE_LIVEUSER'))
+						$myDBaseObj->adminOptions['PayPalAPIUser'] = PAYPAL_APILIB_ACTIVATE_LIVEUSER;
+					if (defined('PAYPAL_APILIB_ACTIVATE_LIVEPWD'))
+						$myDBaseObj->adminOptions['PayPalAPIPwd']  = PAYPAL_APILIB_ACTIVATE_LIVEPWD;
+					if (defined('PAYPAL_APILIB_ACTIVATE_LIVESIG'))
+						$myDBaseObj->adminOptions['PayPalAPISig']  = PAYPAL_APILIB_ACTIVATE_LIVESIG;
+					if (defined('PAYPAL_APILIB_ACTIVATE_LIVEEMAIL'))
+						$myDBaseObj->adminOptions['PayPalAPIEMail']  = PAYPAL_APILIB_ACTIVATE_LIVEEMAIL;				
+				}      
 			
-      if (defined('STAGESHOW_ACTIVATE_ORGANISATION_ID'))
-				$myDBaseObj->adminOptions['OrganisationID'] = STAGESHOW_ACTIVATE_ORGANISATION_ID;
+				// Add Sample PayPal shopping cart Images and URLs
+				if (defined('STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL'))
+					$myDBaseObj->adminOptions['PayPalLogoImageURL'] = STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL;
+				if (defined('STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL'))
+					$myDBaseObj->adminOptions['PayPalHeaderImageURL'] = STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL;
+				
+				if (defined('STAGESHOW_ACTIVATE_ORGANISATION_ID'))
+					$myDBaseObj->adminOptions['OrganisationID'] = STAGESHOW_ACTIVATE_ORGANISATION_ID;
 
-			if (defined('STAGESHOW_ACTIVATE_ADMIN_EMAIL')) 
-			{
-				$myDBaseObj->adminOptions['AdminEMail'] = STAGESHOW_ACTIVATE_ADMIN_EMAIL;
-				$myDBaseObj->adminOptions['AuthTxnEMail'] = STAGESHOW_ACTIVATE_ADMIN_EMAIL;
-      }
-      
+				if (defined('STAGESHOW_ACTIVATE_ADMIN_EMAIL')) 
+				{
+					$myDBaseObj->adminOptions['AdminEMail'] = STAGESHOW_ACTIVATE_ADMIN_EMAIL;
+					$myDBaseObj->adminOptions['AuthTxnEMail'] = STAGESHOW_ACTIVATE_ADMIN_EMAIL;
+				}
+	    }
+			 
 			$LogsFolder = ABSPATH . '/' . $myDBaseObj->adminOptions['LogsFolderPath'];
 			if (!is_dir($LogsFolder))
 				mkdir($LogsFolder, 0644, TRUE);
@@ -177,6 +187,10 @@ if (!class_exists('StageShowPluginClass'))
 				
 				$myDBaseObj->adminOptions['PayPalInvChecked'] = true;
 			}
+			
+			// EMail Template defaults to templates folder - remove folders from path
+			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath');
+			$myDBaseObj->CheckEmailTemplatePath('EMailSummaryTemplatePath');
 			
       $this->saveStageshowOptions();
       
