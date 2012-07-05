@@ -348,7 +348,7 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			if (!isset($this->adminOptions['EMailSummaryTemplatePath']) || ($this->adminOptions['EMailSummaryTemplatePath'] == '')) 
 				return 'EMailSummaryTemplatePath not defined';			
-			$templatePath = $this->adminOptions['EMailSummaryTemplatePath'];
+			$templatePath = $this->GetEmailTemplatePath('EMailSummaryTemplatePath');
 			
 			if (!isset($this->adminOptions['SaleSummaryEMail']) || ($this->adminOptions['SaleSummaryEMail'] == '')) 
 				return 'SaleSummaryEMail not defined';			
@@ -549,17 +549,22 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 		}
 		
-		function GetEmail($ourOptions)
+		function GetEmail($ourOptions, $emailRole = '')
 		{
+			// StageShow ignores the "emailRole" parameter and always uses the AdminEMail entry
 			$ourEmail = '';
-			
-			// Get from email address from settings
-			if (strlen($ourOptions['OrganisationID']) > 0)
-				$ourEmail .= ' '.$ourOptions['OrganisationID'];
-				
-			if (strlen($ourOptions['AdminEMail']) > 0)
-				$ourEmail .= ' <'.$ourOptions['AdminEMail'].'>';
 
+			if (strlen($ourOptions['AdminEMail']) > 0)
+				$ourEmail = $ourOptions['AdminEMail'];
+			else
+				$ourEmail = get_bloginfo('admin_email');
+				
+			// Get from email address from settings
+			if ($ourOptions['AdminID'] !== '')
+				$ourEmail = $ourOptions['AdminID'].' <'.$ourEmail.'>';
+			else if ($ourOptions['OrganisationID'] !== '')
+				$ourEmail = $ourOptions['OrganisationID'].' <'.$ourEmail.'>';
+				
 			return $ourEmail;
 		}
 		
@@ -1380,7 +1385,8 @@ if (!class_exists('StageShowDBaseClass'))
 				
 		function TotalSalesField($sqlFilters)
 		{
-			$sql  = ' SUM('.$this->DBField('orderQty').') AS totalQty ';
+			$sql  = ' SUM(ticketQty) AS totalQty ';
+			$sql .= ',SUM(priceValue * ticketQty) AS totalValue ';
 			return $sql;
 		}
 		
@@ -1628,12 +1634,12 @@ if (!class_exists('StageShowDBaseClass'))
 //			Generic Utilities Function
 //
 // ----------------------------------------------------------------------
-		function GetVersionServerURL($pagename)
+		function GetInfoServerURL($pagename)
 		{
 			$filename = $pagename.'.php';
 			
-			if (defined('STAGESHOW_PLUS_UPDATE_SERVER_URL'))
-				$updateCheckURL = STAGESHOW_PLUS_UPDATE_SERVER_URL;
+			if (defined('STAGESHOW_INFO_SERVER_URL'))
+				$updateCheckURL = STAGESHOW_INFO_SERVER_URL;
 			else
 				$updateCheckURL = $this->get_pluginURI().'/';
 			$updateCheckURL .= $filename;
@@ -1701,7 +1707,7 @@ if (!class_exists('StageShowDBaseClass'))
 			if ($getUpdate)
 			{
 				// Get URL of StagsShow News server from Plugin Info
-				$updateCheckURL = $this->GetVersionServerURL('news');
+				$updateCheckURL = $this->GetInfoServerURL('news');
 				$latest['LatestNews'] = $this->GetHTTPPage($updateCheckURL);	
 				if (strlen($latest['LatestNews']) <= 2)
 				{

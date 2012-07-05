@@ -48,7 +48,20 @@ if (!class_exists('SettingsAdminClass'))
 			foreach ($arr1 as $key1 => $vals1)
 			{
 				if (isset($arr2[$key1]))
-					$arrRslt[$key1] = array_merge($arr1[$key1], $arr2[$key1]);
+				{
+					foreach ($arr2[$key1] as $val2)
+					{
+						if (isset($val2['Posn']))
+						{
+							// This entry must be positioned within earlier entries
+							$insertPosn = $val2['Posn'];
+							array_splice($vals1, $insertPosn, 0, array($val2));
+						}
+						else
+							$vals1 = array_merge($vals1, array($val2));
+					}
+					$arrRslt[$key1] = $vals1;
+				}
 				else
 					$arrRslt[$key1] = $vals1;
 			}
@@ -214,7 +227,7 @@ if (!class_exists('SettingsAdminClass'))
 					$editControl = $this->GetSettingHTMLTag($adminOptions, $settingOption);
 					if ($editControl != '')
 					{
-						$sectionOutput .= '<tr valign="top">'."\n";
+						$sectionOutput .= '<tr valign="middle">'."\n";
 						$sectionOutput .= '<td>'.__($settingLabel, $domainName).'</td>'."\n";
 						$sectionOutput .= '<td>'.$editControl.'</td>'."\n";
 						$sectionOutput .= '</tr>'."\n";

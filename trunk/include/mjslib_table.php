@@ -1079,6 +1079,8 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 		
 		function OutputList($results, $dataAux = array())
 		{
+			if (count($results) == 0) return;
+			
 			$tableId = $this->GetTableID($results[0]);
 			
 			$headerColumns = array();
