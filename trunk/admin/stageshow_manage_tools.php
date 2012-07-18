@@ -21,6 +21,7 @@ Copyright 2012 Malcolm Shergold
 */
 
 include STAGESHOW_INCLUDE_PATH.'mjslib_admin.php';      
+include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 
 if (!class_exists('StageShowToolsAdminClass')) 
 {
@@ -37,95 +38,118 @@ if (!class_exists('StageShowToolsAdminClass'))
 			
 			$this->actionURL = get_site_url().'/wp-content/plugins/stageshow/admin/stageshow_Export.php';
 				
-?>			
+?>
 <div class="wrap">
 	<div id="icon-stageshow" class="icon32"></div>
 	<h2><?php echo $myPluginObj->pluginName.' - '.__('Tools', STAGESHOW_DOMAIN_NAME); ?></h2>
-<?php
+	<div class="stageshow-admin-form">
+		<?php
 			$this->Tools_Validate($env);
 			$this->Tools_Export();
 			if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER))
-				$this->Tools_FlushSalesRecords();
-?>			
+				$this->Tools_FlushSalesRecords();				
+?>
 	</div>
 </div>
 <?php
-			}
+		}
 
-			function Output_Javascript_SetFocus($elementId)
-			{
+		function Tools_Validate($env)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+
+			$TxnId = '';
+				
+			MJSLibUtilsClass::Output_Javascript_SetFocus("TxnId");
+							
 ?>
 <script type="text/javascript">
-	<!--
-  
-	function setInitialFocus()
+	function onSelectDownload(obj)
 	{
-     document.getElementById("<?php echo $elementId ?>").focus();
+	selectControl = document.getElementById("sshow_ex_type");
+	newDownloadType = selectControl.value;
+	isSummaryDownload = newDownloadType == "summary";
+
+	downloadButton = document.getElementById("downloadvalidator");
+	if (newDownloadType == "summary")
+	downloadButton.style.visibility = 'visible';
+	else
+	downloadButton.style.visibility = 'hidden';
 	}
-	window.onload = setInitialFocus;
-						
-// -->
 </script>
-<?php
-			}
-
-			function Tools_Validate($env)
-			{
-				$myDBaseObj = $this->myDBaseObj;
-
-				$TxnId = '';
-				
-				$this->Output_Javascript_SetFocus("TxnId");
-							
-			?>
-
 <h3><?php _e('Validate Sale'); ?></h3>
 <form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_TOOLS; ?>">
-<?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
-<table class="form-table">
-	<tr>
-		<th><label for="sshow_ex_type"><?php _e('Transaction ID'); ?></label></th>
-		<td>
-			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
-			</td>
-	</tr>
-<?php
-				if(isset($_POST['validatesalebutton']))
-				{
-					check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
-
-					$TxnId = stripslashes($_POST['TxnId']);
-					
-					if (strlen($TxnId) > 0)
-					{
-						echo '<tr><td colspan="2">Results - Transaction ID: '.$TxnId.'</tr></td>'."\n";
-
-						$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
-						
-						if (count($results) > 0)
-						{
-							include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
-
-							$salesList = new StageShowSalesAdminDetailsListClass($env);		
-							
-							echo '<tr><td colspan="2">'."\n";
-							$salesList->OutputList($results);	
-							echo "</tr></td>\n";
-						}
-						else
-						{
-							echo '<tr><td colspan="2">No matching record found!</tr></td>'."\n";
-						}
-					}
-				}
+		<?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
+		<table class="form-table">
+			<?php
+			if ($myDBaseObj->GetLocation() !== '')
+			{
+				$TerminalLocation = $myDBaseObj->GetLocation();
+				echo "<tr>
+			<td>Location / Computer ID</td>
+			<td>$TerminalLocation</td>
+		</tr>
+		";
+		}
 ?>
-				</table>
-				<p>
-<p class="submit">
+			<tr>
+		<th><label for="sshow_ex_type"><?php _e('Transaction ID'); ?></label></th>
+				<td>
+			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
+						</td>
+			</tr>
+			<?php
+			if(isset($_POST['validatesalebutton']))
+			{
+				$this->ValidateSale($env);
+			}
+?>
+		</table>
+		<p>
+			<p class="submit">
 <input class="button-secondary" type="submit" name="validatesalebutton" value="<?php _e('Validate', STAGESHOW_DOMAIN_NAME) ?>"/>
+					</form>
 </p>
-</form>
 <?php
+		}
+
+		function ValidateSale($env)
+		{
+			$saleID = 0;
+				 
+			$myDBaseObj = $this->myDBaseObj;
+				 
+			check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+
+			$TxnId = stripslashes($_POST['TxnId']);
+			
+			$validateMsg = 'Sale Validation (Transaction ID: '.$TxnId.') - ';
+			
+			if (strlen($TxnId) > 0)
+			{
+				$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
+						
+				if (count($results) > 0)
+				{						
+					$validateMsg .= __('Matching record found', STAGESHOW_DOMAIN_NAME);
+					echo '<tr><td colspan="2"><div id="message" class="updated"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+					
+					$salesList = new StageShowSalesAdminDetailsListClass($env);		
+							
+					echo '<tr><td colspan="2">'."\n";
+					$salesList->OutputList($results);	
+					echo "</tr></td>\n";
+							 
+					$saleID = $results[0]->saleID;
+				}
+				else
+				{
+					$validateMsg .= __('NO matching record', STAGESHOW_DOMAIN_NAME);
+					echo '<tr><td colspan="2"><div id="message" class="error"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+				}
+			}
+			 
+			return $saleID;
 		}
 		
 		function Tools_Export()
@@ -141,19 +165,22 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
 <table class="form-table">
 <tr>
-<th><label for="sshow_ex_type"><?php _e('Export'); ?></label></th>
+<th><?php _e('Export'); ?></th>
 <td>
-<select name="sshow_ex_type">
-	<option value="all"><?php _e('Settings and Tickets'); ?>&nbsp;&nbsp;</option>
-	<option value="settings"><?php _e('Settings Only'); ?> </option>
-	<option value="tickets" selected="selected"><?php _e('Tickets Only'); ?> </option>
+<select name="sshow_ex_type" id="sshow_ex_type" onchange=onSelectDownload(this)>
+	<?php if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) { ?>
+	<option value="settings"><?php _e('Settings'); ?> </option>
+	<?php } ?>
+	<option value="tickets"><?php _e('Tickets'); ?> </option>
+	<option value="summary" selected="selected"><?php _e('Sales Summary'); ?>&nbsp;&nbsp;</option>
 </select>
 </td>
 </tr>
 </table>
 <p>
 <p class="submit">
-<input type="submit" name="submit" class="button" value="<?php esc_attr_e('Download Export File'); ?>" />
+<input type="submit" name="downloadexport" class="button" value="<?php esc_attr_e('Download Export File'); ?>" />
+<input type="submit" name="downloadvalidator" id="downloadvalidator" class="button-secondary" value="<?php _e('Downlod Offline Validator', STAGESHOW_DOMAIN_NAME); ?>" />
 <input type="hidden" name="page" value="stageshow_tools" />
 <input type="hidden" name="download" value="true" />
 </p>

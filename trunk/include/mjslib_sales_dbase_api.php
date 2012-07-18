@@ -343,7 +343,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			$sql .= $this->GetOptsSQL($sqlFilters);
 
 			if (isset($sqlFilters['orderBy']))
-				$sql .= ' ORDER BY '.$this->opts['SalesTableName'].'.'.$sqlFilters['orderBy'];
+				$sql .= ' ORDER BY '.$sqlFilters['orderBy'];
 			
 			$this->ShowSQL($sql); 
 			
@@ -362,6 +362,11 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		function GetSalesEMail()
 		{
 			return $this->adminOptions['SalesEMail'];
+		}
+		
+		function GetLocation()
+		{
+			return false;
 		}
 		
 		function AddEMailFields($EMailTemplate, $saleDetails)

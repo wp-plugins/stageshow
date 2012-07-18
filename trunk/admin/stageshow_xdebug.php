@@ -45,9 +45,8 @@ if (!class_exists('StageShowDebugAdminClass'))
 		$this->Test_DebugSettings();
 		$this->Test_EMailSale();
 	?>
-	</div>
-	</div>
 </form>
+</div>
 <?php
 			// Stage Show TEST HTML Output - End
 		}				 

@@ -83,6 +83,28 @@ if (!class_exists('MJSLibUtilsClass'))
 			return check_admin_referer($action, $query_arg);
 		}
 		
+		static function Output_Javascript_SetFocus($elementId, $inScript = false)
+		{
+			if (!$inScript)
+				echo '
+<script type="text/javascript">
+	<!--
+';
+			echo '
+	function setInitialFocus()
+	{
+     document.getElementById("'.$elementId.'").focus();
+	}
+	window.onload = setInitialFocus;
+';
+			if (!$inScript)
+				echo '
+						
+// -->
+</script>
+';
+		}
+
 		static function ShowCallStack($echoOut = true)
 		{
 			$lineBreak = $echoOut ? "<br>\n" : "\n";
