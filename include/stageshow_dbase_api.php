@@ -130,6 +130,12 @@ if (!class_exists('StageShowDBaseClass'))
 			$this->GetLatestNews();
 		}
 
+		function init()
+		{
+			// This function should be called by the 'init' action of the Plugin
+			// Action requiring setting of Cookies should be done here
+		}
+
     function GetDefaultOptions()
     {
 			$defOptions = array(
@@ -512,6 +518,11 @@ if (!class_exists('StageShowDBaseClass'))
 			// Convert time string to UNIX timestamp
 			$timestamp = strtotime( $dateInDB );
 			
+			return StageShowDBaseClass::FormatTimestampForDisplay($timestamp);
+		}
+		
+    static function FormatTimestampForDisplay($timestamp)
+    {	
 			if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
 				$dateFormat = STAGESHOW_DATETIME_BOXOFFICE_FORMAT;
 			else
@@ -1191,6 +1202,24 @@ if (!class_exists('StageShowDBaseClass'))
 			$wpdb->query($sql);
 		}			
 		
+		function GetTicketTypes($perfID)
+		{
+			$sql  = 'SELECT * FROM '.STAGESHOW_PRICES_TABLE;
+			$sql .= ' JOIN '.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
+			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfID="'.$perfID.'"';
+			$sql .= ' ORDER BY priceType';
+			$this->ShowSQL($sql); 
+			
+			return $this->get_results($sql);
+		}
+
+		function GetTicketsListByPerfID($perfID)
+		{
+			$sqlFilters['orderBy'] = 'saleName,'.STAGESHOW_SALES_TABLE.'.saleID DESC';
+			$sqlFilters['perfID'] = $perfID;
+			return $this->GetSalesList($sqlFilters);
+		}
+		
 		function GetAllSalesQty($sqlFilters = null)
 		{
 			$sqlFilters['groupBy'] = 'perfID';
@@ -1414,7 +1443,7 @@ if (!class_exists('StageShowDBaseClass'))
 		function GetAllSalesList($sqlFilters = null)
 		{
 			$sqlFilters['groupBy'] = 'saleID';
-			$sqlFilters['orderBy'] = 'saleID DESC';
+			$sqlFilters['orderBy'] = $this->opts['SalesTableName'].'.saleID DESC';
 			return $this->GetSalesList($sqlFilters);
 		}
 

@@ -42,6 +42,7 @@ if (!class_exists('MJSLibTableClass'))
 		const TABLEENTRY_TEXTBOX = 'textbox';
 		const TABLEENTRY_VIEW = 'view';
 		const	TABLEENTRY_VALUE = 'value';
+		const	TABLEENTRY_COOKIE = 'cookie';
 		
 		var $tableContents = array();
 		var $rowAttr = array();
@@ -910,6 +911,7 @@ if (!class_exists('MJSLibAdminListClass'))
 					case MJSLibTableClass::TABLEENTRY_SELECT:
 					case MJSLibTableClass::TABLEENTRY_VALUE:
 					case MJSLibTableClass::TABLEENTRY_VIEW:
+					case MJSLibTableClass::TABLEENTRY_COOKIE:
 						break;
 						
 					default:
@@ -969,6 +971,14 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 							$this->AddSelectToTable($result, $columnId, $options, $currVal);
 							break;
 						
+						case MJSLibTableClass::TABLEENTRY_COOKIE:
+							$coolieID = $columnDef['Id'];
+							if (isset($_COOKIE[$coolieID]))
+								$currVal = $_COOKIE[$coolieID];
+							else
+								$currVal = '';
+							// Fall into next case ...
+							
 						case MJSLibTableClass::TABLEENTRY_TEXT:
 							if (!isset($columnDef['Len']))
 							{
@@ -981,6 +991,8 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 
 						case MJSLibTableClass::TABLEENTRY_VALUE:
 						case MJSLibTableClass::TABLEENTRY_VIEW:
+							$recId = $this->GetRecordID($result);
+							$hiddenTag = '<input type="hidden" name="'.$columnId.$recId.'" value="'.$currVal.'"/>';
 							if (isset($columnDef['Link']))
 							{
 								$currValLink = $columnDef['Link'];
@@ -992,13 +1004,13 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 								}
 								else
 								{
-									$currValLink .= $this->GetRecordID($result);
+									$currValLink .= $recId;
 									$currValLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($currValLink, plugin_basename($this->caller)) : $currValLink;
 									$target = '';
 								}
 								$currVal = '<a href="'.$currValLink.'" '.$target.'>'.$currVal.'</a>';
 							}
-							$this->AddToTable($result, $currVal);
+							$this->AddToTable($result, $currVal.$hiddenTag);
 							break;
 							
 						default:
@@ -1038,7 +1050,13 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 							$functionId = $option['Func'];
 							$content = $this->$functionId($result);
 							$hiddenRows .= '<tr>'."\n";
-							$hiddenRows .= '<td colspan=2>'.$content."</td>\n";
+							$colSpan = ' class='.$hiddenRowsColId.'2';
+							if (isset($option['Label']))
+								$hiddenRows .= '<td class='.$hiddenRowsColId.'1>'.$option['Label']."</td>\n";
+							else
+								$colSpan = " colspan=2";
+								
+							$hiddenRows .= '<td'.$colSpan.'>'.$content."</td>\n";
 							$hiddenRows .= "</tr>\n";
 							break;
 							

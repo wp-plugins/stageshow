@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.4
-Stable tag: 1.1.3
+Tested up to: 3.4.1
+Stable tag: 1.1.4
 
 The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups.
 
@@ -139,6 +139,14 @@ The following tags can be used in the EMail template:
 == Changelog ==
 
 * Version History for StageShow Plugin 
+
+= 1.1.4 =
+* Added "Sales Summary" option to Export Data on Tools admin page
+* Added Offline Sales Verififier
+* Bug Fix: Tools Admin page - Footer appears in middle of page
+* Bug Fix: Settings Export permitted for users without 'StageShow_Admin' capability
+* Bug Fix: Performances or Prices with associated sales can still be deleted
+* Add New Performance uses local date/time as performance date/time
 
 = 1.1.3 =
 * Bug Fix: (Benign) Overview page generates "Undefined offset" error for Shows without any Performances

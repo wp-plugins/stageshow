@@ -301,7 +301,7 @@ else
 					$results = $myDBaseObj->GetSalesListByPriceID($recordId);
 					if (count($results) > 0)
 						$this->blockCount++;
-					return ( ($this->errorCount > 0) || ($this->errorCount > 0) );
+					return ( ($this->errorCount > 0) || ($this->blockCount > 0) );
 			}
 				
 			return false;

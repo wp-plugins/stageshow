@@ -222,7 +222,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				$showID = $_POST['showID'];
 				
 				$statusMsg = '';
-				$myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowDBaseClass::MYSQL_DATETIME_FORMAT));				
+				$myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowDBaseClass::MYSQL_DATETIME_FORMAT, current_time('timestamp')));				
 				echo '<div id="message" class="updated"><p>'.$statusMsg.'</p></div>';		// TODO - Check return status "class"
 			}			 
 
@@ -305,7 +305,7 @@ foreach ($showLists as $showList)
 						$this->errorCount++;
 					else if (!$myDBaseObj->CanDeletePerformance($delPerfEntry[0]))
 						$this->blockCount++;
-					return ( ($this->errorCount > 0) || ($this->errorCount > 0) );
+					return ( ($this->errorCount > 0) || ($this->blockCount > 0) );
 			}
 				
 			return false;

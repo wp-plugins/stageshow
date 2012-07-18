@@ -93,3 +93,34 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 	}
 }
 
+if (!class_exists('StageShowSalesAdminVerifyListClass')) 
+{
+	class StageShowSalesAdminVerifyListClass extends MJSLibAdminListClass // Define class
+	{		
+		function __construct($env, $editMode = false) //constructor
+		{
+			// Call base constructor
+			parent::__construct($env, $editMode);
+		}
+		
+		function GetTableID($result)
+		{
+			return "stageshow_saleverify_list";
+		}
+		
+		function GetRecordID($result)
+		{
+			return $result->verifyID;
+		}
+		
+		function GetMainRowsDefinition()
+		{
+			return array(
+				array('Label' => 'Location',          'Id' => 'verifyLocation',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array('Label' => 'Date and Time',     'Id' => 'verifyDateTime',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
+			);
+		}		
+				
+	}
+}
+

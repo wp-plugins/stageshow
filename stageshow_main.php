@@ -69,6 +69,8 @@ if (!class_exists('StageShowPluginClass'))
 			//Actions
 			add_action('admin_menu', array(&$this, 'StageShow_ap'));
 		  
+			add_action('init', array(&$this, 'init'));
+		  
 			//Filters
 			//Add ShortCode for "front end listing"
 			add_shortcode(STAGESHOW_SHORTCODE_PREFIX."-boxoffice", array(&$this, 'OutputContent_BoxOffice'));
@@ -86,6 +88,12 @@ if (!class_exists('StageShowPluginClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
+			
+			if ($myDBaseObj->adminOptions['Dev_RunDevCode'])
+			{
+				if (!defined('STAGESHOW_RUNDEVCODE'))
+					define('STAGESHOW_RUNDEVCODE', 1);
+			}
 			
 			return $myDBaseObj->adminOptions;
 		}
@@ -222,6 +230,12 @@ if (!class_exists('StageShowPluginClass'))
     {
     }
 
+		function init()
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			$myDBaseObj->init($this->env['caller']);
+		}
+		
 		function OutputMetaTag()
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -511,8 +525,9 @@ if (!class_exists('StageShowPluginClass'))
 					break;
           
 				case STAGESHOW_MENUPAGE_TOOLS:
-					include 'admin/stageshow_manage_tools.php';      
-					new StageShowToolsAdminClass($this->env);
+					include 'admin/'.$this->adminClassFilePrefix.'_manage_tools.php';
+					$classId = $this->adminClassPrefix.'ToolsAdminClass';
+					new $classId($this->env);							 
 					break;
 							
 				case STAGESHOW_MENUPAGE_TESTSETTINGS:

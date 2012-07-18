@@ -139,6 +139,13 @@ if (!class_exists('SettingsAdminClass'))
 			else
 				$controlValue = MJSLibUtilsClass::GetArrayElement($adminOptions, $controlId);					// Get saved value from database
 
+			if ($settingOption['Type'] === MJSLibTableClass::TABLEENTRY_FUNCTION)
+			{
+				$functionId = $settingOption['Func'];
+				$controlValue = $this->$functionId($settingOption);				
+				return $controlValue;
+			}
+			
 			return $this->GetHTMLTag($settingOption, $controlValue);
 		}
 		
@@ -159,14 +166,16 @@ if (!class_exists('SettingsAdminClass'))
 					case MJSLibTableClass::TABLEENTRY_TEXTBOX:
 					case MJSLibTableClass::TABLEENTRY_SELECT:
 					case MJSLibTableClass::TABLEENTRY_CHECKBOX:
+					case MJSLibTableClass::TABLEENTRY_COOKIE:
 						$settingType = MJSLibTableClass::TABLEENTRY_VIEW;
-						break;
+						break;						
 				}
 			}
 				
 			switch ($settingType)
 			{
 				case MJSLibTableClass::TABLEENTRY_TEXT:
+				case MJSLibTableClass::TABLEENTRY_COOKIE:
 					$editLen = $settingOption['Len'];
 					$editSize = isset($settingOption['Size']) ? $settingOption['Size'] : $editLen+1;
 					$editControl = '<input type="text"'.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" name="'.$controlName.'" value="'.$controlValue.'" />'."\n";
@@ -192,7 +201,7 @@ if (!class_exists('SettingsAdminClass'))
 
 				case MJSLibTableClass::TABLEENTRY_CHECKBOX:
 					$checked = ($controlValue === true) ? 'checked="yes"' : '';
-					$editControl = '<input type="checkbox" name="'.$controlName.'" id="'.$controlName.'" value="1" '.$checked.'" />&nbsp;'.$settingOption['Text']."\n";
+					$editControl = '<input type="checkbox" name="'.$controlName.'" id="'.$controlName.'" value="1" '.$checked.' />&nbsp;'.$settingOption['Text']."\n";
 					break;
 
 				case MJSLibTableClass::TABLEENTRY_VIEW:
@@ -204,6 +213,8 @@ if (!class_exists('SettingsAdminClass'))
 					break;
 
 				default:
+					//echo "<string>Unrecognised Table Entry Type - $settingType </string><br>\n";
+					//MJSLibUtilsClass::ShowCallStack();
 					break;
 			}
 
@@ -216,20 +227,35 @@ if (!class_exists('SettingsAdminClass'))
 			$domainName = $dbObj->get_name();
 			
 			$output = '';
+			$nextInline = false;
 			
 			foreach ($this->settings as $settingsName => $settingOpts)
 			{
 				$sectionOutput = '';
-			
+				
 				foreach ($settingOpts as $settingOption)
 				{			
 					$settingLabel = $settingOption['Label'];
 					$editControl = $this->GetSettingHTMLTag($adminOptions, $settingOption);
-					if ($editControl != '')
+					if ($editControl === '')
+						continue;
+
+					if (!$nextInline)
 					{
 						$sectionOutput .= '<tr valign="middle">'."\n";
-						$sectionOutput .= '<td>'.__($settingLabel, $domainName).'</td>'."\n";
-						$sectionOutput .= '<td>'.$editControl.'</td>'."\n";
+						$sectionOutput .= '<td>'."\n";
+					}
+					$sectionOutput .= __($settingLabel, $domainName)."\n";
+					if (!$nextInline)
+					{
+						$sectionOutput .= '</td>'."\n";
+						$sectionOutput .= '<td>'."\n";
+					}
+					$sectionOutput .= $editControl."\n";
+					$nextInline = isset($settingOption['Next-Inline']);
+					if (!$nextInline)
+					{						
+						$sectionOutput .= '</td>'."\n";
 						$sectionOutput .= '</tr>'."\n";
 					}
 				}
@@ -383,6 +409,9 @@ if (!class_exists('MJSLibAdminClass'))
 			{
 				$settingId = $setting['Id'];
 				
+				if (!isset($_POST[$settingId.$index])) 
+					continue;
+					
 				$newVal = $_POST[$settingId.$index];
 				if ($newVal != $result->$settingId)
 				{
