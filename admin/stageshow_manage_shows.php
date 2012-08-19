@@ -88,7 +88,7 @@ if (!class_exists('StageShowShowsAdminClass'))
       
 			if (isset($_GET['action']))
 			{
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				
 				$actionID = $_GET['action'];
 				switch ($actionID)
@@ -170,7 +170,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 					<h2><?php echo $myPluginObj->pluginName.' - '.__('Show Editor', STAGESHOW_DOMAIN_NAME); ?></h2>
 					<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_SHOWS ?>">
 					<?php
-	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
+	$this->WPNonceField();
 
 	if (isset($noteID))
 	{

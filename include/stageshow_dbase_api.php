@@ -108,7 +108,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$this->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
 		}
 
-    function activate()
+    function upgradeDB()
     {
       global $wpdb;
       
@@ -388,10 +388,10 @@ if (!class_exists('StageShowDBaseClass'))
 			if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_test.php') ) { $showName1 .= " (".$this->GetSiteID().")"; }
 
       // Sample dates to reflect current date/time
-      $showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-1 days"))." 20:00:00";
-      $showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-0 days"))." 20:00:00";
-      $showTime3 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+1 days"))." 14:30:00";
-      $showTime4 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+1 days"))." 20:00:00";
+      $showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+28 days"))." 20:00:00";
+      $showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+29 days"))." 20:00:00";
+      $showTime3 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 14:30:00";
+      $showTime4 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 20:00:00";
       
 	    // Populate table
       $showID1 = $this->AddShow($showName1);
@@ -414,10 +414,10 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 			
 	    // Populate prices table
-	    $priceID1_A1 = $this->AddPrice($perfID1, 'Adult', '12.50');
+	    $priceID1_A1 = $this->AddPrice($perfID1, 'All', '12.50');
 	    $priceID1_A2 = $this->AddPrice($perfID2, 'Adult', '5.50');
 	    $priceID1_A3 = $this->AddPrice($perfID3, 'Adult', '4.00');
-	    $priceID1_A4 = $this->AddPrice($perfID4, 'Adult', '6.00');
+	    $priceID1_A4 = $this->AddPrice($perfID4, 'All', '6.00');
 	    
 	    $priceID1_C2 = $this->AddPrice($perfID2, 'Child', '3.00');
 	    $priceID1_C3 = $this->AddPrice($perfID3, 'Child', '2.00');
@@ -428,10 +428,13 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 			
 			// Add some ticket sales
+      $saleTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47";
+      $saleTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-3 days"))." 10:14:51";
+      			
 			$saleEMail = 'other@someemail.co.uk';
 			if (defined('STAGESHOW_SAMPLE_EMAIL'))
 				$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-			$saleID = $this->AddSale(date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47", 'A.N.Other', $saleEMail, 12.00, 'ABCD1234XX', 'Completed',
+			$saleID = $this->AddSale($saleTime1, 'A.N.Other', $saleEMail, 12.00, 'ABCD1234XX', 'Completed',
 								'Andrew Other', '1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
 			$this->AddSaleItem($saleID, $priceID1_C3, 4);
 			$this->AddSaleItem($saleID, $priceID1_A3, 1);
@@ -439,7 +442,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$saleEMail = 'mybrother@someemail.co.uk';
 			if (defined('STAGESHOW_SAMPLE_EMAIL'))
 				$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-			$saleID = $this->AddSale(date(self::STAGESHOW_DATE_FORMAT, strtotime("-2 days"))." 10:14:51", 'M.Y.Brother', $saleEMail, 48.00, '87654321qa', 'Pending',
+			$saleID = $this->AddSale($saleTime2, 'M.Y.Brother', $saleEMail, 48.00, '87654321qa', 'Pending',
 								'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
 			$this->AddSaleItem($saleID, $priceID1_A4, 4);
 			
@@ -475,7 +478,11 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function CreateNewPerformance(&$rtnMsg, $showID, $perfDateTime, $perfRef = '', $perfSeats = -1)
 		{
-			if ($showID <= 0) return 0;
+			if ($showID <= 0) 
+			{
+				$rtnMsg = __('Internal Error - showID', STAGESHOW_DOMAIN_NAME);
+				return 0;
+			}
 			
 			$perfState = '';
 			$perfID = 0;
@@ -507,7 +514,7 @@ if (!class_exists('StageShowDBaseClass'))
 				if ($perfID == 0)
 					$rtnMsg = __('Performance Reference is not unique', STAGESHOW_DOMAIN_NAME);
 				else
-					$rtnMsg = __('Settings have been saved', STAGESHOW_DOMAIN_NAME);
+					$rtnMsg = __('New Performance Added', STAGESHOW_DOMAIN_NAME);
 			}
 			
 			return $perfID;
@@ -1200,7 +1207,17 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql .= ' WHERE '.STAGESHOW_PRICES_TABLE.".$IDfield=$ID";
 			$this->ShowSQL($sql); 
 			$wpdb->query($sql);
-		}			
+		}					
+
+		function GetAllTicketTypes()
+		{
+			$sql  = 'SELECT priceType FROM '.STAGESHOW_PRICES_TABLE;
+			$sql .= ' GROUP BY priceType';
+			$sql .= ' ORDER BY priceType';
+			$this->ShowSQL($sql); 
+			
+			return $this->get_results($sql);
+		}
 		
 		function GetTicketTypes($perfID)
 		{
@@ -1354,46 +1371,6 @@ if (!class_exists('StageShowDBaseClass'))
 //
 // ----------------------------------------------------------------------
     
-		function TODO_REMOVE_AddSaleItem($saleID, $stockID, $qty)
-		{
-			global $wpdb;
-			
-			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').')';
-			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'")';
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
-			$orderID = mysql_insert_id();
-	
-			return $orderID;
-		}			
-		
-		function TODO_REMOVE_UpdateSaleItem($saleID, $priceID, $qty)
-		{
-			global $wpdb;
-
-			// Delete a show entry
-			$sql  = 'UPDATE '.$this->opts['OrdersTableName'];
-			$sql .= ' SET ticketQty="'.$qty.'"';
-			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
-			$sql .= ' AND   '.$this->opts['OrdersTableName'].".priceID=$priceID";
-
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
-		}
-		
-		function TODO_REMOVE_DeleteSaleItem($saleID, $priceID)
-		{
-			global $wpdb;
-
-			// Delete a show entry
-			$sql  = 'DELETE FROM '.$this->opts['OrdersTableName'];
-			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
-			$sql .= ' AND   '.$this->opts['OrdersTableName'].".priceID=$priceID";
-
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
-		}
-		
 		function GetSaleStockID($itemRef, $itemOption)
 		{
 			// itemRef format: {showID}-{perfID}
@@ -1515,6 +1492,24 @@ if (!class_exists('StageShowDBaseClass'))
 			return $salesList;
 		}
 		
+		function GetWhereParam($fieldID, $whereID)
+		{
+			if (is_array($whereID))
+			{
+				$whereList = '';
+				foreach ($whereID as $whereItem)
+				{
+					if ($whereList != '') $whereList .= ',';
+					$whereList .= $whereItem->$fieldID;
+				}
+				$sqlWhere = " IN ($whereList)";
+			}
+			else
+				$sqlWhere = "=$whereID";
+				
+			return $sqlWhere;
+		}
+		
 		function DeleteSale($saleID)
 		{
 			global $wpdb;
@@ -1523,18 +1518,7 @@ if (!class_exists('StageShowDBaseClass'))
 
 			// Delete a show entry
 			$sql  = 'DELETE FROM '.$this->opts['OrdersTableName'];
-			if (is_array($saleID))
-			{
-				$salesList = '';
-				foreach ($saleID as $saleItemID)
-				{
-					if ($salesList != '') $salesList .= ',';
-					$salesList .= $saleItemID->saleID;
-				}
-				$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID IN ($salesList)";
-			}
-			else
-				$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
+			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID".$this->GetWhereParam('saleID', $saleID);
 
 			$this->ShowSQL($sql); 
 			$wpdb->query($sql);
@@ -1760,14 +1744,5 @@ if (!class_exists('StageShowDBaseClass'))
 		
 	}
 }
-
-$stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
-if (defined('WP_UNINSTALL_PLUGIN') && !isset($stageShowObj) && $stageShowDBaseClass === 'StageShowDBaseClass') 
-{
-	global $stageShowObj;
-	$stageShowObj = new stdClass();
-	$stageShowObj->myDBaseObj = new StageShowDBaseClass();
-}
-
 
 ?>

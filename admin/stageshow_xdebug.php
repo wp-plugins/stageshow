@@ -39,7 +39,7 @@ if (!class_exists('StageShowDebugAdminClass'))
 <div class="wrap">
 <div id="icon-stageshow" class="icon32"></div>
 <form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_DEBUG; ?>">
-<?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
+<?php $this->WPNonceField(); ?>
 	<h2><?php echo $myPluginObj->pluginName.' - TEST' ?></h2>
 	<?php 
 		$this->Test_DebugSettings();
@@ -55,7 +55,7 @@ if (!class_exists('StageShowDebugAdminClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			
 			if (isset($_POST['testbutton_SaveDebugSettings'])) {
-				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 					
 				$myDBaseObj->adminOptions['Dev_EnableDebug'] = trim(MJSLibUtilsClass::GetHTTPElement($_POST,'cbEnableDebug'));
 				$myDBaseObj->adminOptions['Dev_ShowSQL'] = trim(MJSLibUtilsClass::GetHTTPElement($_POST,'cbShowSQL'));
@@ -100,7 +100,7 @@ if (!class_exists('StageShowDebugAdminClass'))
 			$results = $myDBaseObj->GetSalesList(null);		// Get list of sales (one row per sale)
 			
 			if (isset($_POST['testbutton_EMailSale'])) {
-				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 					
 				// Run EMail Test		
 				$saleID = stripslashes($_POST['TestSaleID']);

@@ -36,7 +36,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 			
 			$myPluginObj = $this->myPluginObj;
 			
-			$this->actionURL = get_site_url().'/wp-content/plugins/stageshow/admin/stageshow_Export.php';
+			$this->actionURL = STAGESHOW_ADMIN_URL.'stageshow_Export.php';
 				
 ?>
 <div class="wrap">
@@ -79,7 +79,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 </script>
 <h3><?php _e('Validate Sale'); ?></h3>
 <form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_TOOLS; ?>">
-		<?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
+		<?php $this->WPNonceField(); ?>
 		<table class="form-table">
 			<?php
 			if ($myDBaseObj->GetLocation() !== '')
@@ -119,7 +119,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 				 
 			$myDBaseObj = $this->myDBaseObj;
 				 
-			check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+			$this->CheckAdminReferer();
 
 			$TxnId = stripslashes($_POST['TxnId']);
 			
@@ -154,7 +154,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 		
 		function Tools_Export()
 		{
-			$this->actionURL = get_site_url().'/wp-content/plugins/stageshow/admin/stageshow_Export.php';
+			$this->actionURL = STAGESHOW_ADMIN_URL.'stageshow_Export.php';
 				
 ?>
 
@@ -162,7 +162,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 <p><?php _e('Export Configuration and Ticket Sales to a "TAB Separated Text" format file on your computer.'); ?></p>
 <p><?php _e('This format can be imported to many applications including spreadsheets and databases.'); ?></p>
 <form action="<?php echo $this->actionURL; ?>" method="get">
-<?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
+<?php $this->WPNonceField(); ?>
 <table class="form-table">
 <tr>
 <th><?php _e('Export'); ?></th>
@@ -194,7 +194,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 			$DeleteOrphans = ($myDBaseObj->adminOptions['DeleteOrphans'] == true); 
 			if(isset($_POST['flushsalesbutton']))
 			{
-				check_admin_referer(plugin_basename(__FILE__)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 						
 				$myDBaseObj->DeleteOrphanedSales();
 			}
@@ -204,7 +204,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 <p><?php _e('Sales records are not deleted when shows or performances are deleted.'); ?></p>
 <p><?php _e('Individual sales records can be deleted on the sales page. All sales records for sales where the corresponding show or performance has been removed can be deleted by clicking the button below.'); ?></p>
 <form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_TOOLS; ?>">
-	<?php if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename(__FILE__)); ?>
+	<?php $this->WPNonceField(); ?>
 <p>
 <p class="submit">
 <input class="button-secondary" type="submit" name="flushsalesbutton" value="<?php _e('Flush Sales Records', STAGESHOW_DOMAIN_NAME) ?>" onclick="javascript:return confirmDelete('Orphaned Sales Records')"/>

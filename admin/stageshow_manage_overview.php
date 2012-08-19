@@ -50,7 +50,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			return array(
 				array('Label' => 'Show',         'Id' => 'showName',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),
 				array('Label' => 'Performances', 'Id' => 'perfCount',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
-				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE,  'Link' => 'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
 				array('Label' => 'Sales Value',  'Id' => 'totalValue',  'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
 			);
 		}
@@ -135,7 +135,7 @@ if (!class_exists('StageShowOverviewAdminDetailsListClass'))
 		{
 			$ourOptions = array(
 				array('Label' => 'Performance',  'Id' => 'perfDateTime', 'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),						
+				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VALUE, 'Link' => 'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
 				array('Label' => 'Sales Value',  'Id' => 'totalValue',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
 			);
 			

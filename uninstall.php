@@ -9,14 +9,14 @@
 	define('STAGESHOW_PLUGIN_FILE', __FILE__);
 	include 'stageshow_defs.php';      
 
-	if ( file_exists(STAGESHOW_INCLUDE_PATH.'stageshowplus_extns.php') )
-		include('include/stageshowplus_extns.php');
+	if ( file_exists(STAGESHOW_INCLUDE_PATH.'stageshowplus_dbase_api.php') )
+		include STAGESHOW_INCLUDE_PATH.'stageshowplus_dbase_api.php';
 
 	if (!class_exists('StageShowDBaseClass'))
-		include 'include/stageshow_dbase_api.php';      
+		require_once STAGESHOW_INCLUDE_PATH.'stageshow_dbase_api.php';      
       
-	global $stageShowObj;
-	$myDBaseObj = $stageShowObj->myDBaseObj;
+	$stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
+	$myDBaseObj = new $stageShowDBaseClass();
 
 	$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
            
@@ -35,7 +35,7 @@
 	$myDBaseObj->uninstall();
 	
 	// Remove any StageShow entries from Wordpress options 
-	update_option(STAGESHOW_OPTIONS_NAME, array());
+	delete_option(STAGESHOW_OPTIONS_NAME);
 	
 	// Output debug message
 	//$debugMsg = "Uninstall complete!\r\n";

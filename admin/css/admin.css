@@ -67,12 +67,45 @@ div.edit-entry-button
 }
 
 /* ----------------------------------------------------------------------------------------------------------------
-	Styles for Debug Messages
+	Styles for Settings Pages
 ---------------------------------------------------------------------------------------------------------------- */
 
-.form-table td 
+.stageshow-settings-tab-table
+{
+	width: 100%;
+	border-spacing: 0;
+}
+
+.stageshow-settings-tab
+{
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	border-style: solid; 
+	border-width: 1px 1px 0px 1px;
+	font-weight: normal;
+}
+
+.stageshow-settings-tab-selected
+{
+	border-bottom-width: 0px;
+}
+
+.stageshow-settings-tab-unselected
+{
+	border-bottom-width: 1px;
+}
+
+.stageshow-settings-page td 
 {
 	line-height: 14px;
+	padding: 6px 10px;
+}
+
+table.stageshow-settings-page
+{
+	width: 100%;
+	border-style: solid; 
+	border-width: 0px 1px 1px 1px;
 }
 
 /* ----------------------------------------------------------------------------------------------------------------
