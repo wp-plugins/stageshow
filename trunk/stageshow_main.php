@@ -23,7 +23,7 @@ Copyright 2012 Malcolm Shergold
 if (!defined('STAGESHOW_PAYPAL_IPN_NOTIFY_URL'))
 	define('STAGESHOW_PAYPAL_IPN_NOTIFY_URL', get_site_url().'/wp-content/plugins/stageshow/stageshow_NotifyURL.php');
 
-include 'include/stageshow_dbase_api.php';      
+require_once 'include/stageshow_dbase_api.php';      
       
 if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
 	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
@@ -42,7 +42,7 @@ if (!class_exists('StageShowPluginClass'))
 		var	$adminClassFilePrefix;
 		var $adminClassPrefix;
 		
-		function __construct($dbaseObj) 
+		function __construct($caller, $dbaseObj) 
 		{
 			add_action('wp_enqueue_scripts', array(&$this, 'load_user_styles') );
 			add_action('admin_print_styles', array(&$this, 'load_admin_styles') );
@@ -56,7 +56,7 @@ if (!class_exists('StageShowPluginClass'))
 			$this->myDBaseObj = $dbaseObj;
 			
 			$this->env = array(
-		    'caller' => __FILE__,
+		    'caller' => $caller,
 		    'PluginObj' => $this,
 		    'DBaseObj' => $this->myDBaseObj,
 			);
@@ -74,6 +74,8 @@ if (!class_exists('StageShowPluginClass'))
 			//Filters
 			//Add ShortCode for "front end listing"
 			add_shortcode(STAGESHOW_SHORTCODE_PREFIX."-boxoffice", array(&$this, 'OutputContent_BoxOffice'));
+			
+			$this->checkVersion();
 		}
 		
 		function load_user_styles() {
@@ -89,7 +91,7 @@ if (!class_exists('StageShowPluginClass'))
 			
 			$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
 			
-			if ($myDBaseObj->adminOptions['Dev_RunDevCode'])
+			if (isset($myDBaseObj->adminOptions['Dev_RunDevCode']) && ($myDBaseObj->adminOptions['Dev_RunDevCode']))
 			{
 				if (!defined('STAGESHOW_RUNDEVCODE'))
 					define('STAGESHOW_RUNDEVCODE', 1);
@@ -111,6 +113,30 @@ if (!class_exists('StageShowPluginClass'))
     // Activation / Deactivation Functions
     // ----------------------------------------------------------------------
     
+		function checkVersion()
+		{			
+			$myDBaseObj = $this->myDBaseObj;
+			
+			// Check if updates required
+			
+			// Get current version from Wordpress API
+			$currentVersion = $myDBaseObj->get_version();
+
+			// Get last known version from adminOptions
+			$lastVersion = $myDBaseObj->adminOptions['LastVersion'];
+			
+			// Compare versions
+			if ($currentVersion === $lastVersion)
+				return;
+				
+			// Versions are different ... call activate() to do any updates
+			$this->activate();
+			
+			// Save current version to options
+			$myDBaseObj->adminOptions['LastVersion'] = $currentVersion;
+			$myDBaseObj->saveOptions();
+		}
+		
     function activate()
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -165,7 +191,10 @@ if (!class_exists('StageShowPluginClass'))
 					if (defined('PAYPAL_APILIB_ACTIVATE_LIVEEMAIL'))
 						$myDBaseObj->adminOptions['PayPalAPIEMail']  = PAYPAL_APILIB_ACTIVATE_LIVEEMAIL;				
 				}      
+			}
 			
+			if ($myDBaseObj->adminOptions['ActivationCount'] == 1)
+			{
 				// Add Sample PayPal shopping cart Images and URLs
 				if (defined('STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL'))
 					$myDBaseObj->adminOptions['PayPalLogoImageURL'] = STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL;
@@ -186,16 +215,6 @@ if (!class_exists('StageShowPluginClass'))
 			if (!is_dir($LogsFolder))
 				mkdir($LogsFolder, 0644, TRUE);
 
-			if (!$myDBaseObj->adminOptions['PayPalInvChecked'])
-			{
-				// Check that all PayPal buttons have the SOLDOUTURL set			
-				$results = $myDBaseObj->GetAllPerformancesList();
-				foreach ($results as $result)
-					$myDBaseObj->payPalAPIObj->AdjustInventory($result->perfPayPalButtonID, 0);
-				
-				$myDBaseObj->adminOptions['PayPalInvChecked'] = true;
-			}
-			
 			// EMail Template defaults to templates folder - remove folders from path
 			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath');
 			$myDBaseObj->CheckEmailTemplatePath('EMailSummaryTemplatePath');
@@ -205,7 +224,6 @@ if (!class_exists('StageShowPluginClass'))
 			$setupUserRole = $myDBaseObj->adminOptions['SetupUserRole'];
 
 			// Add capability to submit events to all default users
-			// TODO-Improvement Should only do this on first install ....
 			$adminRole = get_role($setupUserRole);
 			if ( !empty($adminRole) ) 
 			{
@@ -220,10 +238,18 @@ if (!class_exists('StageShowPluginClass'))
 					$adminRole->add_cap(STAGESHOW_CAPABILITY_SETUPUSER);
 			}				
 			
-			MJSLibUtilsClass::DeleteFile(STAGESHOW_ADMIN_PATH.'stageshow_dbase_api.php');
-			MJSLibUtilsClass::DeleteFile(STAGESHOW_ADMIN_PATH.'stageshow_paypal_api.php');
-						
-      $myDBaseObj->activate();
+      $myDBaseObj->upgradeDB();
+			
+			if (!$myDBaseObj->adminOptions['PayPalInvChecked'])
+			{
+				// Check that all PayPal buttons have the SOLDOUTURL set			
+				$results = $myDBaseObj->GetAllPerformancesList();
+				foreach ($results as $result)
+					$myDBaseObj->payPalAPIObj->AdjustInventory($result->perfPayPalButtonID, 0);
+				
+				$myDBaseObj->adminOptions['PayPalInvChecked'] = true;
+			}
+			
 		}
 
     function deactivate()
@@ -423,7 +449,7 @@ if (!class_exists('StageShowPluginClass'))
 					echo '
 							</select>
 						</td>
-						<td width="'.$widthCol5.'">
+						<td width="'.$widthCol5.'" class="stageshow-boxoffice-add">
 							';											
 					if (!$myDBaseObj->IsPerfEnabled($result)) echo '&nbsp;';
 					else if ($result->perfSeats == 0) echo '

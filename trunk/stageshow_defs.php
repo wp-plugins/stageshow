@@ -17,7 +17,6 @@ define('STAGESHOW_INCLUDE_PATH', STAGESHOW_FILE_PATH . '/include/');
 define('STAGESHOW_ADMINICON_PATH', STAGESHOW_ADMIN_PATH . 'images/');
 define('STAGESHOW_TEST_PATH', STAGESHOW_FILE_PATH . '/test/');
 
-define('STAGESHOW_CODE_PREFIX', 'stageshow');
 define('STAGESHOW_DOMAIN_NAME', 'stageshow');
 
 if (!defined('STAGESHOW_SHORTCODE_PREFIX'))

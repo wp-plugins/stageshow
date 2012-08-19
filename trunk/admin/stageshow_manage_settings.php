@@ -57,7 +57,7 @@ if (!class_exists('StageShowManageSettingsClass'))
 			
 			if (isset($_POST['savesettingsbutton']))
 			{
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				
 				$PayPalAPIChanged = false;
 				if ($this->IsOptionChanged($myDBaseObj->adminOptions, 'PayPalAPIUser','PayPalAPIPwd','PayPalAPISig') || isset($_POST['errormsglive']))
@@ -141,7 +141,7 @@ if (!class_exists('StageShowManageSettingsClass'))
 <h2><?php echo $myPluginObj->pluginName.' - '.__('Settings', STAGESHOW_DOMAIN_NAME); ?></h2>
 <form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_SETTINGS; ?>">
 <?php 
-	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
+	$this->WPNonceField();
 	echo $hiddenTags; 
 	$genSettingsObj->Output_Form($myDBaseObj);
 ?>

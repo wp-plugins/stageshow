@@ -84,8 +84,8 @@ if (!class_exists('StageShowExportAdminClass'))
 
 		function header($content)
 		{
-			if ( ($this->myDBaseObj->adminOptions['Dev_ShowSQL']) 
-				|| ($this->myDBaseObj->adminOptions['Dev_ShowDBOutput']) )
+			if ( $this->myDBaseObj->isOptionSet('Dev_ShowSQL')
+				|| $this->myDBaseObj->isOptionSet('Dev_ShowDBOutput') )
 				echo $content."<br>\n";
 			else
 				header($content);				
@@ -313,15 +313,15 @@ function onclickverify(obj)
 			
 			// Get All Sales - Sort by Show Name, then Performance Date/Time, then by Performance ID, then by Buyer Name, then Sale EMail
 			
+			// Get list of ticket types for all shows
+			$typesList = $this->myDBaseObj->GetAllTicketTypes();
+					
 			$showLists = $this->myDBaseObj->GetAllShowsList();
 			foreach ($showLists as $showEntry)
 			{
 				$perfsLists = $this->myDBaseObj->GetPerformancesListByShowID($showEntry->showID);
 				foreach ($perfsLists as $perfsList)
 				{
-					// Get list of ticket types for this show
-					$typesList = $this->myDBaseObj->GetTicketTypes($perfsList->perfID);
-					
 					// Get all sales for this performance
 					$salesList = $this->myDBaseObj->GetTicketsListByPerfID($perfsList->perfID);
 					
@@ -373,7 +373,7 @@ function onclickverify(obj)
 	}
 }
 
-global $stageShowObj;
-new StageShowExportAdminClass($stageShowObj->myDBaseObj);
+$stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
+new StageShowExportAdminClass(new $stageShowDBaseClass());
 
 ?>

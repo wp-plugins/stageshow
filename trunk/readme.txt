@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 
 The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups.
 
@@ -139,6 +139,17 @@ The following tags can be used in the EMail template:
 == Changelog ==
 
 * Version History for StageShow Plugin 
+
+= 1.1.5 =
+* Bug Fix: Version update code does not check database version
+* Bug Fix: Ticket Types can be omitted from Sale Summary Export
+* Ticket types for some samples changed to "All"
+* Added stageshow-boxoffice-add class to Box Office Add buttons
+* Renamed 'StageShow+ Auto Update Settings' as Auto Update Settings'
+* Sales quantities on overview page are now links to show and performance sales pages 
+* Sample performance dates altered to make shows visible on setup
+* Settings sections displayed as tabs on admin page
+* Add New Performance status messages improved
 
 = 1.1.4 =
 * Added "Sales Summary" option to Export Data on Tools admin page

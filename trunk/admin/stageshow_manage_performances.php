@@ -105,7 +105,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			echo '<div class="wrap">';
 			if (isset($_POST['saveperfbutton']))
 			{
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				
 				// Save Settings Request ....
 				$showID = $_POST['showID'];
@@ -217,13 +217,15 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			}			
 			else if (isset($_POST['addperfbutton']) && isset($_POST['showID']))
 			{
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				
 				$showID = $_POST['showID'];
 				
 				$statusMsg = '';
-				$myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowDBaseClass::MYSQL_DATETIME_FORMAT, current_time('timestamp')));				
-				echo '<div id="message" class="updated"><p>'.$statusMsg.'</p></div>';		// TODO - Check return status "class"
+				$newPerfID = $myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowDBaseClass::MYSQL_DATETIME_FORMAT, current_time('timestamp')));				
+
+				$statusMsgClass = ($newPerfID > 0) ? 'updated' : 'error';
+				echo '<div id="message" class="'.$statusMsgClass.'"><p>'.$statusMsg.'</p></div>';
 			}			 
 
 			$this->Output_MainPage($env, $perfsMsg !== '');
@@ -257,7 +259,7 @@ foreach ($showLists as $showList)
 	<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_PERFORMANCES; ?>">
 	<h3><?php echo($showList->showName); ?></h3>
 		<?php 
-	if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
+	$this->WPNonceField();
 	if (count($results) == 0) 
 	{ 
 		echo __('Show has NO Performances', STAGESHOW_DOMAIN_NAME)."<br>\n";

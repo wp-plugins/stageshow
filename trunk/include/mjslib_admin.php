@@ -221,18 +221,144 @@ if (!class_exists('SettingsAdminClass'))
 			return $editControl;
 		}
 		
+		function JS_Top()
+		{
+			return "
+<script language='JavaScript'>
+<!-- Hide script from old browsers
+// End of Hide script from old browsers -->
+
+var tabIdsList  = [";
+	
+		}
+		
+		function JS_Tab($tabID)
+		{
+			return "'$tabID',";	
+		}
+		
+		function JS_Bottom()
+		{
+			return "''];
+
+function onSettingsLoad()
+{
+	var tabsRowElem, index, tabId, defaultTabId;
+	
+	tabsRowElem = document.getElementById('stageshow-settings-tab-table');
+	tabsRowElem.style.display = '';
+	
+	defaultTabId = tabIdsList[0];
+	
+	for (index = 0; index < tabIdsList.length-1; index++)
+	{
+		tabId = tabIdsList[index];
+		setTab(tabId, defaultTabId);
+	}
+}
+
+window.onload = onSettingsLoad;
+
+function setTab(tabID, selectedTabID)
+{
+	var headerElem, tabElem, pageElem, tabWidth;
+	
+	// Get the header 'Tab' Element					
+	headerElem = document.getElementById('page-header-' + tabID);
+	headerElem.style.display = 'none';
+	
+	// Get the header 'Tab' Element					
+	tabElem = document.getElementById('stageshow-settings-tab-' + tabID);
+	
+	// Get the Body Element					
+	pageElem = document.getElementById('stageshow-settings-page-' + tabID);
+
+	tabWidth = tabElem.style.width;
+	if (tabID == selectedTabID)
+	{
+		// Make the font weight normal and background Grey
+		tabElem.style.fontWeight = 'bold';	
+		//tabElem.backgroundColor = '#000000';
+		tabElem.style.borderBottom = '0px red solid';
+		
+		// Hide the settings text
+		pageElem.style.display = '';
+	}
+	else
+	{
+		// Make the font weight normal and background Grey
+		tabElem.style.fontWeight = 'normal';	
+		//tabElem.backgroundColor = '#F9F9F9';
+		tabElem.style.borderBottom = '1px black solid';
+		
+		// Hide the settings text
+		pageElem.style.display = 'none';
+	}	
+	
+	newStyle = tabElem.style.border;
+	newStyle2 = tabElem.style.border;
+}
+
+function getTabID(obj)
+{
+	tabID = obj.innerHTML.replace(/ /g, '-');
+	tabID = tabID.replace('+', '');
+	tabID = tabID.toLowerCase();
+	
+	return tabID;
+}
+
+function clickHeader(obj, state)
+{
+	var headerID, selectedTabID, index, tabId;
+	
+	headerID = obj.innerHTML;
+			
+	//alert('Clicked Header: ' + headerID);
+	
+	selectedTabID = getTabID(obj);
+	
+	for (index = 0; index < tabIdsList.length-1; index++)
+	{
+		tabId = tabIdsList[index];
+		setTab(tabId, selectedTabID);
+	}
+}
+
+</script>
+			";
+		}
+		
 		function Output_Form($dbObj)
 		{
+		
 			$adminOptions = $dbObj->adminOptions;
 			$domainName = $dbObj->get_name();
 			
+			$tabbedMenu = '';
 			$output = '';
 			$nextInline = false;
 			
+			$tabClassID = "stageshow-settings-tab";
+			$pageClassID = "stageshow-settings-page";
+			
+			$javascript = $this->JS_Top();
+			
+			$numOfTabs = count($this->settings);
+			$tabWidth = intval(100/$numOfTabs)."%";
+			
 			foreach ($this->settings as $settingsName => $settingOpts)
 			{
+				$setingsPageID = strtolower(str_replace(" ", "-", str_replace("+", "", $settingsName)));
+				
+				$tabElemID  = $tabClassID.'-'.$setingsPageID;
+				$pageElemID = $pageClassID.'-'.$setingsPageID;
+			
 				$sectionOutput = '';
 				
+				$tabTableClass = $tabClassID.'-table';
+				$tabbedMenu .= "<th id=$tabElemID class=$tabClassID width=\"$tabWidth\" onclick=clickHeader(this)>$settingsName</th>\n";
+					
 				foreach ($settingOpts as $settingOption)
 				{			
 					$settingLabel = $settingOption['Label'];
@@ -262,15 +388,22 @@ if (!class_exists('SettingsAdminClass'))
 
 				if ($sectionOutput != '')
 				{
-					$header = "<h3>".__($settingsName, $domainName)."</h3>\n";
-					$sectionOutput = "$header<table class=\"form-table\">\n$sectionOutput</table>\n";					
-				}		// End ... foreach ($settings as $section => $settingOpts)
-
+					$header = "\n";
+					$header = '<div id="page-header-'.$setingsPageID.'">'."<h3>".__($settingsName, $domainName)."</h3></div>\n";
+					$sectionOutput = "$header<table class=\"$pageClassID\" id=\"$pageElemID\">\n$sectionOutput</table>\n";					
+					
+					$javascript .= $this->JS_Tab($setingsPageID);					
+				}		// End ... if ($sectionOutput != '')
 				$output .= $sectionOutput;
 				
 			} // End ... foreach ($settings as $section => $settingOpts)
 
-			echo $output;
+			$tabbedMenu = "<table class=$tabTableClass id=$tabTableClass style=\"display: none;\"><tr>$tabbedMenu</tr></table>\n";			
+			
+			$javascript .= $this->JS_Bottom();
+			echo $javascript;
+			
+			echo $tabbedMenu.$output;
 
 		} // End function Output_Form()
 
@@ -344,13 +477,13 @@ if (!class_exists('MJSLibAdminClass'))
 					if ($actionCount > 0)
 					{
 						$actionMsg = $this->GetBulkActionMsg($bulkAction, $actionCount);
-						echo '<div id="message" class="updated"><p>'.$actionMsg.'</p></div>';	// TODO - Check return status "class"
+						echo '<div id="message" class="updated"><p>'.$actionMsg.'</p></div>';
 					}
 				}
 				else
 				{										
 					$actionMsg = $this->GetBulkActionMsg($bulkAction, $actionCount);
-					echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';	// TODO - Check return status "class"
+					echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
 				}
 				
  			}
@@ -398,7 +531,13 @@ if (!class_exists('MJSLibAdminClass'))
 			$referer = plugin_basename($this->caller);
 			
 			if ($this->myDBaseObj->getOption('Dev_EnableDebug'))
+			{
 				echo "<!-- check_admin_referer($referer) -->\n";
+				if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
+					echo "<br><strong>check_admin_referer FAILED - verifyResult: $verifyResult - Referer: $referer </strong></br>\n";
+				return;
+			}
+			
 			check_admin_referer($referer);
 		}
 
@@ -448,6 +587,20 @@ if (!class_exists('MJSLibAdminClass'))
 				return $editControl;    
 		}
 		
+		function AdminUpgradeNotice() 
+		{ 
+/*
+	Function to add notification to admin page
+			add_action( 'admin_notices', 'AdminUpgradeNotice' );
+*/
+				
+?>
+	<div id="message" class="updated fade">
+		<p><?php echo '<strong>Stageshow is ready</strong>'; ?></p>
+	</div>
+<?php
+		}
+
   }
 }
 

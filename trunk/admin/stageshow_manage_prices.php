@@ -99,7 +99,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			echo '<div class="wrap">';
 			if (isset($_POST['savepricebutton']))
 			{
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				
 				$showID = $_POST['showID'];
 				$results = $myDBaseObj->GetPricesListByShowID($showID);
@@ -201,7 +201,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			}			
 			else if(isset($_POST['addpricebutton']))
 			{
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				
 				$showID = $_POST['showID'];
 				
@@ -243,7 +243,7 @@ foreach ($showLists as $showList)
 	<div class="stageshow-admin-form">
 	<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_PRICES; ?>">
 <?php 
-if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
+$this->WPNonceField();
 if (count($perfsLists) == 0)
 { 
 	$showsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.STAGESHOW_MENUPAGE_PERFORMANCES;

@@ -38,6 +38,13 @@ td.stageshow-boxoffice-perfnote
 	text-align: left;
 }
 
+/* Disable Qty drop down box and Add button in Box Office */
+.stageshow-boxoffice-qty,
+.stageshow-boxoffice-add
+{
+	/* display:none; */
+}
+
 #content .stageshow-boxoffice input
 {
 	margin: 0 0 0 0;

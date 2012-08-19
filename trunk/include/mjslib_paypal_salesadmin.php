@@ -215,7 +215,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			
 			if (isset($_POST['emailsale']))
 			{
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				
 				$this->emailSaleId = $_POST['id'];
 				$myDBaseObj->EMailSale($this->emailSaleId);
@@ -223,7 +223,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			
 			if (isset($_GET['action']))
 			{
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				$this->DoActions();
 			}
 
@@ -301,7 +301,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			if (isset($this->saleId))
 				echo "\n".'<input type="hidden" name="saleID" value="'.$this->saleId.'"/>'."\n";
 				
-			if ( function_exists('wp_nonce_field') ) wp_nonce_field(plugin_basename($this->caller));
+			$this->WPNonceField();
 				 
 			if ($this->editingRecord)
 			{
@@ -361,7 +361,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			switch ($_GET['action'])
 			{
 				case 'addsale':
-					check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+					$this->CheckAdminReferer();
 					
 					$this->pricesList = $this->myDBaseObj->GetPricesListWithSales(0);
 					if (count($this->pricesList) == 0) break;

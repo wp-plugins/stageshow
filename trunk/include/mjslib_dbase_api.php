@@ -146,6 +146,7 @@ if (!class_exists('MJSLibDBaseClass'))
 			
 			$ourOptions = array( 
 				'ActivationCount' => 0,
+				'LastVersion' => '',
 				       
 				'OrganisationID' => get_bloginfo('name'),
 				       
@@ -184,8 +185,16 @@ if (!class_exists('MJSLibDBaseClass'))
 				return '';
 				
 			return $this->adminOptions[$optionID];
-    }
+		}
     
+    function isOptionSet($optionID)
+    {
+			$value = $this->getOption($optionID);
+			if ($value == '') return false;
+			
+			return $value;
+		}
+        
 		// Saves the admin options to the options data table
 		function saveOptions($newOptions = null) 
 		{			
