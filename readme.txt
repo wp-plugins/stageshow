@@ -65,7 +65,8 @@ Upgrade
 
 PayPal API Access must be enabled - and the associated User, Password, Signature and EMail entries added to "Stageshow" settings. 
 		
-IPN Notification must be enabled for Sales to be recorded by the PlugIn. Payment will still be accepted and the sale will be recorded by PayPal if IPN is disabled. Set the "IPN Listener" URL to http://{Your Site URL}/wp-content/plugins/stageshow/stageshow_NotifyURL.php.
+IPN (Instant Payment Notification) must be enabled for Sales to be recorded by the PlugIn. Payment will still be accepted and the sale will be recorded by PayPal if IPN is disabled. 
+Set the "IPN Listener" URL to http://{Your Site URL}/wp-content/plugins/stageshow/stageshow_NotifyURL.php. 
 
 StageShow can be used with a PayPal developer account (the "SandBox"). Select "SandBox" as the Environment option, and then enter the PayPal account parameters in the usual way.
 	
