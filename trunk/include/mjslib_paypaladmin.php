@@ -68,8 +68,8 @@ if (!class_exists('PayPalSettingsAdminClass'))
 						'JYP|Yen (&#xa5;)',
 					)
 				),
-				array('Label' => 'PayPal Checkout Logo Image URL', 'Id' => 'PayPalLogoImageURL',   'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => PAYPAL_APILIB_URL_TEXTLEN,   'Size' => PAYPAL_APILIB_URL_EDITLEN, ),
-				array('Label' => 'PayPal Header Image URL',        'Id' => 'PayPalHeaderImageURL', 'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => PAYPAL_APILIB_URL_TEXTLEN,   'Size' => PAYPAL_APILIB_URL_EDITLEN, ),				
+				array('Label' => 'PayPal Checkout Logo Image File', 'Id' => 'PayPalLogoImageFile',   'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Dir' => STAGESHOW_UPLOAD_IMAGES_PATH, 'Extn' => 'jpg', ),
+				array('Label' => 'PayPal Header Image File',        'Id' => 'PayPalHeaderImageFile', 'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Dir' => STAGESHOW_UPLOAD_IMAGES_PATH, 'Extn' => 'gif', ),
 			);
 			
 			$settings['PayPal Settings'] = $this->paypalOpts;			
@@ -93,6 +93,12 @@ if (!class_exists('PayPalSettingsAdminClass'))
 			}			
 		}
 		
+		function GetDefaultSettingsTab($dbObj)
+		{
+			$selectedTab = $dbObj->payPalAPIObj->IsConfigured() ? 1 : 0;
+			return $selectedTab;
+		}
+		
 		function GetCurrencySymbol($currency)
 		{
 			$currencySymbol = '';
@@ -102,7 +108,7 @@ if (!class_exists('PayPalSettingsAdminClass'))
 				if ($payPalSetting['Id'] === 'PayPalCurrency')
 				{					
 					// Found the settings Opts for currentcy settings
-					$selectOpts = $this->GetSelectOptsArray($payPalSetting['Items']);
+					$selectOpts = $this->GetSelectOptsArray($payPalSetting);
 					
 					if (!isset($selectOpts[$currency]))
 						break;
@@ -142,7 +148,7 @@ if (!class_exists('PayPalSettingsAdminClass'))
 					if ($this->ppReadOnly)
 					{
 						$settingOption['Type'] = 'value';
-						$selectOpts = $this->GetSelectOptsArray($settingOption['Items']);
+						$selectOpts = $this->GetSelectOptsArray($settingOption);
 						if ($currValue !== '')
 							$settingOption['Value'] = $selectOpts[$currValue];
 						else

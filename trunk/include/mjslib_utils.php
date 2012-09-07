@@ -71,7 +71,64 @@ if (!class_exists('MJSLibUtilsClass'))
 			if ($debug) echo "serverVersionVal = ourVersionVal ($ourVersion = $serverVersion) - Exit FALSE<br>\n";					
 			return false;
 		}
+		
+		static function recurse_copy($src, $dst, $perm=0755) 
+		{
+			$dir = opendir($src);
+			@mkdir($dst, $perm, TRUE);
+			while(false !== ( $file = readdir($dir)) ) 
+			{
+				if ( $file == '.' ) continue;
+				if ( $file == '..' ) continue;
+				if ( $file == 'Thumbs.db' ) continue;
 
+				if ( is_dir($src . '/' . $file) ) 
+				{
+					self::recurse_copy($src . '/' . $file, $dst . '/' . $file);
+				}
+				else 
+				{
+					copy($src . '/' . $file, $dst . '/' . $file);
+				}
+			}
+			closedir($dir);
+		}
+
+		static function deleteDir($dir)
+		{
+			if (substr($dir, strlen($dir)-1, 1) != '/')
+				$dir .= '/';
+
+			echo $dir;
+
+			if ($handle = opendir($dir))
+			{
+				while ($obj = readdir($handle))
+				{
+					if ($obj != '.' && $obj != '..')
+					{
+						if (is_dir($dir.$obj))
+						{
+							if (!self::deleteDir($dir.$obj))
+								return false;
+						}
+						elseif (is_file($dir.$obj))
+						{
+							if (!unlink($dir.$obj))
+								return false;
+						}
+					}
+				}
+
+				closedir($handle);
+
+				if (!@rmdir($dir))
+					return false;
+				return true;
+			}
+			return false;
+		}  
+			
 		static function check_admin_referer($action = -1, $query_arg = '_wpnonce')
 		{
 			if (!wp_verify_nonce($_REQUEST[$query_arg], $action))
@@ -178,8 +235,8 @@ if (!class_exists('MJSLibUtilsClass'))
 		{
 			$rtnVal = "<br>";
 			if ($name !== '') $rtnVal .= "$name<br>\n";
-			$rtnVal .= print_r($obj, true);
-			$rtnVal .= "<br>\n";
+			$rtnVal .= str_replace("\n", "<br>\n", print_r($obj, true));
+			//$rtnVal .= "<br>\n";
 			
 			if (!$return) echo $rtnVal;
 			

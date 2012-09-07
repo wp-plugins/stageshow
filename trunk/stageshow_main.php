@@ -196,10 +196,10 @@ if (!class_exists('StageShowPluginClass'))
 			if ($myDBaseObj->adminOptions['ActivationCount'] == 1)
 			{
 				// Add Sample PayPal shopping cart Images and URLs
-				if (defined('STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL'))
-					$myDBaseObj->adminOptions['PayPalLogoImageURL'] = STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_URL;
-				if (defined('STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL'))
-					$myDBaseObj->adminOptions['PayPalHeaderImageURL'] = STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_URL;
+				if (defined('STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_FILE'))
+					$myDBaseObj->adminOptions['PayPalLogoImageFile'] = STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_FILE;
+				if (defined('STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_FILE'))
+					$myDBaseObj->adminOptions['PayPalHeaderImageFile'] = STAGESHOW_SAMPLE_PAYPALHEADERIMAGE_FILE;
 				
 				if (defined('STAGESHOW_ACTIVATE_ORGANISATION_ID'))
 					$myDBaseObj->adminOptions['OrganisationID'] = STAGESHOW_ACTIVATE_ORGANISATION_ID;
@@ -217,8 +217,12 @@ if (!class_exists('StageShowPluginClass'))
 
 			// EMail Template defaults to templates folder - remove folders from path
 			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath');
-			$myDBaseObj->CheckEmailTemplatePath('EMailSummaryTemplatePath');
 			
+			// Copy release templates to stageshow persistent templates and images folders
+			MJSLibUtilsClass::recurse_copy(STAGESHOW_DEFAULT_EMAILS_PATH, STAGESHOW_UPLOAD_EMAILS_PATH);
+			MJSLibUtilsClass::recurse_copy(STAGESHOW_DEFAULT_BOXOFFICES_PATH, STAGESHOW_UPLOAD_BOXOFFICES_PATH);
+			MJSLibUtilsClass::recurse_copy(STAGESHOW_DEFAULT_IMAGES_PATH, STAGESHOW_UPLOAD_IMAGES_PATH);
+
       $this->saveStageshowOptions();
       
 			$setupUserRole = $myDBaseObj->adminOptions['SetupUserRole'];
@@ -340,11 +344,13 @@ if (!class_exists('StageShowPluginClass'))
       
       $hiddenTags  = "\n";
       $hiddenTags .= '<input type="hidden" name="cmd" value="_s-xclick"/>'."\n";
-      if (strlen($myDBaseObj->adminOptions['PayPalLogoImageURL']) > 0) {
-        $hiddenTags .= '<input type="hidden" name="image_url" value="'.$payPalAPIObj->GetURL($myDBaseObj->adminOptions['PayPalLogoImageURL']).'"/>'."\n";
+      if (strlen($myDBaseObj->adminOptions['PayPalLogoImageFile']) > 0) 
+			{
+        $hiddenTags .= '<input type="hidden" name="image_url" value="'.STAGESHOW_IMAGES_URL.$myDBaseObj->adminOptions['PayPalLogoImageFile'].'"/>'."\n";
       }
-      if (strlen($myDBaseObj->adminOptions['PayPalHeaderImageURL']) > 0) {
-        $hiddenTags .= '<input type="hidden" name="cpp_header_image" value="'.$payPalAPIObj->GetURL($myDBaseObj->adminOptions['PayPalHeaderImageURL']).'"/>'."\n";
+      if (strlen($myDBaseObj->adminOptions['PayPalHeaderImageFile']) > 0) 
+			{
+        $hiddenTags .= '<input type="hidden" name="cpp_header_image" value="'.STAGESHOW_IMAGES_URL.$myDBaseObj->adminOptions['PayPalHeaderImageFile'].'"/>'."\n";
       }
 
       $hiddenTags .= '<input type="hidden" name="on0" value="TicketType"/>'."\n";      
@@ -614,11 +620,11 @@ if (!class_exists('StageShowPluginClass'))
 				$icon_url = STAGESHOW_ADMIN_IMAGES_URL.'stageshow16grey.png';
 				add_menu_page($pluginName, $pluginName, $adminCap, STAGESHOW_MENUPAGE_ADMINMENU, array(&$this, 'printAdminPage'), $icon_url);
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('StageShow Overview', STAGESHOW_DOMAIN_NAME),__('Overview', STAGESHOW_DOMAIN_NAME),    $adminCap,                        STAGESHOW_MENUPAGE_ADMINMENU,    array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Show Editor', STAGESHOW_DOMAIN_NAME),       __('Show', STAGESHOW_DOMAIN_NAME),        STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_SHOWS,        array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Show Editor', STAGESHOW_DOMAIN_NAME),       __('Shows', STAGESHOW_DOMAIN_NAME),        STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_SHOWS,        array(&$this, 'printAdminPage'));
 				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshowplus_manage_priceplans.php') ) 
 					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Plan Editor', STAGESHOW_DOMAIN_NAME),  __('Price Plans', STAGESHOW_DOMAIN_NAME),STAGESHOW_CAPABILITY_ADMINUSER, STAGESHOW_MENUPAGE_PRICEPLANS,   array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', STAGESHOW_DOMAIN_NAME),__('Performance', STAGESHOW_DOMAIN_NAME), STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', STAGESHOW_DOMAIN_NAME),        __('Price', STAGESHOW_DOMAIN_NAME),       STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', STAGESHOW_DOMAIN_NAME),__('Performances', STAGESHOW_DOMAIN_NAME), STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', STAGESHOW_DOMAIN_NAME),        __('Prices', STAGESHOW_DOMAIN_NAME),       STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
 
 				if ( current_user_can(STAGESHOW_CAPABILITY_VALIDATEUSER)
 				  || current_user_can(STAGESHOW_CAPABILITY_SALESUSER))

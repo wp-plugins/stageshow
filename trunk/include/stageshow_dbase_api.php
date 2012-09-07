@@ -34,7 +34,7 @@ if (!class_exists('StageShowSettingsAdminClass'))
 			$controlsOpts = array
 			(
 				array('Label' => 'Organisation ID',       'Id' => 'OrganisationID',		'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => STAGESHOW_ORGANISATIONID_TEXTLEN, 'Size' => 60, ),				
-				array('Label' => 'StageShow Sales EMail', 'Id' => 'AdminEMail',				'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => STAGESHOW_ADMINMAIL_TEXTLEN,      'Size' => STAGESHOW_ADMINMAIL_EDITLEN, ),
+				array('Label' => 'StageShow Sales EMail', 'Id' => 'AdminEMail',				'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => STAGESHOW_MAIL_TEXTLEN,      'Size' => STAGESHOW_MAIL_EDITLEN, ),
 				array('Label' => 'Bcc EMails to WP Admin','Id' => 'BccEMailsToAdmin',	'Type' => MJSLibTableClass::TABLEENTRY_CHECKBOX,   'Text' => 'Send EMail confirmation to Administrator' ),
 				array('Label' => 'Currency Symbol',				'Id' => 'UseCurrencySymbol','Type' => MJSLibTableClass::TABLEENTRY_CHECKBOX,   'Text' => 'Include in Box Office Output' ),
 				array('Label' => 'Items per Page',        'Id' => 'PageLength',				'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => 3, 'Default' => MJSLIB_EVENTS_PER_PAGE),
@@ -62,10 +62,10 @@ if (!class_exists('StageShowDBaseClass'))
 	define('STAGESHOW_SALES_TABLE', STAGESHOW_TABLE_PREFIX.'sales');
 	define('STAGESHOW_TICKETS_TABLE', STAGESHOW_TABLE_PREFIX.'tickets');
 
-	if (!defined('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_URL'))
-		define('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_URL', STAGESHOW_IMAGES_URL.'StageShowLogo.jpg');
-	if (!defined('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_URL'))
-		define('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_URL', STAGESHOW_IMAGES_URL.'StageShowHeader.gif');
+	if (!defined('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE'))
+		define('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE', 'StageShowLogo.jpg');
+	if (!defined('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE'))
+		define('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE', 'StageShowHeader.gif');
 	
 	define('STAGESHOW_DATETIME_TEXTLEN', 19);
 	
@@ -147,7 +147,7 @@ if (!class_exists('StageShowDBaseClass'))
 
 		function DeleteCapability($capID)
 		{
-			// TODO - DeleteCapability doesn't work - Fix it!
+			// DeleteCapability doesn't work - Fix it!
 			if (!isset($wp_roles)) {
 				$wp_roles = new WP_Roles();
 				$wp_roles->use_db = true;
@@ -157,10 +157,8 @@ if (!class_exists('StageShowDBaseClass'))
 			global $wp_roles;
 			$roleIDs = $wp_roles->get_names();
  
-			foreach ($roleIDs as $roleID) 
-			{
+			foreach ($roleIDs as $roleID => $publicID) 
 				$wp_roles->remove_cap($roleID, $capID) ;
-			}
 		}
 			
     function uninstall()
@@ -350,26 +348,10 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 		}
 		
-		function SendSaleReport()
-		{
-			if (!isset($this->adminOptions['EMailSummaryTemplatePath']) || ($this->adminOptions['EMailSummaryTemplatePath'] == '')) 
-				return 'EMailSummaryTemplatePath not defined';			
-			$templatePath = $this->GetEmailTemplatePath('EMailSummaryTemplatePath');
-			
-			if (!isset($this->adminOptions['SaleSummaryEMail']) || ($this->adminOptions['SaleSummaryEMail'] == '')) 
-				return 'SaleSummaryEMail not defined';			
-			$EMailTo = $this->adminOptions['SaleSummaryEMail'];
-	
-			$salesSummary = $this->GetAllSalesQty();
-			return $this->SendEMailFromTemplate($salesSummary, $templatePath, $EMailTo);
-		}
-		
 		function LogSale($results)
 		{
 			$saleID = parent::LogSale($results);
 			
-			$this->SendSaleReport();		
-				
 			return $saleID;
 		}
 		
@@ -584,6 +566,14 @@ if (!class_exists('StageShowDBaseClass'))
 				$ourEmail = $ourOptions['OrganisationID'].' <'.$ourEmail.'>';
 				
 			return $ourEmail;
+		}
+		
+		function GetEmailTemplatePath($templateID)
+		{
+			// EMail Template defaults to templates folder
+			$templatePath = STAGESHOW_UPLOAD_EMAILS_PATH.$this->adminOptions[$templateID];
+
+			return $templatePath;
 		}
 		
 		function IsStateActive($state)
