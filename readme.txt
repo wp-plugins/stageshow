@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.4.1
-Stable tag: 1.1.5
+Tested up to: 3.4.2
+Stable tag: 1.1.6
 
 The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups.
 
@@ -30,7 +30,7 @@ Features Summary
 * Integrated PayPal Payment Collection
 * EMail confirmation of Booking to Client and Administrator
 * Manual entry of ticket sales for telephone sales etc.
-* Online Transaction ID validation
+* Online Sale Transaction ID validation
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
 * Enhanced version with many additional features now available - for details see http://corondeck.co.uk/StageShow/Plus 
 
@@ -140,6 +140,15 @@ The following tags can be used in the EMail template:
 == Changelog ==
 
 * Version History for StageShow Plugin 
+
+= 1.1.6 =
+* Bug Fix: Custom templates and images are deleted on plugin update
+* Bug Fix: Custom roles not deleted on plugin uninstall
+* Emails templates moved to uploads/stageshow/emails folder
+* PayPal Logo and Header Images moved to uploads/stageshow/images folder
+* PayPal Logo and Header Images now selected using drop-down box on settings page
+* Deletes uploads/stageshow folder when plugin is deleted
+* Settings page default tab changes once PayPal settings are added
 
 = 1.1.5 =
 * Bug Fix: Version update code does not check database version

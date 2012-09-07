@@ -888,11 +888,6 @@ if (!class_exists('MJSLibAdminListClass'))
 			echo "</div>\n";
 		}
 		
-		function AddResult($result)
-		{
-			// TODO - Use Table defined in GetMainRowsDefinition() to determine table output
-		}
-		
 		function AddResultFromTable($result)
 		{		
 			$canDisplayTable = true;
@@ -1155,11 +1150,9 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 					if (!isset($this->usedAddResult))
 					{
 						$this->usedAddResult = true;
-						echo "<br>Using AddResult function in ".get_class($this)." class<br>\n";
+						echo "<br>Error returned by AddResultFromTable function in ".get_class($this)." class<br>\n";
 						MJSLibUtilsClass::ShowCallStack();
 					}
-					
-					$this->AddResult($result);
 				}
 				$this->AddOptions($result);
 				$this->rowCount++;

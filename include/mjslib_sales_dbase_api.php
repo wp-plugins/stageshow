@@ -32,6 +32,11 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 	define('MJSLIB_SALES_STOCKFILEPATH_TEXTLEN',60);
 	define('MJSLIB_SALES_STOCKPRICE_TEXTLEN',12);	// Decimal Number Precision = 9.2
 
+	if (!defined('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE'))
+		define('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE', '');
+	if (!defined('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE'))
+		define('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE', '');
+		
   class MJSLibSalesDBaseClass extends MJSLibDBaseClass // Define class
   {	
 		var	$payPalAPIObj;
@@ -69,8 +74,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
         'PayPalAPIPwd' => '',
         'PayPalAPIEMail' => '',
         
-        'PayPalLogoImageURL' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_URL,
-        'PayPalHeaderImageURL' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_URL,
+        'PayPalLogoImageFile' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE,
+        'PayPalHeaderImageFile' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE,
         
         'PayPalInvChecked' => false,	// Set to true when SS is activated and Inventory URLs have been verified
         
@@ -81,7 +86,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
                 
         'Unused_EndOfList' => ''
 			);
-				
+			
 			$ourOptions = array_merge($ourOptions, $childOptions);
 			
 			$currOptions = parent::getOptions($ourOptions);
@@ -89,6 +94,20 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			if ($currOptions['PayPalCurrency'] == '')
 				$currOptions['PayPalCurrency'] = PAYPAL_APILIB_DEFAULT_CURRENCY;
 			
+			// PayPalLogoImageURL option has been changed to PayPalLogoImageFile
+			if (isset($currOptions['PayPalLogoImageURL']))
+			{
+				$currOptions['PayPalLogoImageFile'] = basename($currOptions['PayPalLogoImageURL']);
+				unset($currOptions['PayPalLogoImageURL']);
+			}
+				
+			// PayPalHeaderImageURL option has been changed to PayPalHeaderImageFile
+			if (isset($currOptions['PayPalHeaderImageURL']))
+			{
+				$currOptions['PayPalHeaderImageFile'] = basename($currOptions['PayPalHeaderImageURL']);
+				unset($currOptions['PayPalHeaderImageURL']);
+			}
+				
 			$this->adminOptions = $currOptions;
 			
 			return $currOptions;
@@ -366,7 +385,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		
 		function GetLocation()
 		{
-			return false;
+			return '';
 		}
 		
 		function AddEMailFields($EMailTemplate, $saleDetails)
@@ -442,6 +461,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			if (preg_match('#[/]#', $templatePath) == 0)
 				$templatePath = 'templates/'.$templatePath;
 
+			$templatePath = dirname($this->opts['PluginRootFilePath']).'/'.$templatePath;
+
 			return $templatePath;
 		}
 		
@@ -459,11 +480,9 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		
 		function SendEMailFromTemplate($emailContent, $templatePath, $EMailTo = '')
 		{				
-			$filePath = dirname($this->opts['PluginRootFilePath']).'/'.$templatePath;		
-
-			$mailTemplate = $this->ReadTemplateFile($filePath);
+			$mailTemplate = $this->ReadTemplateFile($templatePath);
 			if (strlen($mailTemplate) == 0)
-				return "EMail Template Not Found ($filePath)";
+				return "EMail Template Not Found ($templatePath)";
 				
 			$saleConfirmation = '';
 			

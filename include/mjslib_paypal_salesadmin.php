@@ -442,7 +442,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 
 		function GetRequestedSaleQtys()				
 		{
-			$errorId = 0;
+			$errorId = '';
 			$newPrice = 0;
 
 			$this->newPriceQtys = array();
@@ -464,13 +464,13 @@ if (!class_exists('PayPalSalesAdminClass'))
 					
 					$this->SetSaleQty($this->results[$key], $qty);	// Set requested quantity for display
 						
-					if ($errorId != 0)
+					if ($errorId != '')
 						continue;
 						
 					if (!is_numeric($qty))
 					{
 						echo '<div id="message" class="error"><p>'.__('INVALID Quantity (Non-numeric)', $this->pluginName).' - '.$this->GetItemDesc($pricesEntry).'</p></div>';
-						$errorId = $itemID;
+						$errorId = $inputID;
 						continue;
 					}
 					else
@@ -483,7 +483,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 						else
 						{
 							echo '<div id="message" class="error"><p>'.__('INVALID Quantity (Negative)', $this->pluginName).' - '.$this->GetItemDesc($pricesEntry).'</p></div>';
-							$errorId = $itemID;
+							$errorId = $inputID;
 							continue;
 						}
 					}
@@ -506,7 +506,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function CheckStockQtys()
 		{
-			$errorId = 0;
+			$errorId = '';
 			$totalQty = 0;
 			
 			foreach ($this->newStockQtys as $buttonID => $qty)
@@ -537,7 +537,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 				}
 			}
 			
-			if (($errorId == 0) && ($totalQty ==0))
+			if (($errorId == '') && ($totalQty ==0))
 			{
 				echo '<div id="message" class="error"><p>'.__('Total Quantity CANNOT be zero', $this->pluginName).'</p></div>';
 				$errorId = -1;
@@ -550,7 +550,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		{	
 			$myDBaseObj = $this->myDBaseObj;
 			
-			$errorId = 0;
+			$errorId = '';
 			$saleId = isset($this->saleId) ? $this->saleId : 0;
 			
 			$saleName = $this->GetFormInput($saleId, 'saleName');

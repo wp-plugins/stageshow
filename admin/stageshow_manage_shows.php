@@ -295,7 +295,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 					else
 						$myDBaseObj->SetShowActivated($recordId, 'activate');
 						
-					// TODO-BEFORE-RELEASE - Update Inventory Settings for Performance Buttons
+					// TODO-PRIORITY - Update Inventory Settings for Performance Buttons
 					break;
 
 			}

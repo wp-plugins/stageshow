@@ -109,8 +109,29 @@ if (!class_exists('SettingsAdminClass'))
 			$dbObj->saveOptions();			
 		}
 		
-		static function GetSelectOptsArray($selectOpts)
+		static function GetSelectOptsArray($settingOption)
 		{
+			if (isset($settingOption['Dir']))
+			{
+				// Folder is defined ... create the search path
+				$dir = $settingOption['Dir'];
+				if (substr($dir, strlen($dir)-1, 1) != '/')
+					$dir .= '/';
+				if (isset($settingOption['Extn']))
+					$dir .= '*.'.$settingOption['Extn'];
+				else
+					$dir .= '*.*';
+
+				// Now get the files list and convert paths to file names
+				$selectOpts = glob($dir);
+				foreach ($selectOpts as $key => $path)
+					$selectOpts[$key] = basename($path);
+			}
+			else
+				$selectOpts = $settingOption['Items'];
+					
+			$selectOptsArray = array();
+			
 			foreach ($selectOpts as $selectOpt)
 			{
 				$selectAttrs = explode('|', $selectOpt);
@@ -188,9 +209,8 @@ if (!class_exists('SettingsAdminClass'))
 					break;
 
 				case MJSLibTableClass::TABLEENTRY_SELECT:
-					$selectOpts = $settingOption['Items'];
 					$editControl  = '<select name="'.$controlName.'">'."\n";
-					$selectOptsArray = self::GetSelectOptsArray($selectOpts);
+					$selectOptsArray = self::GetSelectOptsArray($settingOption);
 					foreach ($selectOptsArray as $selectOptValue => $selectOptText)
 					{
 						$selected = ($controlValue == $selectOptValue) ? ' selected=""' : '';
@@ -237,7 +257,7 @@ var tabIdsList  = [";
 			return "'$tabID',";	
 		}
 		
-		function JS_Bottom()
+		function JS_Bottom($defaultTab)
 		{
 			return "''];
 
@@ -248,7 +268,7 @@ function onSettingsLoad()
 	tabsRowElem = document.getElementById('stageshow-settings-tab-table');
 	tabsRowElem.style.display = '';
 	
-	defaultTabId = tabIdsList[0];
+	defaultTabId = tabIdsList[".$defaultTab."];
 	
 	for (index = 0; index < tabIdsList.length-1; index++)
 	{
@@ -329,9 +349,15 @@ function clickHeader(obj, state)
 			";
 		}
 		
+		function GetDefaultSettingsTab($dbObj)
+		{
+			return 0;
+		}
+		
 		function Output_Form($dbObj)
 		{
-		
+			$selectedTab =  $this->GetDefaultSettingsTab($dbObj);
+			
 			$adminOptions = $dbObj->adminOptions;
 			$domainName = $dbObj->get_name();
 			
@@ -400,7 +426,7 @@ function clickHeader(obj, state)
 
 			$tabbedMenu = "<table class=$tabTableClass id=$tabTableClass style=\"display: none;\"><tr>$tabbedMenu</tr></table>\n";			
 			
-			$javascript .= $this->JS_Bottom();
+			$javascript .= $this->JS_Bottom($selectedTab);
 			echo $javascript;
 			
 			echo $tabbedMenu.$output;

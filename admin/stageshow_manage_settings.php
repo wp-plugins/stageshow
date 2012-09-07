@@ -23,10 +23,10 @@ Copyright 2012 Malcolm Shergold
 if (!class_exists('StageShowManageSettingsClass')) 
 {
 	define('STAGESHOW_ADMINID_TEXTLEN',110);
-	define('STAGESHOW_ADMINMAIL_TEXTLEN',127);
+	define('STAGESHOW_MAIL_TEXTLEN',127);
 	define('STAGESHOW_ORGANISATIONID_TEXTLEN',60);
 		
-	define('STAGESHOW_ADMINMAIL_EDITLEN', 60);
+	define('STAGESHOW_MAIL_EDITLEN', 60);
 	define('STAGESHOW_ADMINID_EDITLEN', 60);
 	define('STAGESHOW_URL_EDITLEN', 95);
 	
