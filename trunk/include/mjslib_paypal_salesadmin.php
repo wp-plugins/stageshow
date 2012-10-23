@@ -113,7 +113,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			return new PayPalSalesDetailsAdminClass($env, $editMode);	
 		}
 		
-		function ShowSaleDetails($result)
+		function ShowSaleDetails($result, $salesList)
 		{
 			if ($this->editMode) return '';
 			
@@ -122,6 +122,14 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			return $this->BuildSaleDetails($saleResults);
 		}
 				
+		function GetListDetails($result)
+		{
+			if (isset($this->pricesList)) 
+				return $this->pricesList;
+			
+			return $this->myDBaseObj->GetPricesListWithSales($result->saleID);
+		}
+		
 		function BuildSaleDetails($saleResults)
 		{
 			$env = $this->env;
@@ -136,6 +144,12 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			ob_end_clean();
 
 			return $saleDetailsOoutput;
+		}
+		
+		function OutputEditSale($editSaleEntry, $pricesList)
+		{			
+			$this->pricesList = $pricesList;
+			$this->OutputList($editSaleEntry);
 		}
 		
 	}
@@ -312,7 +326,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$salesList->errorInputId = $invalidInputId; // TODO-IMPROVEMENT Highlight error line ...
 				
 				if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) MJSLibUtilsClass::print_r($this->editSaleEntry, 'Call OutputList-editSaleEntry');
-				$salesList->OutputList($this->editSaleEntry, $this->pricesList);
+				$salesList->OutputEditSale($this->editSaleEntry, $this->pricesList);
 			}
 			else if(count($this->results) == 0)
 			{
@@ -508,7 +522,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		{
 			$errorId = '';
 			$totalQty = 0;
-			
+
 			foreach ($this->newStockQtys as $buttonID => $qty)
 			{
 				$totalQty += $qty;
@@ -518,6 +532,9 @@ if (!class_exists('PayPalSalesAdminClass'))
 				{
 					if ($this->payPalAPIObj->GetInventory($buttonID, $stockQty) === 'OK')
 					{
+						if ($stockQty == PayPalAPIClass::PAYPAL_APILIB_INFINITE)
+							continue;
+							
 						if ($stockQty < $qty)
 						{
 							$errorItem = '';

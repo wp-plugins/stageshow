@@ -34,6 +34,9 @@ if (!class_exists('PayPalSettingsAdminClass'))
 		
 		function __construct($settingsOpts)
 		{
+			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
+			$paypalUploadImagesPath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/images';
+
 			$this->paypalOpts = array
 			(
 				array('Label' => 'Environment',   'Id' => 'PayPalEnv',      'PayPalLock' => true, 'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Items' => array('live|Live', 'sandbox|Sandbox'), ),
@@ -68,8 +71,8 @@ if (!class_exists('PayPalSettingsAdminClass'))
 						'JYP|Yen (&#xa5;)',
 					)
 				),
-				array('Label' => 'PayPal Checkout Logo Image File', 'Id' => 'PayPalLogoImageFile',   'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Dir' => STAGESHOW_UPLOAD_IMAGES_PATH, 'Extn' => 'jpg', ),
-				array('Label' => 'PayPal Header Image File',        'Id' => 'PayPalHeaderImageFile', 'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Dir' => STAGESHOW_UPLOAD_IMAGES_PATH, 'Extn' => 'gif', ),
+				array('Label' => 'PayPal Checkout Logo Image File', 'Id' => 'PayPalLogoImageFile',   'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Dir' => $paypalUploadImagesPath, 'Extn' => 'jpg', ),
+				array('Label' => 'PayPal Header Image File',        'Id' => 'PayPalHeaderImageFile', 'Type' => MJSLibTableClass::TABLEENTRY_SELECT, 'Dir' => $paypalUploadImagesPath, 'Extn' => 'gif', ),
 			);
 			
 			$settings['PayPal Settings'] = $this->paypalOpts;			

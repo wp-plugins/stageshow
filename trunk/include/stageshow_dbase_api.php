@@ -112,6 +112,9 @@ if (!class_exists('StageShowDBaseClass'))
     {
       global $wpdb;
       
+      // Call upgradeDB() in base class
+			parent::upgradeDB();
+			
 			// Add DB Tables
 			$this->createDB();
 			
@@ -566,14 +569,6 @@ if (!class_exists('StageShowDBaseClass'))
 				$ourEmail = $ourOptions['OrganisationID'].' <'.$ourEmail.'>';
 				
 			return $ourEmail;
-		}
-		
-		function GetEmailTemplatePath($templateID)
-		{
-			// EMail Template defaults to templates folder
-			$templatePath = STAGESHOW_UPLOAD_EMAILS_PATH.$this->adminOptions[$templateID];
-
-			return $templatePath;
 		}
 		
 		function IsStateActive($state)

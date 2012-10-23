@@ -265,7 +265,7 @@ function onSettingsLoad()
 {
 	var tabsRowElem, index, tabId, defaultTabId;
 	
-	tabsRowElem = document.getElementById('stageshow-settings-tab-table');
+	tabsRowElem = document.getElementById('mjsadmin-settings-tab-table');
 	tabsRowElem.style.display = '';
 	
 	defaultTabId = tabIdsList[".$defaultTab."];
@@ -288,10 +288,10 @@ function setTab(tabID, selectedTabID)
 	headerElem.style.display = 'none';
 	
 	// Get the header 'Tab' Element					
-	tabElem = document.getElementById('stageshow-settings-tab-' + tabID);
+	tabElem = document.getElementById('mjsadmin-settings-tab-' + tabID);
 	
 	// Get the Body Element					
-	pageElem = document.getElementById('stageshow-settings-page-' + tabID);
+	pageElem = document.getElementById('mjsadmin-settings-page-' + tabID);
 
 	tabWidth = tabElem.style.width;
 	if (tabID == selectedTabID)
@@ -365,8 +365,8 @@ function clickHeader(obj, state)
 			$output = '';
 			$nextInline = false;
 			
-			$tabClassID = "stageshow-settings-tab";
-			$pageClassID = "stageshow-settings-page";
+			$tabClassID = "mjsadmin-settings-tab";
+			$pageClassID = "mjsadmin-settings-page";
 			
 			$javascript = $this->JS_Top();
 			

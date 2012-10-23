@@ -43,7 +43,6 @@ if (!class_exists('StageShowDebugAdminClass'))
 	<h2><?php echo $myPluginObj->pluginName.' - TEST' ?></h2>
 	<?php 
 		$this->Test_DebugSettings();
-		$this->Test_EMailSale();
 	?>
 </form>
 </div>
@@ -85,66 +84,6 @@ if (!class_exists('StageShowDebugAdminClass'))
 <?php
 		}
 
-		function Test_EMailSale() {
-			$myDBaseObj = $this->myDBaseObj;
-
-			echo '<br><br><h3>EMail Sale Test</h3>';
-			
-			if (isset($_POST['DivertEMailTo']))
-				$DivertEMailTo = stripslashes($_POST['DivertEMailTo']);
-			else if (defined('STAGESHOW_SAMPLE_EMAIL'))
-				$DivertEMailTo = STAGESHOW_SAMPLE_EMAIL;
-			else
-				$DivertEMailTo = 'malcolm@corondeck.co.uk';
-
-			$results = $myDBaseObj->GetSalesList(null);		// Get list of sales (one row per sale)
-			
-			if (isset($_POST['testbutton_EMailSale'])) {
-				$this->CheckAdminReferer();
-					
-				// Run EMail Test		
-				$saleID = stripslashes($_POST['TestSaleID']);
-				$DivertEMailTo = stripslashes($_POST['DivertEMailTo']);
-				$saleResults = $myDBaseObj->GetSale($saleID);
-				if(count($saleResults) == 0) {
-					echo '<div id="message" class="error"><p>'.__('No Sales', STAGESHOW_DOMAIN_NAME).'</p></div>';
-				}
-				else {
-					$myDBaseObj->EMailSale($saleResults[0]->saleID, $DivertEMailTo);
-				}	
-			}
-			
-			$TBD = 'TBD';
-?>
-	<table class="form-table">			
-		<tr valign="top">
-      <td>Divert EMail To:</td>
-			<td>
-				<input name="DivertEMailTo" type="text" maxlength="110" size="50" value="<?php echo $DivertEMailTo; ?>" />
-			</td>
-		</tr>
-		<tr valign="top">
-      <td>Selected Sale:</td>
-			<td>
-				<select name="TestSaleID">
-<?php		
-foreach($results as $result) {
-			echo '<option value="',$result->saleID.'">'.$result->saleEMail.' - '.$result->saleDateTime.'&nbsp;&nbsp;</option>'."\n";
-}
-?>
-				</select>
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>
-				<input class="button-primary" type="submit" name="testbutton_EMailSale" value="EMail Sale Test"/>
-			</td>
-			<td>&nbsp;</td>
-		</tr>
-	</table>			
-		
-<?php		
-		}
 	}
 }
 		

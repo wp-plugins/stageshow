@@ -708,8 +708,6 @@ if (!class_exists('MJSLibAdminListClass'))
 		var $env;
 		var $caller;
 		var $results;
-		var $dataAux;
-	
 		var $myPluginObj;
 		var $myDBaseObj;
 		var $pluginName;
@@ -1017,7 +1015,7 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 			return $canDisplayTable;
 		}
 		
-		function AddOptions($result)
+		function AddOptions($result, $optionDetails = array())
 		{
 			$hiddenRowsID = 'record'.$this->GetRecordID($result).'options';
 			
@@ -1043,7 +1041,7 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 					{
 						case MJSLibTableClass::TABLEENTRY_FUNCTION:
 							$functionId = $option['Func'];
-							$content = $this->$functionId($result);
+							$content = $this->$functionId($result, $optionDetails);
 							$hiddenRows .= '<tr>'."\n";
 							$colSpan = ' class='.$hiddenRowsColId.'2';
 							if (isset($option['Label']))
@@ -1090,7 +1088,12 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 			}			
 		}
 		
-		function OutputList($results, $dataAux = array())
+		function GetListDetails($result)
+		{
+			return array();
+		}
+		
+		function OutputList($results)
 		{
 			if (count($results) == 0) return;
 			
@@ -1102,7 +1105,6 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 			$this->SetListHeaders($tableId, $headerColumns, $this->HeadersPosn);
 			
 			$this->results = $results;
-			$this->dataAux = $dataAux;
 			
 			$this->EnableListHeaders();
 			
@@ -1154,7 +1156,8 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 						MJSLibUtilsClass::ShowCallStack();
 					}
 				}
-				$this->AddOptions($result);
+				$resultDetails = $this->GetListDetails($result);
+				$this->AddOptions($result, $resultDetails);
 				$this->rowCount++;
 			}
 			

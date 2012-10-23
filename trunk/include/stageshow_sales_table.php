@@ -52,6 +52,14 @@ if (!class_exists('StageShowSalesAdminListClass'))
 			return parent::GetDetailsRowsDefinition();
 		}
 		
+		function ShowSaleDetails($result, $salesList)
+		{
+			if (!$this->editMode) 
+				return parent::ShowSaleDetails($result, $salesList);
+				
+			return $this->BuildSaleDetails($salesList);
+		}
+		
 		function CreateSalesAdminDetailsListObject($env, $editMode = false)
 		{
 			return new StageShowSalesAdminDetailsListClass($env, $editMode);	

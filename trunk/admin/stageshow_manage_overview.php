@@ -76,10 +76,8 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			return $ourOptions;
 		}
 		
-		function ShowSaleDetails($result)
+		function ShowSaleDetails($result, $saleResults)
 		{		
-			$saleResults = $this->perfsList[$result->showID];
-
 			$env = $this->env;
 			$salesList = new StageShowOverviewAdminDetailsListClass($env, $this->editMode);	
 			
@@ -92,6 +90,11 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			ob_end_clean();
 
 			return $saleDetailsOoutput;
+		}
+		
+		function GetListDetails($result)
+		{
+			return $this->perfsList[$result->showID];
 		}
 		
 		function OutputList($results)
