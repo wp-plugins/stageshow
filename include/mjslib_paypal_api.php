@@ -85,6 +85,8 @@ if (!class_exists('PayPalAPIClass')) {
 		const PAYPAL_APILIB_CREATEBUTTON_ERROR = 1;
 		const PAYPAL_APILIB_CREATEBUTTON_NOLOGIN = 2;
 		
+		const PAYPAL_APILIB_INFINITE = -1;
+		
     // Class variables:
     var		$URLParamsArray;  //  Array of params for PayPal API HTTP request
     var		$APIEndPoint;			//	PayPal API access URL
@@ -538,11 +540,25 @@ if (!class_exists('PayPalAPIClass')) {
       $APIStatus = $this->APIAction('Get Inventory ' . $hostedButtonID);
       if ($APIStatus === 'OK')
       {
-				if (isset($this->APIResponses['ITEMQTY']))
-					$quantity = $this->APIResponses['ITEMQTY'];
+			if (isset($this->APIResponses['TRACKINV']))
+			{
+				if (intval($this->APIResponses['TRACKINV']) === 0)
+				{
+					$quantity = PayPalAPIClass::PAYPAL_APILIB_INFINITE;					
+				}
 				else
-					$APIStatus === 'ITEMQTY Parameter Missing';
-      }
+				{
+					if (isset($this->APIResponses['ITEMQTY']))
+						$quantity = $this->APIResponses['ITEMQTY'];
+					else
+						$APIStatus === 'ITEMQTY Parameter Missing';					
+				}
+      		}
+			else
+				$APIStatus === 'TRACKINV Parameter Missing';
+		}
+echo "APIStatus: $APIStatus <br>";
+echo "quantity:  $quantity <br>";
       
       return $APIStatus;
     }    

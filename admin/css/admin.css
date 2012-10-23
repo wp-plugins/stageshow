@@ -70,13 +70,13 @@ div.edit-entry-button
 	Styles for Settings Pages
 ---------------------------------------------------------------------------------------------------------------- */
 
-.stageshow-settings-tab-table
+.mjsadmin-settings-tab-table
 {
 	width: 100%;
 	border-spacing: 0;
 }
 
-.stageshow-settings-tab
+.mjsadmin-settings-tab
 {
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
@@ -85,23 +85,23 @@ div.edit-entry-button
 	font-weight: normal;
 }
 
-.stageshow-settings-tab-selected
+.mjsadmin-settings-tab-selected
 {
 	border-bottom-width: 0px;
 }
 
-.stageshow-settings-tab-unselected
+.mjsadmin-settings-tab-unselected
 {
 	border-bottom-width: 1px;
 }
 
-.stageshow-settings-page td 
+.mjsadmin-settings-page td 
 {
 	line-height: 14px;
 	padding: 6px 10px;
 }
 
-table.stageshow-settings-page
+table.mjsadmin-settings-page
 {
 	width: 100%;
 	border-style: solid; 

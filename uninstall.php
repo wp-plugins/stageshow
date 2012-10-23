@@ -34,10 +34,6 @@
       
 	$myDBaseObj->uninstall();
 	
-	// Remove templates and images folders in Uploads folder
-	if (is_dir(STAGESHOW_UPLOADS_PATH))
-		MJSLibUtilsClass::deleteDir(STAGESHOW_UPLOADS_PATH);
-	
 	// Remove any StageShow entries from Wordpress options 
 	delete_option(STAGESHOW_OPTIONS_NAME);
 	

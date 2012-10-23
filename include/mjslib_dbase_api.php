@@ -49,6 +49,26 @@ if (!class_exists('MJSLibDBaseClass'))
 			$this->getOptions();			
 		}
 		
+		function checkVersion()
+		{			
+			// Check if updates required
+			
+			// Get current version from Wordpress API
+			$currentVersion = $this->get_version();
+
+			// Get last known version from adminOptions
+			$lastVersion = $this->adminOptions['LastVersion'];
+			
+			// Compare versions
+			if ($currentVersion === $lastVersion)
+				return false;
+				
+			// Save current version to options
+			$this->adminOptions['LastVersion'] = $currentVersion;
+			$this->saveOptions();
+			return true;
+		}
+		
 		function get_pluginInfo($att = '') 
 		{
 			if (!isset($this->pluginInfo)) 

@@ -54,37 +54,66 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			if (!isset($this->emailObj))
 				$this->emailObj = new MJSLibEMailAPIClass($this);
 		}
-		
-    function uninstall()
+
+    function upgradeDB()
     {
-      global $wpdb;
+			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
+			$salesDefaultTemplatesPath = WP_CONTENT_DIR . '/plugins/' . $pluginID . '/templates/';
+			$salesTemplatesPath = WP_CONTENT_DIR . '/uploads/'.$pluginID;
+			
+			// Copy release templates to stageshow persistent templates and images folders
+			MJSLibUtilsClass::recurse_copy($salesDefaultTemplatesPath, $salesTemplatesPath);
+		}
+		
+		function uninstall()
+		{
+			global $wpdb;
       
-      $wpdb->query('DROP TABLE IF EXISTS '.$this->opts['SalesTableName']);
+			$wpdb->query('DROP TABLE IF EXISTS '.$this->opts['SalesTableName']);
+			
+			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
+			$salesTemplatesPath = WP_CONTENT_DIR . '/uploads/'.$pluginID;
+			
+			// Remove templates and images folders in Uploads folder
+			if (is_dir($salesTemplatesPath))
+				MJSLibUtilsClass::deleteDir($salesTemplatesPath);
+		}
+		
+		function getImagesURL()
+		{
+			$siteurl = get_option('siteurl');
+			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
+			return $siteurl.'/wp-content/uploads/'.$pluginID.'/images/';
+		}
+		
+		function getImageURL($optionId)
+		{
+			return $this->getImagesURL().$this->adminOptions[$optionId];
 		}
 		
 		//Returns an array of admin options
 		function getOptions($childOptions = array()) 
 		{
 			$ourOptions = array(
-        'PayPalEnv' => 'live',
-        'PayPalCurrency' => PAYPAL_APILIB_DEFAULT_CURRENCY,
-        
-        'PayPalAPIUser' => '',
-        'PayPalAPISig' => '',
-        'PayPalAPIPwd' => '',
-        'PayPalAPIEMail' => '',
-        
-        'PayPalLogoImageFile' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE,
-        'PayPalHeaderImageFile' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE,
-        
-        'PayPalInvChecked' => false,	// Set to true when SS is activated and Inventory URLs have been verified
-        
-        'CurrencySymbol' => '',
+				'PayPalEnv' => 'live',
+				'PayPalCurrency' => PAYPAL_APILIB_DEFAULT_CURRENCY,
+				        
+				'PayPalAPIUser' => '',
+				'PayPalAPISig' => '',
+				'PayPalAPIPwd' => '',
+				'PayPalAPIEMail' => '',
+				        
+				'PayPalLogoImageFile' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE,
+				'PayPalHeaderImageFile' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE,
+				        
+				'PayPalInvChecked' => false,	// Set to true when SS is activated and Inventory URLs have been verified
+				        
+				'CurrencySymbol' => '',
 
-        'SalesID' => '',        
-        'SalesEMail' => '',
-                
-        'Unused_EndOfList' => ''
+				'SalesID' => '',        
+				'SalesEMail' => '',
+				                
+				'Unused_EndOfList' => ''
 			);
 			
 			$ourOptions = array_merge($ourOptions, $childOptions);
@@ -131,7 +160,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
     
 		function createDB($dropTable = false)
 		{
-      global $wpdb;
+			global $wpdb;
       
 			parent::createDB($dropTable);
 
@@ -197,7 +226,12 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		
 		function GetOptsSQL($sqlFilters)
 		{
-			return '';
+			$sqlOpts = '';
+			
+			if (isset($sqlFilters['limit']))
+				$sqlOpts .= ' LIMIT '.$sqlFilters['limit'];
+			
+			return $sqlOpts;
 		}
 		
 		// Add Sale - Address details are optional
@@ -450,18 +484,19 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			if (substr($templatePath, 0, strlen($templatesFolder)) === $templatesFolder)
 			{
 				// If the template starts with templates folder - just use the file name
-				$this->adminOptions[$templateID] = substr($templatePath, strlen($templatesFolder));
 			}
+			
+			$this->adminOptions[$templateID] = basename($templatePath);
+			//echo "Option[$templateID]: $templatePath -> ".$this->adminOptions[$templateID]."<br>\n";
+			
+			// TODO-PRIORITY - EMail Templates must now be in 'uploads' folder ... Copy template?
 		}
 		
 		function GetEmailTemplatePath($templateID)
 		{
 			// EMail Template defaults to templates folder
-			$templatePath = str_replace("\\", "/", $this->adminOptions[$templateID]);
-			if (preg_match('#[/]#', $templatePath) == 0)
-				$templatePath = 'templates/'.$templatePath;
-
-			$templatePath = dirname($this->opts['PluginRootFilePath']).'/'.$templatePath;
+			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
+			$templatePath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/emails/'.$this->adminOptions[$templateID];
 
 			return $templatePath;
 		}

@@ -23,6 +23,9 @@ Copyright 2012 Malcolm Shergold
 include STAGESHOW_INCLUDE_PATH.'mjslib_admin.php';      
 include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 
+if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_test_emailsale.php') ) 
+	include STAGESHOW_ADMIN_PATH.'stageshow_test_emailsale.php'; 
+ 
 if (!class_exists('StageShowToolsAdminClass')) 
 {
 	class StageShowToolsAdminClass extends MJSLibAdminClass // Define class
@@ -46,8 +49,8 @@ if (!class_exists('StageShowToolsAdminClass'))
 		<?php
 			$this->Tools_Validate($env);
 			$this->Tools_Export();
-			if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER))
-				$this->Tools_FlushSalesRecords();				
+			if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) $this->Tools_FlushSalesRecords();				
+			if (class_exists('StageShowTestEMailClass') && current_user_can(STAGESHOW_CAPABILITY_DEVUSER)) new StageShowTestEMailClass($this);
 ?>
 	</div>
 </div>
@@ -78,7 +81,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 	}
 </script>
 <h3><?php _e('Validate Sale'); ?></h3>
-<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_TOOLS; ?>">
+<form method="post">
 		<?php $this->WPNonceField(); ?>
 		<table class="form-table">
 			<?php
@@ -109,7 +112,6 @@ if (!class_exists('StageShowToolsAdminClass'))
 			<p class="submit">
 <input class="button-secondary" type="submit" name="validatesalebutton" value="<?php _e('Validate', STAGESHOW_DOMAIN_NAME) ?>"/>
 					</form>
-</p>
 <?php
 		}
 
@@ -203,7 +205,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 <h3><?php _e('Sales Records'); ?></h3>
 <p><?php _e('Sales records are not deleted when shows or performances are deleted.'); ?></p>
 <p><?php _e('Individual sales records can be deleted on the sales page. All sales records for sales where the corresponding show or performance has been removed can be deleted by clicking the button below.'); ?></p>
-<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_TOOLS; ?>">
+<form method="post">
 	<?php $this->WPNonceField(); ?>
 <p>
 <p class="submit">

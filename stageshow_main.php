@@ -20,9 +20,6 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-if (!defined('STAGESHOW_PAYPAL_IPN_NOTIFY_URL'))
-	define('STAGESHOW_PAYPAL_IPN_NOTIFY_URL', get_site_url().'/wp-content/plugins/stageshow/stageshow_NotifyURL.php');
-
 require_once 'include/stageshow_dbase_api.php';      
       
 if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
@@ -75,7 +72,11 @@ if (!class_exists('StageShowPluginClass'))
 			//Add ShortCode for "front end listing"
 			add_shortcode(STAGESHOW_SHORTCODE_PREFIX."-boxoffice", array(&$this, 'OutputContent_BoxOffice'));
 			
-			$this->checkVersion();
+			if ($myDBaseObj->checkVersion())
+			{
+				// Versions are different ... call activate() to do any updates
+				$this->activate();
+			}			
 		}
 		
 		function load_user_styles() {
@@ -113,30 +114,6 @@ if (!class_exists('StageShowPluginClass'))
     // Activation / Deactivation Functions
     // ----------------------------------------------------------------------
     
-		function checkVersion()
-		{			
-			$myDBaseObj = $this->myDBaseObj;
-			
-			// Check if updates required
-			
-			// Get current version from Wordpress API
-			$currentVersion = $myDBaseObj->get_version();
-
-			// Get last known version from adminOptions
-			$lastVersion = $myDBaseObj->adminOptions['LastVersion'];
-			
-			// Compare versions
-			if ($currentVersion === $lastVersion)
-				return;
-				
-			// Versions are different ... call activate() to do any updates
-			$this->activate();
-			
-			// Save current version to options
-			$myDBaseObj->adminOptions['LastVersion'] = $currentVersion;
-			$myDBaseObj->saveOptions();
-		}
-		
     function activate()
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -218,11 +195,6 @@ if (!class_exists('StageShowPluginClass'))
 			// EMail Template defaults to templates folder - remove folders from path
 			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath');
 			
-			// Copy release templates to stageshow persistent templates and images folders
-			MJSLibUtilsClass::recurse_copy(STAGESHOW_DEFAULT_EMAILS_PATH, STAGESHOW_UPLOAD_EMAILS_PATH);
-			MJSLibUtilsClass::recurse_copy(STAGESHOW_DEFAULT_BOXOFFICES_PATH, STAGESHOW_UPLOAD_BOXOFFICES_PATH);
-			MJSLibUtilsClass::recurse_copy(STAGESHOW_DEFAULT_IMAGES_PATH, STAGESHOW_UPLOAD_IMAGES_PATH);
-
       $this->saveStageshowOptions();
       
 			$setupUserRole = $myDBaseObj->adminOptions['SetupUserRole'];
@@ -346,11 +318,11 @@ if (!class_exists('StageShowPluginClass'))
       $hiddenTags .= '<input type="hidden" name="cmd" value="_s-xclick"/>'."\n";
       if (strlen($myDBaseObj->adminOptions['PayPalLogoImageFile']) > 0) 
 			{
-        $hiddenTags .= '<input type="hidden" name="image_url" value="'.STAGESHOW_IMAGES_URL.$myDBaseObj->adminOptions['PayPalLogoImageFile'].'"/>'."\n";
+        $hiddenTags .= '<input type="hidden" name="image_url" value="'.$myDBaseObj->getImageURL('PayPalLogoImageFile').'"/>'."\n";
       }
-      if (strlen($myDBaseObj->adminOptions['PayPalHeaderImageFile']) > 0) 
+     if (strlen($myDBaseObj->adminOptions['PayPalHeaderImageFile']) > 0) 
 			{
-        $hiddenTags .= '<input type="hidden" name="cpp_header_image" value="'.STAGESHOW_IMAGES_URL.$myDBaseObj->adminOptions['PayPalHeaderImageFile'].'"/>'."\n";
+        $hiddenTags .= '<input type="hidden" name="cpp_header_image" value="'.$myDBaseObj->getImageURL('PayPalHeaderImageFile').'"/>'."\n";
       }
 
       $hiddenTags .= '<input type="hidden" name="on0" value="TicketType"/>'."\n";      
