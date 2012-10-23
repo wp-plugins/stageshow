@@ -145,7 +145,7 @@ The following tags can be used in the EMail template:
 * Activate function explicitly called on version update
 * Email and Images Templates moved to uploads/{pluginID}/****** folders
 * Test Send Email added to Tools admin page (implemented by stageshow_test_emailsale.php)
-* Admin Pages - Redundant <form> tag action parameters removed
+* Admin Pages - Redundant &lt;form&gt; tag action parameters removed
 * Admin Pages CSS - stageshow-settings-**** classes changed to mjslib-settings-****
 
 = 1.1.6 =
