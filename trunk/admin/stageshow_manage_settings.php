@@ -1,6 +1,6 @@
 <?php
 /* 
-Description: Code for Managing Configuration Settings
+Description: Code for Managing StageShow Settings
  
 Copyright 2012 Malcolm Shergold
 
@@ -20,144 +20,73 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-if (!class_exists('StageShowManageSettingsClass')) 
+include STAGESHOW_INCLUDE_PATH.'mjslib_paypal_settings.php';
+
+if (!class_exists('StageShowSettingsAdminListClass')) 
 {
-	define('STAGESHOW_ADMINID_TEXTLEN',110);
-	define('STAGESHOW_MAIL_TEXTLEN',127);
-	define('STAGESHOW_ORGANISATIONID_TEXTLEN',60);
+	class StageShowSettingsAdminListClass extends PayPalSettingsAdminListClass // Define class
+	{		
+		function __construct($env, $editMode = false) //constructor
+		{	
+			// Call base constructor
+			parent::__construct($env, $editMode);
+		}
 		
-	define('STAGESHOW_MAIL_EDITLEN', 60);
-	define('STAGESHOW_ADMINID_EDITLEN', 60);
-	define('STAGESHOW_URL_EDITLEN', 95);
-	
-	class StageShowManageSettingsClass extends MJSLibAdminClass // Define class
-	{
+		function GetTableID($result)
+		{
+			return "stageshow-settings";
+		}
+		
+		function GetMainRowsDefinition()
+		{
+			$this->isTabbedOutput = true;
+			
+			$rowDefs = array(			
+				array(self::TABLEPARAM_LABEL => 'StageShow Settings',    self::TABLEPARAM_ID => 'stageshow-settings-tab', ),
+			);
+			
+			$rowDefs = $this->MergeSettings(parent::GetMainRowsDefinition(), $rowDefs);
+			return $rowDefs;
+		}		
+		
+		function GetDetailsRowsDefinition()
+		{
+			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
+			$templatePath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/emails/';
+			
+			$rowDefs = array(
+				array(self::TABLEPARAM_LABEL => 'Organisation ID',                 self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'OrganisationID',		   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => STAGESHOW_ORGANISATIONID_TEXTLEN, self::TABLEPARAM_SIZE => 60, ),				
+				array(self::TABLEPARAM_LABEL => 'EMail Template File',             self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'EMailTemplatePath',       self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT,   self::TABLEPARAM_DIR => $templatePath, self::TABLEPARAM_EXTN => 'php', self::TABLEPARAM_BEFORE => 'AdminEMail', ),
+				array(self::TABLEPARAM_LABEL => 'StageShow Sales EMail',           self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'AdminEMail',			   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => STAGESHOW_MAIL_TEXTLEN,      self::TABLEPARAM_SIZE => STAGESHOW_MAIL_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => 'Bcc EMails to WP Admin',          self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'BccEMailsToAdmin',	   self::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, self::TABLEPARAM_TEXT => 'Send EMail confirmation to Administrator' ),
+				array(self::TABLEPARAM_LABEL => 'Currency Symbol',		           self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'UseCurrencySymbol',     self::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, self::TABLEPARAM_TEXT => 'Include in Box Office Output' ),
+				array(self::TABLEPARAM_LABEL => 'Items per Page',                  self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'PageLength',			   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => 3, self::TABLEPARAM_DEFAULT => MJSLIB_EVENTS_PER_PAGE),
+				array(self::TABLEPARAM_LABEL => 'Max Ticket Qty',                  self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'MaxTicketQty',          self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => 2, self::TABLEPARAM_DEFAULT => STAGESHOW_MAXTICKETCOUNT),
+			);
+			
+			$rowDefs = $this->MergeSettings(parent::GetDetailsRowsDefinition(), $rowDefs);
+			return $rowDefs;
+		}
+	}
+}
+		
+if (!class_exists('StageShowSettingsAdminClass')) 
+{
+	class StageShowSettingsAdminClass extends PayPalSettingsAdminClass // Define class
+	{		
 		function __construct($env)
 		{
 			// Call base constructor
 			parent::__construct($env);
-			
-			$myPluginObj = $this->myPluginObj;
-			$myDBaseObj = $this->myDBaseObj;			
-					
-			$payPalAPIObj = $myDBaseObj->payPalAPIObj;
-			
-			$genSettingsObj = $myDBaseObj->GetSettingsObj();
-			
-			echo '<div class="wrap">';
+		}
 		
-			$SettingsUpdateMsg = '';
-			$hiddenTags = '';
-				
-			// PAYPAL SETTINGS
-			$PayPalAPITestChanged = false;
-
-			$results = $myDBaseObj->GetAllPerformancesList();		
-			$perfsConfigured = (count($results) > 0);
-			
-			if (isset($_POST['savesettingsbutton']))
-			{
-				$this->CheckAdminReferer();
-				
-				$PayPalAPIChanged = false;
-				if ($this->IsOptionChanged($myDBaseObj->adminOptions, 'PayPalAPIUser','PayPalAPIPwd','PayPalAPISig') || isset($_POST['errormsglive']))
-				{
-					// Block changes to PayPal Login Parameters if there are performances configured				
-					if ($perfsConfigured)
-					{
-						// Put back original settings
-						$_POST['PayPalAPIUser'] = $myDBaseObj->adminOptions['PayPalAPIUser'];
-						$_POST['PayPalAPIPwd'] = $myDBaseObj->adminOptions['PayPalAPIPwd'];
-						$_POST['PayPalAPISig'] = $myDBaseObj->adminOptions['PayPalAPISig'];
-						
-						$SettingsUpdateMsg = __('Perfoamances already created - Paypal Login details cannot be changed.', STAGESHOW_DOMAIN_NAME);
-					}
-					else if ($payPalAPIObj->VerifyPayPalLogin(stripslashes($_POST['PayPalEnv']), stripslashes($_POST['PayPalAPIUser']), stripslashes($_POST['PayPalAPIPwd']), stripslashes($_POST['PayPalAPISig'])))
-					{
-						// New PayPal API Settings are valid			
-						$PayPalAPIChanged = true;
-					}
-					else
-					{
-						$SettingsUpdateMsg = __('PayPal Login FAILED', STAGESHOW_DOMAIN_NAME);
-						$hiddenTags .= '<input type="hidden" name="errormsglive" value="'.$SettingsUpdateMsg.'"/>'."\n";
-					}
-				}
-				        
-				if ($this->IsOptionChanged($myDBaseObj->adminOptions, 'AdminEMail'))
-				{
-					if (!$this->ValidateEmail(stripslashes($_POST['AdminEMail'])))
-					{
-						$SettingsUpdateMsg = __('Invalid StageShow Sales EMail', STAGESHOW_DOMAIN_NAME);
-					}
-				}
-        
-				if ($this->IsOptionChanged($myDBaseObj->adminOptions, 'LogsFolderPath'))
-				{
-					// Confrm that logs folder path is valid or create folder
-					$LogsFolder = stripslashes($_POST['LogsFolderPath']);
-					if (!strpos($LogsFolder, ':'))
-						$LogsFolder = ABSPATH . '/' . $LogsFolder;
-					
-					$LogsFolderValid = is_dir($LogsFolder);
-					if (!$LogsFolderValid)
-					{
-						mkdir($LogsFolder, 0644, TRUE);
-						$LogsFolderValid = is_dir($LogsFolder);
-					}
-					
-					if ($LogsFolderValid)
-					{
-						// New PayPal API Settings are valid			
-					}
-					else
-					{
-						$SettingsUpdateMsg = __('Cannot Create Logs Folder', STAGESHOW_DOMAIN_NAME);
-					}
-				}
-        
-				if ($SettingsUpdateMsg === '')
-				{
-					$genSettingsObj->SaveSettings($myDBaseObj);					
-					$myDBaseObj->saveOptions();
-					
-					echo '<div id="message" class="updated"><p>'.__('Settings have been saved.', STAGESHOW_DOMAIN_NAME).'</p></div>';
-				}
-				else
-				{
-					$genSettingsObj->Reload();		
-					
-					echo '<div id="message" class="error"><p>'.$SettingsUpdateMsg.'</p></div>';
-					echo '<div id="message" class="error"><p>'.__('Paypal settings have NOT been saved.', STAGESHOW_DOMAIN_NAME).'</p></div>';
-				}
-			}
-			
-			$genSettingsObj->ppReadOnly = $perfsConfigured;
-			
-			// PayPal Settings HTML Output - Start 
-?>
-<div class="settings_page">
-<div id="icon-stageshow" class="icon32"></div>
-<h2><?php echo $myPluginObj->pluginName.' - '.__('Settings', STAGESHOW_DOMAIN_NAME); ?></h2>
-<form method="post" action="admin.php?page=<?php echo STAGESHOW_MENUPAGE_SETTINGS; ?>">
-<?php 
-	$this->WPNonceField();
-	echo $hiddenTags; 
-	$genSettingsObj->Output_Form($myDBaseObj);
-?>
-	<br></br>
-<?php 
-	$myDBaseObj->OutputButton("savesettingsbutton", "Save Settings", "button-primary");
-?>
-	<br></br>
-
-</form>
-</div>
-</div>
-<?php
-			// PayPal Settings HTML Output - End
-		}	
+		function GetAdminListClass()
+		{
+			return 'StageShowSettingsAdminListClass';			
+		}
+		
 	}
 }
+		
 
 ?>

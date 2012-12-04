@@ -33,6 +33,34 @@ if (!class_exists('MJSLibTableClass'))
 		const HEADERPOSN_BOTTOM = 2;
 		const HEADERPOSN_BOTH = 3;
 
+		const TABLETYPE_HTML = 'html';
+		const TABLETYPE_RTF = 'RTF';
+		const TABLETYPE_TEXT = 'text';
+
+		const TABLEPARAM_LABEL = 'Label';
+		const TABLEPARAM_TAB = 'Tab';
+		const TABLEPARAM_ID = 'Id';
+		const TABLEPARAM_TYPE = 'Type';
+		const TABLEPARAM_ITEMS = 'Items';
+		const TABLEPARAM_TEXT = 'Text';
+		const TABLEPARAM_LEN = 'Len';
+		const TABLEPARAM_SIZE = 'Size';
+		const TABLEPARAM_LINK = 'Link';
+		const TABLEPARAM_DEFAULT = 'Default';
+		const TABLEPARAM_NEXTINLINE = 'Next-Inline';
+
+		const TABLEPARAM_NAME = 'Name';
+		const TABLEPARAM_OPTION = 'Option';
+
+		const TABLEPARAM_DIR = 'Dir';
+		const TABLEPARAM_EXTN = 'Extn';
+		const TABLEPARAM_FUNC = 'Func';
+		const TABLEPARAM_ROWS = 'Rows';
+		const TABLEPARAM_COLS = 'Cols';
+		const TABLEPARAM_DECODE = 'Decode';
+		const TABLEPARAM_BEFORE = 'Before';
+		const TABLEPARAM_AFTER = 'After';
+		
 		const TABLEENTRY_ARRAY = 'array';
 		const TABLEENTRY_BUTTON = 'button';
 		const TABLEENTRY_CHECKBOX = 'checkbox';
@@ -41,8 +69,8 @@ if (!class_exists('MJSLibTableClass'))
 		const TABLEENTRY_TEXT = 'text';
 		const TABLEENTRY_TEXTBOX = 'textbox';
 		const TABLEENTRY_VIEW = 'view';
-		const	TABLEENTRY_VALUE = 'value';
-		const	TABLEENTRY_COOKIE = 'cookie';
+		const TABLEENTRY_VALUE = 'value';
+		const TABLEENTRY_COOKIE = 'cookie';
 		
 		var $tableContents = array();
 		var $rowAttr = array();
@@ -87,14 +115,17 @@ if (!class_exists('MJSLibTableClass'))
 		
 		var $tableType;
 		
-		function __construct($newTableType = 'html') //constructor
+		function __construct($newTableType = self::TABLETYPE_HTML) //constructor
 		{
+			if (!isset($this->myDomain) || ($this->myDomain == ''))
+				$this->myDomain = basename(dirname(dirname(__FILE__)));
+			
 			$this->tableType = $newTableType;
 			switch ($this->tableType)
 			{
-				case 'html':
-				case 'RTF':
-				case 'text':
+				case self::TABLETYPE_HTML:
+				case self::TABLETYPE_RTF:
+				case self::TABLEENTRY_TEXT:
 					break;
 					
 				default:
@@ -107,6 +138,8 @@ if (!class_exists('MJSLibTableClass'))
 			$this->currRow = 1;
 			$this->currCol = 0;
 			$this->maxCol = 0;
+			$this->HeaderCols = 0;
+			$this->isTabbedOutput = false;
 			$this->rowActive[$this->currRow] = false;
 			$this->hideEmptyRows = true;
 			$this->spanEmptyCells = false;
@@ -125,8 +158,8 @@ if (!class_exists('MJSLibTableClass'))
 			
 			$this->detailsRowsDef = array_merge($this->GetDetailsRowsDefinition(), $this->GetDetailsRowsFooter());
 				
-			$this->moreText = __('Show');
-			$this->lessText = __('Hide');
+			$this->moreText = __('Show', $this->myDomain);
+			$this->lessText = __('Hide', $this->myDomain);
 			
 		}
 		
@@ -143,7 +176,9 @@ if (!class_exists('MJSLibTableClass'))
 		function AddHiddenRows($result, $hiddenRowsID, $hiddenRows)
 		{
 			$this->NewRow($result, 'id="'.$hiddenRowsID.'" '.$this->hiddenRowStyle.' class="hiddenRow"');
-			$this->AddToTable($result, $hiddenRows);	
+			$this->AddToTable($result, $hiddenRows);
+// TODO ...
+			$this->maxCol = max($this->maxCol, $this->HeaderCols);
 		}
 
 		function GetMainRowsDefinition()
@@ -198,7 +233,7 @@ if (!class_exists('MJSLibTableClass'))
 			$this->colClass = split(',', ','.$newColClass);
 		}
 
-		function SetListHeaders($headerId, $columns = null, $headerPosn = MJSLibTableClass::HEADERPOSN_BOTH)
+		function SetListHeaders($headerId, $columns = null, $headerPosn = self::HEADERPOSN_BOTH)
 		{
 			// Save the settings, the headers are actually set by the EnableListHeaders function			
 			$this->columnHeadersId = $headerId;
@@ -207,6 +242,7 @@ if (!class_exists('MJSLibTableClass'))
 				$this->columns = $columns;	// Save for possible next call
 				
 			$this->HeadersPosn = $headerPosn;
+			$this->HeaderCols = count($columns);
 		}
 
 		function EnableListHeaders()
@@ -233,7 +269,10 @@ if (!class_exists('MJSLibTableClass'))
 				$columns = array_merge($columns, array('eventOptions' => $this->hiddenRowsButtonId)); 
 			}
 				
-			register_column_headers($this->columnHeadersId, $columns);	
+			// TODO-BEFORE_RELEASE Check that column headers still work OK
+			$this->mergedColumns = $columns;
+			
+			//register_column_headers($this->columnHeadersId, $columns);	
 		}
 		
 		function AddCheckBoxToTable($result, $inputName, $col=0, $value='checked', $checked=false, $label='', $newRow = false)
@@ -305,16 +344,54 @@ if (!class_exists('MJSLibTableClass'))
 			
 			// Increment Row ... but only if the current row has data
 			if ($newRow) 
+			{				
 				$this->NewRow($result);
+			}
 			
 			if ($col <= 0) 
+			{
 				$col = ++$this->currCol;
+			}
 			else
+			{
 				$this->currCol = $col;
+			}
 				
 			$this->tableContents[$this->currRow][$col] = $content;
 			$this->rowActive[$this->currRow] = true;
 			$this->maxCol = max($col, $this->maxCol);
+		}
+		
+		function Output_ColHeader()
+		{
+			$addSeparator = false;
+			$tabParam = ' class=mjstab-tab-inactive';
+			
+			$width = 100/count($this->mergedColumns);
+						
+			if ($this->isTabbedOutput)
+			{
+				$separatorWidth = 1;
+				$width -= $separatorWidth;
+				$tabParam .= " onclick=clickHeader(this)";
+				$tabParam .= ' width="'.$width.'%"';
+				$tabParam .= ' style="border: 1px solid black;"';
+				$separatorParam = ' class=mjstab-tab-gap width="'.$separatorWidth.'%"';
+				$separatorParam .= ' style="border-bottom: 1px solid black; background: #f9f9f9;"';				
+			}
+			
+			
+			foreach ($this->mergedColumns as $id => $text)
+			{
+				if ($addSeparator)
+				{
+					echo "<th $separatorParam></th>\n";					
+				}
+					
+				echo "<th id=$id $tabParam >$text</th>\n";
+				
+				$addSeparator = $this->isTabbedOutput;
+			}
 		}
 		
 		function ColumnHeaders($atTop = true)
@@ -325,28 +402,25 @@ if (!class_exists('MJSLibTableClass'))
 			if ($this->columnHeadersId === '') 
 				return;
 
-			if ( !function_exists( 'print_column_headers' ) )
-				return;
-			
 			if ($atTop)
 			{
-				if ($this->HeadersPosn === MJSLibTableClass::HEADERPOSN_BOTTOM) 
+				if ($this->HeadersPosn === self::HEADERPOSN_BOTTOM) 
 					return;
 					
 				echo "<thead>\n";
 				echo "<tr>\n";
-				print_column_headers($this->columnHeadersId);
+				$this->Output_ColHeader();
 				echo "</tr>\n";
 				echo "</thead>\n";
 			}
 			else
 			{
-				if ($this->HeadersPosn === MJSLibTableClass::HEADERPOSN_TOP) 
+				if ($this->HeadersPosn === self::HEADERPOSN_TOP) 
 					return;
 					
 				echo "<tfoot>\n";
 				echo "<tr>\n";
-				print_column_headers($this->columnHeadersId, false);
+				$this->Output_ColHeader();
 				echo "</tr>\n";
 				echo "</tfoot>\n";
 				echo "<tbody>\n";
@@ -357,7 +431,7 @@ if (!class_exists('MJSLibTableClass'))
 		{
 			switch ($this->tableType)
 			{
-				case 'html':
+				case self::TABLETYPE_HTML:
 					if ($this->divClass)
 						echo "<div class=$this->divClass>\n";
 						
@@ -368,8 +442,8 @@ if (!class_exists('MJSLibTableClass'))
 					
 					echo "<tbody>\n";
 					break;
-				case 'RTF':
-				case 'text':
+				case self::TABLETYPE_RTF:
+				case self::TABLEENTRY_TEXT:
 				default:
 					break;
 			}
@@ -381,13 +455,13 @@ if (!class_exists('MJSLibTableClass'))
 		{
 			switch ($this->tableType)
 			{
-				case 'html':
+				case self::TABLETYPE_HTML:
 					echo "</tbody></table>\n";		
 					if ($this->divClass)
 						echo "</div>\n";		
 					break;
-				case 'RTF':
-				case 'text':
+				case self::TABLETYPE_RTF:
+				case self::TABLEENTRY_TEXT:
 				default:
 					break;
 			}
@@ -401,13 +475,15 @@ if (!class_exists('MJSLibTableClass'))
 			
 			$tagNo = $which === 'top' ? '' : '2';
 			
+			$bulkActions = __('Bulk Actions', $this->myDomain);
+			
 			$output  = "<div class='alignleft actions'>\n";
 			$output .= "<select name='action$tagNo'>\n"; 
-			$output .= "<option value='-1' selected='selected'>Bulk Actions&nbsp;&nbsp;</option>\n"; 
+			$output .= "<option value='-1' selected='selected'>$bulkActions &nbsp;&nbsp;</option>\n"; 
 			foreach ($this->bulkActions as $action => $actionID)
 				$output .= "<option value='$action'>$actionID</option>\n"; 
 			$output .= "</select>\n"; 
-			$output .= "<input type='submit' name='' id='doaction' class='button-secondary action' value='Apply'  />\n"; 
+			$output .= "<input type='submit' name='' id='doaction' class='button-secondary action' value=".__('Apply', $this->myDomain)."  />\n"; 
 			$output .= "</div>\n"; 
 			
 			return $output;
@@ -526,14 +602,14 @@ function updateCheckboxes(obj)
 
 			$page_links[] = sprintf( "<a class='%s' title='%s' %s>%s</a>",
 				'first-page' . $disable_first,
-				$disable_first === '' ? esc_attr__('Go to the first page') : '',
+				$disable_first === '' ? esc_attr__('Go to the first page', $this->myDomain) : '',
 				$disable_first === '' ? 'href='.esc_url( remove_query_arg( 'paged', $current_url ) ) : '',
 				'&laquo;'
 			);
 
 			$page_links[] = sprintf( "<a class='%s' title='%s' %s>%s</a>",
 				'prev-page' . $disable_first,
-				$disable_first === '' ? esc_attr__('Go to the previous page') : '',
+				$disable_first === '' ? esc_attr__('Go to the previous page', $this->myDomain) : '',
 				$disable_first === '' ? 'href='.esc_url( add_query_arg( 'paged', max( 1, $this->currentPage-1 ), $current_url ) ) : '',
 				'&lsaquo;'
 			);
@@ -542,25 +618,25 @@ function updateCheckboxes(obj)
 				$html_current_page = $this->currentPage;
 			else
 				$html_current_page = sprintf( "<input class='current-page' title='%s' type='text' name='%s' value='%s' size='%d' />",
-					esc_attr__( 'Current page' ),
+					esc_attr__( 'Current page', $this->myDomain),
 					esc_attr( 'paged' ),
 					$this->currentPage,
 					strlen( $totalPages )
 				);
 
 			$html_total_pages = sprintf( "<span class='total-pages'>%s</span>", number_format_i18n( $totalPages ) );
-			$page_links[] = '<span class="paging-input">' . sprintf( _x( '%1$s of %2$s', 'paging' ), $html_current_page, $html_total_pages ) . '</span>';
+			$page_links[] = '<span class="paging-input">' . sprintf('%1$s '.__('of', $this->myDomain).' %2$s', $html_current_page, $html_total_pages ) . '</span>';
 
 			$page_links[] = sprintf( "<a class='%s' title='%s' %s>%s</a>",
 				'next-page' . $disable_last,
-				$disable_last === '' ? esc_attr__('Go to the next page') : '',
+				$disable_last === '' ? esc_attr__('Go to the next page', $this->myDomain) : '',
 				$disable_last === '' ? 'href='.esc_url( add_query_arg( 'paged', min( $totalPages, $this->currentPage+1 ), $current_url ) ) : '',
 				'&rsaquo;'
 			);
 
 			$page_links[] = sprintf( "<a class='%s' title='%s' %s>%s</a>",
 				'last-page' . $disable_last,
-				$disable_last === '' ? esc_attr__('Go to the last page') : '',
+				$disable_last === '' ? esc_attr__('Go to the last page', $this->myDomain) : '',
 				$disable_last === '' ? 'href='.esc_url( add_query_arg( 'paged', $totalPages, $current_url ) ) : '',
 				'&raquo;'
 			);
@@ -576,10 +652,10 @@ function updateCheckboxes(obj)
 		{
 			switch ($this->tableType)
 			{
-				case 'html':
+				case self::TABLETYPE_HTML:
 					break;
-				case 'RTF':
-				case 'text':
+				case self::TABLETYPE_RTF:
+				case self::TABLEENTRY_TEXT:
 				default:
 					return;
 			}
@@ -606,15 +682,15 @@ function updateCheckboxes(obj)
 				if ($this->hideEmptyRows && !$this->rowActive[$row]) continue;
 				switch ($this->tableType)
 				{
-					case 'html':
+					case self::TABLETYPE_HTML:
 						if (isset($this->rowAttr[$row]) && ($this->rowAttr[$row] != ''))
 							echo "<tr ".$this->rowAttr[$row].">\n";
 						else
 							echo "<tr>\n";
 						break;
-					case 'RTF':
+					case self::TABLETYPE_RTF:
 						break;
-					case 'text':
+					case self::TABLEENTRY_TEXT:
 					default:
 						break;
 				}
@@ -642,17 +718,22 @@ function updateCheckboxes(obj)
 						{
 							if (isset($this->tableContents[$row][$nextCol])) break;
 						}
-						if ($colSpanCount > 1) 
-							$colSpan = ' colspan="'.$colSpanCount.'"';
-						}							
+					}		
+										
+					if ($colSpanCount > 1)
+					{
+						$colSpanCount = $this->isTabbedOutput ? (2*($colSpanCount-1))+1 : $colSpanCount;
+						$colSpan = ' colspan="'.$colSpanCount.'"';						
+					} 
+						
 					switch ($this->tableType)
 					{
-						case 'html':
+						case self::TABLETYPE_HTML:
 							echo '<'.$colTag.$colSpan.$setWidth.$setAlign.$setId.$setClass.'>';
 							break;
-						case 'RTF':
+						case self::TABLETYPE_RTF:
 							if ($col > 1) echo '\tab ';
-						case 'text':
+						case self::TABLEENTRY_TEXT:
 						default:
 							break;
 					}
@@ -662,12 +743,12 @@ function updateCheckboxes(obj)
 					
 					switch ($this->tableType)
 					{
-						case 'html':
+						case self::TABLETYPE_HTML:
 							echo "</$colTag>\n";
 							break;
-						case 'RTF':
+						case self::TABLETYPE_RTF:
 							break;
-						case 'text':
+						case self::TABLEENTRY_TEXT:
 						default:
 							echo "\t";
 							break;
@@ -679,13 +760,13 @@ function updateCheckboxes(obj)
 					
 				switch ($this->tableType)
 				{
-					case 'html':
+					case self::TABLETYPE_HTML:
 						echo "</tr>\n";
 						break;
-					case 'RTF':
+					case self::TABLETYPE_RTF:
 						echo '\par '."\n";
 						break;
-					case 'text':
+					case self::TABLEENTRY_TEXT:
 					default:
 						echo "\n";
 						break;
@@ -724,26 +805,22 @@ if (!class_exists('MJSLibAdminListClass'))
 		
 		var $updateFailed;
 		
-		function __construct($env, $editMode /* = false */, $newTableType = 'html') //constructor
+		function __construct($env, $editMode /* = false */, $newTableType = self::TABLETYPE_HTML) //constructor
 		{
 			$this->editMode = $editMode;
 			
+			$this->env = $env;
+			
+			$this->caller = $env['caller'];
+			$this->myPluginObj = $env['PluginObj'];
+			$this->myDBaseObj = $env['DBaseObj'];
+			$this->myDomain = $env['Domain'];
+				
 			// Call base constructor
 			parent::__construct($newTableType);
 			
 			$this->ignoreEmptyCells = false;
 			
-			$this->env = $env;
-			
-			if (is_array($env))
-			{
-				$this->caller = $env['caller'];
-				$this->myPluginObj = $env['PluginObj'];
-				$this->myDBaseObj = $env['DBaseObj'];
-			}
-			else
-				$this->caller = $env;
-				
 			$this->enableFilter = true;
 			
 			$callerFolders = explode("/", plugin_basename($this->caller));
@@ -765,11 +842,11 @@ if (!class_exists('MJSLibAdminListClass'))
 			
 			$this->columnDefs = $this->GetMainRowsDefinition();			
 			
-			if (!isset($this->HeadersPosn)) $this->HeadersPosn = MJSLibTableClass::HEADERPOSN_BOTH;
+			if (!isset($this->HeadersPosn)) $this->HeadersPosn = self::HEADERPOSN_BOTH;
 			if (!isset($this->hiddenRowsButtonId)) 
 			{
 				if (!$this->editMode)
-					$this->hiddenRowsButtonId = 'Details';
+					$this->hiddenRowsButtonId = __('Details', $env['Domain']);		
 				else
 				{
 					$this->hiddenRowStyle = '';
@@ -789,19 +866,19 @@ if (!class_exists('MJSLibAdminListClass'))
 			$isFirstLine = ($this->lastCBId !== $recordID);
 			$this->lastCBId = $recordID;
 			
-			if ($this->showDBIds)
-			{
-				if ($isFirstLine)
-					$this->AddToTable($result, $recordID, $col++);
-				else	
-					$this->AddToTable($result, ' ', $col++);
-			}
-			
 			if (isset($this->bulkActions))
 			{
 				//echo "Adding Checkbox - Col = $col<br>";				
 				if ($isFirstLine)
 					$this->AddCheckBoxToTable($result, 'rowSelect[]', $col++, $recordID);
+				else	
+					$this->AddToTable($result, ' ', $col++);
+			}
+			
+			if ($this->showDBIds)
+			{
+				if ($isFirstLine)
+					$this->AddToTable($result, $recordID, $col++);
 				else	
 					$this->AddToTable($result, ' ', $col++);
 			}
@@ -875,7 +952,7 @@ if (!class_exists('MJSLibAdminListClass'))
 						
 				$filter_links .= sprintf( "<a class='%s' title='%s' %s>%s</a>",
 					$filterClass,
-					$rowCount > 0 ? esc_attr__('Show all Events') : '',
+					$rowCount > 0 ? esc_attr__('Show all Events', $this->myDomain) : '',
 					$rowCount > 0 ? 'href='.$filterURL : '',
 					"$filterId ($rowCount)"
 				);
@@ -886,6 +963,120 @@ if (!class_exists('MJSLibAdminListClass'))
 			echo "</div>\n";
 		}
 		
+		function GetSelectOptsArray($settingOption)
+		{
+			if (isset($settingOption[MJSLibTableClass::TABLEPARAM_DIR]))
+			{
+				// Folder is defined ... create the search path
+				$dir = $settingOption[MJSLibTableClass::TABLEPARAM_DIR];
+				if (substr($dir, strlen($dir)-1, 1) != '/')
+					$dir .= '/';
+				if (isset($settingOption[MJSLibTableClass::TABLEPARAM_EXTN]))
+					$dir .= '*.'.$settingOption[MJSLibTableClass::TABLEPARAM_EXTN];
+				else
+					$dir .= '*.*';
+
+				// Now get the files list and convert paths to file names
+				$selectOpts = glob($dir);
+				foreach ($selectOpts as $key => $path)
+					$selectOpts[$key] = basename($path);
+			}
+			else
+				$selectOpts = $settingOption[MJSLibTableClass::TABLEPARAM_ITEMS];
+					
+			$selectOptsArray = array();
+			
+			foreach ($selectOpts as $selectOpt)
+			{
+				$selectAttrs = explode('|', $selectOpt);
+				if (count($selectAttrs) == 1)
+				{
+					$selectOptValue = $selectOptText = $selectAttrs[0];
+				}
+				else
+				{
+					$selectOptValue = $selectAttrs[0];
+					$selectOptText = __($selectAttrs[1], $this->myDomain);
+				}
+				
+				$selectOptsArray[$selectOptValue] = $selectOptText;
+			}
+			
+			return $selectOptsArray;
+		}
+		
+		function GetHTMLTag($settingOption, $controlValue, $editMode = true)
+		{
+			$autocompleteTag = ' autocomplete="off"';
+			$controlName = $settingOption[self::TABLEPARAM_ID];
+			
+			$editControl = '';
+			
+			$settingType = $settingOption[self::TABLEPARAM_TYPE];
+			
+			if (!$editMode)
+			{
+				switch ($settingType)
+				{
+					case self::TABLEENTRY_TEXT:
+					case self::TABLEENTRY_TEXTBOX:
+					case self::TABLEENTRY_SELECT:
+					case self::TABLEENTRY_CHECKBOX:
+					case self::TABLEENTRY_COOKIE:
+						$settingType = self::TABLEENTRY_VIEW;
+						break;						
+				}
+			}
+				
+			switch ($settingType)
+			{
+				case self::TABLEENTRY_TEXT:
+				case self::TABLEENTRY_COOKIE:
+					$editLen = $settingOption[self::TABLEPARAM_LEN];
+					$editSize = isset($settingOption[self::TABLEPARAM_SIZE]) ? $settingOption[self::TABLEPARAM_SIZE] : $editLen+1;
+					$editControl = '<input type="text"'.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" name="'.$controlName.'" value="'.$controlValue.'" />'."\n";
+					break;
+
+				case self::TABLEENTRY_TEXTBOX:
+					$editRows = $settingOption[self::TABLEPARAM_ROWS];
+					$editCols = $settingOption[self::TABLEPARAM_COLS];
+					$editControl = '<textarea rows="'.$editRows.'" cols="'.$editCols.'" name="'.$controlName.'">'.$controlValue."</textarea>\n";
+					break;
+
+				case self::TABLEENTRY_SELECT:
+					$editControl  = '<select name="'.$controlName.'">'."\n";
+					$selectOptsArray = self::GetSelectOptsArray($settingOption);
+					foreach ($selectOptsArray as $selectOptValue => $selectOptText)
+					{
+						$selected = ($controlValue == $selectOptValue) ? ' selected=""' : '';
+						$editControl .= '<option value="'.$selectOptValue.'"'.$selected.' >'.$selectOptText."&nbsp;</option>\n";
+					}
+					$editControl .= '</select>'."\n";
+					break;
+
+				case self::TABLEENTRY_CHECKBOX:
+					$checked = ($controlValue === true) ? 'checked="yes"' : '';
+					$cbText = __($settingOption[MJSLibTableClass::TABLEPARAM_TEXT], $this->myDomain);
+					$editControl = '<input type="checkbox" name="'.$controlName.'" id="'.$controlName.'" value="1" '.$checked.' />&nbsp;'.$cbText."\n";
+					break;
+
+				case self::TABLEENTRY_VIEW:
+					$editControl = $controlValue;
+					break;
+
+				case self::TABLEENTRY_VALUE:
+					$editControl = $settingOption['Value'];
+					break;
+
+				default:
+					//echo "<string>Unrecognised Table Entry Type - $settingType </string><br>\n";
+					//MJSLibUtilsClass::ShowCallStack();
+					break;
+			}
+
+			return $editControl;
+		}
+		
 		function AddResultFromTable($result)
 		{		
 			$canDisplayTable = true;
@@ -893,23 +1084,23 @@ if (!class_exists('MJSLibAdminListClass'))
 			// Check if this row CAN be output using data from the columnDefs table
 			foreach ($this->columnDefs as $key => $columnDef)
 			{
-				if (!isset($columnDef['Type']))
+				if (!isset($columnDef[self::TABLEPARAM_TYPE]))
 					return true;
 				
-				switch ($columnDef['Type'])
+				switch ($columnDef[self::TABLEPARAM_TYPE])
 				{
-					//case MJSLibTableClass::TABLEENTRY_CHECKBOX:
-					case MJSLibTableClass::TABLEENTRY_TEXT:
-					//case MJSLibTableClass::TABLEENTRY_TEXTBOX:
-					case MJSLibTableClass::TABLEENTRY_SELECT:
-					case MJSLibTableClass::TABLEENTRY_VALUE:
-					case MJSLibTableClass::TABLEENTRY_VIEW:
-					case MJSLibTableClass::TABLEENTRY_COOKIE:
+					//case self::TABLEENTRY_CHECKBOX:
+					case self::TABLEENTRY_TEXT:
+					//case self::TABLEENTRY_TEXTBOX:
+					case self::TABLEENTRY_SELECT:
+					case self::TABLEENTRY_VALUE:
+					case self::TABLEENTRY_VIEW:
+					case self::TABLEENTRY_COOKIE:
 						break;
 						
 					default:
 						$canDisplayTable = false;
-echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['Id']." Column Type:".$columnDef['Type']."<br>\n";						
+echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id:".$columnDef[self::TABLEPARAM_ID]." Column Type:".$columnDef[self::TABLEPARAM_TYPE]."<br>\n";						
 						break 2;
 				}
 			}
@@ -922,7 +1113,7 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 				
 				foreach ($this->columnDefs as $columnDef)
 				{
-					$columnId = $columnDef['Id'];
+					$columnId = $columnDef[self::TABLEPARAM_ID];
 					
 					if ($this->updateFailed)
 					{
@@ -936,59 +1127,59 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 						$currVal = $result->$columnId;
 					}
 
-					if (isset($columnDef['Decode']))
+					if (isset($columnDef[MJSLibTableClass::TABLEPARAM_DECODE]))
 					{
-						$funcName = $columnDef['Decode'];
+						$funcName = $columnDef[MJSLibTableClass::TABLEPARAM_DECODE];
 						$currVal = $this->$funcName($result);
 					}
 					
 					if ($this->editMode)
-						$columnType = $columnDef['Type'];
+						$columnType = $columnDef[self::TABLEPARAM_TYPE];
 					else
-						$columnType = MJSLibTableClass::TABLEENTRY_VIEW;
+						$columnType = self::TABLEENTRY_VIEW;
 						
 					switch ($columnType)
 					{
-						//case MJSLibTableClass::TABLEENTRY_CHECKBOX:
-						//case MJSLibTableClass::TABLEENTRY_TEXTBOX:
+						//case self::TABLEENTRY_CHECKBOX:
+						//case self::TABLEENTRY_TEXTBOX:
 						
-						case MJSLibTableClass::TABLEENTRY_SELECT:
-							if (isset($columnDef['Items']))
-								$options = $columnDef['Items'];
+						case self::TABLEENTRY_SELECT:
+							if (isset($columnDef[self::TABLEPARAM_ITEMS]))
+								$options = $columnDef[self::TABLEPARAM_ITEMS];
 							else
 							{
-								$functionId = $columnDef['Func'];
+								$functionId = $columnDef[self::TABLEPARAM_FUNC];
 								$options = $this->$functionId($result);
 							}
 							
 							$this->AddSelectToTable($result, $columnId, $options, $currVal);
 							break;
 						
-						case MJSLibTableClass::TABLEENTRY_COOKIE:
-							$coolieID = $columnDef['Id'];
-							if (isset($_COOKIE[$coolieID]))
-								$currVal = $_COOKIE[$coolieID];
+						case self::TABLEENTRY_COOKIE:
+							$cookieID = $columnDef[self::TABLEPARAM_ID];
+							if (isset($_COOKIE[$cookieID]))
+								$currVal = $_COOKIE[$cookieID];
 							else
 								$currVal = '';
 							// Fall into next case ...
 							
-						case MJSLibTableClass::TABLEENTRY_TEXT:
-							if (!isset($columnDef['Len']))
+						case self::TABLEENTRY_TEXT:
+							if (!isset($columnDef[self::TABLEPARAM_LEN]))
 							{
 								echo "No Len entry in Column Definition<br>\n";
 								MJSLibUtilsClass::print_r($columnDef, 'columnDef');
 							}
 							
-							$this->AddInputToTable($result, $columnId, $columnDef['Len'], $currVal);
+							$this->AddInputToTable($result, $columnId, $columnDef[self::TABLEPARAM_LEN], $currVal);
 							break;
 
-						case MJSLibTableClass::TABLEENTRY_VALUE:
-						case MJSLibTableClass::TABLEENTRY_VIEW:
+						case self::TABLEENTRY_VALUE:
+						case self::TABLEENTRY_VIEW:
 							$recId = $this->GetRecordID($result);
 							$hiddenTag = '<input type="hidden" name="'.$columnId.$recId.'" value="'.$currVal.'"/>';
-							if (isset($columnDef['Link']))
+							if (isset($columnDef[MJSLibTableClass::TABLEPARAM_LINK]))
 							{
-								$currValLink = $columnDef['Link'];
+								$currValLink = $columnDef[MJSLibTableClass::TABLEPARAM_LINK];
 								if (isset($columnDef['LinkTo']))
 								{
 									$currValLink .= "http://";		// Make link absolute
@@ -1021,31 +1212,55 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 			
 			if (count($this->detailsRowsDef) > 0)
 			{
-				if ($this->moreText != '')
-					$this->AddShowOrHideButtonToTable($result, $this->tableName, $hiddenRowsID, $this->moreText);
-				else
-					$this->AddToTable($result, '');
-				
 				$colClassList = '';
 				for ($c=1; $c<$this->maxCol; $c++)
 					$colClassList .= ',';
-				$colClassList .= 'optionsCol';
+				
+				if ($this->moreText != '')
+				{
+					$this->AddShowOrHideButtonToTable($result, $this->tableName, $hiddenRowsID, $this->moreText);
+					$colClassList .= 'optionsCol';					
+				}
+				else if ($this->maxCol > 0)
+				{
+					$this->AddToTable($result, '');
+				}
+				
 				$this->SetColClass($colClassList);
 												
-				$hiddenRowsColId = $this->GetTableID($result).'-hiddenCol';
+				$tableId = $this->GetTableID($result);
+				$hiddenRowsColId = $tableId.'-hiddenCol';
+		
+				$tabbedRowCounts = array();
 				
-				$hiddenRows = "<table width=\"100%\">\n";
+				$nextInline = false;
+				$hiddenRows = "<table class=$tableId-table width=\"100%\">\n";
 				foreach ($this->detailsRowsDef as $option)
 				{
-					switch ($option['Type'])
+					if (isset($option[self::TABLEPARAM_LABEL]))
+						$optionLabel = __($option[self::TABLEPARAM_LABEL], $this->myDomain);
+						
+					if (!$nextInline && isset($option[self::TABLEPARAM_TAB]))
 					{
-						case MJSLibTableClass::TABLEENTRY_FUNCTION:
-							$functionId = $option['Func'];
+						$tabId = $option[self::TABLEPARAM_TAB];
+						$rowNumber = isset($tabbedRowCounts[$tabId]) ? $tabbedRowCounts[$tabId] + 1 : 1;
+						$tabbedRowCounts[$tabId] = $rowNumber;
+						
+						$tabRowId = 'id='.$tabId.'-row'.$rowNumber;
+					}
+					else
+						$tabRowId = '';
+						
+					$tableRowTag = '<tr '.$tabRowId.' >';
+					switch ($option[self::TABLEPARAM_TYPE])
+					{
+						case self::TABLEENTRY_FUNCTION:
+							$functionId = $option[self::TABLEPARAM_FUNC];
 							$content = $this->$functionId($result, $optionDetails);
-							$hiddenRows .= '<tr>'."\n";
+							$hiddenRows .= $tableRowTag."\n";
 							$colSpan = ' class='.$hiddenRowsColId.'2';
-							if (isset($option['Label']))
-								$hiddenRows .= '<td class='.$hiddenRowsColId.'1>'.$option['Label']."</td>\n";
+							if (isset($option[self::TABLEPARAM_LABEL]))
+								$hiddenRows .= '<td class='.$hiddenRowsColId.'1>'.$optionLabel."</td>\n";
 							else
 								$colSpan = " colspan=2";
 								
@@ -1053,17 +1268,17 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 							$hiddenRows .= "</tr>\n";
 							break;
 							
-						case MJSLibTableClass::TABLEENTRY_ARRAY:
-							if (isset($option['Label']))
+						case self::TABLEENTRY_ARRAY:
+							if (isset($option[self::TABLEPARAM_LABEL]))
 							{
-								$hiddenRows .= '<tr>'."\n";
-								$hiddenRows .= '<td colspan=2>'.$option['Label']."</td>\n";
+								$hiddenRows .= $tableRowTag."\n";
+								$hiddenRows .= '<td colspan=2>'.$optionLabel."</td>\n";
 								$hiddenRows .= "</tr>\n";
 							}
-							$arrayId = $option['Id'];
+							$arrayId = $option[self::TABLEPARAM_ID];
 							foreach ($result->$arrayId as $elemId => $elemValue)
 							{
-								$hiddenRows .= '<tr>'."\n";
+								$hiddenRows .= $tableRowTag."\n";
 								$hiddenRows .= '<td class='.$hiddenRowsColId.'1>'.$elemId."</td>\n";
 								$hiddenRows .= '<td class='.$hiddenRowsColId.'2>'.$elemValue."</td>\n";
 								$hiddenRows .= "</tr>\n";
@@ -1071,13 +1286,33 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 							break;
 							
 						default:
-							$optionId = $option['Id'];
-							$option['Id'] = $option['Id'].$this->GetRecordID($result);
+							$optionId = $option[self::TABLEPARAM_ID];
+							$option[self::TABLEPARAM_ID] = $option[self::TABLEPARAM_ID].$this->GetRecordID($result);
 											
-							$hiddenRows .= '<tr>'."\n";
-							$hiddenRows .= '<td class='.$hiddenRowsColId.'1>'.$option['Label']."</td>\n";
-							$hiddenRows .= '<td class='.$hiddenRowsColId.'2>'.SettingsAdminClass::GetHTMLTag($option, $result->$optionId, $this->editMode)."</td>\n";
-							$hiddenRows .= "</tr>\n";
+							if (!$nextInline)
+								$hiddenRows .= $tableRowTag."\n";
+							if (strlen($option[self::TABLEPARAM_LABEL]) > 0)
+							{
+								if (!$nextInline)
+									$hiddenRows .= '<td class='.$hiddenRowsColId.'1>';
+								$hiddenRows .= $optionLabel."</td>\n";
+								$nextInline = false;
+							}
+							if (!$nextInline)
+								$hiddenRows .= '<td class='.$hiddenRowsColId.'2>';
+							
+							if (isset($option[self::TABLEPARAM_TYPE]) && ($option[self::TABLEPARAM_TYPE] != self::TABLEENTRY_COOKIE))
+								$currVal = $result->$optionId;
+							else if (isset($_COOKIE[$optionId]))
+								$currVal = $_COOKIE[$optionId];
+							else
+								$currVal = '';
+								
+							$hiddenRows .= self::GetHTMLTag($option, $currVal, $this->editMode);
+							
+							$nextInline = isset($option[self::TABLEPARAM_NEXTINLINE]);
+							if (!$nextInline) 
+								$hiddenRows .= "</td>\n</tr>\n";
 							break;
 					}
 				}
@@ -1087,21 +1322,83 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 				$this->AddHiddenRows($result, $hiddenRowsID, $hiddenRows);					
 			}			
 		}
+				
+		static function GetSettingsRowIndex($arr1, $id)
+		{			
+			for ($index=0; $index<count($arr1); $index++)
+			{
+				if ($arr1[$index][self::TABLEPARAM_ID] === $id)
+					return $index;
+			}
+			
+			return -1;
+		}
+		
+		static function MergeSettings($arr1, $arr2)
+		{
+			// Merge Arrays ... keeping all duplicate entries
+			$vals1 = $arr1;
+			foreach ($arr2 as $val2)
+			{
+				$index = -1;
+				if (isset($val2[self::TABLEPARAM_BEFORE]))
+				{
+					// This entry must be positioned within earlier entries
+					$index = self::GetSettingsRowIndex($vals1, $val2[self::TABLEPARAM_BEFORE]);
+				}
+				if (isset($val2[self::TABLEPARAM_AFTER]))
+				{
+					// This entry must be positioned within earlier entries
+					$index = self::GetSettingsRowIndex($vals1, $val2[self::TABLEPARAM_AFTER]);
+					if ($index >= 0) $index++;
+				}
+				
+				if ($index >= 0)
+					array_splice($vals1, $index, 0, array($val2));
+				else
+					$vals1 = array_merge($vals1, array($val2));
+			}
+			return $vals1;
+		}
 		
 		function GetListDetails($result)
 		{
 			return array();
 		}
 		
+		function OutputJavascript($selectedTabIndex = 0)
+		{
+			if (!$this->isTabbedOutput)
+				return;
+					
+			if (count($this->columnDefs) <= 1)
+				return;
+						
+			$javascript = $this->JS_Top();
+			foreach ($this->columnDefs as $column)
+			{
+				$setingsPageID = $column[self::TABLEPARAM_ID];
+				$javascript .= $this->JS_Tab($setingsPageID);					
+			}
+				
+			$javascript .= $this->JS_Bottom($selectedTabIndex);
+			echo $javascript;
+		}
+
 		function OutputList($results)
 		{
 			if (count($results) == 0) return;
 			
 			$tableId = $this->GetTableID($results[0]);
 			
+			$this->OutputJavascript();
+			
 			$headerColumns = array();
 			foreach ($this->columnDefs as $column)
-				$headerColumns = array_merge($headerColumns, array($column['Id'] => $column['Label']));
+			{
+				$columnLabel = __($column[self::TABLEPARAM_LABEL], $this->myDomain);
+				$headerColumns = array_merge($headerColumns, array($column[self::TABLEPARAM_ID] => $columnLabel));
+			}
 			$this->SetListHeaders($tableId, $headerColumns, $this->HeadersPosn);
 			
 			$this->results = $results;
@@ -1164,6 +1461,131 @@ echo "Can't display this table - Label:".$columnDef['Label']." Id:".$columnDef['
 			$this->Display();
 		}
 		
+		function JS_Top()
+		{
+			return "
+<script language='JavaScript'>
+<!-- Hide script from old browsers
+// End of Hide script from old browsers -->
+
+var tabIdsList  = [";
+	
+		}
+		
+		function JS_Tab($tabID)
+		{
+			return "'$tabID',";	
+		}
+		
+		function JS_Bottom($defaultTab)
+		{
+			return "''];
+
+function onSettingsLoad()
+{
+	var defaultTabId = GetURLParam('tab');
+	if (defaultTabId != '')
+	{		
+		defaultTabId = defaultTabId.replace(/_/g,'-');
+		defaultTabId = defaultTabId.toLowerCase()
+		defaultTabId = defaultTabId + '-tab';
+	}
+	else
+	{
+		defaultTabId = tabIdsList[".$defaultTab."];
+	}
+	
+	SelectTab(defaultTabId);
+}
+
+window.onload = onSettingsLoad;
+
+function clickHeader(obj)
+{
+	SelectTab(obj.id);
+}
+
+function GetURLParam(paramID)
+{
+	var rtnVal = '';
+	
+	var Url = location.href;
+	Url.match(/\?(.+)$/);
+ 	var Params = RegExp.$1;
+ 	
+	Variables = Params.split ('&');
+	for (i = 0; i < Variables.length; i++) 
+	{
+		Separ = Variables[i].split('=');
+		if (Separ[0] == paramID)
+		{
+			rtnVal = Separ[1];
+			break;
+		}
+	}
+	
+	return rtnVal;
+}
+
+function SelectTab(selectedTabID)
+{
+	for (index = 0; index < tabIdsList.length-1; index++)
+	{
+		tabId = tabIdsList[index];
+		ShowOrHideTab(tabId, selectedTabID);
+	}
+}
+
+function ShowOrHideTab(tabID, selectedTabID)
+{
+	var headerElem, tabElem, pageElem, tabWidth;
+	
+	// Get the header 'Tab' Element					
+	tabElem = document.getElementById(tabID);
+	
+	// Get the Body Element					
+	pageElem = document.getElementById('recordoptions');
+
+	// Get all <tr> entries for this TabID and hide/show them as required
+	for (i=1; i<100; i++)
+	{
+		// Get the Body Element	
+		rowElemID = tabID +'-row' + i;				
+		rowElem = document.getElementById(rowElemID);
+		if (rowElem == null) 
+			break;
+			
+		if (tabID == selectedTabID)
+		{
+			// Show the settings row
+			rowElem.style.display = '';
+		}
+		else
+		{
+			// Hide the settings row
+			rowElem.style.display = 'none';
+		}
+	}
+	
+	if (tabID == selectedTabID)
+	{
+		// Make the font weight normal and background Grey
+		tabElem.style.fontWeight = 'bold';	
+		tabElem.style.borderBottom = '0px red solid';
+		//tabElem.style.backgroundColor = '#F9F9F9';
+	}
+	else
+	{
+		// Make the font weight normal and background Grey
+		tabElem.style.fontWeight = 'normal';	
+		tabElem.style.borderBottom = '1px black solid';		
+		//tabElem.style.backgroundColor = '#F1F1F1';
+	}	
+}
+
+</script>
+			";
+		}
 	}
 }
 		 

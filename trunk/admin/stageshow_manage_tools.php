@@ -34,20 +34,27 @@ if (!class_exists('StageShowToolsAdminClass'))
 		
 		function __construct($env) //constructor	
 		{
+			$this->pageTitle = 'Tools';
+			
 			// Call base constructor
 			parent::__construct($env);
-			
+		}
+		
+		function ProcessActionButtons()
+		{
+		}
+		
+		function Output_MainPage($updateFailed)
+		{			
 			$myPluginObj = $this->myPluginObj;
 			
-			$this->actionURL = STAGESHOW_ADMIN_URL.'stageshow_Export.php';
+			$this->actionURL = STAGESHOW_ADMIN_URL.'stageshow_export.php';
 				
 ?>
 <div class="wrap">
-	<div id="icon-stageshow" class="icon32"></div>
-	<h2><?php echo $myPluginObj->pluginName.' - '.__('Tools', STAGESHOW_DOMAIN_NAME); ?></h2>
 	<div class="stageshow-admin-form">
-		<?php
-			$this->Tools_Validate($env);
+<?php
+			$this->Tools_Validate();
 			$this->Tools_Export();
 			if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) $this->Tools_FlushSalesRecords();				
 			if (class_exists('StageShowTestEMailClass') && current_user_can(STAGESHOW_CAPABILITY_DEVUSER)) new StageShowTestEMailClass($this);
@@ -57,8 +64,10 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php
 		}
 
-		function Tools_Validate($env)
+		function Tools_Validate()
 		{
+												
+	  		// FUNCTIONALITY: Tools - Online Sale Validator
 			$myDBaseObj = $this->myDBaseObj;
 
 			$TxnId = '';
@@ -80,7 +89,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 	downloadButton.style.visibility = 'hidden';
 	}
 </script>
-<h3><?php _e('Validate Sale'); ?></h3>
+<h3><?php _e('Validate Sale', $this->myDomain); ?></h3>
 <form method="post">
 		<?php $this->WPNonceField(); ?>
 		<table class="form-table">
@@ -89,14 +98,14 @@ if (!class_exists('StageShowToolsAdminClass'))
 			{
 				$TerminalLocation = $myDBaseObj->GetLocation();
 				echo "<tr>
-			<td>Location / Computer ID</td>
+			<td>".__('Location / Computer ID', $myDBaseObj->get_domain())."</td>
 			<td>$TerminalLocation</td>
 		</tr>
 		";
 		}
 ?>
 			<tr>
-		<th><label for="sshow_ex_type"><?php _e('Transaction ID'); ?></label></th>
+		<th><label for="sshow_ex_type"><?php _e('Transaction ID', $this->myDomain); ?></label></th>
 				<td>
 			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
 						</td>
@@ -104,13 +113,14 @@ if (!class_exists('StageShowToolsAdminClass'))
 			<?php
 			if(isset($_POST['validatesalebutton']))
 			{
+				$env = MJSLibAdminBaseClass::getEnv($this);					
 				$this->ValidateSale($env);
 			}
 ?>
 		</table>
 		<p>
 			<p class="submit">
-<input class="button-secondary" type="submit" name="validatesalebutton" value="<?php _e('Validate', STAGESHOW_DOMAIN_NAME) ?>"/>
+<input class="button-secondary" type="submit" name="validatesalebutton" value="<?php _e('Validate', $this->myDomain) ?>"/>
 					</form>
 <?php
 		}
@@ -133,7 +143,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 						
 				if (count($results) > 0)
 				{						
-					$validateMsg .= __('Matching record found', STAGESHOW_DOMAIN_NAME);
+					$validateMsg .= __('Matching record found', $this->myDomain);
 					echo '<tr><td colspan="2"><div id="message" class="updated"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
 					
 					$salesList = new StageShowSalesAdminDetailsListClass($env);		
@@ -146,7 +156,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 				}
 				else
 				{
-					$validateMsg .= __('NO matching record', STAGESHOW_DOMAIN_NAME);
+					$validateMsg .= __('No matching record', $this->myDomain);
 					echo '<tr><td colspan="2"><div id="message" class="error"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
 				}
 			}
@@ -156,33 +166,33 @@ if (!class_exists('StageShowToolsAdminClass'))
 		
 		function Tools_Export()
 		{
-			$this->actionURL = STAGESHOW_ADMIN_URL.'stageshow_Export.php';
+			$this->actionURL = STAGESHOW_ADMIN_URL.'stageshow_export.php';
 				
 ?>
 
-<h3><?php _e('Export Data'); ?></h3>
-<p><?php _e('Export Configuration and Ticket Sales to a "TAB Separated Text" format file on your computer.'); ?></p>
-<p><?php _e('This format can be imported to many applications including spreadsheets and databases.'); ?></p>
+<h3><?php _e('Export Data', $this->myDomain); ?></h3>
+<p><?php _e('Export Configuration and Ticket Sales to a "TAB Separated Text" format file on your computer.', $this->myDomain); ?></p>
+<p><?php _e('This format can be imported to many applications including spreadsheets and databases.', $this->myDomain); ?></p>
 <form action="<?php echo $this->actionURL; ?>" method="get">
 <?php $this->WPNonceField(); ?>
 <table class="form-table">
 <tr>
-<th><?php _e('Export'); ?></th>
+<th><?php _e('Export', $this->myDomain); ?></th>
 <td>
 <select name="sshow_ex_type" id="sshow_ex_type" onchange=onSelectDownload(this)>
 	<?php if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) { ?>
-	<option value="settings"><?php _e('Settings'); ?> </option>
+	<option value="settings"><?php _e('Settings', $this->myDomain); ?> </option>
 	<?php } ?>
-	<option value="tickets"><?php _e('Tickets'); ?> </option>
-	<option value="summary" selected="selected"><?php _e('Sales Summary'); ?>&nbsp;&nbsp;</option>
+	<option value="tickets"><?php _e('Tickets', $this->myDomain); ?> </option>
+	<option value="summary" selected="selected"><?php _e('Sales Summary', $this->myDomain); ?>&nbsp;&nbsp;</option>
 </select>
 </td>
 </tr>
 </table>
 <p>
 <p class="submit">
-<input type="submit" name="downloadexport" class="button" value="<?php esc_attr_e('Download Export File'); ?>" />
-<input type="submit" name="downloadvalidator" id="downloadvalidator" class="button-secondary" value="<?php _e('Downlod Offline Validator', STAGESHOW_DOMAIN_NAME); ?>" />
+<input type="submit" name="downloadexport" class="button" value="<?php esc_attr_e('Download Export File', $this->myDomain); ?>" />
+<input type="submit" name="downloadvalidator" id="downloadvalidator" class="button-secondary" value="<?php _e('Downlod Offline Validator', $this->myDomain); ?>" />
 <input type="hidden" name="page" value="stageshow_tools" />
 <input type="hidden" name="download" value="true" />
 </p>
@@ -192,8 +202,8 @@ if (!class_exists('StageShowToolsAdminClass'))
 		
 		function Tools_FlushSalesRecords()
 		{			
+	  		// FUNCTIONALITY: Tools - Flush Sales DB 
 			$myDBaseObj = $this->myDBaseObj;
-			$DeleteOrphans = ($myDBaseObj->adminOptions['DeleteOrphans'] == true); 
 			if(isset($_POST['flushsalesbutton']))
 			{
 				$this->CheckAdminReferer();
@@ -202,14 +212,14 @@ if (!class_exists('StageShowToolsAdminClass'))
 			}
 	
 ?>
-<h3><?php _e('Sales Records'); ?></h3>
-<p><?php _e('Sales records are not deleted when shows or performances are deleted.'); ?></p>
-<p><?php _e('Individual sales records can be deleted on the sales page. All sales records for sales where the corresponding show or performance has been removed can be deleted by clicking the button below.'); ?></p>
+<h3><?php _e('Sales Records', $this->myDomain); ?></h3>
+<p><?php _e('Sales records are not deleted when shows or performances are deleted.', $this->myDomain); ?></p>
+<p><?php _e('Individual sales records can be deleted on the sales page. All sales records for sales where the corresponding show or performance has been removed can be deleted by clicking the button below.', $this->myDomain); ?></p>
 <form method="post">
 	<?php $this->WPNonceField(); ?>
 <p>
 <p class="submit">
-<input class="button-secondary" type="submit" name="flushsalesbutton" value="<?php _e('Flush Sales Records', STAGESHOW_DOMAIN_NAME) ?>" onclick="javascript:return confirmDelete('Orphaned Sales Records')"/>
+<input class="button-secondary" type="submit" name="flushsalesbutton" value="<?php _e('Flush Sales Records', $this->myDomain) ?>" onclick="javascript:return confirmDelete('Orphaned Sales Records')"/>
 </p>
 </form>
 

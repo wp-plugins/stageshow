@@ -6,6 +6,6 @@ include '../../../wp-config.php';
 include 'include/mjslib_NotifyURL.php';
 	
 $stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
-new NotifyURLClass(new $stageShowDBaseClass());	
+new NotifyURLClass(new $stageShowDBaseClass(__FILE__));	
 
 ?>

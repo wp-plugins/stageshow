@@ -32,10 +32,7 @@ if (!class_exists('StageShowExportAdminClass'))
 		{
 			$this->myDBaseObj = $myDBaseObj;
 
-			// Get the value of the "Delete Orphans" option and save it
-			$myDBaseObj->adminOptions['DeleteOrphans'] = (isset($_GET['sshow_delete_orphans']) && ($_GET['sshow_delete_orphans'] == 1));
-			$myDBaseObj->saveOptions();
-			
+	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
 			if ( isset( $_GET['downloadexport'] ) )
 			{
 				$this->filename = 'stageshow.txt';	
@@ -46,23 +43,23 @@ if (!class_exists('StageShowExportAdminClass'))
 					{          
 						case 'settings':
 								if (!current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) die("Access Denied"); 
-								$this->ouput_downloadHeader(false);
+								$this->ouput_downloadHeader();
 								$this->export_shows();
 								break;
 			          
 						case 'tickets':
-								$this->ouput_downloadHeader(false);
+								$this->ouput_downloadHeader();
 								$this->export_tickets();
 								break;          
 
 						case 'summary':
-								$this->ouput_downloadHeader(false);
+								$this->ouput_downloadHeader();
 								$this->export_summary();
 								break;
 								
 						case 'all':
 						default :
-								$this->ouput_downloadHeader(false);
+								$this->ouput_downloadHeader();
 								$this->export_shows();
 								$this->export_tickets();
 								break;
@@ -73,7 +70,8 @@ if (!class_exists('StageShowExportAdminClass'))
 			{
 				$this->filename = 'stageshowValidator.html';
 				
-				$this->ouput_downloadHeader(true);
+				$this->ouput_downloadHeader();
+				$this->output_htmlhead();
 				$this->export_tickets(true);
 				$this->output_endhtmlhead();
 				$this->ouput_downloadFooter(true);
@@ -147,15 +145,11 @@ td.col_show
 ';
 		}
 		
-		function ouput_downloadHeader($exportHTML)
+		function ouput_downloadHeader()
 		{
 			$this->header( 'Content-Description: File Transfer' );
 			$this->header( 'Content-Disposition: attachment; filename=' . $this->filename );
 			$this->header( 'Content-Type: text/html; charset=utf-8' );	
-			
-			if (!$exportHTML) return;
-			
-			$this->output_htmlhead();
 		}
 
 		function ouput_downloadFooter()
@@ -374,6 +368,6 @@ function onclickverify(obj)
 }
 
 $stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
-new StageShowExportAdminClass(new $stageShowDBaseClass());
+new StageShowExportAdminClass(new $stageShowDBaseClass(__FILE__));
 
 ?>

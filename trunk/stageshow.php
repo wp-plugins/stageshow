@@ -2,7 +2,7 @@
 /* 
 Plugin Name: StageShow
 Plugin URI: http://www.corondeck.co.uk/StageShow
-Version: 1.1.7
+Version: 1.2
 Author: Malcolm Shergold
 Author URI: http://www.corondeck.co.uk
 Description: A Wordpress Plugin to sell theatre tickets online
@@ -25,20 +25,11 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-define('STAGESHOW_PLUGIN_FILE', __FILE__);
 define('STAGESHOW_CODE_PREFIX', 'stageshow');
 
 include 'stageshow_defs.php';
 include 'stageshow_main.php';
 
-$stageShowPluginObj = new StageShowPluginClass(__FILE__, new StageShowDBaseClass());
-
-//Actions and Filters	
-if (isset($stageShowPluginObj)) 
-{
-	//Actions
-	register_activation_hook( __FILE__, array(&$stageShowPluginObj, 'activate') );
-	register_deactivation_hook( __FILE__, array(&$stageShowPluginObj, 'deactivate') );	
-}
+new StageShowPluginClass(__FILE__);
 
 ?>

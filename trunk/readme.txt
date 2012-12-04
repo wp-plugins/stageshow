@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.4.2
-Stable tag: 1.1.7
+Stable tag: 1.2
 
 The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups.
 
@@ -124,27 +124,39 @@ The following tags can be used in the EMail template:
 
 == Screenshots ==
 
-1. Screenshot 1: Stageshow and PayPal Settings Page 
-2. Screenshot 2: Overview Page 
-3. Screenshot 3: Shows Setup 
-4. Screenshot 4: Performances Setup 
-5. Screenshot 5: Ticket Types and Prices Setup 
-6. Screenshot 6: Sales Log Summary 
-7. Screenshot 7: Sales Log Sale Details 
-8. Screenshot 8: Sales Log Show Summary 
-9. Screenshot 9: Sales Log Performance Summary 
-10. Screenshot 10: Admin Tools Page 
-11. Screenshot 11: Shows Box Office Page 
-12. Screenshot 12: Sample EMail 
+1. Screenshot 1: Overview Page 
+2. Screenshot 2: Shows Setup 
+3. Screenshot 3: Performances Setup 
+4. Screenshot 4: Ticket Types and Prices Setup 
+5. Screenshot 5: Sales Log Summary 
+6. Screenshot 6: Sales Log Summary (Showing Details) 
+7. Screenshot 7: Sales Log Show Summary 
+8. Screenshot 8: Sales Log Performance Summary 
+9. Screenshot 9: Admin Tools Page 
+10. Screenshot 10: PayPal Settings Page 
+11. Screenshot 11: Stageshow Settings Page 
+12. Screenshot 12: Shows Box Office Page 
 
 == Changelog ==
 
 * Version History for StageShow Plugin 
 
+= 1.2 =
+* Bug Fix: StageShow_Validate capability not deleted on uninstall
+* Admin Pages code optimised
+* Separators added between tabs on settings page(s)
+* Added support for translations
+* Added stageshow.pot file to distribution
+* Added PayPal login error code reports
+* Moved "EMail Template File" option to StageShow settings
+* Sample Sales are always for only one show
+* New Shows are always initialised as ACTIVE
+* Added Settings Page URL param to select tab
+
 = 1.1.7 =
 * Activate function explicitly called on version update
 * Email and Images Templates moved to uploads/{pluginID}/****** folders
-* Test Send Email added to Tools admin page (implemented by stageshow_test_emailsale.php)
+* Test Send Email added to Tools admin page
 * Admin Pages - Redundant &lt;form&gt; tag action parameters removed
 * Admin Pages CSS - stageshow-settings-**** classes changed to mjslib-settings-****
 

@@ -1,5 +1,7 @@
 <?php
 
+if (defined('STAGESHOW_FOLDER')) return;
+
 $siteurl = get_option('siteurl');
 define('STAGESHOW_FOLDER', dirname(plugin_basename(__FILE__)));
 define('STAGESHOW_URL', $siteurl.'/wp-content/plugins/' . STAGESHOW_FOLDER .'/');
@@ -12,7 +14,7 @@ if (!defined('STAGESHOW_STYLESHEET_URL'))
 if (!defined('STAGESHOW_PAYPAL_IPN_NOTIFY_URL'))
 	define('STAGESHOW_PAYPAL_IPN_NOTIFY_URL', STAGESHOW_URL.'stageshow_NotifyURL.php');
 
-define('STAGESHOW_FILE_PATH', dirname(STAGESHOW_PLUGIN_FILE).'/');
+define('STAGESHOW_FILE_PATH', dirname(__FILE__).'/');
 define('STAGESHOW_DIR_NAME', basename(STAGESHOW_FILE_PATH));
 define('STAGESHOW_ADMIN_PATH', STAGESHOW_FILE_PATH . '/admin/');
 define('STAGESHOW_INCLUDE_PATH', STAGESHOW_FILE_PATH . '/include/');
@@ -20,8 +22,7 @@ define('STAGESHOW_ADMINICON_PATH', STAGESHOW_ADMIN_PATH . 'images/');
 define('STAGESHOW_TEST_PATH', STAGESHOW_FILE_PATH . '/test/');
 
 define('STAGESHOW_DEFAULT_TEMPLATES_PATH', STAGESHOW_FILE_PATH . 'templates/');
-
-define('STAGESHOW_DOMAIN_NAME', 'stageshow');
+define('STAGESHOW_LANG_RELPATH', STAGESHOW_FOLDER . '/lang/');
 
 if (!defined('STAGESHOW_SHORTCODE_PREFIX'))
 	define('STAGESHOW_SHORTCODE_PREFIX', 'sshow');
@@ -64,5 +65,11 @@ define('STAGESHOW_URL_TEXTLEN',110);
 	
 if (!defined('STAGESHOW_NEWS_UPDATE_INTERVAL'))
 	define('STAGESHOW_NEWS_UPDATE_INTERVAL', 10);
+
+if (!defined('STAGESHOW_MAXTICKETCOUNT'))
+	define('STAGESHOW_MAXTICKETCOUNT', 4);
+
+if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
+	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
 
 ?>

@@ -22,46 +22,51 @@ Copyright 2012 Malcolm Shergold
 
 require_once 'include/stageshow_dbase_api.php';      
       
-if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
-	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
-
-if (!defined('STAGESHOW_MAXTICKETCOUNT'))
-	define('STAGESHOW_MAXTICKETCOUNT', 4);
-
 if (!class_exists('StageShowPluginClass')) 
 {
 	class StageShowPluginClass // Define class
 	{
-		var $pluginName;
+		var $ourPluginName;
 		var $myDBaseObj;
 		var	$env;
 		
 		var	$adminClassFilePrefix;
 		var $adminClassPrefix;
 		
-		function __construct($caller, $dbaseObj) 
+		function __construct($caller)		 
 		{
+			$dbaseObj = $this->CreateDBClass($caller);
+			
+			//Actions
+			register_activation_hook( $caller, array(&$this, 'activate') );
+			register_deactivation_hook( $caller, array(&$this, 'deactivate') );	
+	
 			add_action('wp_enqueue_scripts', array(&$this, 'load_user_styles') );
 			add_action('admin_print_styles', array(&$this, 'load_admin_styles') );
 			
 			// Add a reference to the header
 			add_action('wp_head', array(&$this, 'OutputMetaTag'));
 
+			$this->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_test.php');
+			$dbaseObj->testModeEnabled = $this->testModeEnabled;
+				
 			$this->adminClassFilePrefix = 'stageshow';
 			$this->adminClassPrefix = 'StageShow';
 			
 			$this->myDBaseObj = $dbaseObj;
+			$this->myDomain = $this->myDBaseObj->get_domain();
 			
 			$this->env = array(
-		    'caller' => $caller,
-		    'PluginObj' => $this,
-		    'DBaseObj' => $this->myDBaseObj,
+			    'caller' => $caller,
+			    'PluginObj' => $this,
+			    'DBaseObj' => $this->myDBaseObj,
+			    'Domain' => $this->myDomain,
 			);
 
 			$this->getStageshowOptions();
 			
 			$myDBaseObj = $this->myDBaseObj;
-			$this->pluginName = $myDBaseObj->get_name();
+			//$this->pluginName = $myDBaseObj->get_name();
 			
 			//Actions
 			add_action('admin_menu', array(&$this, 'StageShow_ap'));
@@ -69,17 +74,25 @@ if (!class_exists('StageShowPluginClass'))
 			add_action('init', array(&$this, 'init'));
 		  
 			//Filters
+			// FUNCTIONALITY: Main - Shortcode sshow-boxoffice
 			//Add ShortCode for "front end listing"
 			add_shortcode(STAGESHOW_SHORTCODE_PREFIX."-boxoffice", array(&$this, 'OutputContent_BoxOffice'));
 			
 			if ($myDBaseObj->checkVersion())
 			{
+				// FUNCTIONALITY: Main - Call "Activate" on plugin update
 				// Versions are different ... call activate() to do any updates
 				$this->activate();
 			}			
 		}
 		
-		function load_user_styles() {
+		function CreateDBClass($caller)
+		{					
+			return new StageShowDBaseClass($caller);		
+		}
+		
+		function load_user_styles() 
+		{
 			$this->getStageshowOptions();
 			
 			//Add Style Sheet
@@ -87,7 +100,8 @@ if (!class_exists('StageShowPluginClass'))
 		}
 		
 		//Returns an array of admin options
-		function getStageshowOptions() {
+		function getStageshowOptions() 
+		{
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
@@ -97,27 +111,27 @@ if (!class_exists('StageShowPluginClass'))
 				if (!defined('STAGESHOW_RUNDEVCODE'))
 					define('STAGESHOW_RUNDEVCODE', 1);
 			}
-			
+						
 			return $myDBaseObj->adminOptions;
 		}
-    
 		// Saves the admin options to the options data table
-		function saveStageshowOptions() {
+		
+		function saveStageshowOptions()
+		{
 			$myDBaseObj = $this->myDBaseObj;
-			
 			$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
-			
 			$myDBaseObj->saveOptions();
 		}
-    
-    // ----------------------------------------------------------------------
-    // Activation / Deactivation Functions
-    // ----------------------------------------------------------------------
-    
-    function activate()
+		
+		// ----------------------------------------------------------------------
+		// Activation / Deactivation Functions
+		// ----------------------------------------------------------------------
+		
+		function activate()
 		{
 			$myDBaseObj = $this->myDBaseObj;
       
+	  		// FUNCTIONALITY: Activate - Add defaults to options that are not set
 			$defaultOptions = $myDBaseObj->GetDefaultOptions();
 			foreach ($defaultOptions as $optionKey => $optionValue)
 			{
@@ -129,49 +143,10 @@ if (!class_exists('StageShowPluginClass'))
 			// Bump the activation counter
 			$myDBaseObj->adminOptions['ActivationCount']++;
 			
-			if ( ($myDBaseObj->adminOptions['ActivationCount'] == 2)
-				&& ($myDBaseObj->adminOptions['PayPalAPIUser'] === '')
-				&& ($myDBaseObj->adminOptions['PayPalAPIPwd'] === '')
-				&& ($myDBaseObj->adminOptions['PayPalAPISig'] === '')
-				&& ($myDBaseObj->adminOptions['PayPalAPIEMail'] === '') )
-			{
-				// Initialise PayPal target ....
-				if (defined('PAYPAL_APILIB_ACTIVATE_TESTMODE'))
-				{
-					if (defined('PAYPAL_APILIB_ACTIVATE_TESTMODE'))
-						$myDBaseObj->adminOptions['PayPalEnv']  = 'sandbox';
-					else
-						$myDBaseObj->adminOptions['PayPalEnv']  = 'live';
-				}
-				
-				if ($myDBaseObj->adminOptions['PayPalEnv']  == 'sandbox')
-				{
-					// Pre-configured PayPal Sandbox settings - can be defined in wp-config.php
-					if (defined('PAYPAL_APILIB_ACTIVATE_TESTUSER'))
-						$myDBaseObj->adminOptions['PayPalAPIUser'] = PAYPAL_APILIB_ACTIVATE_TESTUSER;
-					if (defined('PAYPAL_APILIB_ACTIVATE_TESTPWD'))
-						$myDBaseObj->adminOptions['PayPalAPIPwd']  = PAYPAL_APILIB_ACTIVATE_TESTPWD;
-					if (defined('PAYPAL_APILIB_ACTIVATE_TESTSIG'))
-						$myDBaseObj->adminOptions['PayPalAPISig']  = PAYPAL_APILIB_ACTIVATE_TESTSIG;
-					if (defined('PAYPAL_APILIB_ACTIVATE_TESTEMAIL'))
-						$myDBaseObj->adminOptions['PayPalAPIEMail']  = PAYPAL_APILIB_ACTIVATE_TESTEMAIL;
-				}
-				else
-				{
-					// Pre-configured PayPal "Live" settings - can be defined in wp-config.php
-					if (defined('PAYPAL_APILIB_ACTIVATE_LIVEUSER'))
-						$myDBaseObj->adminOptions['PayPalAPIUser'] = PAYPAL_APILIB_ACTIVATE_LIVEUSER;
-					if (defined('PAYPAL_APILIB_ACTIVATE_LIVEPWD'))
-						$myDBaseObj->adminOptions['PayPalAPIPwd']  = PAYPAL_APILIB_ACTIVATE_LIVEPWD;
-					if (defined('PAYPAL_APILIB_ACTIVATE_LIVESIG'))
-						$myDBaseObj->adminOptions['PayPalAPISig']  = PAYPAL_APILIB_ACTIVATE_LIVESIG;
-					if (defined('PAYPAL_APILIB_ACTIVATE_LIVEEMAIL'))
-						$myDBaseObj->adminOptions['PayPalAPIEMail']  = PAYPAL_APILIB_ACTIVATE_LIVEEMAIL;				
-				}      
-			}
-			
 			if ($myDBaseObj->adminOptions['ActivationCount'] == 1)
 			{
+	  			// FUNCTIONALITY: FIRST Activate - Apply STAGESHOW_ACTIVATE_******** defaults if defined
+				
 				// Add Sample PayPal shopping cart Images and URLs
 				if (defined('STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_FILE'))
 					$myDBaseObj->adminOptions['PayPalLogoImageFile'] = STAGESHOW_SAMPLE_PAYPALLOGOIMAGE_FILE;
@@ -186,19 +161,21 @@ if (!class_exists('StageShowPluginClass'))
 					$myDBaseObj->adminOptions['AdminEMail'] = STAGESHOW_ACTIVATE_ADMIN_EMAIL;
 					$myDBaseObj->adminOptions['AuthTxnEMail'] = STAGESHOW_ACTIVATE_ADMIN_EMAIL;
 				}
-	    }
+	    	}
 			 
 			$LogsFolder = ABSPATH . '/' . $myDBaseObj->adminOptions['LogsFolderPath'];
 			if (!is_dir($LogsFolder))
 				mkdir($LogsFolder, 0644, TRUE);
 
+	  		// FUNCTIONALITY: Activate - Set EMail template to file name ONLY
 			// EMail Template defaults to templates folder - remove folders from path
 			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath');
 			
-      $this->saveStageshowOptions();
+      		$this->saveStageshowOptions();
       
 			$setupUserRole = $myDBaseObj->adminOptions['SetupUserRole'];
 
+	  		// FUNCTIONALITY: Activate - Add Capabilities
 			// Add capability to submit events to all default users
 			$adminRole = get_role($setupUserRole);
 			if ( !empty($adminRole) ) 
@@ -214,7 +191,7 @@ if (!class_exists('StageShowPluginClass'))
 					$adminRole->add_cap(STAGESHOW_CAPABILITY_SETUPUSER);
 			}				
 			
-      $myDBaseObj->upgradeDB();
+      		$myDBaseObj->upgradeDB();
 			
 			if (!$myDBaseObj->adminOptions['PayPalInvChecked'])
 			{
@@ -228,40 +205,43 @@ if (!class_exists('StageShowPluginClass'))
 			
 		}
 
-    function deactivate()
-    {
-    }
+	    function deactivate()
+	    {
+	    }
 
 		function init()
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			$myDBaseObj->init($this->env['caller']);
+			
+	  		// FUNCTIONALITY: Runtime - Load language files
+			$langRelPath = STAGESHOW_LANG_RELPATH;
+			load_plugin_textdomain('stageshow', false, $langRelPath);
 		}
 		
 		function OutputMetaTag()
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
+	  		// FUNCTIONALITY: Runtime - Output StageShow Meta Tag
 			// Get Version Number
 			$pluginID = $myDBaseObj->get_name();
 			$pluginVer = $myDBaseObj->get_version();
 			
-			echo "\n<meta name='$pluginID' content='$pluginID for WordPress by Malcolm Shergold - Ver:$pluginVer' />\n";			
+			echo "\n<meta name='$pluginID' content='$pluginID for WordPress by Malcolm Shergold - Ver:$pluginVer' />\n";						
 		}
 		
 		function CreateSample()
 		{
-      $myDBaseObj = $this->myDBaseObj;
-      
-      $this->saveStageshowOptions();
-      
-      $myDBaseObj->CreateSample();
+			$myDBaseObj = $this->myDBaseObj;
+			$this->saveStageshowOptions();
+			$myDBaseObj->CreateSample();
 		}
 		
 		function OutputContent_BoxOffice( $atts )
 		{
-      $myDBaseObj = $this->myDBaseObj;
-
+	  		// FUNCTIONALITY: Runtime - Output Box Office
+			$myDBaseObj = $this->myDBaseObj;
 			$pluginID = $myDBaseObj->get_name();
 			$pluginVer = $myDBaseObj->get_version();
 			$pluginAuthor = $myDBaseObj->get_author();
@@ -275,12 +255,12 @@ if (!class_exists('StageShowPluginClass'))
         
 			ob_start();
 			
-      $showID = $atts['id'];
-      if ( $showID !== '' )
-      {
+			$showID = $atts['id'];
+			if ( $showID !== '' )
+		    {
 				$this->OutputContent_ShowBoxOffice($showID);
-      }
-      else
+		    }
+		    else
 			{
 				// Get the ID of the show(s)
 				$shows = $myDBaseObj->GetAllShowsList();
@@ -294,56 +274,56 @@ if (!class_exists('StageShowPluginClass'))
 			$boxOfficeOutput = ob_get_contents();
 			ob_end_clean();
 			
-			return $boxOfficeOutput;			
-    }
-     
+			return $boxOfficeOutput;						
+		}
+		
 		function OutputContent_ShowBoxOffice( $showID )
 		{
-      $myDBaseObj = $this->myDBaseObj;
+			$myDBaseObj = $this->myDBaseObj;
 			
 			$payPalAPIObj = $myDBaseObj->payPalAPIObj;
 			
-      // Get all database entries for this show ... ordered by date/time then ticket type
+			// Get all database entries for this show ... ordered by date/time then ticket type
 			$myDBaseObj->prepareBoxOffice($showID);			
-      $results = $myDBaseObj->GetPricesListByShowID($showID, true);
+			$results = $myDBaseObj->GetPricesListByShowID($showID, true);
 			$perfCount = 0;
 			
-      if (count($results) == 0) 
+			if (count($results) == 0)
 			{
 				echo "<!-- StageShow BoxOffice - No Output for ShowID=$showID -->\n";
 				return;
 			}
       
-      $hiddenTags  = "\n";
-      $hiddenTags .= '<input type="hidden" name="cmd" value="_s-xclick"/>'."\n";
-      if (strlen($myDBaseObj->adminOptions['PayPalLogoImageFile']) > 0) 
+			$hiddenTags  = "\n";
+			$hiddenTags .= '<input type="hidden" name="cmd" value="_s-xclick"/>'."\n";
+			if (strlen($myDBaseObj->adminOptions['PayPalLogoImageFile']) > 0)
 			{
-        $hiddenTags .= '<input type="hidden" name="image_url" value="'.$myDBaseObj->getImageURL('PayPalLogoImageFile').'"/>'."\n";
-      }
-     if (strlen($myDBaseObj->adminOptions['PayPalHeaderImageFile']) > 0) 
+				$hiddenTags .= '<input type="hidden" name="image_url" value="'.$myDBaseObj->getImageURL('PayPalLogoImageFile').'"/>'."\n";
+			}
+			if (strlen($myDBaseObj->adminOptions['PayPalHeaderImageFile']) > 0)
 			{
-        $hiddenTags .= '<input type="hidden" name="cpp_header_image" value="'.$myDBaseObj->getImageURL('PayPalHeaderImageFile').'"/>'."\n";
-      }
+				$hiddenTags .= '<input type="hidden" name="cpp_header_image" value="'.$myDBaseObj->getImageURL('PayPalHeaderImageFile').'"/>'."\n";
+			}
 
-      $hiddenTags .= '<input type="hidden" name="on0" value="TicketType"/>'."\n";      
-      $hiddenTags .= '<input type="hidden" name="SiteURL" value="'.get_site_url().'"/>'."\n";
+			$hiddenTags .= '<input type="hidden" name="on0" value="TicketType"/>'."\n";      
+			$hiddenTags .= '<input type="hidden" name="SiteURL" value="'.get_site_url().'"/>'."\n";
       
-      if (strlen($payPalAPIObj->PayPalNotifyURL) > 0)
-	      $notifyTag  = '<input type="hidden" name="notify_url" value="'.$payPalAPIObj->PayPalNotifyURL.'"/>'."\n";
-      else
+			if (strlen($payPalAPIObj->PayPalNotifyURL) > 0)
+				$notifyTag  = '<input type="hidden" name="notify_url" value="'.$payPalAPIObj->PayPalNotifyURL.'"/>'."\n";
+			else
 				$notifyTag = '';
 				
-			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', STAGESHOW_DOMAIN_NAME);
+			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', $this->myDomain);
 ?>
 			<div class="stageshow-boxoffice">
-				<div id="icon-stageshow" class="icon32"></div>
-				<h2>
-					<?php echo $results[0]->showName; ?>
-				</h2>
-					<?php      
+			<div id="icon-stageshow" class="icon32"></div>
+			<h2>
+			<?php echo $results[0]->showName; ?>
+			</h2>
+<?php      
 			if (isset($results[0]->showNote) && ($results[0]->showNote !== ''))
 			{
-				echo '<div class="stageshow-boxoffice-shownote">'.$results[0]->showNote . "</div><br>\n"; 
+				echo '<div class="stageshow-boxoffice-shownote">'.$results[0]->showNote . "</div><br>\n";
 			}
 			
 			$widthCol1 = '25%';
@@ -367,7 +347,7 @@ if (!class_exists('StageShowPluginClass'))
 				{
 					$perfCount++;
 					if ($perfCount == 1) echo '
-		 <table width="100%" border="0">
+			 <table width="100%" border="0">
 			 <tr>
 				 <td>
 					<table width="100%" cellspacing="0">
@@ -431,7 +411,7 @@ if (!class_exists('StageShowPluginClass'))
 							';											
 					if (!$myDBaseObj->IsPerfEnabled($result)) echo '&nbsp;';
 					else if ($result->perfSeats == 0) echo '
-						'.__('Sold Out', STAGESHOW_DOMAIN_NAME);
+						'.__('Sold Out', $this->myDomain);
 					else echo '
 						<input type="submit" value="Add"  alt="'.$altTag.'"/>';
 						echo '
@@ -453,7 +433,7 @@ if (!class_exists('StageShowPluginClass'))
 				}
 			}
 			if ($perfCount == 0) 
-				echo __('Bookings Not Currently Available', STAGESHOW_DOMAIN_NAME)."<br>\n";
+				echo __('Bookings Not Currently Available', $this->myDomain)."<br>\n";
 			else echo '
 			  </table>';
 				
@@ -472,8 +452,8 @@ if (!class_exists('StageShowPluginClass'))
 			$payPalAPIObj = $myDBaseObj->payPalAPIObj;
 			
 			$pageSubTitle = $_GET['page'];			
-      switch ($pageSubTitle)
-      {
+      		switch ($pageSubTitle)
+      		{
 				case STAGESHOW_MENUPAGE_ADMINMENU:
 				case STAGESHOW_MENUPAGE_OVERVIEW:
 				default :
@@ -482,13 +462,13 @@ if (!class_exists('StageShowPluginClass'))
 					new $classId($this->env);
 					break;
 					
-        case STAGESHOW_MENUPAGE_SHOWS:
+        		case STAGESHOW_MENUPAGE_SHOWS:
 					include 'admin/'.$this->adminClassFilePrefix.'_manage_shows.php';     
 					$classId = $this->adminClassPrefix.'ShowsAdminClass';
 					new $classId($this->env);
-          break;
+          			break;
           
-        case STAGESHOW_MENUPAGE_PERFORMANCES :
+        		case STAGESHOW_MENUPAGE_PERFORMANCES :
 					include 'admin/'.$this->adminClassFilePrefix.'_manage_performances.php';
 					$classId = $this->adminClassPrefix.'PerformancesAdminClass';
 					new $classId($this->env);
@@ -513,19 +493,14 @@ if (!class_exists('StageShowPluginClass'))
 				case STAGESHOW_MENUPAGE_BUTTONS :
 					global $salesManDBaseObj;
 					$salesManDBaseObj = $this->myDBaseObj;
-					
-					if (!defined('SALESMAN_INCLUDE_PATH'))
-						define ('SALESMAN_INCLUDE_PATH', STAGESHOW_INCLUDE_PATH);
-					if (!defined('SALESMAN_DOMAIN_NAME'))
-						define ('SALESMAN_DOMAIN_NAME', STAGESHOW_DOMAIN_NAME);
-										
 					include STAGESHOW_TEST_PATH.'paypal_manage_buttons.php';      
 					new PayPalButtonsAdminClass($this->env, $salesManDBaseObj->GetOurButtonsList());
 					break;
 					
 				case STAGESHOW_MENUPAGE_SETTINGS :
-					include 'admin/stageshow_manage_settings.php';      
-					new StageShowManageSettingsClass($this->env);
+					include 'admin/'.$this->adminClassFilePrefix.'_manage_settings.php';
+					$classId = $this->adminClassPrefix.'SettingsAdminClass';
+					new $classId($this->env);
 					break;
           
 				case STAGESHOW_MENUPAGE_TOOLS:
@@ -535,17 +510,17 @@ if (!class_exists('StageShowPluginClass'))
 					break;
 							
 				case STAGESHOW_MENUPAGE_TESTSETTINGS:
-		      include STAGESHOW_TEST_PATH.'stageshow_test.php';   
+					include STAGESHOW_TEST_PATH.'stageshow_test.php';   
 					new StageShowTestSettingsAdminClass($this->env);
 					break;		
 					
 				case STAGESHOW_MENUPAGE_TEST:
-		      include STAGESHOW_TEST_PATH.'stageshow_test.php';   
+					include STAGESHOW_TEST_PATH.'stageshow_test.php';   
 					new StageShowTestAdminClass($this->env);
 					break;
 							
 				case STAGESHOW_MENUPAGE_DEBUG:
-		      include 'admin/stageshow_debug.php';    
+		      		include STAGESHOW_ADMIN_PATH.'stageshow_debug.php';    
 					new StageShowDebugAdminClass($this->env);
 					break;							
 			}
@@ -587,49 +562,45 @@ if (!class_exists('StageShowPluginClass'))
 			
 			if (isset($adminCap) && function_exists('add_menu_page')) 
 			{
-				$pluginName = $myDBaseObj->get_name();
+				$ourPluginName = $myDBaseObj->get_name();
 				
 				$icon_url = STAGESHOW_ADMIN_IMAGES_URL.'stageshow16grey.png';
-				add_menu_page($pluginName, $pluginName, $adminCap, STAGESHOW_MENUPAGE_ADMINMENU, array(&$this, 'printAdminPage'), $icon_url);
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('StageShow Overview', STAGESHOW_DOMAIN_NAME),__('Overview', STAGESHOW_DOMAIN_NAME),    $adminCap,                        STAGESHOW_MENUPAGE_ADMINMENU,    array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Show Editor', STAGESHOW_DOMAIN_NAME),       __('Shows', STAGESHOW_DOMAIN_NAME),        STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_SHOWS,        array(&$this, 'printAdminPage'));
+				add_menu_page($ourPluginName, $ourPluginName, $adminCap, STAGESHOW_MENUPAGE_ADMINMENU, array(&$this, 'printAdminPage'), $icon_url);
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('StageShow Overview', $this->myDomain),__('Overview', $this->myDomain),    $adminCap,                        STAGESHOW_MENUPAGE_ADMINMENU,    array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Show Editor', $this->myDomain),       __('Shows', $this->myDomain),        STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_SHOWS,        array(&$this, 'printAdminPage'));
 				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshowplus_manage_priceplans.php') ) 
-					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Plan Editor', STAGESHOW_DOMAIN_NAME),  __('Price Plans', STAGESHOW_DOMAIN_NAME),STAGESHOW_CAPABILITY_ADMINUSER, STAGESHOW_MENUPAGE_PRICEPLANS,   array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', STAGESHOW_DOMAIN_NAME),__('Performances', STAGESHOW_DOMAIN_NAME), STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', STAGESHOW_DOMAIN_NAME),        __('Prices', STAGESHOW_DOMAIN_NAME),       STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Plan Editor', $this->myDomain),  __('Price Plans', $this->myDomain),STAGESHOW_CAPABILITY_ADMINUSER, STAGESHOW_MENUPAGE_PRICEPLANS,   array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', $this->myDomain),__('Performances', $this->myDomain), STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', $this->myDomain),        __('Prices', $this->myDomain),       STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
 
 				if ( current_user_can(STAGESHOW_CAPABILITY_VALIDATEUSER)
 				  || current_user_can(STAGESHOW_CAPABILITY_SALESUSER))
-					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Sales Admin', STAGESHOW_DOMAIN_NAME),       __('Sales', STAGESHOW_DOMAIN_NAME),     $adminCap,                        STAGESHOW_MENUPAGE_SALES,        array(&$this, 'printAdminPage'));
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Sales Admin', $this->myDomain),       __('Sales', $this->myDomain),     $adminCap,                        STAGESHOW_MENUPAGE_SALES,        array(&$this, 'printAdminPage'));
 				
 				if ( current_user_can(STAGESHOW_CAPABILITY_VALIDATEUSER)
 				  || current_user_can(STAGESHOW_CAPABILITY_ADMINUSER))
-					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Admin Tools', STAGESHOW_DOMAIN_NAME),       __('Tools', STAGESHOW_DOMAIN_NAME),     $adminCap,                        STAGESHOW_MENUPAGE_TOOLS,        array(&$this, 'printAdminPage'));
-					
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', STAGESHOW_DOMAIN_NAME),     __('Settings', STAGESHOW_DOMAIN_NAME),    STAGESHOW_CAPABILITY_SETUPUSER,   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Admin Tools', $this->myDomain),       __('Tools', $this->myDomain),     $adminCap,                        STAGESHOW_MENUPAGE_TOOLS,        array(&$this, 'printAdminPage'));
 
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', $this->myDomain),     __('Settings', $this->myDomain),    STAGESHOW_CAPABILITY_SETUPUSER,   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
+
+				// Show test menu if stageshow_test.php is present
+				if ( $this->testModeEnabled )
 				{
-					if ( file_exists(STAGESHOW_TEST_PATH.'paypal_manage_buttons.php') ) 
+					add_submenu_page( 'options-general.php', 'StageShow Test', 'StageShow Test', STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TESTSETTINGS, array(&$this, 'printAdminPage'));
+
+					if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
 					{
-						if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
-							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', STAGESHOW_DOMAIN_NAME),    __('Buttons', STAGESHOW_DOMAIN_NAME),   STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));
+						
+						if ( file_exists(STAGESHOW_TEST_PATH.'paypal_manage_buttons.php') ) 
+							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', $this->myDomain),    __('Buttons', $this->myDomain),   STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));
+						
+						if ( isset($this->testModeEnabled) )
+							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('TEST', $this->myDomain), __('TEST', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
 					}
-					
-					// Show test menu if stageshow_test.php is present
-					if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_test.php') )
-					{
-						add_submenu_page( 'options-general.php', 'StageShow Test', 'StageShow Test', STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TESTSETTINGS, array(&$this, 'printAdminPage'));
-						if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
-							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('TEST', STAGESHOW_DOMAIN_NAME), __('TEST', STAGESHOW_DOMAIN_NAME), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
-		      }
-					
-					// Show debug menu if stageshow_debug.php is present
-					if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_debug.php') )
-					{
-						if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
-							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEBUG', STAGESHOW_DOMAIN_NAME), __('DEBUG', STAGESHOW_DOMAIN_NAME), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEBUG, array(&$this, 'printAdminPage'));
-					}
-				}	
+				}
+				
+				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_debug.php') )
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEBUG', $this->myDomain), __('DEBUG', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEBUG, array(&$this, 'printAdminPage'));
 			}	
 			
 		}
