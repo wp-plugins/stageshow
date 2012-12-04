@@ -66,7 +66,7 @@ if (!class_exists('StageShowSalesAdminClass'))
 		function NoStockMessage()
 		{
 			$perfsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.STAGESHOW_MENUPAGE_PRICES;
-			$perfsPageMsg = __('NO Prices Defined', STAGESHOW_DOMAIN_NAME).' - <a href='.$perfsPageURL.'>'.__('Add one Here', STAGESHOW_DOMAIN_NAME).'</a>';
+			$perfsPageMsg = __('No Prices Defined', $this->myDomain).' - <a href='.$perfsPageURL.'>'.__('Add one Here', $this->myDomain).'</a>';
 			$perfsPageMsg = "<div class='error'><p>$perfsPageMsg</p></div>";
 			return $perfsPageMsg;
 		}
@@ -78,20 +78,22 @@ if (!class_exists('StageShowSalesAdminClass'))
 			switch ($_GET['action'])
 			{
 				case 'show':
+					// FUNCTIONALITY: Sales - Lists Sales for a Show
 					// List Sales for Show
 					$showID = $_GET['id']; 
 					$this->results = $this->myDBaseObj->GetSalesListByShowID($showID);	
-					$this->salesFor = '- '.$this->results[0]->showName.' ';
+					$this->salesFor = $this->results[0]->showName.' - ';
 					for ($i=0; $i<count($this->results); $i++)
 						$this->results[$i]->ticketQty = $this->myDBaseObj->GetSalesQtyBySaleID($this->results[$i]->saleID);
 					$rtnVal = true;
 					break;
 						
 				case 'perf':
+					// FUNCTIONALITY: Sales - Lists Sales for a Performance
 					// List Sales for Performance
 					$perfID = $_GET['id']; 
 					$this->results = $this->myDBaseObj->GetSalesListByPerfID($perfID);
-					$this->salesFor = '- '.$this->results[0]->showName.' ('.$this->myDBaseObj->FormatDateForDisplay($this->results[0]->perfDateTime).') ';
+					$this->salesFor = $this->results[0]->showName.' ('.$this->myDBaseObj->FormatDateForDisplay($this->results[0]->perfDateTime).') - ';
 					for ($i=0; $i<count($this->results); $i++)
 						$this->results[$i]->ticketQty = $this->myDBaseObj->GetSalesQtyBySaleID($this->results[$i]->saleID);
 					$rtnVal = true;
@@ -108,6 +110,7 @@ if (!class_exists('StageShowSalesAdminClass'))
 		
 		function GetEditSaleFormEntries($saleID)
 		{
+			// FUNCTIONALITY: Sales - Restore form values when save edit fails 
 			$prices = parent::GetEditSaleFormEntries($saleID);
 				
 			// Put the POST values into the prices (if they exist)

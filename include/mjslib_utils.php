@@ -24,36 +24,42 @@ if (!class_exists('MJSLibUtilsClass'))
 {
 	class MJSLibUtilsClass // Define class
 	{
-    static function GetHTTPElement($reqArray, $elementId) 
+		static function GetSiteID()
+		{
+			$siteURL = get_option('siteurl');
+			$slashPosn = strrpos($siteURL, '/');
+			$siteURL = substr($siteURL, $slashPosn+1);
+			
+			return $siteURL;			
+		}
+		
+		static function GetHTTPElement($reqArray, $elementId)
 		{
 			// HTTP escapes ', " and / 
 			// This function will return the array element with escape sequences removed
 			return stripslashes(self::GetArrayElement($reqArray, $elementId));
-    }
-    
-    static function GetArrayElement($reqArray, $elementId, $defaultValue = '') 
-    {
-	    // Get an element from the array ... if it exists
-	    if (!is_array($reqArray)) 
-				return $defaultValue;
-	    if (!array_key_exists($elementId, $reqArray)) 
-				return $defaultValue;	
-	    return $reqArray[$elementId];
-    }
-    
-		static function isNewVersion($ourVersion, $serverVersion, $debug=false) 
+		}
+		
+		static function GetArrayElement($reqArray, $elementId, $defaultValue = '')
+		{
+			// Get an element from the array ... if it exists
+			if (!is_array($reqArray)) 
+			return $defaultValue;
+			if (!array_key_exists($elementId, $reqArray)) 
+			return $defaultValue;	
+			return $reqArray[$elementId];
+		}
+		
+		static function isNewVersion($ourVersion, $serverVersion, $debug=false)
 		{
 			// Compare version numbers - format N1.N2.N3 .... etc.
 			$ourVersionVals = split('\.', $ourVersion);
 			$serverVersionVals = split('\.', $serverVersion);
-					
 			if ($debug) echo "Compare Versions ($ourVersion , $serverVersion)<br>\n";					
-			
 			for ($i=0; $i<max(count($ourVersionVals),count($serverVersionVals)); $i++)
 			{
 				$ourVersionVal = isset($ourVersionVals[$i]) ? (int)$ourVersionVals[$i] : 0;
 				$serverVersionVal = isset($serverVersionVals[$i]) ? (int)$serverVersionVals[$i] : 0;
-				
 				if ($serverVersionVal > $ourVersionVal)
 				{
 					if ($debug) echo "serverVersionVal > ourVersionVal ($serverVersionVal > $ourVersionVal)- Exit TRUE<br>\n";					
@@ -64,25 +70,22 @@ if (!class_exists('MJSLibUtilsClass'))
 					if ($debug) echo "serverVersionVal < ourVersionVal ($serverVersionVal < $ourVersionVal) - Exit FALSE<br>\n";					
 					return false;
 				}
-					
-				if ($debug) echo "serverVersionVal = ourVersionVal ($serverVersionVal = $ourVersionVal) - Continue<br>\n";					
+				if ($debug) echo "serverVersionVal = ourVersionVal ($serverVersionVal = $ourVersionVal) - Continue<br>\n";
 			}
-			
 			if ($debug) echo "serverVersionVal = ourVersionVal ($ourVersion = $serverVersion) - Exit FALSE<br>\n";					
 			return false;
 		}
 		
-		static function recurse_copy($src, $dst, $perm=0755) 
+		static function recurse_copy($src, $dst, $perm=0755)
 		{
 			$dir = opendir($src);
 			@mkdir($dst, $perm, TRUE);
-			while(false !== ( $file = readdir($dir)) ) 
+			while(false !== ( $file = readdir($dir)) )
 			{
 				if ( $file == '.' ) continue;
 				if ( $file == '..' ) continue;
 				if ( $file == 'Thumbs.db' ) continue;
-
-				if ( is_dir($src . '/' . $file) ) 
+				if ( is_dir($src . '/' . $file) )
 				{
 					self::recurse_copy($src . '/' . $file, $dst . '/' . $file);
 				}
@@ -93,14 +96,12 @@ if (!class_exists('MJSLibUtilsClass'))
 			}
 			closedir($dir);
 		}
-
+		
 		static function deleteDir($dir)
 		{
 			if (substr($dir, strlen($dir)-1, 1) != '/')
 				$dir .= '/';
-
-			echo $dir;
-
+			// echo $dir;
 			if ($handle = opendir($dir))
 			{
 				while ($obj = readdir($handle))
@@ -119,16 +120,14 @@ if (!class_exists('MJSLibUtilsClass'))
 						}
 					}
 				}
-
 				closedir($handle);
-
 				if (!@rmdir($dir))
 					return false;
 				return true;
 			}
 			return false;
-		}  
-			
+		}
+		
 		static function check_admin_referer($action = -1, $query_arg = '_wpnonce')
 		{
 			if (!wp_verify_nonce($_REQUEST[$query_arg], $action))
@@ -136,7 +135,6 @@ if (!class_exists('MJSLibUtilsClass'))
 				echo "NOnce check failed - Call Stack Follows:<br>\n";
 				MJSLibUtilsClass::ShowCallStack();
 			}
-			
 			return check_admin_referer($action, $query_arg);
 		}
 		
@@ -277,14 +275,14 @@ if (!class_exists('MJSLibUtilsClass'))
 		{
 			if (!file_exists($filePath))
 				return;
-				
+								
 			try 
 			{
 				//throw exception if can't move the file
-        chmod($filePath, 0666);
-        unlink($filePath);
-			} 
-			catch (Exception $e) 
+				chmod($filePath, 0666);
+				unlink($filePath);
+			}
+			catch (Exception $e)
 			{
 			}
 		}

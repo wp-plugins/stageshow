@@ -53,3 +53,18 @@ div.stageshow-edit-planref
 	font-weight: bold;
 }
 
+th.column-paypal-settings-tab
+{
+	width: 33%;
+}
+
+/* ----------------------------------------------------------------------------------------------------------------
+	Styles for Settings Page
+---------------------------------------------------------------------------------------------------------------- */
+
+.stageshow-settings-table td 
+{
+	line-height: 14px;
+	padding: 6px 10px;
+}
+

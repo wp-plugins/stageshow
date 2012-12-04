@@ -28,12 +28,14 @@ if (!class_exists('MJSLibEMailAPIClass'))
 		
 		function __construct($ourParentObj)	
 		{
-			$this->parentObj = $ourParentObj;
+			$this->parentObj = $ourParentObj;			
 		}
 		
 		function sendMail($to, $from, $subject, $content, $content2 = '', $headers = '')
 		{
 			$BccEMail = '';
+			
+			// FUNCTIONALITY: General - EMail copy of any outgoing email to AdminEMail
 			if ($this->parentObj->adminOptions['BccEMailsToAdmin'])
 				$BccEMail = $this->parentObj->GetEmail($this->parentObj->adminOptions);	
 			$replyTo = $from;
@@ -43,11 +45,12 @@ if (!class_exists('MJSLibEMailAPIClass'))
 			$headers .= "From: $from";	
 				
 			// Bcc emails to Admin Email	
-      if (strlen($BccEMail) > 0) $headers .= "\r\nbcc: $BccEMail";
+			if (strlen($BccEMail) > 0) $headers .= "\r\nbcc: $BccEMail";
 			$headers .= "\r\nReply-To: $replyTo";	
 				
 			if ($this->parentObj->getOption('Dev_ShowEMailMsgs'))
 			{
+				// FUNCTIONALITY: General - Echo EMail when Dev_ShowEMailMsgs selected - Body Encoded with htmlspecialchars
 				echo "To:<br>\n";
 				echo htmlspecialchars($to);
 				echo "<br>\n<br>\n";
@@ -59,6 +62,7 @@ if (!class_exists('MJSLibEMailAPIClass'))
 				echo "<br>\n<br>\n";
 			}
 						
+			// FUNCTIONALITY: General - Send EMail
 			//send the email
 			wp_mail($to, $subject, $content, $headers);
 		}

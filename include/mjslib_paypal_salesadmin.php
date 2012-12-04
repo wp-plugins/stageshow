@@ -34,7 +34,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			
 			if (!$this->editMode)
 			{
-				$this->hiddenRowsButtonId = 'Details';
+				$this->hiddenRowsButtonId = __('Details', $this->myDomain);		
 			}
 			else
 			{
@@ -46,7 +46,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			if (!$editMode)
 			{
 				$this->bulkActions = array(
-					'delete' => __('Delete', $this->pluginName),
+					'delete' => __('Delete', $this->myDomain),
 					);
 					
 				$this->HeadersPosn = MJSLibTableClass::HEADERPOSN_BOTH;
@@ -65,27 +65,34 @@ if (!class_exists('PayPalSalesAdminListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array('Label' => 'Name',	            'Id' => 'saleName',     'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Transaction Date',  'Id' => 'saleDateTime',	'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Status',            'Id' => 'saleStatus',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),						
+				array(self::TABLEPARAM_LABEL => 'Name',	            self::TABLEPARAM_ID => 'saleName',     self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Transaction Date', self::TABLEPARAM_ID => 'saleDateTime', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Status',           self::TABLEPARAM_ID => 'saleStatus',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
 			);
 		}		
 		
 		function GetDetailsRowsDefinition()
 		{
+			// FUNCTIONALITY: Sales - Use PAYPAL_APILIB_******* consts if defined
+			$address = defined('PAYPAL_APILIB_STREET_LABEL')  ? PAYPAL_APILIB_STREET_LABEL  : __('Address', $this->myDomain);
+			$city    = defined('PAYPAL_APILIB_CITY_LABEL')    ? PAYPAL_APILIB_CITY_LABEL    : __('Town/City', $this->myDomain);
+			$state   = defined('PAYPAL_APILIB_STATE_LABEL')   ? PAYPAL_APILIB_STATE_LABEL   : __('County', $this->myDomain);
+			$zip     = defined('PAYPAL_APILIB_ZIP_LABEL')     ? PAYPAL_APILIB_ZIP_LABEL  : __('Postcode', $this->myDomain);
+			$country = defined('PAYPAL_APILIB_COUNTRY_LABEL') ? PAYPAL_APILIB_COUNTRY_LABEL : __('Country', $this->myDomain);
+			
 			$ourOptions = array(
-				array('Label' => 'Name',	                     'Id' => 'saleName',      'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      'Size' => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
-				array('Label' => 'EMail',	                     'Id' => 'saleEMail',     'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN,     'Size' => PAYPAL_APILIB_PPSALEEMAIL_EDITLEN, ),
-				array('Label' => 'PayPal Username',	           'Id' => 'salePPName',    'Type' => MJSLibTableClass::TABLEENTRY_VIEW),
-				array('Label' => PAYPAL_APILIB_STREET_LABEL,	 'Id' => 'salePPStreet',  'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN,  'Size' => PAYPAL_APILIB_PPSALEPPSTREET_EDITLEN, ),
-				array('Label' => PAYPAL_APILIB_CITY_LABEL,	   'Id' => 'salePPCity',    'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN,    'Size' => PAYPAL_APILIB_PPSALEPPCITY_EDITLEN, ),			
-				array('Label' => PAYPAL_APILIB_STATE_LABEL,	   'Id' => 'salePPState',   'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN,   'Size' => PAYPAL_APILIB_PPSALEPPSTATE_EDITLEN, ),
-				array('Label' => PAYPAL_APILIB_ZIP_LABEL,	     'Id' => 'salePPZip',     'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN,     'Size' => PAYPAL_APILIB_PPSALEPPZIP_EDITLEN, ),
-				array('Label' => PAYPAL_APILIB_COUNTRY_LABEL,	 'Id' => 'salePPCountry', 'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN, 'Size' => PAYPAL_APILIB_PPSALEPPCOUNTRY_EDITLEN, ),
-				array('Label' => 'Paid',                       'Id' => 'salePaid',      'Type' => MJSLibTableClass::TABLEENTRY_VIEW),
-				array('Label' => 'Transaction Date/Time',      'Id' => 'saleDateTime',  'Type' => MJSLibTableClass::TABLEENTRY_VIEW),
-				array('Label' => 'Transaction ID',             'Id' => 'saleTxnId',     'Type' => MJSLibTableClass::TABLEENTRY_VIEW),						
-				array('Label' => 'Status',                     'Id' => 'saleStatus',    'Type' => MJSLibTableClass::TABLEENTRY_VIEW),						
+				array(self::TABLEPARAM_LABEL => 'Name',	                     self::TABLEPARAM_ID => 'saleName',      self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => 'EMail',	                 self::TABLEPARAM_ID => 'saleEMail',     self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEEMAIL_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => 'PayPal Username',	         self::TABLEPARAM_ID => 'salePPName',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW),
+				array(self::TABLEPARAM_LABEL => $address,	                 self::TABLEPARAM_ID => 'salePPStreet',  self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN,  self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTREET_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => $city,	                     self::TABLEPARAM_ID => 'salePPCity',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN,    self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCITY_EDITLEN, ),			
+				array(self::TABLEPARAM_LABEL => $state,	                     self::TABLEPARAM_ID => 'salePPState',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN,   self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTATE_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => $zip,                        self::TABLEPARAM_ID => 'salePPZip',     self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPZIP_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => $country,                    self::TABLEPARAM_ID => 'salePPCountry', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN, self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCOUNTRY_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => 'Paid',                      self::TABLEPARAM_ID => 'salePaid',      self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW),
+				array(self::TABLEPARAM_LABEL => 'Transaction Date/Time',     self::TABLEPARAM_ID => 'saleDateTime',  self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW),
+				array(self::TABLEPARAM_LABEL => 'Transaction ID',            self::TABLEPARAM_ID => 'saleTxnId',     self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW),						
+				array(self::TABLEPARAM_LABEL => 'Status',                    self::TABLEPARAM_ID => 'saleStatus',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
@@ -95,7 +102,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 		function GetDetailsRowsFooter()
 		{
 			$ourOptions = array(
-				array('Type' => MJSLibTableClass::TABLEENTRY_FUNCTION, 'Func' => 'ShowSaleDetails'),						
+				array(MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_FUNCTION, MJSLibTableClass::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsFooter(), $ourOptions);
@@ -113,12 +120,15 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			return new PayPalSalesDetailsAdminClass($env, $editMode);	
 		}
 		
-		function ShowSaleDetails($result, $salesList)
+		function ShowSaleDetails($result, $saleResults)
 		{
-			if ($this->editMode) return '';
+			if ($this->editMode) 
+			{
+				return '';
+			}
 			
 			$myDBaseObj = $this->myDBaseObj;
-			$saleResults = $myDBaseObj->GetSale($result->saleID);
+			// $saleResults = $myDBaseObj->GetSale($result->saleID); // TODO - Caller should pass $saleResults
 			return $this->BuildSaleDetails($saleResults);
 		}
 				
@@ -179,11 +189,12 @@ if (!class_exists('PayPalSalesDetailsAdminClass'))
 		
 		function GetMainRowsDefinition()
 		{
+			// FUNCTIONALITY: Sales - List Item, Type, Price and Quantity
 			return array(
-				array('Label' => 'Item',     'Id' => 'saleShowName', 'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Type',     'Id' => 'ticketType',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Price',    'Id' => 'price',        'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),						
-				array('Label' => 'Quantity', 'Id' => 'quantity',     'Type' => MJSLibTableClass::TABLEENTRY_TEXT, ),						
+				array(MJSLibTableClass::TABLEPARAM_LABEL => 'Item',     MJSLibTableClass::TABLEPARAM_ID => 'saleShowName', MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(MJSLibTableClass::TABLEPARAM_LABEL => 'Type',     MJSLibTableClass::TABLEPARAM_ID => 'ticketType',   MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(MJSLibTableClass::TABLEPARAM_LABEL => 'Price',    MJSLibTableClass::TABLEPARAM_ID => 'price',        MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),						
+				array(MJSLibTableClass::TABLEPARAM_LABEL => 'Quantity', MJSLibTableClass::TABLEPARAM_ID => 'quantity',     MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, ),						
 			);
 		}		
 				
@@ -199,30 +210,27 @@ if (!class_exists('PayPalSalesAdminClass'))
 		var $payPalAPIObj;
 		var $saleQtyInputID;
 		
-		function __construct($env, $myPluginObj = null, $myDBaseObj = null, $payPalObj = null) //constructor	
+		function __construct($env) //constructor	
 		{
-			// Call base constructor
-			parent::__construct($env);
+			$this->pageTitle = 'Sales Log';
 			
+			// TODO - Check this .....
 			if (isset($env['saleQtyInputID'])) 
 				$this->saleQtyInputID = $env['saleQtyInputID'];
 			else
 				$this->saleQtyInputID = 'editSaleQty';
 
-			if (!is_array($env))
-			{
-				$this->myPluginObj = $myPluginObj;
-				$this->myDBaseObj = $myDBaseObj;
- 				$this->payPalAPIObj = $payPalObj;
-			}
-			else
-			{
-				$myPluginObj = $this->myPluginObj;
-				$myDBaseObj = $this->myDBaseObj;				
-				$payPalObj = $myDBaseObj->payPalAPIObj;
+			// Call base constructor
+			parent::__construct($env);
+		}
+		
+		function ProcessActionButtons()
+		{
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj = $this->myDBaseObj;				
+			$payPalObj = $myDBaseObj->payPalAPIObj;
 				
- 				$this->payPalAPIObj = $payPalObj;
-			}
+ 			$this->payPalAPIObj = $payPalObj;
      
 			$this->detailsSaleId = 0;
 			$this->salesFor = '';
@@ -241,8 +249,8 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$this->DoActions();
 			}
 
-			$invalidInputId = '';
-			if (isset($_POST['savesale']))
+			$this->invalidInputId = '';
+			if (isset($_POST['savechanges']))
 			{
 				// TODO-IMPROVEMENT - Adding Manual Sale - Check for address errors 				
 				/*
@@ -263,21 +271,21 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$this->GetCurrentSaleQtys();
 				
 				// Get requested quantities for each price option
-				$invalidInputId = $this->GetRequestedSaleQtys();
+				$this->invalidInputId = $this->GetRequestedSaleQtys();
 					
 				// Check Stock Quantities
-				if ($invalidInputId == '')
-					$invalidInputId = $this->CheckStockQtys();
+				if ($this->invalidInputId == '')
+					$this->invalidInputId = $this->CheckStockQtys();
 					
 				$saleId = isset($this->saleId) ? $this->saleId : 0;
-				if ($invalidInputId == '')
+				if ($this->invalidInputId == '')
 				{
-					$invalidInputId = $this->AddOrEditSale();	// Note: Updates $this->saleId on new sale			
+					$this->invalidInputId = $this->AddOrEditSale();	// Note: Updates $this->saleId on new sale			
 					
 					$this->pricesList = $this->myDBaseObj->GetPricesListWithSales($this->saleId);
 					$this->editSaleEntry = $myDBaseObj->GetSaleBuyer($this->saleId);	// Get list of items for a single sale
 					
-					echo '<div id="message" class="updated"><p>'.__('Sale Details have been saved', $this->pluginName).'</p></div>';
+					echo '<div id="message" class="updated"><p>'.__('Sale Details have been saved', $this->myDomain).'</p></div>';
 				}
 				else
 				{
@@ -286,32 +294,35 @@ if (!class_exists('PayPalSalesAdminClass'))
 					$this->editSaleEntry[0] = $this->pricesList[0];
 				}
 			}
-					
+			
+			$this->pageTitle = $this->salesFor . 'Sales Log';			
+		}
+		
+		function Output_MainPage($updateFailed)
+		{
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj = $this->myDBaseObj;				
+			$payPalObj = $myDBaseObj->payPalAPIObj;
+			
 			if (!$this->editingRecord)
 			{
 				if (!isset($this->results))	
 					$this->results = $myDBaseObj->GetAllSalesList();		// Get list of sales (one row per sale)
 			}
 			
-			echo '<div class="wrap">';
-
 			// HTML Output - Start 
 ?>
-		<div class="wrap">
-				<div id="icon-<?php echo $this->pluginName; ?>" class="icon32"></div>
-			<h2>
-				<?php echo $myPluginObj->pluginName.' '.$this->salesFor.' - '.__('Sales Log', $this->pluginName); ?>
-			</h2>
-				<form method="post" action="admin.php?page=<?php echo $this->pluginName; ?>_sales">
-					<h3>
-						<?php 					
+	<div class="stageshow-admin-form">
+	<form method="post">
+<?php
+
+			echo "<h3>";
 			if (!$this->editingRecord)
-				_e('Summary', $this->pluginName); 
+				_e('Summary', $this->myDomain); 
 			else if (!isset($this->saleId))
-				_e('Add Sale', $this->pluginName); 
-?>
-					</h3>
-					<?php
+				_e('Add Sale', $this->myDomain); 
+			echo "</h3>";
+			
 			if (isset($this->saleId))
 				echo "\n".'<input type="hidden" name="saleID" value="'.$this->saleId.'"/>'."\n";
 				
@@ -321,51 +332,50 @@ if (!class_exists('PayPalSalesAdminClass'))
 			{
 				$this->editSaleEntry[0]->totalQty = '';	
 				
-				$classId = $env['PluginObj']->adminClassPrefix.'SalesAdminListClass';
-				$salesList = new $classId($env, MJSLibAdminListClass::EDITMODE);	// StageShowSalesAdminListClass etc.
-				$salesList->errorInputId = $invalidInputId; // TODO-IMPROVEMENT Highlight error line ...
+				$classId = $myPluginObj->adminClassPrefix.'SalesAdminListClass';
+				$salesList = new $classId($this->env, MJSLibAdminListClass::EDITMODE);	// StageShowSalesAdminListClass etc.
+				$salesList->errorInputId = $this->invalidInputId; // TODO-IMPROVEMENT Highlight error line ...
 				
 				if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) MJSLibUtilsClass::print_r($this->editSaleEntry, 'Call OutputList-editSaleEntry');
 				$salesList->OutputEditSale($this->editSaleEntry, $this->pricesList);
 			}
 			else if(count($this->results) == 0)
 			{
-				echo "<div class='noconfig'>".__('NO Sales', $this->pluginName)."</div>\n";
+				echo "<div class='noconfig'>".__('No Sales', $this->myDomain)."</div>\n";
 			}
 			else 
 			{
-				$this->OutputSalesList($env);
+				$this->OutputSalesList($this->env);
 			}
 
-	if ($this->editingRecord)
-      echo '
-			<br><input class="button-primary" type="submit" name="savesale" value="'.__('Save Sale', $this->pluginName).'">
-			';
-	else if ($this->detailsSaleId <= 0)
-	{
-		$pricesList = $myDBaseObj->GetPricesList(null);
-		if (count($pricesList) > 0)
-			echo MJSLibAdminClass::AddActionButton($this->caller, __('Add Sale', $this->pluginName), 'tablenav_bottom_actions'); 
-		else
-			echo $this->NoStockMessage();
-	}
-	else
-	{
-			echo MJSLibAdminClass::AddActionButton($this->caller, __('Back to Sales Summary', $this->pluginName), 'tablenav_bottom_actions'); 
-			echo MJSLibAdminClass::AddActionButton($this->caller, __('Send Confirmation EMail', $this->pluginName), 'tablenav_bottom_actions'); 
-	}
-	echo "<br></br>\n";
-?>
-				</form>
-		</div>
+			if ($this->editingRecord)
+		      echo '
+					<br><input class="button-primary" type="submit" name="savechanges" value="'.__('Save Sale', $this->myDomain).'">
+					';
+			else if ($this->detailsSaleId <= 0)
+			{
+				$pricesList = $myDBaseObj->GetPricesList(null);
+				if (count($pricesList) > 0)
+					echo MJSLibAdminClass::ActionButtonHTML('Add Sale', $this->caller, $this->myDomain, 'tablenav_bottom_actions'); 
+				else
+					echo $this->NoStockMessage();
+			}
+			else
+			{
+					echo MJSLibAdminClass::ActionButtonHTML('Back to Sales Summary', $this->caller, $this->myDomain, 'tablenav_bottom_actions'); 
+					echo MJSLibAdminClass::ActionButtonHTML('Send Confirmation EMail', $this->caller, $this->myDomain, 'tablenav_bottom_actions'); 
+			}
 
-		<?php
-        // HTML Output - End
-		}	
+?>
+	<br></br>
+	</form>
+	</div>
+<?php
+		} // End of function Output_MainPage()
 		
 		function NoStockMessage()
 		{
-			return 'NO Stock';
+			return 'No Stock';
 		}
 		
 		function DoActions()
@@ -375,6 +385,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			switch ($_GET['action'])
 			{
 				case 'addsale':
+					// FUNCTIONALITY: Sales - Add a sale
 					$this->CheckAdminReferer();
 					
 					$this->pricesList = $this->myDBaseObj->GetPricesListWithSales(0);
@@ -451,7 +462,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			}
 						
 			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) MJSLibUtilsClass::print_r($this->currPriceQtys, 'currPriceQtys');
-			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) MJSLibUtilsClass::print_r($this->currStockQtys, 'this->currStockQtys');				
+			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) MJSLibUtilsClass::print_r($this->currStockQtys, 'currStockQtys');				
 		}
 
 		function GetRequestedSaleQtys()				
@@ -483,7 +494,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 						
 					if (!is_numeric($qty))
 					{
-						echo '<div id="message" class="error"><p>'.__('INVALID Quantity (Non-numeric)', $this->pluginName).' - '.$this->GetItemDesc($pricesEntry).'</p></div>';
+						echo '<div id="message" class="error"><p>'.__('INVALID Quantity (Non-numeric)', $this->myDomain).' - '.$this->GetItemDesc($pricesEntry).'</p></div>';
 						$errorId = $inputID;
 						continue;
 					}
@@ -496,7 +507,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 						}
 						else
 						{
-							echo '<div id="message" class="error"><p>'.__('INVALID Quantity (Negative)', $this->pluginName).' - '.$this->GetItemDesc($pricesEntry).'</p></div>';
+							echo '<div id="message" class="error"><p>'.__('INVALID Quantity (Negative)', $this->myDomain).' - '.$this->GetItemDesc($pricesEntry).'</p></div>';
 							$errorId = $inputID;
 							continue;
 						}
@@ -522,7 +533,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		{
 			$errorId = '';
 			$totalQty = 0;
-
+			
 			foreach ($this->newStockQtys as $buttonID => $qty)
 			{
 				$totalQty += $qty;
@@ -547,7 +558,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 									break;
 								}
 							}
-							echo '<div id="message" class="error"><p>'.__('Out of Stock', $this->pluginName).$errorItem.'</p></div>';
+							echo '<div id="message" class="error"><p>'.__('Out of Stock', $this->myDomain).$errorItem.'</p></div>';
 							break;
 						}
 					}
@@ -556,7 +567,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			
 			if (($errorId == '') && ($totalQty ==0))
 			{
-				echo '<div id="message" class="error"><p>'.__('Total Quantity CANNOT be zero', $this->pluginName).'</p></div>';
+				echo '<div id="message" class="error"><p>'.__('Total Quantity CANNOT be zero', $this->myDomain).'</p></div>';
 				$errorId = -1;
 			}
 						
@@ -643,6 +654,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function GetEditSaleFormEntries($saleID)
 		{
+			// FUNCTIONALITY: Sales - Restore form values when save edit fails 
 			// Get the prices with all quantites zero
 			$pricesList = $this->myDBaseObj->GetPricesListWithSales(0);			
 
@@ -682,9 +694,9 @@ if (!class_exists('PayPalSalesAdminClass'))
 			{
 				case 'delete':		
 					if ($actionCount > 0)		
-						$actionMsg = ($actionCount == 1) ? __("1 Sale has been deleted", $this->pluginName) : $actionCount.' '.__("Sales have been deleted", $this->pluginName); 
+						$actionMsg = ($actionCount == 1) ? __("1 Sale has been deleted", $this->myDomain) : $actionCount.' '.__("Sales have been deleted", $this->myDomain); 
 					else
-						$actionMsg =  __("Nothing to Delete", $this->pluginName);
+						$actionMsg =  __("Nothing to Delete", $this->myDomain);
 					break;
 			}
 			
@@ -693,7 +705,9 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function OutputSalesList($env)
 		{
-			$classId = $env['PluginObj']->adminClassPrefix.'SalesAdminListClass';
+			$myPluginObj = $this->myPluginObj;
+			
+			$classId = $myPluginObj->adminClassPrefix.'SalesAdminListClass';
 			$salesList = new $classId($env);	// StageShowSalesAdminListClass etc.
 			$salesList->OutputList($this->results);		
 		}

@@ -9,9 +9,9 @@ if (!class_exists('NotifyURLClass'))
 {
 	class NotifyURLClass // Define class
 	{
-    // Class variables:
-    var		$notifyDBaseObj;			//  Database access Object
-    var		$notifyPayPalAPIObj;	//	PayPal API access Object
+	    // Class variables:
+	    var		$notifyDBaseObj;			//  Database access Object
+	    var		$notifyPayPalAPIObj;	//	PayPal API access Object
     
 		function GetQueryString()
 		{
@@ -42,15 +42,17 @@ if (!class_exists('NotifyURLClass'))
 
 		function AddToLog($LogLine)
 		{
-			global $LogMessage;
-			
-			if (defined('PAYPAL_APILIB_NOTIFYLOG_ON_SCREEN'))
+			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNDisplay'))
 			{
+	  			// FUNCTIONALITY: IPN Notify - Log IPN Messages to Screen if Dev_IPNDisplay set
 				echo "$LogLine<br>\n";
 			}
 		  
-			if (defined('PAYPAL_APILIB_ENABLE_IPNLOG'))
-				$LogMessage .= $LogLine . "\n";
+			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNLogRequests'))
+			{
+	  			// FUNCTIONALITY: IPN Notify - Log IPN Messages to file if Dev_IPNLogRequests set
+				$this->LogMessage .= $LogLine . "\n";
+			}
 		}
 
 		function QueryParam($paramId)
@@ -83,14 +85,12 @@ if (!class_exists('NotifyURLClass'))
 
 			$ourOptions = $this->notifyDBaseObj->adminOptions;
 
+	  		// FUNCTIONALITY: IPN Notify - Logs Folder uses ABSPATH if no ':' is included
 			$this->LogsFolder = $ourOptions['LogsFolderPath'].'/';
 			if (!strpos($this->LogsFolder, ':'))
 				$this->LogsFolder = ABSPATH . $this->LogsFolder;
 				
-			//$LogsFolder = ABSPATH . '/logs/';
-				
-			global $LogMessage;
-			$LogMessage = '';
+			$this->LogMessage = '';
 
 			if (defined('NOTIFYURL_CALLER'))
 			{
@@ -100,8 +100,9 @@ if (!class_exists('NotifyURLClass'))
 			// read post from PayPal server and add 'cmd'
 			$URLParamsArray = $this->GetQueryString();
 			
-			if (defined('PAYPAL_APILIB_ENABLE_IPNDUMP'))
+			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNDumpParams'))
 			{
+	  			// FUNCTIONALITY: IPN Notify - Dump IPN Request to "IPNPacket.txt" if Dev_IPNDumpParams set
 				$logFileObj = new MJSLibLogFileClass($this->LogsFolder);
 				$rawPostData = file_get_contents('php://input');
 				$logFileObj->DumpToFile("IPNPacket.txt", "IPN_RAW_POST_Data", $rawPostData);
@@ -125,7 +126,7 @@ if (!class_exists('NotifyURLClass'))
 			}
 			$PayPalNotifyEMail = $ourOptions['PayPalAPIEMail'];
 
-			if (defined('PAYPAL_APILIB_LOG_IPNPARAMS'))
+			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNLogRequests'))
 			{
 				$decodedParams = '';
 				foreach ($URLParamsArray as $key => $param)
@@ -137,15 +138,15 @@ if (!class_exists('NotifyURLClass'))
 				$this->LogDebugToFile('LastIPNCall.txt', $LogIPNContent);
 			}
 
-			if (defined('PAYPAL_APILIB_IPNPARAMS_ON_SCREEN'))
+			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNDisplay'))
 			{
-				echo "PAYPAL_APILIB_IPNPARAMS_ON_SCREEN flag set - Dumping URLParamsArray:<br>\n";
+				echo "Display IPNs option set - Dumping URLParamsArray:<br>\n";
 				foreach ($URLParamsArray as $key => $param)
 					echo "$key=$param<br>\n";
 				echo "<br>\n";
 			}
 
-			if (defined('PAYPAL_APILIB_ENABLE_IPNDUMP'))
+			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNDumpParams'))
 			{
 				$logFileObj = new MJSLibLogFileClass($this->LogsFolder);
 				$logFileObj->DumpToFile("IPNPacket.txt", "IPN_TX_Data", $URLParamsArray);
@@ -175,123 +176,112 @@ if (!class_exists('NotifyURLClass'))
 			// Check notification validation
 			if ($payPalResponse['APIStatus'] != 200 )
 			{
-					$this->AddToLog("IPN Response: Status=".$payPalResponse['APIStatus']);
-					// HTTP error handling
-			}
+				$this->AddToLog("IPN Response: Status=".$payPalResponse['APIStatus']);
+				// HTTP error handling
+			}			
 			else if ($payPalResponse['APIResponseText'] === 'VERIFIED')
 			{
-					$this->AddToLog('IPN Response: VERIFIED');
-					$this->AddToLog('    Payment_status: ' . $Payment_status);
-					$this->AddToLog('    Txn_id:         ' . $Txn_id);
-					$this->AddToLog('    Receiver_email: ' . $Receiver_email);
-			    
-					$IPNError = '';
-					
- 					if ($IPNError === '')
+				$this->AddToLog('IPN Response: VERIFIED');
+				$this->AddToLog('    Payment_status: ' . $Payment_status);
+				$this->AddToLog('    Txn_id:         ' . $Txn_id);
+				$this->AddToLog('    Receiver_email: ' . $Receiver_email);
+				$IPNError = '';
+				if ($IPNError === '')
+				{
+					// Check that $Payment_status and deal with "Pending" payment status
+					if (($Payment_status !== 'Completed') && ($Payment_status !== 'Pending'))
+						$IPNError = 'Payment_status not completed';
+				}
+				if ($IPNError === '')
+				{
+					// Check that $Receiver_email is the EMail we expected
+					if ((strlen($PayPalNotifyEMail)>0) && ($Receiver_email != $PayPalNotifyEMail))
 					{
-						// Check that $Payment_status and deal with "Pending" payment status
-						if (($Payment_status !== 'Completed') && ($Payment_status !== 'Pending'))
-							$IPNError = 'Payment_status not completed';	
+						$this->AddToLog('Receiver Email INVALID');
+						$this->AddToLog('APIEmail: '.$PayPalNotifyEMail);
 					}
-
- 					if ($IPNError === '')
-					{
-						// Check that $Receiver_email is the EMail we expected
-						if ((strlen($PayPalNotifyEMail)>0) && ($Receiver_email != $PayPalNotifyEMail))
-						{
-							//$IPNError = 'Receiver Email INVALID';
-							$this->AddToLog('Receiver Email INVALID');
-							$this->AddToLog('APIEmail: '.$PayPalNotifyEMail);
-						}
-					}
-					 
-					$txnStatus = '';
-					if ($IPNError === '')
-					{
-						// Check that $Txn_id has not been previously processed
-						$txnStatus = $this->notifyDBaseObj->GetTxnStatus($Txn_id);
-						if (($txnStatus === $Payment_status) || ($txnStatus === 'Completed'))
-							$IPNError = 'Txn_ID Already Processed';		// Entry with matching Txn_Id found
-					}
-					
-					if ($IPNError === '')
-					{
-						if ($txnStatus !== '')
-							$this->notifyDBaseObj->UpdateSaleStatus($Txn_id, $Payment_status);
-						else
-						{
-							$results['Txnid'] = $this->HTTPParam('txn_id');
-							$results['saleName'] = $this->HTTPParam('first_name') . ' ' . $this->HTTPParam('last_name');
-							$results['saleEmail'] = $this->HTTPParam('payer_email');
-							$results['saleStatus'] = $this->HTTPParam('payment_status');
-							$results['salePrice'] = $this->HTTPParam('mc_gross');
-							$results['salePPName'] = $this->HTTPParam('address_name');
-							$results['salePPStreet'] = $this->HTTPParam('address_street');
-							$results['salePPCity'] = $this->HTTPParam('address_city');
-							$results['salePPState'] = $this->HTTPParam('address_state');
-							$results['salePPZip'] = $this->HTTPParam('address_zip');
-							$results['salePPCountry'] = $this->HTTPParam('address_country');
-			
-							$itemNo = 0;
-							$lineNo = 1;
-							while (true)
-							{
-								$itemNo++;
-								$itemID = $this->HTTPParam('item_number' . $itemNo);
-								if (strlen($itemID) == 0)
-									break;
-									
-								$qty = $this->HTTPParam('quantity' . $itemNo);
-								if ($qty == 0)
-									continue;
-									
-								$results['itemID' . $lineNo] = $this->HTTPParam('item_number' . $itemNo);
-								$results['itemName' . $lineNo] = $this->HTTPParam('item_name' . $itemNo);
-								$results['itemRef' . $lineNo] = $this->HTTPParam('item_number' . $itemNo);
-								$results['itemOption' . $lineNo] = $this->HTTPParam('option_selection1_' . $itemNo);
-								$results['qty' . $lineNo] = $this->HTTPParam('quantity' . $itemNo);
-								
-								$this->AddToLog('---------------------------------------------');
-								$this->AddToLog('Line ' . $lineNo);
-								$this->AddToLog('Item Name:    ' . $results['itemName' . $lineNo]);
-								$this->AddToLog('Item Ref:     ' . $results['itemRef' . $lineNo]);
-								$this->AddToLog('Item Option:  ' . $results['itemOption' . $lineNo]);
-								$this->AddToLog('Quantity:     ' . $results['qty' . $lineNo]);
-			    
-								$lineNo++;
-							}
-						
-							$results['TxdDate'] = date(MJSLibDBaseClass::MYSQL_DATETIME_FORMAT);
-							$saleID = $this->notifyDBaseObj->LogSale($results);
-							$this->AddToLog('Sale Logged - SaleID: '.$saleID);
-							
-							$emailStatus = $this->notifyDBaseObj->EMailSale($saleID);
-							$this->AddToLog('EMail Status: '.$emailStatus);
-						}
-						echo "OK<br>\n";
-					}
+				}
+				$txnStatus = '';
+				if ($IPNError === '')
+				{
+					// Check that $Txn_id has not been previously processed
+					$txnStatus = $this->notifyDBaseObj->GetTxnStatus($Txn_id);
+					if (($txnStatus === $Payment_status) || ($txnStatus === 'Completed'))
+						$IPNError = 'Txn_ID Already Processed';		// Entry with matching Txn_Id found
+				}
+				if ($IPNError === '')
+				{
+					if ($txnStatus !== '')
+						$this->notifyDBaseObj->UpdateSaleStatus($Txn_id, $Payment_status);
 					else
 					{
-						$this->AddToLog('IPN Rejected: '.$IPNError);
-						echo "$IPNError<br>\n";
+						$results['Txnid'] = $this->HTTPParam('txn_id');
+						$results['saleName'] = $this->HTTPParam('first_name') . ' ' . $this->HTTPParam('last_name');
+						$results['saleEmail'] = $this->HTTPParam('payer_email');
+						$results['saleStatus'] = $this->HTTPParam('payment_status');
+						$results['salePrice'] = $this->HTTPParam('mc_gross');
+						$results['salePPName'] = $this->HTTPParam('address_name');
+						$results['salePPStreet'] = $this->HTTPParam('address_street');
+						$results['salePPCity'] = $this->HTTPParam('address_city');
+						$results['salePPState'] = $this->HTTPParam('address_state');
+						$results['salePPZip'] = $this->HTTPParam('address_zip');
+						$results['salePPCountry'] = $this->HTTPParam('address_country');
+						$itemNo = 0;
+						$lineNo = 1;
+						while (true)
+						{
+							$itemNo++;
+							$itemID = $this->HTTPParam('item_number' . $itemNo);
+							if (strlen($itemID) == 0)
+								break;
+							$qty = $this->HTTPParam('quantity' . $itemNo);
+							if ($qty == 0)
+								continue;
+							$results['itemID' . $lineNo] = $this->HTTPParam('item_number' . $itemNo);
+							$results['itemName' . $lineNo] = $this->HTTPParam('item_name' . $itemNo);
+							$results['itemRef' . $lineNo] = $this->HTTPParam('item_number' . $itemNo);
+							$results['itemOption' . $lineNo] = $this->HTTPParam('option_selection1_' . $itemNo);
+							$results['qty' . $lineNo] = $this->HTTPParam('quantity' . $itemNo);
+							$this->AddToLog('---------------------------------------------');
+							$this->AddToLog('Line ' . $lineNo);
+							$this->AddToLog('Item Name:    ' . $results['itemName' . $lineNo]);
+							$this->AddToLog('Item Ref:     ' . $results['itemRef' . $lineNo]);
+							$this->AddToLog('Item Option:  ' . $results['itemOption' . $lineNo]);
+							$this->AddToLog('Quantity:     ' . $results['qty' . $lineNo]);
+							$lineNo++;
+						}
+						$results['TxdDate'] = date(MJSLibDBaseClass::MYSQL_DATETIME_FORMAT);
+												
+	  					// FUNCTIONALITY: IPN Notify - Log Sale to DB
+						$saleID = $this->notifyDBaseObj->LogSale($results);
+						$this->AddToLog('Sale Logged - SaleID: '.$saleID);
+												
+	  					// FUNCTIONALITY: IPN Notify - Send Sale EMail to buyer (and admin))
+						$emailStatus = $this->notifyDBaseObj->EMailSale($saleID);
+						$this->AddToLog('EMail Status: '.$emailStatus);
 					}
+					echo "OK<br>\n";
+				}
+				else
+				{
+					$this->AddToLog('IPN Rejected: '.$IPNError);
+					echo "$IPNError<br>\n";
+				}
 			}
 			else if ($payPalResponse['APIResponseText'] == 'INVALID')
 			{
-					// log for manual investigation
-					$this->AddToLog('IPN Response: INVALID');
-					echo "INVALID<br>\n";
-			}
+				// log for manual investigation
+				$this->AddToLog('IPN Response: INVALID');
+				echo "INVALID<br>\n";
+			}			
 			else
 			{
-					// error
-					$this->AddToLog("IPN Response: Unknown Response (len=" . strlen($payPalResponse['APIResponseText']) . ")" . substr($payPalResponse['APIResponseText'], 0, 80));
+				// error
+				$this->AddToLog("IPN Response: Unknown Response (len=" . strlen($payPalResponse['APIResponseText']) . ")" . substr($payPalResponse['APIResponseText'], 0, 80));
 			}
-
 			$this->AddToLog("---------------------------------------------------------------------");
-
-			if (defined('PAYPAL_APILIB_ENABLE_IPNLOG'))
-				$this->LogDebugToFile('IPNNotify.txt', $LogMessage);
+			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNLogRequests'))
+				$this->LogDebugToFile('IPNNotify.txt', $this->LogMessage);
 		}
 	}
 }

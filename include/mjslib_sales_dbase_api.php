@@ -55,12 +55,13 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 				$this->emailObj = new MJSLibEMailAPIClass($this);
 		}
 
-    function upgradeDB()
-    {
+	    function upgradeDB()
+	    {
 			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
 			$salesDefaultTemplatesPath = WP_CONTENT_DIR . '/plugins/' . $pluginID . '/templates/';
 			$salesTemplatesPath = WP_CONTENT_DIR . '/uploads/'.$pluginID;
 			
+			// FUNCTIONALITY: DBase - On upgrade ... Copy sales templates to working folder
 			// Copy release templates to stageshow persistent templates and images folders
 			MJSLibUtilsClass::recurse_copy($salesDefaultTemplatesPath, $salesTemplatesPath);
 		}
@@ -77,6 +78,18 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			// Remove templates and images folders in Uploads folder
 			if (is_dir($salesTemplatesPath))
 				MJSLibUtilsClass::deleteDir($salesTemplatesPath);
+			
+			parent::uninstall();
+		}
+		
+		function CheckIsConfigured()
+		{
+			return $this->payPalAPIObj->CheckIsConfigured();
+		}
+				
+		function CanEditPayPalSettings()
+		{					
+			return true;
 		}
 		
 		function getImagesURL()
@@ -113,6 +126,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 				'SalesID' => '',        
 				'SalesEMail' => '',
 				                
+				'EMailTemplatePath' => '',
+								
 				'Unused_EndOfList' => ''
 			);
 			
@@ -145,19 +160,62 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		// Saves the admin options to the PayPal object(s)
 		function setPayPalCredentials($OurIPNListener) 
 		{
+			$useLocalIPNServer = $this->isOptionSet('Dev_IPNLocalServer');
+				
 			$this->payPalAPIObj->SetLoginParams(
 				$this->adminOptions['PayPalEnv'], 
 				$this->adminOptions['PayPalAPIUser'], 
 				$this->adminOptions['PayPalAPIPwd'], 
 				$this->adminOptions['PayPalAPISig'], 
 				$this->adminOptions['PayPalCurrency'], 
-				$this->adminOptions['PayPalAPIEMail']);
+				$this->adminOptions['PayPalAPIEMail'],
+				$useLocalIPNServer);
+				
 			$this->payPalAPIObj->SetIPNListener($OurIPNListener);
 				
 			if ($this->getOption('Dev_ShowPayPalIO') == 1)
 				$this->payPalAPIObj->EnableDebug();
 		}
     
+		function UseTestPayPalSettings()
+		{
+			$this->getOptions();
+			
+			if (defined('PAYPAL_APILIB_ACTIVATE_TESTMODE'))
+			{
+				$this->adminOptions['PayPalEnv']  = 'sandbox';
+				
+				// Pre-configured PayPal Sandbox settings - can be defined in wp-config.php
+				$this->adminOptions['PayPalAPIUser']  = PAYPAL_APILIB_ACTIVATE_TESTUSER;
+				$this->adminOptions['PayPalAPIPwd']   = PAYPAL_APILIB_ACTIVATE_TESTPWD;
+				$this->adminOptions['PayPalAPISig']   = PAYPAL_APILIB_ACTIVATE_TESTSIG;
+				$this->adminOptions['PayPalAPIEMail'] = PAYPAL_APILIB_ACTIVATE_TESTEMAIL;
+	    	}
+			else
+			{
+				$this->adminOptions['PayPalEnv']  = 'live';
+				
+				// Pre-configured PayPal "Live" settings - can be defined in wp-config.php
+				$this->adminOptions['PayPalAPIUser']  = PAYPAL_APILIB_ACTIVATE_LIVEUSER;
+				$this->adminOptions['PayPalAPIPwd']   = PAYPAL_APILIB_ACTIVATE_LIVEPWD;
+				$this->adminOptions['PayPalAPISig']   = PAYPAL_APILIB_ACTIVATE_LIVESIG;
+				$this->adminOptions['PayPalAPIEMail'] = PAYPAL_APILIB_ACTIVATE_LIVEEMAIL;				
+			}      
+				
+      		if (defined('SALESMAN_DEFAULT_SALES_ID'))
+				$this->adminOptions['SalesID'] = SALESMAN_DEFAULT_SALES_ID;
+     		if (defined('SALESMAN_DEFAULT_SALES_EMAIL'))
+				$this->adminOptions['SalesEMail'] = SALESMAN_DEFAULT_SALES_EMAIL;
+      
+     		if (defined('SALESMAN_DEFAULT_EMAIL_TEMPLATE_PATH'))
+			{
+				if ($this->adminOptions['EMailTemplatePath'] == '')
+		      		$this->adminOptions['EMailTemplatePath'] = SALESMAN_DEFAULT_EMAIL_TEMPLATE_PATH;				
+			}
+				
+			$this->saveOptions();			
+		}
+		
 		function createDB($dropTable = false)
 		{
 			global $wpdb;
@@ -424,6 +482,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		
 		function AddEMailFields($EMailTemplate, $saleDetails)
 		{
+			// FUNCTIONALITY: DBase - Sales - Add generic DB fields to EMail
 			$emailFields = array(
 				// Details from User Profile
 				'[saleDateTime]' => 'saleDateTime',
@@ -480,16 +539,8 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 		function CheckEmailTemplatePath($templateID)
 		{
 			$templatePath = str_replace("\\", "/", $this->adminOptions[$templateID]);
-			$templatesFolder = 'templates/';
-			if (substr($templatePath, 0, strlen($templatesFolder)) === $templatesFolder)
-			{
-				// If the template starts with templates folder - just use the file name
-			}
-			
 			$this->adminOptions[$templateID] = basename($templatePath);
 			//echo "Option[$templateID]: $templatePath -> ".$this->adminOptions[$templateID]."<br>\n";
-			
-			// TODO-PRIORITY - EMail Templates must now be in 'uploads' folder ... Copy template?
 		}
 		
 		function GetEmailTemplatePath($templateID)
@@ -572,7 +623,7 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			if (isset($this->emailObj))
 				$this->emailObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
 
-			echo '<div id="message" class="updated"><p>'.__('EMail Sent to', $this->get_name()).' '.$EMailTo.'</p></div>';
+			echo '<div id="message" class="updated"><p>'.__('EMail Sent to', $this->get_domain()).' '.$EMailTo.'</p></div>';
 						
 			return 'OK';
 		}
@@ -667,13 +718,13 @@ if (!class_exists('MJSLibSalesDBaseClass'))
 			return $saleID;
 		}
 
-    function HTTPAction($url, $urlParams = '')
-    {	
+	    function HTTPAction($url, $urlParams = '')
+	    {	
 			$HTTPResponse = PayPalAPIClass::HTTPAction($url, $urlParams);
 			if ($this->getOption('Dev_ShowMiscDebug') == 1)
 				MJSLibUtilsClass::print_r($HTTPResponse, 'HTTPResponse:');
 			return $HTTPResponse; 
-    }
+	    }
     
 	}
 }

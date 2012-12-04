@@ -23,32 +23,6 @@ Copyright 2012 Malcolm Shergold
 if (!defined('STAGESHOW_DBASE_CLASS'))
 	define('STAGESHOW_DBASE_CLASS', 'StageShowDBaseClass');
 	
-include STAGESHOW_INCLUDE_PATH.'mjslib_paypaladmin.php';   
-
-if (!class_exists('StageShowSettingsAdminClass'))
-{
-	class StageShowSettingsAdminClass extends PayPalSettingsAdminClass // Define class
-	{
-		function __construct($settingsOpts = array())
-		{
-			$controlsOpts = array
-			(
-				array('Label' => 'Organisation ID',       'Id' => 'OrganisationID',		'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => STAGESHOW_ORGANISATIONID_TEXTLEN, 'Size' => 60, ),				
-				array('Label' => 'StageShow Sales EMail', 'Id' => 'AdminEMail',				'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => STAGESHOW_MAIL_TEXTLEN,      'Size' => STAGESHOW_MAIL_EDITLEN, ),
-				array('Label' => 'Bcc EMails to WP Admin','Id' => 'BccEMailsToAdmin',	'Type' => MJSLibTableClass::TABLEENTRY_CHECKBOX,   'Text' => 'Send EMail confirmation to Administrator' ),
-				array('Label' => 'Currency Symbol',				'Id' => 'UseCurrencySymbol','Type' => MJSLibTableClass::TABLEENTRY_CHECKBOX,   'Text' => 'Include in Box Office Output' ),
-				array('Label' => 'Items per Page',        'Id' => 'PageLength',				'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => 3, 'Default' => MJSLIB_EVENTS_PER_PAGE),
-				array('Label' => 'Max Ticket Qty',        'Id' => 'MaxTicketQty',			'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => 2, 'Default' => STAGESHOW_MAXTICKETCOUNT),
-			);
-			$settings['StageShow Settings'] = $controlsOpts;
-			
-			$settings = $this->MergeSettings($settings, $settingsOpts);
-			
-			parent::__construct($settings);		
-		}
-	}
-}
-
 include 'mjslib_sales_dbase_api.php';      
 
 if (!class_exists('StageShowDBaseClass')) 
@@ -89,35 +63,38 @@ if (!class_exists('StageShowDBaseClass'))
 
 	define('STAGESHOW_TICKETNAME_DIVIDER', ' - ');
 	
-  class StageShowDBaseClass extends MJSLibSalesDBaseClass // Define class
-  {
+	class StageShowDBaseClass extends MJSLibSalesDBaseClass // Define class
+  	{
 		const STAGESHOW_DATE_FORMAT = 'Y-m-d';
 		
-		function __construct() { //constructor		
-			// Call base constructor
+		function __construct($caller) //constructor	
+		{
 			$opts = array (
-				'PluginRootFilePath' => STAGESHOW_PLUGIN_FILE,
+				'Caller'             => $caller,
+				'PluginFolder'       => dirname(plugin_basename(dirname(__FILE__))),
 				'DownloadFilePath'   => '/wp-content/plugins/stageshow/stageshow_download.php',
 				'SalesTableName'     => STAGESHOW_SALES_TABLE,
 				'OrdersTableName'    => STAGESHOW_TICKETS_TABLE,
 				'CfgOptionsID'       => STAGESHOW_OPTIONS_NAME,
 			);			
 			
+			// Call base constructor
 			parent::__construct($opts);
 			
-			$this->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
+			$this->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);			
 		}
-
-    function upgradeDB()
-    {
-      global $wpdb;
-      
-      // Call upgradeDB() in base class
+		
+		function upgradeDB()
+		{
+			global $wpdb;
+			// Call upgradeDB() in base class
 			parent::upgradeDB();
 			
+			// FUNCTIONALITY: DBase - On upgrade ... Add any database fields
 			// Add DB Tables
 			$this->createDB();
 			
+			// FUNCTIONALITY: DBase - On upgrade ... Add administrator capabilities
 			// Add administrator capabilities
 			$adminRole = get_role('administrator');
 			
@@ -139,69 +116,52 @@ if (!class_exists('StageShowDBaseClass'))
 			// Action requiring setting of Cookies should be done here
 		}
 
-    function GetDefaultOptions()
-    {
+	    function GetDefaultOptions()
+	    {
+			// FUNCTIONALITY: DBase - StageShow - On Activate ... Set EMail Template Path
 			$defOptions = array(
 		    'EMailTemplatePath' => STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH,
 			);
 			
-			return $defOptions;
+			return $defOptions;			
 		}
-
-		function DeleteCapability($capID)
+		
+		function uninstall()
 		{
-			// DeleteCapability doesn't work - Fix it!
-			if (!isset($wp_roles)) {
-				$wp_roles = new WP_Roles();
-				$wp_roles->use_db = true;
-			}
-			
-			// Get all roles
-			global $wp_roles;
-			$roleIDs = $wp_roles->get_names();
- 
-			foreach ($roleIDs as $roleID => $publicID) 
-				$wp_roles->remove_cap($roleID, $capID) ;
-		}
-			
-    function uninstall()
-    {
-      global $wpdb;
-      
+			// FUNCTIONALITY: DBase - StageShow - Uninstall - Delete Performance, Prices and Tickets tables and Capabilities
+			global $wpdb;
 			parent::uninstall();
+			$wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_PERFORMANCES_TABLE);      
+			$wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_PRICES_TABLE);      
+			$wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_TICKETS_TABLE);  			
 			
-      $wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_PERFORMANCES_TABLE);      
-      $wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_PRICES_TABLE);      
-      $wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_TICKETS_TABLE);  
-						
+			$this->DeleteCapability(STAGESHOW_CAPABILITY_VALIDATEUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_SALESUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_ADMINUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_SETUPUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_DEVUSER);
-    }
-
+		}
+		
 		//Returns an array of admin options
-		function getOptions($childOptions = array())
-		{
+			function getOptions($childOptions = array())
+			{
 			// Initialise settings array with default values
 			$ourOptions = array(        
-        'loaded' => true,
-        'showName' => '',
-        
+		        'loaded' => true,
+		        'showName' => '',
+		        
 				'SetupUserRole' => STAGESHOW_DEFAULT_SETUPUSER,
-        'AuthTxnEMail' => '',                
-        
-				'DeleteOrphans' => false,
-				
-        'SLen' => 0,                
-        'PLen' => 4,
-        
-        'MaxTicketQty' => STAGESHOW_MAXTICKETCOUNT,
-        
-        'LatestNews' => '',
-        'NewsUpdateTime' => '',
-        
-        'Unused_EndOfList' => ''
+		        'AuthTxnEMail' => '',                
+		        
+		        'SLen' => 0,                
+		        'PLen' => 4,
+		        
+		        'MaxTicketQty' => STAGESHOW_MAXTICKETCOUNT,
+		        
+		        'LatestNews' => '',
+		        'NewsUpdateTime' => '',
+		        
+		        'Unused_EndOfList' => ''
 			);
 				
 			$ourOptions = array_merge($ourOptions, $childOptions);
@@ -212,6 +172,7 @@ if (!class_exists('StageShowDBaseClass'))
 			// Check for Upgrading from separate settings for Live and Test API Settings 
 			if (isset($currOptions['PayPalAPITestUser']))
 			{
+				// FUNCTIONALITY: DBase - StageShow - Options - Merge PayPal settings after version 0.9.3
 				// Update from Ver 0.9.3 or earlier setup
 				
 				if ($currOptions['PayPalEnv'] == 'sandbox')
@@ -262,6 +223,18 @@ if (!class_exists('StageShowDBaseClass'))
 			return $currOptions;
 		}
     
+		function get_domain()
+		{
+			// This function returns the domain id (for translations) 
+			// The domain is the same for all stageshow derivatives
+			return 'stageshow';
+		}
+		
+		function UseTestPayPalSettings()
+		{
+			parent::UseTestPayPalSettings();
+		}
+		
 		function DeleteHostedButtons($buttonType)
 		{
 			$sql = 'SELECT perfPayPal'.$buttonType.'ButtonID FROM '.STAGESHOW_PERFORMANCES_TABLE;
@@ -274,7 +247,7 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			parent::createDB($dropTable);
 
-      $ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
+			$ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
 
 			$table_name = $this->opts['OrdersTableName'];
 			{
@@ -334,13 +307,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$this->ShowSQL($sql);
 				dbDelta($sql);
 			}
-
-    }
-		
-		function GetSettingsObj()
-		{
-			return new StageShowSettingsAdminClass();	
-		}
+    	}
     
 		function DBField($fieldName)
 		{
@@ -358,81 +325,63 @@ if (!class_exists('StageShowDBaseClass'))
 			return $saleID;
 		}
 		
-		function GetSiteID()
-		{
-			$siteURL = get_option('siteurl');
-			$slashPosn = strrpos($siteURL, '/');
-			$siteURL = substr($siteURL, $slashPosn+1);
-			
-			return $siteURL;
-		}
-		
 		function CreateSample()
-		{			
-      $showName1 = "The Wordpress Show";
-			if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_test.php') ) { $showName1 .= " (".$this->GetSiteID().")"; }
-
-      // Sample dates to reflect current date/time
-      $showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+28 days"))." 20:00:00";
-      $showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+29 days"))." 20:00:00";
-      $showTime3 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 14:30:00";
-      $showTime4 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 20:00:00";
-      
-	    // Populate table
-      $showID1 = $this->AddShow($showName1);
-          
-      $statusMsg = '';
-			
-	    // Populate performances table	  
+		{
+			// FUNCTIONALITY: DBase - StageShow - Implement "Create Sample"
+			$showName1 = "The Wordpress Show";
+			if ( isset($this->testModeEnabled) ) 
+			{
+				$showName1 .= " (".MJSLibUtilsClass::GetSiteID().")";
+			}
+			// Sample dates to reflect current date/time
+			$showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+28 days"))." 20:00:00";
+			$showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+29 days"))." 20:00:00";
+			$showTime3 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 14:30:00";
+			$showTime4 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 20:00:00";
+			// Populate table
+			$showID1 = $this->AddShow($showName1);
+			$statusMsg = '';
+			// Populate performances table	  
 			$perfCount = 4;
 			if (defined('STAGESHOW_SAMPLE_PERFORMANCES_COUNT'))
 				$perfCount = STAGESHOW_SAMPLE_PERFORMANCES_COUNT;
-				
-      $perfID1 = $perfCount >= 1 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime1, "Day1Eve", 80) : -1;
-      $perfID2 = $perfCount >= 2 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime2, "Day2Eve", 60) : -1;
-      $perfID3 = $perfCount >= 3 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime3, "Day3Mat", 80) : -1;
-      $perfID4 = $perfCount >= 4 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime4, "Day3Eve", 60) : -1;
-      if (($perfID1 == 0) ||($perfID2 == 0) || ($perfID3 == 0) || ($perfID4 == 0))
+			$perfID1 = $perfCount >= 1 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime1, "Day1Eve", 80) : -1;
+			$perfID2 = $perfCount >= 2 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime2, "Day2Eve", 60) : -1;
+			$perfID3 = $perfCount >= 3 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime3, "Day3Mat", 80) : -1;
+			$perfID4 = $perfCount >= 4 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime4, "Day3Eve", 60) : -1;
+			if (($perfID1 == 0) ||($perfID2 == 0) || ($perfID3 == 0) || ($perfID4 == 0))
 			{
-				echo '<div id="message" class="error"><p>'.__('Cannot Add Performances', STAGESHOW_DOMAIN_NAME).' - '.$statusMsg.'</p></div>';
+				echo '<div id="message" class="error"><p>'.__('Cannot Add Performances', $this->get_domain()).' - '.$statusMsg.'</p></div>';
 				return;
 			}
-			
-	    // Populate prices table
-	    $priceID1_A1 = $this->AddPrice($perfID1, 'All', '12.50');
-	    $priceID1_A2 = $this->AddPrice($perfID2, 'Adult', '5.50');
-	    $priceID1_A3 = $this->AddPrice($perfID3, 'Adult', '4.00');
-	    $priceID1_A4 = $this->AddPrice($perfID4, 'All', '6.00');
-	    
-	    $priceID1_C2 = $this->AddPrice($perfID2, 'Child', '3.00');
-	    $priceID1_C3 = $this->AddPrice($perfID3, 'Child', '2.00');
-                 
+			// Populate prices table
+			$priceID1_A1 = $this->AddPrice($perfID1, 'All', '12.50');
+			$priceID1_A2 = $this->AddPrice($perfID2, 'Adult', '5.50');
+			$priceID1_A3 = $this->AddPrice($perfID3, 'Adult', '4.00');
+			$priceID1_A4 = $this->AddPrice($perfID4, 'All', '6.00');
+			$priceID1_C2 = $this->AddPrice($perfID2, 'Child', '3.00');
+			$priceID1_C3 = $this->AddPrice($perfID3, 'Child', '2.00');
 			$perfsList = $this->GetPerformancesListByShowID($showID1);
 			{
 				$this->UpdateCartButtons($perfsList);
 			}
-			
 			// Add some ticket sales
-      $saleTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47";
-      $saleTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-3 days"))." 10:14:51";
-      			
+			$saleTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47";
+			$saleTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-3 days"))." 10:14:51";
 			$saleEMail = 'other@someemail.co.uk';
 			if (defined('STAGESHOW_SAMPLE_EMAIL'))
 				$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 			$saleID = $this->AddSale($saleTime1, 'A.N.Other', $saleEMail, 12.00, 'ABCD1234XX', 'Completed',
-								'Andrew Other', '1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
+			'Andrew Other', '1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
 			$this->AddSaleItem($saleID, $priceID1_C3, 4);
 			$this->AddSaleItem($saleID, $priceID1_A3, 1);
-			
 			$saleEMail = 'mybrother@someemail.co.uk';
 			if (defined('STAGESHOW_SAMPLE_EMAIL'))
 				$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 			$saleID = $this->AddSale($saleTime2, 'M.Y.Brother', $saleEMail, 48.00, '87654321qa', 'Pending',
-								'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
+			'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
 			$this->AddSaleItem($saleID, $priceID1_A4, 4);
-			
 			$timeStamp = time();
-			
 			if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
 			{
 				// Add a lot of ticket sales
@@ -441,11 +390,9 @@ if (!class_exists('StageShowDBaseClass'))
 					$saleDate = date(self::MYSQL_DATETIME_FORMAT, $timeStamp);
 					$saleName = 'Sample Buyer'.$sampleSaleNo;
 					$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
-					
 					$saleID = $this->AddSale($saleDate, $saleName, $saleEMail, 12.50, 'TXNID_'.$sampleSaleNo, 'Completed',
-										'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
+					'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
 					$this->AddSaleItem($saleID, $priceID1_A3, 3);
-					
 					$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
 				}
 			}
@@ -465,7 +412,7 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			if ($showID <= 0) 
 			{
-				$rtnMsg = __('Internal Error - showID', STAGESHOW_DOMAIN_NAME);
+				$rtnMsg = __('Internal Error - showID', $this->get_domain());
 				return 0;
 			}
 			
@@ -477,7 +424,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$showName = $shows[0]->showName;
 			
 			// Create PayPal buttons ....
-			$ButtonStatus = $this->payPalAPIObj->CreateButton($hostedButtonID, $showName);
+			$ButtonStatus = $this->payPalAPIObj->CreateButton($hostedButtonID, $showName);				
 				
 			if ($ButtonStatus === PayPalAPIClass::PAYPAL_APILIB_CREATEBUTTON_ERROR)
 			{
@@ -485,11 +432,11 @@ if (!class_exists('StageShowDBaseClass'))
 				if ($ButtonStatus === PayPalAPIClass::PAYPAL_APILIB_CREATEBUTTON_OK)
 					$this->payPalAPIObj->DeleteButton($hostedButtonID);
 						
-				$rtnMsg = __('Error Creating PayPal Button(s)', STAGESHOW_DOMAIN_NAME);
+				$rtnMsg = __('Error Creating PayPal Button(s)', $this->get_domain());
 			}
 			else if ($ButtonStatus === PayPalAPIClass::PAYPAL_APILIB_CREATEBUTTON_NOLOGIN)
 			{
-				$rtnMsg = __('PayPal Login Settings Invalid', STAGESHOW_DOMAIN_NAME);
+				$rtnMsg = __('PayPal Login Settings Invalid', $this->get_domain());
 			}
 			else
 			{
@@ -497,34 +444,33 @@ if (!class_exists('StageShowDBaseClass'))
 				// Give performance unique Ref - Check what default reference IDs already exist in database
 				$perfID = $this->AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats, $hostedButtonID);
 				if ($perfID == 0)
-					$rtnMsg = __('Performance Reference is not unique', STAGESHOW_DOMAIN_NAME);
+					$rtnMsg = __('Performance Reference is not unique', $this->get_domain());
 				else
-					$rtnMsg = __('New Performance Added', STAGESHOW_DOMAIN_NAME);
+					$rtnMsg = __('New Performance Added', $this->get_domain());
 			}
 			
-			return $perfID;
+			return $perfID;			
 		}
 		
-    static function FormatDateForDisplay($dateInDB)
-    {	
+		static function FormatDateForDisplay($dateInDB)
+		{
 			// Convert time string to UNIX timestamp
 			$timestamp = strtotime( $dateInDB );
-			
 			return StageShowDBaseClass::FormatTimestampForDisplay($timestamp);
 		}
 		
-    static function FormatTimestampForDisplay($timestamp)
-    {	
+		static function FormatTimestampForDisplay($timestamp)
+		{
 			if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
 				$dateFormat = STAGESHOW_DATETIME_BOXOFFICE_FORMAT;
 			else
 				// Use Wordpress Date and Time Format
 				$dateFormat = get_option( 'date_format' ).' '.get_option( 'time_format' );
-			
+				
 			// Return Time & Date formatted for display to user
-			return date($dateFormat, $timestamp);				 
+			return date($dateFormat, $timestamp);
 		}
-
+		
 		function UpdateCartButtons($perfsList)
 		{
 			$siteurl = get_option('siteurl');
@@ -546,7 +492,8 @@ if (!class_exists('StageShowDBaseClass'))
 					array_push($priceIDs, $pricesEntry->priceType);
 					array_push($ticketPrices, $pricesEntry->priceValue);
 				}
-								
+						
+				// FUNCTIONALITY: DBase Update Performance Inventory
 				$this->payPalAPIObj->UpdateButton($perfEntry->perfPayPalButtonID, $description, $reference, $ticketPrices, $priceIDs);
 				$this->payPalAPIObj->UpdateInventory($perfEntry->perfPayPalButtonID, $quantity, $siteurl, $reference);
 			}
@@ -554,6 +501,7 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function GetEmail($ourOptions, $emailRole = '')
 		{
+			// FUNCTIONALITY: DBase - GetEmail - Uses AdminEMail (otherwise WP admin email) - Optionally with OrganisationID from settings
 			// StageShow ignores the "emailRole" parameter and always uses the AdminEMail entry
 			$ourEmail = '';
 
@@ -634,13 +582,6 @@ if (!class_exists('StageShowDBaseClass'))
 			$wpdb->query($sql);	
 		}
 		
-		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
-		{
-			$buttonText = __($buttonText, STAGESHOW_DOMAIN_NAME);
-			
-			echo "<input class=\"$buttonClass\" type=\"submit\" name=\"$buttonId\" value=\"$buttonText\" />\n";
-		}
-		
 		function IsShowNameUnique($showName)
 		{
 			return true;
@@ -655,6 +596,7 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function CanAddShow()
 		{		
+			// FUNCTIONALITY: Shows - StageShow limits to a single show
 			// Check if a show is already configured
 			if ( (isset($this->adminOptions['showName'])) && (strlen($this->adminOptions['showName']) > 0) )
 				return false;
@@ -664,20 +606,29 @@ if (!class_exists('StageShowDBaseClass'))
 		 
 		function AddShow($showName = '', $showState = 'activate')
 		{
+			// FUNCTIONALITY: Shows - StageShow - Add Show
 			// Check if a show is already configured
-			if ( (isset($this->adminOptions['showName'])) && (strlen($this->adminOptions['showName']) > 0) )
+			if (!$this->CanAddShow())
 				return 0;
 				
-			if ($showName === '') $showName = 'New Show';
-			
+			if ($showName === '') 
+			{
+				$showName = __('Unnamed Show', $this->get_domain());
+				if ( isset($this->testModeEnabled) ) 
+					$showName .= " (".MJSLibUtilsClass::GetSiteID().")";
+			}
+						
 			$this->adminOptions['showName'] = $showName;
 			$this->saveOptions();
 			
-     	return 1;
+			$this->SetShowActivated(1, $showState);
+			
+     		return 1;
 		}
 				
 		function UpdateShowName($showID, $showName)
 		{
+			// FUNCTIONALITY: Shows - StageShow - Update Show
 			if (!$this->IsShowNameUnique($showName))
 				return "ERROR";
 				
@@ -688,7 +639,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$this->adminOptions['showName'] = $showName;
 			$this->saveOptions();
 			
-			// Show Name Changed ... Updated Any Hosted Buttons
+			// FUNCTIONALITY: Shows - StageShow - Show Name Changed ... Updated Any Hosted Buttons
 			$perfsList = $this->GetPerformancesListByShowID($showID);
 			$this->UpdateCartButtons($perfsList);
 													
@@ -768,11 +719,11 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function renameColumn($table_name, $oldColName, $newColName)
 		{
-      global $wpdb;
+      		global $wpdb;
 			
 			$colSpec = $this->getColumnType($table_name, $oldColName);
 			if (!isset($colSpec->Field))
-				return __("DB Error: $oldColName Column does not exist");
+				return __("DB Error", $this->get_domain()).": $oldColName ".__("Column does not exist", $this->get_domain());
 				
 			$sql = "ALTER TABLE $table_name CHANGE $oldColName $newColName ".$colSpec->Type;
 			if ($colSpec->Null == 'NO')
@@ -788,7 +739,7 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function deleteColumn($table_name, $colName)
 		{
-      global $wpdb;
+      		global $wpdb;
 			
 			$sql = "ALTER TABLE $table_name DROP $colName";
 			$this->ShowSQL($sql); 
@@ -805,6 +756,12 @@ if (!class_exists('StageShowDBaseClass'))
 			$typesArray = $this->get_results($sql);
 
 			return isset($typesArray[0]) ? $typesArray[0] : '';
+		}
+		
+		function CanEditPayPalSettings()
+		{					
+			$results = $this->GetAllPerformancesList();		
+			return (count($results) == 0);			
 		}
 		
 		function GetAllPerformancesList()
@@ -895,7 +852,7 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function SetPerfActivated($perfID, $perfState = 'activate')
 		{
-      global $wpdb;
+      		global $wpdb;
       
 			$sqlFilters['perfID'] = $perfID;
 				 
@@ -957,10 +914,10 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats, $perfPayPalButtonID)
 		{
-      global $wpdb;
-      
-      if ($perfRef === '')
-      {
+			global $wpdb;
+		      
+			if ($perfRef === '')
+			{
 				$perfRefNo = 1;
 				while (true)
 				{
@@ -983,7 +940,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			$wpdb->query($sql);
 			
-     	return mysql_insert_id();
+     		return mysql_insert_id();
 		}
 				
 		function UpdatePerformanceTime($perfID, $newPerfDateTime)
@@ -995,7 +952,9 @@ if (!class_exists('StageShowDBaseClass'))
 		function UpdatePerformanceRef($perfID, $newPerfRef)
 		{
 			if (!$this->IsPerfRefUnique($newPerfRef))
+			{
 				return "ERROR";
+			}
 				
 			$sqlSET = 'perfRef="'.$newPerfRef.'"';
 			return $this->UpdatePerformanceEntry($perfID, $sqlSET);
@@ -1060,7 +1019,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$joinCmd = ' JOIN ';
 						
 			$sql  = 'SELECT '.$selectFields.' FROM '.STAGESHOW_PRICES_TABLE;
-      $sql .= ' '.$joinCmd.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
+      		$sql .= ' '.$joinCmd.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
 			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			
@@ -1086,12 +1045,12 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function AddPrice($perfID, $priceType, $priceValue, $priceRef = '')
 		{
-      global $wpdb;
+      		global $wpdb;
       
-      if ($perfID <= 0) return 0;
+      		if ($perfID <= 0) return 0;
       
-      if ($priceType === '')
-      {
+      		if ($priceType === '')
+      		{
 				$priceTypeNo = 1;
 				while (true)
 				{
@@ -1108,8 +1067,8 @@ if (!class_exists('StageShowDBaseClass'))
 					return 0;	// Error - Performance Reference is not unique
 			}
 			
-      $sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceRef, priceValue)';
-      $sql .= ' VALUES('.$perfID.', "'.$priceType.'", "'.$priceRef.'", "'.$priceValue.'")';
+			$sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceRef, priceValue)';
+			$sql .= ' VALUES('.$perfID.', "'.$priceType.'", "'.$priceRef.'", "'.$priceValue.'")';
 			$this->ShowSQL($sql); 
 			
 			$wpdb->query($sql);
@@ -1593,16 +1552,7 @@ if (!class_exists('StageShowDBaseClass'))
 			{
 				$EMailTemplate = str_replace("[$key]", $value, $EMailTemplate);
 			}
-/*			
-			$EMailTemplate = str_replace('[ticketName]', $saleDetails->ticketName, $EMailTemplate);
-			$EMailTemplate = str_replace('[ticketType]', $saleDetails->ticketType, $EMailTemplate);
-			$EMailTemplate = str_replace('[ticketQty]', $saleDetails->ticketQty, $EMailTemplate);
-			$EMailTemplate = str_replace('[ticketSeat]', $saleDetails->ticketSeat, $EMailTemplate);
 			
-			$EMailTemplate = str_replace('[showName]', $saleDetails->showName, $EMailTemplate);
-			$EMailTemplate = str_replace('[perfRef]', $saleDetails->perfRef, $EMailTemplate);
-			$EMailTemplate = str_replace('[perfDateTime]', $saleDetails->perfDateTime, $EMailTemplate);
-*/			
 			return parent::AddSalesDetailsEMailFields($EMailTemplate, $saleDetails);
 		}
 		
@@ -1670,7 +1620,7 @@ if (!class_exists('StageShowDBaseClass'))
 		function CheckIsConfigured()
 		{
 			$this->GetLatestNews();
-			return $this->payPalAPIObj->CheckIsConfigured();
+			return parent::CheckIsConfigured();
 		}
 				
 		function GetLatestNews()

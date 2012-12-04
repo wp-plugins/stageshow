@@ -27,21 +27,22 @@ if (!class_exists('StageShowSalesAdminListClass'))
 {
 	class StageShowSalesAdminListClass extends PayPalSalesAdminListClass // Define class
 	{		
-		var $showZeroQtyEntries;
 		var	$salesList;
 		
 		function __construct($env, $editMode = false) //constructor
 		{
 			// Call base constructor
 			parent::__construct($env, $editMode);
-
-			$this->showZeroQtyEntries = false;
 		}
 		
 		function GetMainRowsDefinition()
 		{
+			if ($this->editMode) return array(
+				array(self::TABLEPARAM_LABEL => 'Sale Editor',       self::TABLEPARAM_ID => 'edit', ),						
+			);
+							
 			$columnDefs = array(
-				array('Label' => 'Qty', 'Id' => 'totalQty', 'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),		
+				array(self::TABLEPARAM_LABEL => 'Qty', self::TABLEPARAM_ID => 'totalQty', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),		
 			);
 			
 			return array_merge(parent::GetMainRowsDefinition(), $columnDefs);
@@ -54,9 +55,12 @@ if (!class_exists('StageShowSalesAdminListClass'))
 		
 		function ShowSaleDetails($result, $salesList)
 		{
-			if (!$this->editMode) 
+			if (!$this->editMode)
+			//if ((!$this->editMode) || ($result->saleID != NULL))
+			{
 				return parent::ShowSaleDetails($result, $salesList);
-				
+			}
+			
 			return $this->BuildSaleDetails($salesList);
 		}
 		
@@ -91,11 +95,25 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array('Label' => 'Show',     'Id' => 'ticketName',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Type',     'Id' => 'ticketType',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Price',    'Id' => 'priceValue',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),						
-				array('Label' => 'Quantity', 'Id' => 'ticketQty',    'Type' => MJSLibTableClass::TABLEENTRY_TEXT,   'Len' => 4, ),						
+				array(self::TABLEPARAM_LABEL => 'Show',     self::TABLEPARAM_ID => 'ticketName',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Type',     self::TABLEPARAM_ID => 'ticketType',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Price',    self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),						
+				array(self::TABLEPARAM_LABEL => 'Quantity', self::TABLEPARAM_ID => 'ticketQty',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 4, ),						
 			);
+		}
+		
+		function IsRowInView($result, $rowFilter)
+		{
+			if (!$this->editMode)
+			{
+				if ($result->ticketQty == 0)
+				{
+					// Obnly show rows that have non-zero quantity
+					return false;
+				}
+			}
+			
+			return true;
 		}		
 				
 	}
@@ -124,8 +142,8 @@ if (!class_exists('StageShowSalesAdminVerifyListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array('Label' => 'Location',          'Id' => 'verifyLocation',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Date and Time',     'Id' => 'verifyDateTime',   'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(MJSLibTableClass::TABLEPARAM_LABEL => 'Location',          MJSLibTableClass::TABLEPARAM_ID => 'verifyLocation',   MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(MJSLibTableClass::TABLEPARAM_LABEL => 'Date and Time',     MJSLibTableClass::TABLEPARAM_ID => 'verifyDateTime',   MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
 			);
 		}		
 				

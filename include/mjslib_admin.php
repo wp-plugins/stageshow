@@ -22,458 +22,67 @@ Copyright 2012 Malcolm Shergold
 
 include "mjslib_utils.php";
 
-if (!class_exists('SettingsAdminClass'))
+if (!class_exists('MJSLibAdminBaseClass')) 
 {
-	class SettingsAdminClass // Define class
-	{
-		var $settingsOpts;
-		var $incTableTags;
-		var $reloadMode;
-		var $autocompleteTag;
-		var $settings;
+	class MJSLibAdminBaseClass // Define class
+  	{
+		var $caller;				// File Path of descendent class
+		var $myPluginObj;
+		var $myDBaseObj;
+		var $myDomain;
 		
-		function __construct($settings)
+		function __construct($env)	 //constructor	
 		{
-			$this->settings = $settings;
-			
-			$this->incTableTags = false;
-			$this->reloadMode = false;
-			
-			$this->autocompleteTag = ' autocomplete="off"';
+			$this->caller = $env['caller'];
+			$this->myPluginObj = $env['PluginObj'];
+			$this->myDBaseObj = $env['DBaseObj'];
+			$this->myDomain = $env['Domain'];
 		}
 		
-		function MergeSettings($arr1, $arr2)
+		static function getEnv($callerContext)
 		{
-			// Merge Arrays ... keeping all duplicate entries
-			foreach ($arr1 as $key1 => $vals1)
-			{
-				if (isset($arr2[$key1]))
-				{
-					foreach ($arr2[$key1] as $val2)
-					{
-						if (isset($val2['Posn']))
-						{
-							// This entry must be positioned within earlier entries
-							$insertPosn = $val2['Posn'];
-							array_splice($vals1, $insertPosn, 0, array($val2));
-						}
-						else
-							$vals1 = array_merge($vals1, array($val2));
-					}
-					$arrRslt[$key1] = $vals1;
-				}
-				else
-					$arrRslt[$key1] = $vals1;
-			}
-			
-			foreach ($arr2 as $key2 => $vals2)
-			{
-				if (!isset($arr1[$key2]))
-					$arrRslt[$key2] = $vals2;
-			}
-			
-			return $arrRslt;
+			$env['caller'] = $callerContext->caller;
+			$env['PluginObj'] = $callerContext->myPluginObj;
+			$env['DBaseObj'] = $callerContext->myDBaseObj;
+			$env['Domain'] = $callerContext->myDomain;
+			return $env;
 		}
-		
-		function Reload($reloadMode = true)
-		{
-			$this->reloadMode = $reloadMode;
-		}
-		
-		function SaveSettings($dbObj)
-		{
-			// Save admin settings to database
-			foreach ($this->settings as $section => $settingOpts)
-			{
-				foreach ($settingOpts as $settingOption)
-				{		
-					switch ($settingOption['Type'])
-					{
-						case MJSLibTableClass::TABLEENTRY_VIEW:
-							break;
-							
-						case MJSLibTableClass::TABLEENTRY_CHECKBOX:
-							$controlId = $settingOption['Id'];
-							$dbObj->adminOptions[$controlId] = isset($_POST[$controlId]) ? true : false;
-							break;
-						
-						default:
-							$controlId = $settingOption['Id'];
-							if (isset($_POST[$controlId]))
-								$dbObj->adminOptions[$controlId] = stripslashes($_POST[$controlId]);
-							break;
-					}
-				}	
-			}
-					
-			$dbObj->saveOptions();			
-		}
-		
-		static function GetSelectOptsArray($settingOption)
-		{
-			if (isset($settingOption['Dir']))
-			{
-				// Folder is defined ... create the search path
-				$dir = $settingOption['Dir'];
-				if (substr($dir, strlen($dir)-1, 1) != '/')
-					$dir .= '/';
-				if (isset($settingOption['Extn']))
-					$dir .= '*.'.$settingOption['Extn'];
-				else
-					$dir .= '*.*';
-
-				// Now get the files list and convert paths to file names
-				$selectOpts = glob($dir);
-				foreach ($selectOpts as $key => $path)
-					$selectOpts[$key] = basename($path);
-			}
-			else
-				$selectOpts = $settingOption['Items'];
-					
-			$selectOptsArray = array();
-			
-			foreach ($selectOpts as $selectOpt)
-			{
-				$selectAttrs = explode('|', $selectOpt);
-				if (count($selectAttrs) == 1)
-				{
-					$selectOptValue = $selectOptText = $selectAttrs[0];
-				}
-				else
-				{
-					$selectOptValue = $selectAttrs[0];
-					$selectOptText = __($selectAttrs[1]);
-				}
-				
-				$selectOptsArray[$selectOptValue] = $selectOptText;
-			}
-			
-			return $selectOptsArray;
-		}
-		
-		function GetSettingHTMLTag($adminOptions, $settingOption)
-		{
-			$controlId = $settingOption['Id'];
-
-			if ($this->reloadMode)
-				$controlValue = stripslashes(MJSLibUtilsClass::GetArrayElement($_POST, $controlId));		// Reuse value from submitted form
-			else
-				$controlValue = MJSLibUtilsClass::GetArrayElement($adminOptions, $controlId);					// Get saved value from database
-
-			if ($settingOption['Type'] === MJSLibTableClass::TABLEENTRY_FUNCTION)
-			{
-				$functionId = $settingOption['Func'];
-				$controlValue = $this->$functionId($settingOption);				
-				return $controlValue;
-			}
-			
-			return $this->GetHTMLTag($settingOption, $controlValue);
-		}
-		
-		static function GetHTMLTag($settingOption, $controlValue, $editMode = true)
-		{
-			$autocompleteTag = ' autocomplete="off"';
-			$controlName = $settingOption['Id'];
-			
-			$editControl = '';
-			
-			$settingType= $settingOption['Type'];
-			
-			if (!$editMode)
-			{
-				switch ($settingType)
-				{
-					case MJSLibTableClass::TABLEENTRY_TEXT:
-					case MJSLibTableClass::TABLEENTRY_TEXTBOX:
-					case MJSLibTableClass::TABLEENTRY_SELECT:
-					case MJSLibTableClass::TABLEENTRY_CHECKBOX:
-					case MJSLibTableClass::TABLEENTRY_COOKIE:
-						$settingType = MJSLibTableClass::TABLEENTRY_VIEW;
-						break;						
-				}
-			}
-				
-			switch ($settingType)
-			{
-				case MJSLibTableClass::TABLEENTRY_TEXT:
-				case MJSLibTableClass::TABLEENTRY_COOKIE:
-					$editLen = $settingOption['Len'];
-					$editSize = isset($settingOption['Size']) ? $settingOption['Size'] : $editLen+1;
-					$editControl = '<input type="text"'.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" name="'.$controlName.'" value="'.$controlValue.'" />'."\n";
-					break;
-
-				case MJSLibTableClass::TABLEENTRY_TEXTBOX:
-					$editRows = $settingOption['Rows'];
-					$editCols = $settingOption['Cols'];
-					$editControl = '<textarea rows="'.$editRows.'" cols="'.$editCols.'" name="'.$controlName.'">'.$controlValue."</textarea>\n";
-					break;
-
-				case MJSLibTableClass::TABLEENTRY_SELECT:
-					$editControl  = '<select name="'.$controlName.'">'."\n";
-					$selectOptsArray = self::GetSelectOptsArray($settingOption);
-					foreach ($selectOptsArray as $selectOptValue => $selectOptText)
-					{
-						$selected = ($controlValue == $selectOptValue) ? ' selected=""' : '';
-						$editControl .= '<option value="'.$selectOptValue.'"'.$selected.' >'.$selectOptText."&nbsp;</option>\n";
-					}
-					$editControl .= '</select>'."\n";
-					break;
-
-				case MJSLibTableClass::TABLEENTRY_CHECKBOX:
-					$checked = ($controlValue === true) ? 'checked="yes"' : '';
-					$editControl = '<input type="checkbox" name="'.$controlName.'" id="'.$controlName.'" value="1" '.$checked.' />&nbsp;'.$settingOption['Text']."\n";
-					break;
-
-				case MJSLibTableClass::TABLEENTRY_VIEW:
-					$editControl = $controlValue;
-					break;
-
-				case MJSLibTableClass::TABLEENTRY_VALUE:
-					$editControl = $settingOption['Value'];
-					break;
-
-				default:
-					//echo "<string>Unrecognised Table Entry Type - $settingType </string><br>\n";
-					//MJSLibUtilsClass::ShowCallStack();
-					break;
-			}
-
-			return $editControl;
-		}
-		
-		function JS_Top()
-		{
-			return "
-<script language='JavaScript'>
-<!-- Hide script from old browsers
-// End of Hide script from old browsers -->
-
-var tabIdsList  = [";
-	
-		}
-		
-		function JS_Tab($tabID)
-		{
-			return "'$tabID',";	
-		}
-		
-		function JS_Bottom($defaultTab)
-		{
-			return "''];
-
-function onSettingsLoad()
-{
-	var tabsRowElem, index, tabId, defaultTabId;
-	
-	tabsRowElem = document.getElementById('mjsadmin-settings-tab-table');
-	tabsRowElem.style.display = '';
-	
-	defaultTabId = tabIdsList[".$defaultTab."];
-	
-	for (index = 0; index < tabIdsList.length-1; index++)
-	{
-		tabId = tabIdsList[index];
-		setTab(tabId, defaultTabId);
-	}
-}
-
-window.onload = onSettingsLoad;
-
-function setTab(tabID, selectedTabID)
-{
-	var headerElem, tabElem, pageElem, tabWidth;
-	
-	// Get the header 'Tab' Element					
-	headerElem = document.getElementById('page-header-' + tabID);
-	headerElem.style.display = 'none';
-	
-	// Get the header 'Tab' Element					
-	tabElem = document.getElementById('mjsadmin-settings-tab-' + tabID);
-	
-	// Get the Body Element					
-	pageElem = document.getElementById('mjsadmin-settings-page-' + tabID);
-
-	tabWidth = tabElem.style.width;
-	if (tabID == selectedTabID)
-	{
-		// Make the font weight normal and background Grey
-		tabElem.style.fontWeight = 'bold';	
-		//tabElem.backgroundColor = '#000000';
-		tabElem.style.borderBottom = '0px red solid';
-		
-		// Hide the settings text
-		pageElem.style.display = '';
-	}
-	else
-	{
-		// Make the font weight normal and background Grey
-		tabElem.style.fontWeight = 'normal';	
-		//tabElem.backgroundColor = '#F9F9F9';
-		tabElem.style.borderBottom = '1px black solid';
-		
-		// Hide the settings text
-		pageElem.style.display = 'none';
-	}	
-	
-	newStyle = tabElem.style.border;
-	newStyle2 = tabElem.style.border;
-}
-
-function getTabID(obj)
-{
-	tabID = obj.innerHTML.replace(/ /g, '-');
-	tabID = tabID.replace('+', '');
-	tabID = tabID.toLowerCase();
-	
-	return tabID;
-}
-
-function clickHeader(obj, state)
-{
-	var headerID, selectedTabID, index, tabId;
-	
-	headerID = obj.innerHTML;
-			
-	//alert('Clicked Header: ' + headerID);
-	
-	selectedTabID = getTabID(obj);
-	
-	for (index = 0; index < tabIdsList.length-1; index++)
-	{
-		tabId = tabIdsList[index];
-		setTab(tabId, selectedTabID);
-	}
-}
-
-</script>
-			";
-		}
-		
-		function GetDefaultSettingsTab($dbObj)
-		{
-			return 0;
-		}
-		
-		function Output_Form($dbObj)
-		{
-			$selectedTab =  $this->GetDefaultSettingsTab($dbObj);
-			
-			$adminOptions = $dbObj->adminOptions;
-			$domainName = $dbObj->get_name();
-			
-			$tabbedMenu = '';
-			$output = '';
-			$nextInline = false;
-			
-			$tabClassID = "mjsadmin-settings-tab";
-			$pageClassID = "mjsadmin-settings-page";
-			
-			$javascript = $this->JS_Top();
-			
-			$numOfTabs = count($this->settings);
-			$tabWidth = intval(100/$numOfTabs)."%";
-			
-			foreach ($this->settings as $settingsName => $settingOpts)
-			{
-				$setingsPageID = strtolower(str_replace(" ", "-", str_replace("+", "", $settingsName)));
-				
-				$tabElemID  = $tabClassID.'-'.$setingsPageID;
-				$pageElemID = $pageClassID.'-'.$setingsPageID;
-			
-				$sectionOutput = '';
-				
-				$tabTableClass = $tabClassID.'-table';
-				$tabbedMenu .= "<th id=$tabElemID class=$tabClassID width=\"$tabWidth\" onclick=clickHeader(this)>$settingsName</th>\n";
-					
-				foreach ($settingOpts as $settingOption)
-				{			
-					$settingLabel = $settingOption['Label'];
-					$editControl = $this->GetSettingHTMLTag($adminOptions, $settingOption);
-					if ($editControl === '')
-						continue;
-
-					if (!$nextInline)
-					{
-						$sectionOutput .= '<tr valign="middle">'."\n";
-						$sectionOutput .= '<td>'."\n";
-					}
-					$sectionOutput .= __($settingLabel, $domainName)."\n";
-					if (!$nextInline)
-					{
-						$sectionOutput .= '</td>'."\n";
-						$sectionOutput .= '<td>'."\n";
-					}
-					$sectionOutput .= $editControl."\n";
-					$nextInline = isset($settingOption['Next-Inline']);
-					if (!$nextInline)
-					{						
-						$sectionOutput .= '</td>'."\n";
-						$sectionOutput .= '</tr>'."\n";
-					}
-				}
-
-				if ($sectionOutput != '')
-				{
-					$header = "\n";
-					$header = '<div id="page-header-'.$setingsPageID.'">'."<h3>".__($settingsName, $domainName)."</h3></div>\n";
-					$sectionOutput = "$header<table class=\"$pageClassID\" id=\"$pageElemID\">\n$sectionOutput</table>\n";					
-					
-					$javascript .= $this->JS_Tab($setingsPageID);					
-				}		// End ... if ($sectionOutput != '')
-				$output .= $sectionOutput;
-				
-			} // End ... foreach ($settings as $section => $settingOpts)
-
-			$tabbedMenu = "<table class=$tabTableClass id=$tabTableClass style=\"display: none;\"><tr>$tabbedMenu</tr></table>\n";			
-			
-			$javascript .= $this->JS_Bottom($selectedTab);
-			echo $javascript;
-			
-			echo $tabbedMenu.$output;
-
-		} // End function Output_Form()
-
-	}
+  	}
 }
 
 if (!class_exists('MJSLibAdminClass')) 
 {
-  class MJSLibAdminClass // Define class
+  class MJSLibAdminClass extends MJSLibAdminBaseClass// Define class
   {
 		var $env;
 		
-		var $caller;				// File Path of descendent class
 		var $pluginName;
 		var $currentPage;		
 		var $salesPerPage;
-		var $myPluginObj;
-		var $myDBaseObj;
 		var $adminOptions;
 
 		var $editingRecord;
       		
 		function __construct($env)	 //constructor	
 		{
-			if (is_array($env))
-			{
-				$this->caller = $env['caller'];
-				$this->myPluginObj = $env['PluginObj'];
-				$this->myDBaseObj = $env['DBaseObj'];
-				$this->adminOptions = $this->myDBaseObj->adminOptions;
-			}
-			else
-			{
-				MJSLibUtilsClass::ShowCallStack();
-				die("Env must be an array in ".get_class()." constructor. ".__FILE__." at line ".__LINE__."\n");
-			}
+			parent::__construct($env);
+			
+			$this->adminOptions = $this->myDBaseObj->adminOptions;
 				
 			$this->env = $env;
+			
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj  = $this->myDBaseObj;
 			
 			$this->editingRecord = false;
 			
 			$callerFolders = explode("/", plugin_basename($this->caller));
 			$this->pluginName = $callerFolders[0];
 			
+			if (!isset($this->pageTitle)) $this->pageTitle = "***  pageTitle Undefined ***";
+			
+			$this->adminMsg = '';			
+
 			if ( isset( $_POST['action'] ) && (-1 != $_POST['action']) )
 				$bulkAction = $_POST['action'];
 			else if ( isset( $_POST['action2'] ) && (-1 != $_POST['action2']) )
@@ -514,6 +123,32 @@ if (!class_exists('MJSLibAdminClass'))
 				
  			}
  			
+			echo '<div class="wrap">';
+
+			$this->ProcessActionButtons();
+			
+			echo '
+				<div id="icon-stageshow" class="icon32"></div>
+				<h2>'.$myDBaseObj->get_name().' - '.__($this->pageTitle, $this->myDomain).'</h2>'."\n";
+				
+			echo "
+<script>
+
+function HideElement(obj)
+{
+	// Get the header 'Tab' Element					
+	tabElem = document.getElementById(obj.id);
+	
+	// Hide the settings row
+	tabElem.style.display = 'none';
+}
+
+</script>
+			";
+			
+			$this->Output_MainPage($this->adminMsg !== '');
+			
+			echo '</div>';
 		}
 		
 		static function ValidateEmail($ourEMail)
@@ -572,7 +207,7 @@ if (!class_exists('MJSLibAdminClass'))
 			// Save option extensions
 			foreach ($settings as $setting)
 			{
-				$settingId = $setting['Id'];
+				$settingId = $setting[MJSLibTableClass::TABLEPARAM_ID];
 				
 				if (!isset($_POST[$settingId.$index])) 
 					continue;
@@ -601,16 +236,39 @@ if (!class_exists('MJSLibAdminClass'))
 			echo "GetBulkActionMsg() function not defined in ".get_class()."<br>\n";
 		}
 		
-		static function AddActionButton($caller, $buttonText, $buttonClass, $saleID = 0)
+		static function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass, $elementId = 0)
 		{
-				$buttonAction = strtolower(str_replace(" ", "", $buttonText));
-				$page = $_GET['page'];
+			$buttonAction = strtolower(str_replace(" ", "", $buttonText));
+			$buttonText = __($buttonText, $domainId);
+			$page = $_GET['page'];
 				
-				$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
-				if ($saleID !== 0) $editLink .= '&id='.$saleID;
-				$editLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($editLink, plugin_basename($caller)) : $editLink;
-				$editControl = '<div class='.$buttonClass.'><a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a></div>'."\n";  
-				return $editControl;    
+			$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
+			if ($elementId !== 0) $editLink .= '&id='.$elementId;
+			$editLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($editLink, plugin_basename($caller)) : $editLink;
+			$editControl = '<div class='.$buttonClass.'><a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a></div>'."\n";  
+			return $editControl;    
+		}
+		
+		function GetAdminListClass()
+		{
+			return '';			
+		}
+		
+		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
+		{
+			$buttonText = __($buttonText, $this->myDomain);
+			
+			echo "<input class=\"$buttonClass\" type=\"submit\" name=\"$buttonId\" value=\"$buttonText\" />\n";
+		}
+		
+		function Output_MainPage($updateFailed)
+		{
+			echo "Output_MainPage() function not defined in ".get_class()."<br>\n";
+		}
+		
+		function ProcessActionButtons()
+		{
+			echo "ProcessActionButtons() function not defined in ".get_class()."<br>\n";
 		}
 		
 		function AdminUpgradeNotice() 
@@ -626,8 +284,8 @@ if (!class_exists('MJSLibAdminClass'))
 	</div>
 <?php
 		}
-
-  }
+		
+ 	}
 }
 
 ?>

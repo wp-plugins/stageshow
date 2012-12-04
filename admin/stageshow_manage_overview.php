@@ -47,18 +47,19 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		
 		function GetMainRowsDefinition()
 		{
+			// FUNCTIONALITY: Overview - Shows Performances Count, Ticket sales quantity (with link to Show Sales page) and Sales Values
 			return array(
-				array('Label' => 'Show',         'Id' => 'showName',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),
-				array('Label' => 'Performances', 'Id' => 'perfCount',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
-				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',    'Type' => MJSLibTableClass::TABLEENTRY_VALUE,  'Link' => 'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
-				array('Label' => 'Sales Value',  'Id' => 'totalValue',  'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array(self::TABLEPARAM_LABEL => 'Show',         self::TABLEPARAM_ID => 'showName',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, ),
+				array(self::TABLEPARAM_LABEL => 'Performances', self::TABLEPARAM_ID => 'perfCount',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'totalQty',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
+				array(self::TABLEPARAM_LABEL => 'Sales Value',  self::TABLEPARAM_ID => 'totalValue',  self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, ),						
 			);
 		}
 		
 		function GetDetailsRowsDefinition()
 		{
 			$ourOptions = array(
-//				array('Label' => 'Name',	                     'Id' => 'showName',      'Type' => MJSLibTableClass::TABLEENTRY_TEXT, 'Len' => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      'Size' => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+//				array(self::TABLEPARAM_LABEL => 'Name',	                     self::TABLEPARAM_ID => 'showName',      self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
@@ -68,7 +69,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		function GetDetailsRowsFooter()
 		{
 			$ourOptions = array(
-				array('Type' => MJSLibTableClass::TABLEENTRY_FUNCTION, 'Func' => 'ShowSaleDetails'),						
+				array(self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_FUNCTION, self::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsFooter(), $ourOptions);
@@ -78,6 +79,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		
 		function ShowSaleDetails($result, $saleResults)
 		{		
+			// FUNCTIONALITY: Overview - Output Peforrmances List
 			$env = $this->env;
 			$salesList = new StageShowOverviewAdminDetailsListClass($env, $this->editMode);	
 			
@@ -99,6 +101,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		
 		function OutputList($results)
 		{
+			// FUNCTIONALITY: Overview - Calculate Performances Count for each show
 			foreach ($results as $key=>$result)
 			{
 				// Save Performances Lists in class object so it can be reused by ShowSaleDetails() function
@@ -136,10 +139,11 @@ if (!class_exists('StageShowOverviewAdminDetailsListClass'))
 		
 		function GetMainRowsDefinition()
 		{
+			// FUNCTIONALITY: Overview - Show button lists performances, sales (with link) and value
 			$ourOptions = array(
-				array('Label' => 'Performance',  'Id' => 'perfDateTime', 'Type' => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array('Label' => 'Tickets Sold', 'Id' => 'totalQty',     'Type' => MJSLibTableClass::TABLEENTRY_VALUE, 'Link' => 'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
-				array('Label' => 'Sales Value',  'Id' => 'totalValue',   'Type' => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'totalQty',     self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
+				array(self::TABLEPARAM_LABEL => 'Sales Value',  self::TABLEPARAM_ID => 'totalValue',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, ),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
@@ -156,80 +160,90 @@ if (!class_exists('StageShowOverviewAdminClass'))
 	{
 		function __construct($env)
 		{
-			parent::__construct($env);
-
-			$myPluginObj = $this->myPluginObj;
-			$myDBaseObj = $this->myDBaseObj;
+			$this->pageTitle = 'Overview';
 			
-?>			
-			<div class="wrap">
-			<div id="icon-stageshow" class="icon32"></div>
-			<h2>
-				<?php echo $myPluginObj->pluginName.' - '.__('Overview', STAGESHOW_DOMAIN_NAME); ?>
-			</h2>
-<?php
-
+			// Call base constructor
+			parent::__construct($env);
+		}
+		
+		function ProcessActionButtons()
+		{
+			$myPluginObj = $this->myPluginObj;
+			$myDBaseObj  = $this->myDBaseObj;
+			
+			// FUNCTIONALITY: Overview - Action "Create Sample" Button
 			if(isset($_POST['createsample']))
 			{
 				$myPluginObj->CreateSample();
 			}
-			
+		}
+		
+		function GetAdminListClass()
+		{
+			return 'StageShowOverviewAdminListClass';			
+		}
+		
+		function Output_MainPage($updateFailed)
+		{
 			// Stage Show Overview HTML Output - Start 
-			$this->Output_Overview($env);
+			$this->Output_Overview();
 			$this->Output_ShortcodeHelp();
 			$this->Output_UpdateServerHelp();
 			$this->Output_UpdateInfo();
-			
-			echo '</div>';
 		}
 		
-		function Output_Overview($env)
+		
+		function Output_Overview()
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			$results = $myDBaseObj->GetAllShowsList();
 						
 ?>
-						<br>
-							<h2>Shows</h2>
-							<?php	
+	<br>
+	<h2><?php _e('Shows', $this->myDomain); ?></h2>
+<?php	
 	
 			if(count($results) == 0)
 			{
+				// FUNCTIONALITY: Overview - Show Link to Settings page if PayPal settings required
 				if ($myDBaseObj->CheckIsConfigured())
 				{
-					echo "<div class='noconfig'>".__('No Show Configured', STAGESHOW_DOMAIN_NAME)."</div>\n";
+					// FUNCTIONALITY: Overview - Show message and "Create Sample" button if no shows configured
+					echo "<div class='noconfig'>".__('No Show Configured', $this->myDomain)."</div>\n";
 					echo '
 					<form method="post" action="admin.php?page='.STAGESHOW_MENUPAGE_ADMINMENU.'">
 					<br>
-						<input class="button-primary" type="submit" name="createsample" value="'.__('Create Sample', STAGESHOW_DOMAIN_NAME).'"/>
+						<input class="button-primary" type="submit" name="createsample" value="'.__('Create Sample', $this->myDomain).'"/>
 					<br>
 					</form>';
 				}
 			}
 			else
 			{
-				$overviewList = new StageShowOverviewAdminListClass($env);		
+				$classId       = $this->GetAdminListClass();
+				$overviewList = new $classId($this->env);
 				$overviewList->OutputList($results);		
 			}
 		}
 		
 		function Output_ShortcodeHelp()
 		{
+			// FUNCTIONALITY: Overview - Show Help for Shortcode(s))
 ?>
-			<br>			
-				<h2>Shortcodes</h2>
-				StageShow generates output to your Wordpress pages for the following shortcodes:
+	<br>			
+	<h2><?php _e('Shortcodes', $this->myDomain); ?></h2>
+	<?php _e('StageShow generates output to your Wordpress pages for the following shortcodes:', $this->myDomain); ?>
 			<table class="widefat" cellspacing="0">
 				<thead>
 					<tr>
-						<th>Shortcode</th>
-						<th>Description</th>
+						<th><?php _e('Shortcode', $this->myDomain); ?></th>
+						<th><?php _e('Description', $this->myDomain); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
 						<td>[sshow-boxoffice]</td>
-						<td>Add Box Office for all performances</td>
+						<td><?php _e('Add Box Office for all performances', $this->myDomain); ?></td>
 					</tr>
 				</tbody>
 			</table>
@@ -238,15 +252,17 @@ if (!class_exists('StageShowOverviewAdminClass'))
 
 		function Output_UpdateServerHelp()
 		{
+			// FUNCTIONALITY: Overview - Output Update Server 
 			if (defined('STAGESHOW_INFO_SERVER_URL'))
 			{
 				$msg = "<strong>Using Custom Update Server - Root URL=".STAGESHOW_INFO_SERVER_URL."<br>\n";
-				echo '<br><div class="error inline"><p>'.$msg.'</p></div>';
+				echo '<br><div id="cust-update-error" class="error inline" onclick=HideElement(this) ><p>'.$msg.'</p></div>';
 			}			
 		}
 		
 		function Output_UpdateInfo()
 		{
+			// FUNCTIONALITY: Overview - Get and Output News from Update Server
 			// Get News entry from server
 			$myDBaseObj = $this->myDBaseObj;
 			$latest = $myDBaseObj->GetLatestNews();

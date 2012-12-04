@@ -1,42 +1,40 @@
 <?php
+/* 
+Description: Generic Plugin Uninstaller
+ 
+Copyright 2012 Malcolm Shergold
 
-	if (!defined('WP_UNINSTALL_PLUGIN')) 
-	{
-		echo "Access Denied.";
-		die;
-	}
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 
-	define('STAGESHOW_PLUGIN_FILE', __FILE__);
-	include 'stageshow_defs.php';      
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-	if ( file_exists(STAGESHOW_INCLUDE_PATH.'stageshowplus_dbase_api.php') )
-		include STAGESHOW_INCLUDE_PATH.'stageshowplus_dbase_api.php';
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-	if (!class_exists('StageShowDBaseClass'))
-		require_once STAGESHOW_INCLUDE_PATH.'stageshow_dbase_api.php';      
-      
-	$stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
-	$myDBaseObj = new $stageShowDBaseClass();
-
-	$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
-           
-  // Delete any PayPal Hosted buttons in the Performance Table
-	$results = $myDBaseObj->GetAllPerformancesList();
+*/
 	
-	//echo "<br>Class of myDBaseObj is ".get_class($myDBaseObj)."<br>\n";
-	//echo "<br>Performances:<br>\n"; print_r($results);
-	//die;
+if (!defined('WP_UNINSTALL_PLUGIN')) 
+{
+	echo "Access Denied.";
+	die;
+}
 
-	foreach($results as $result)
-	{
-		$myDBaseObj->payPalAPIObj->DeleteButton($result->perfPayPalButtonID);
-	}
-      
-	$myDBaseObj->uninstall();
+$pluginPath = dirname(__FILE__);
+$pluginID = basename($pluginPath);
+
+if (file_exists($pluginPath.MJSLIB_UNINSTALL_TESTCODE))
+{
+	include $pluginPath.MJSLIB_UNINSTALL_TESTCODE;
+}
 	
-	// Remove any StageShow entries from Wordpress options 
-	delete_option(STAGESHOW_OPTIONS_NAME);
-	
-	// Output debug message
-	//$debugMsg .= "Uninstall complete!\r\n";
-	//$myDBaseObj->LogToFile(__DIR__.'\..\debug.log', $debugMsg, $myDBaseObj->ForAppending);
+$uninstallerPath = $pluginID.'_uninstall.php';
+include $uninstallerPath;
+
+?>
