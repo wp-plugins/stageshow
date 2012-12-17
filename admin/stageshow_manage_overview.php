@@ -256,7 +256,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			if (defined('STAGESHOW_INFO_SERVER_URL'))
 			{
 				$msg = "<strong>Using Custom Update Server - Root URL=".STAGESHOW_INFO_SERVER_URL."<br>\n";
-				echo '<br><div id="cust-update-error" class="error inline" onclick=HideElement(this) ><p>'.$msg.'</p></div>';
+				echo '<br><div id="cust-update-error" class="error inline" onclick=ShowOrHideSubmenu(this) ><p>'.$msg.'</p></div>';
 			}			
 		}
 		
