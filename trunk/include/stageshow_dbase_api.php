@@ -702,8 +702,13 @@ if (!class_exists('StageShowDBaseClass'))
 					$results[$i]->showID = 1;
 					$results[$i]->showState = (isset($this->adminOptions['showState'])) ? $this->adminOptions['showState'] : 'activate';
 					
-					if ($addTotalQty && !isset($results[$i]->totalQty))	// Check if we need the totalQty field
-						$results[$i]->totalQty = 0;
+					if ($addTotalQty)	// Check if we need the totalQty field
+					{
+						if (!isset($results[$i]->totalQty))
+						{
+							$results[$i]->totalQty = NULL;
+						}
+					}
 				}
 			}
 			

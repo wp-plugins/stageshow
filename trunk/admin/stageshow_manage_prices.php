@@ -53,9 +53,9 @@ if (!class_exists('StageShowPricesAdminListClass'))
 		{
 			// FUNCTIONALITY: Prices - Lists Performance, Type and Price
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfID',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_SELECT, self::TABLEPARAM_FUNC => 'PerfDates'),
-				array(self::TABLEPARAM_LABEL => 'Type',         self::TABLEPARAM_ID => 'priceType', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
-				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, ),						
+				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Type',         self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
+				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, ),						
 			);
 		}
 		
@@ -115,7 +115,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 				{
 					foreach ($results as $result)
 					{
-						$newPerfID     = $_POST['perfID' . $result->priceID];
+						$newPerfID     = $result->perfID;
 						$newPriceType  = stripslashes($_POST['priceType' . $result->priceID]);
 						$newPriceValue = stripslashes($_POST['priceValue' . $result->priceID]);
 						
@@ -170,15 +170,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 						{
 							$pricesUpdated = false;
 							
-							// FUNCTIONALITY: Prices - Save Performance Date/Time, Ref and Price
-							$newPerfID = $_POST['perfID' . $result->priceID];
-							if ($newPerfID != $result->perfID)
-							{
-								$myDBaseObj->UpdatePricePerfID($result->priceID, $newPerfID);
-								$result->perfID = $newPerfID;
-								$pricesUpdated  = true;
-							}
-							
+							// FUNCTIONALITY: Prices - Save Price Ref and Price
 							$newPriceType = stripslashes($_POST['priceType' . $result->priceID]);
 							if ($newPriceType != $result->priceType)
 							{
@@ -273,12 +265,12 @@ if (!class_exists('StageShowPricesAdminClass'))
 						$showsList = new $classId($this->env);
 						$showsList->OutputList($results, $updateFailed);
 					} 
-?>
-      <input type="hidden" name="showID" value="<?php echo $showList->showID; ?>"/>
-      <input type="hidden" name="perfID" value="<?php echo $perfsLists[0]->perfID; ?>"/>
-<?php
+
+      				echo '<input type="hidden" name="showID" value="'.$showList->showID.'" />'."\n";
+
 					{
 						// FUNCTIONALITY: Prices - Output "Add New Price" Button (if valid)
+						$this->showID = $showList->showID;
 						$this->OutputButton("addpricebutton", __("Add New Price", $this->myDomain));
 					}
 				
@@ -353,6 +345,41 @@ if (!class_exists('StageShowPricesAdminClass'))
 			}
 			
 			return $actionMsg;
+		}
+		
+		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
+		{
+			// Overload OutputButton function to add a performance drop-down box
+			parent::OutputButton($buttonId, $buttonText, $buttonClass);
+			
+			switch ($buttonId)
+			{
+				case "addpricebutton":
+					// FUNCTIONALITY: Performances - StageShow+ - Add "Performance" select to new Price button
+					echo "<!-- Price Plan Select -->\n";
+					$this->OutputPerformanceSelect('&nbsp; '.__('for perfarmance', $this->myDomain).' &nbsp;');
+					break;
+			}
+		}
+		
+		function OutputPerformanceSelect($label = '')
+		{
+			// Output a performance drop-down box
+			$myDBaseObj  = $this->myDBaseObj;
+
+			echo $label;
+			
+			// TODO - Get performances list for this show
+			$perfsList = $myDBaseObj->GetPerformancesListByShowID($this->showID);
+			
+			echo '<select name="perfID">'."\n";
+			foreach ($perfsList as $perfRecord)
+			{
+				$perfDateTime = $perfRecord->perfDateTime.'&nbsp;&nbsp;';
+				$perfID = $perfRecord->perfID;
+				echo "<option value=\"$perfID\">$perfDateTime</option>\n";
+			}
+			echo '</select>'."\n";
 		}
 		
 	}
