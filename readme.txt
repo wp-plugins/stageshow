@@ -1,4 +1,4 @@
-=== StageShow ===
+=== BingMaps ===
 Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/BingMaps/donate.html
 Tags: pages, paypal, maps, bing, 
