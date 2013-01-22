@@ -53,9 +53,9 @@ For a list of all available maps see the Bing Maps help page <a href=http://msdn
 
 == Screenshots ==
 
-1. Screenshot 1: Settings Page
-2. Screenshot 2: Typical output (Road Map)
-3. Screenshot 3: Typical output (OS Map)
+1. Settings Page
+2. Typical output (Road Map)
+3. Typical output (OS Map)
 
 == Changelog ==
 
