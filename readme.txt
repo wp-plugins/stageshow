@@ -1,7 +1,7 @@
 === BingMaps ===
 Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/BingMaps/donate.html
-Tags: pages, paypal, maps, bing, 
+Tags: pages, paypal, maps, bing, mapping, ordnance survey, OS, routes, walking
 Requires at least: 3.0
 Tested up to: 3.5
 Stable tag: 0.1
@@ -38,24 +38,24 @@ Features Summary
 * Install the plugin and activate it
 * Go to <a href=http://www.bingmapsportal.com>bingmapsportal.com</a> and sign up to get a free BingMaps key
 * Go to the BingMaps - Settings page and enter your BingMaps key
-* Create a page on your website (or edit an existing one) to contain the map and add the shortcode to it
+* Create a page on your website to contain the map (or edit an existing one) and add the shortcode to it
 		
 = How do I add a map to my site? =
 
-Add the shortcode to either a new or existing page on your site. Two typical shortcodes are as follows:
-[bing-maps-map x=51.503146 y=-0.002979]
+Add the shortcode to either a new or existing page on your site. <br>Two typical shortcodes are as follows:<br>
+[bing-maps-map x=51.503146 y=-0.002979]<br>
 [bing-maps-map x=51.477841 y=-0.001548 zoom=14 w=800 h=500 type=ordnanceSurvey] (GB locale only)
 
 = What map types are available? =
 
-All map types supported by the Bing Maps AJAX Control can be displayed. The maps available depends on the locale selected in the BingMaps settings.
+All map types supported by the Bing Maps AJAX Control can be displayed. The map types available depends on the locale selected in the BingMaps settings.<br>
 For a list of all available maps see the Bing Maps help page <a href=http://msdn.microsoft.com/en-us/library/gg427625.aspx>here</a>
- 
 
 == Screenshots ==
 
 1. Screenshot 1: Settings Page
-2. Screenshot 2: Typical output
+2. Screenshot 2: Typical output (Road Map)
+3. Screenshot 3: Typical output (OS Map)
 
 == Changelog ==
 
