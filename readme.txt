@@ -49,7 +49,7 @@ Add the shortcode to either a new or existing page on your site. <br>Two typical
 = What map types are available? =
 
 All map types supported by the Bing Maps AJAX Control can be displayed. The map types available depends on the locale selected in the BingMaps settings.<br>
-For a list of all available maps see the Bing Maps help page <a href=http://msdn.microsoft.com/en-us/library/gg427625.aspx>here</a>
+The Bing Maps help page (<a href=http://msdn.microsoft.com/en-us/library/gg427625.aspx>here</a>) lists all available map types.
 
 == Screenshots ==
 
