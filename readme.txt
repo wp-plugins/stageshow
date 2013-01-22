@@ -53,6 +53,8 @@ The Bing Maps help page (http://msdn.microsoft.com/en-us/library/gg427625.aspx) 
 
 == Screenshots ==
 
+Screenshots should appear here. Otherwise visit http://www.corondeck.co.uk/wordpress/bingmaps/screenshots/
+
 1. Settings Page
 2. Typical output (Road Map)
 3. Typical output (OS Map)
