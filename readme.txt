@@ -36,7 +36,7 @@ Features Summary
 = How do I set up BingMaps? =
 
 * Install the plugin and activate it
-* Go to http://www.bingmapsportal.com>bingmapsportal.com and sign up to get a free BingMaps key
+* Go to http://www.bingmapsportal.com and sign up to get a free BingMaps key
 * Go to the BingMaps - Settings page and enter your BingMaps key
 * Create a page on your website to contain the map (or edit an existing one) and add the shortcode to it
 		
