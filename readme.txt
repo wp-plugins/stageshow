@@ -46,9 +46,9 @@ Add the shortcode to either a new or existing page on your site.
 
 Two typical shortcodes are as follows:
 
-[bing-maps-map x&#61;51.503146 y&#61;-0.002979]
+[bingmaps-map x&#61;51.503146 y&#61;-0.002979]
 
-[bing-maps-map x&#61;51.477841 y&#61;-0.001548 zoom&#61;14 w&#61;800 h&#61;500 type&#61;ordnanceSurvey] (GB locale only)
+[bingmaps-map x&#61;51.477841 y&#61;-0.001548 zoom&#61;14 w&#61;800 h&#61;500 type&#61;ordnanceSurvey] (GB locale only)
 
 = What map types are available? =
 
