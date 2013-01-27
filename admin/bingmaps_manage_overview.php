@@ -56,7 +56,7 @@ if (!class_exists('BingMapsOverviewAdminClass'))
 				</thead>
 				<tbody>
 					<tr>
-						<td>[bing-maps-map x=nn.nnnnn y=nn.nnnn]</td>
+						<td>[<?php echo BINGMAPS_SHORTCODE_MAP; ?> x=nn.nnnnn y=nn.nnnn]</td>
 						<td><?php _e('Output a map', $this->myDomain); ?></td>
 					</tr>
 					<tr>

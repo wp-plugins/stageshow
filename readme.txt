@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/BingMaps/donate.html
 Tags: pages, paypal, maps, bing, mapping, ordnance survey, OS, routes, walking
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 0.1
+Stable tag: 0.2
 
 The BingMaps plugin adds an interactive map(s) to your Wordpress Page or Page, using the Bing Maps AJAX Control.
 
@@ -58,8 +58,6 @@ The Bing Maps help page (http://msdn.microsoft.com/en-us/library/gg427625.aspx) 
 
 == Screenshots ==
 
-Screenshots should appear here. Otherwise visit http://www.corondeck.co.uk/wordpress/bingmaps/screenshots/
-
 1. Settings Page
 2. Typical output (Road Map)
 3. Typical output (OS Map)
@@ -67,6 +65,10 @@ Screenshots should appear here. Otherwise visit http://www.corondeck.co.uk/wordp
 == Changelog ==
 
 * Version History for BingMaps Plugin
+
+= 0.2 =
+* Shortcode help corrected
+* Added Plugin URI to header
 
 = 0.1 =
 * First public release

@@ -2,11 +2,11 @@
 
 /*
 Plugin Name: Bing Maps
-Plugin URI: http://tbd.co.uk
+Plugin URI: http://wordpress.org/extend/plugins/bingmaps/
 Description: Adds a Bing Maps image to a web page
 Author: Malcolm Shergold
-Version: 0.1
-Author URI: http://tbd.co.uk
+Version: 0.2
+Author URI: http://www.corondeck.co.uk
 */
 
 include 'include/bingmapslib_dbase_api.php';  
@@ -60,6 +60,8 @@ if (!class_exists('BingMapsPluginClass'))
 	
 	define('BINGMAPS_ADMINUSER_CAPABILITY', 'manage_options');
 	
+	define('BINGMAPS_SHORTCODE_MAP', BINGMAPS_CODE_PREFIX.'-map');
+	
 	include 'include/bingmapslib_plugin.php';      
 
 	class BingMapsPluginClass extends BingMapsLibPluginClass
@@ -91,7 +93,7 @@ if (!class_exists('BingMapsPluginClass'))
 			add_action('wp_enqueue_scripts', array(&$this, 'load_user_styles'));
 			
 			//Filters
-			add_shortcode(BINGMAPS_CODE_PREFIX."-map", array(&$this, 'OutputContent_Map'));
+			add_shortcode(BINGMAPS_SHORTCODE_MAP, array(&$this, 'OutputContent_Map'));
 
 /* TODO - Implement checkVersion() function 	
 			if ($myDBaseObj->checkVersion())
@@ -105,7 +107,10 @@ if (!class_exists('BingMapsPluginClass'))
 		function load_user_styles() 
 		{
 			//Add Style Sheet
-			wp_enqueue_style(BINGMAPS_CODE_PREFIX, BINGMAPS_URL.'css/salesman.css'); // BingMaps core style
+			//wp_enqueue_style(BINGMAPS_CODE_PREFIX, BINGMAPS_URL.'css/bingmaps.css'); 	  // BingMaps core style
+			
+			//Add Javascript
+			wp_enqueue_style(BINGMAPS_CODE_PREFIX, BINGMAPS_URL.'js/bingmaps.js'); 		// BingMaps javascript
 		}
 		
 		//Returns an array of admin options
