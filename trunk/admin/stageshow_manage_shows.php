@@ -19,11 +19,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
-include STAGESHOW_INCLUDE_PATH . 'mjslib_table.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
 
 if (!class_exists('StageShowShowsAdminListClass'))
 {
-	class StageShowShowsAdminListClass extends MJSLibAdminListClass // Define class
+	class StageShowShowsAdminListClass extends StageShowLibAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -53,9 +53,9 @@ if (!class_exists('StageShowShowsAdminListClass'))
 		{
 			// FUNCTIONALITY: Shows - Lists Show Names, Tickets Sold (with link to Show Sales page) and Show "State""
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Show Name',    self::TABLEPARAM_ID => 'showName',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_SHOWNAME_TEXTLEN, ),
-				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'totalQty',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
-				array(self::TABLEPARAM_LABEL => 'State',        self::TABLEPARAM_ID => 'showState',  self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_DECODE =>'GetShowState', ),						
+				array(self::TABLEPARAM_LABEL => 'Show Name',    self::TABLEPARAM_ID => 'showName',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_SHOWNAME_TEXTLEN, ),
+				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'soldQty',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
+				array(self::TABLEPARAM_LABEL => 'State',        self::TABLEPARAM_ID => 'showState',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_DECODE =>'GetShowState', ),						
 			);
 		}
 		
@@ -76,11 +76,11 @@ if (!class_exists('StageShowShowsAdminListClass'))
 	}
 }
 
-include STAGESHOW_INCLUDE_PATH . 'mjslib_admin.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_admin.php';
 
 if (!class_exists('StageShowShowsAdminClass'))
 {
-	class StageShowShowsAdminClass extends MJSLibAdminClass // Define class
+	class StageShowShowsAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env) //constructor	
 		{
@@ -262,9 +262,12 @@ if (!class_exists('StageShowShowsAdminClass'))
 						// Delete all prices for this performance
 						$myDBaseObj->DeletePriceByPerfID($delperfId);
 						
-						// Delete any PayPal buttons ....
-						$myDBaseObj->payPalAPIObj->DeleteButton($result->perfPayPalButtonID);
-						
+						if (!$myDBaseObj->UseIntegratedTrolley())					
+						{
+							// Delete any PayPal buttons ....
+							$myDBaseObj->payPalAPIObj->DeleteButton($result->perfPayPalButtonID);
+						}
+												
 						// Delete a performances entry
 						$myDBaseObj->DeletePerformanceByPerfID($delperfId);
 					}

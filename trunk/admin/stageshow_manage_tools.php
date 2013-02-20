@@ -20,7 +20,7 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include STAGESHOW_INCLUDE_PATH.'mjslib_admin.php';      
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_admin.php';      
 include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 
 if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_test_emailsale.php') ) 
@@ -28,7 +28,7 @@ if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_test_emailsale.php') )
  
 if (!class_exists('StageShowToolsAdminClass')) 
 {
-	class StageShowToolsAdminClass extends MJSLibAdminClass // Define class
+	class StageShowToolsAdminClass extends StageShowLibAdminClass // Define class
 	{
 		var $actionURL;
 		
@@ -72,7 +72,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 
 			$TxnId = '';
 				
-			MJSLibUtilsClass::Output_Javascript_SetFocus("TxnId");
+			StageShowLibUtilsClass::Output_Javascript_SetFocus("TxnId");
 							
 ?>
 <script type="text/javascript">
@@ -113,7 +113,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 			<?php
 			if(isset($_POST['validatesalebutton']))
 			{
-				$env = MJSLibAdminBaseClass::getEnv($this);					
+				$env = StageShowLibAdminBaseClass::getEnv($this);					
 				$this->ValidateSale($env);
 			}
 ?>
@@ -180,7 +180,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 <th><?php _e('Export', $this->myDomain); ?></th>
 <td>
 <select name="sshow_ex_type" id="sshow_ex_type" onchange=onSelectDownload(this)>
-	<?php if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) { ?>
+	<?php if (current_user_can(STAGESHOW_CAPABILITY_SETUPUSER)) { ?>
 	<option value="settings"><?php _e('Settings', $this->myDomain); ?> </option>
 	<?php } ?>
 	<option value="tickets"><?php _e('Tickets', $this->myDomain); ?> </option>
@@ -192,7 +192,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 <p>
 <p class="submit">
 <input type="submit" name="downloadexport" class="button" value="<?php esc_attr_e('Download Export File', $this->myDomain); ?>" />
-<input type="submit" name="downloadvalidator" id="downloadvalidator" class="button-secondary" value="<?php _e('Downlod Offline Validator', $this->myDomain); ?>" />
+<input type="submit" name="downloadvalidator" id="downloadvalidator" class="button-secondary" value="<?php _e('Download Offline Validator', $this->myDomain); ?>" />
 <input type="hidden" name="page" value="stageshow_tools" />
 <input type="hidden" name="download" value="true" />
 </p>

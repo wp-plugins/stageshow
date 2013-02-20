@@ -20,12 +20,25 @@ Copyright 2012 Malcolm Shergold
 
 */
 	
-include STAGESHOW_INCLUDE_PATH.'mjslib_debug.php';      
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_debug.php';      
 
 if (!class_exists('StageShowDebugAdminClass')) 
 {
-	class StageShowDebugAdminClass extends MJSLibDebugSettingsClass // Define class
+	class StageShowDebugAdminClass extends StageShowLibDebugSettingsClass // Define class
 	{
+		function GetOptionsDefs()
+		{
+			$testOptionDefs = array(
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowTrolley',     StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowTrolley', ),
+			);
+			
+			$childOptions = parent::GetOptionsDefs();
+			
+			$ourOptions = array_merge($childOptions, $testOptionDefs);
+			
+			return $ourOptions;
+		}
+		
 	}
 }
 		

@@ -20,11 +20,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include STAGESHOW_INCLUDE_PATH . 'mjslib_table.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
 
 if (!class_exists('StageShowPricesAdminListClass'))
 {
-	class StageShowPricesAdminListClass extends MJSLibAdminListClass // Define class
+	class StageShowPricesAdminListClass extends StageShowLibAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -53,9 +53,9 @@ if (!class_exists('StageShowPricesAdminListClass'))
 		{
 			// FUNCTIONALITY: Prices - Lists Performance, Type and Price
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Type',         self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
-				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, ),						
+				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Type',         self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
+				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, ),						
 			);
 		}
 		
@@ -79,11 +79,11 @@ if (!class_exists('StageShowPricesAdminListClass'))
 	}
 }
 
-include STAGESHOW_INCLUDE_PATH . 'mjslib_admin.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_admin.php';
 
 if (!class_exists('StageShowPricesAdminClass'))
 {
-	class StageShowPricesAdminClass extends MJSLibAdminClass // Define class
+	class StageShowPricesAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env) //constructor	
 		{
@@ -357,7 +357,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 				case "addpricebutton":
 					// FUNCTIONALITY: Performances - StageShow+ - Add "Performance" select to new Price button
 					echo "<!-- Price Plan Select -->\n";
-					$this->OutputPerformanceSelect('&nbsp; '.__('for perfarmance', $this->myDomain).' &nbsp;');
+					$this->OutputPerformanceSelect('&nbsp; '.__('for performance', $this->myDomain).' &nbsp;');
 					break;
 			}
 		}

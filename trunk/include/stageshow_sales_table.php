@@ -20,8 +20,8 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include 'mjslib_table.php';
-include 'mjslib_paypal_salesadmin.php';      
+include 'stageshowlib_table.php';
+include 'stageshowlib_paypal_salesadmin.php';      
 
 if (!class_exists('StageShowSalesAdminListClass')) 
 {
@@ -42,7 +42,7 @@ if (!class_exists('StageShowSalesAdminListClass'))
 			);
 							
 			$columnDefs = array(
-				array(self::TABLEPARAM_LABEL => 'Qty', self::TABLEPARAM_ID => 'totalQty', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),		
+				array(self::TABLEPARAM_LABEL => 'Qty', self::TABLEPARAM_ID => 'totalQty', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),		
 			);
 			
 			return array_merge(parent::GetMainRowsDefinition(), $columnDefs);
@@ -95,10 +95,10 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Show',     self::TABLEPARAM_ID => 'ticketName',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Type',     self::TABLEPARAM_ID => 'ticketType',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Price',    self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),						
-				array(self::TABLEPARAM_LABEL => 'Quantity', self::TABLEPARAM_ID => 'ticketQty',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 4, ),						
+				array(self::TABLEPARAM_LABEL => 'Show',     self::TABLEPARAM_ID => 'ticketName',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Type',     self::TABLEPARAM_ID => 'ticketType',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Price',    self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),						
+				array(self::TABLEPARAM_LABEL => 'Quantity', self::TABLEPARAM_ID => 'ticketQty',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 4, ),						
 			);
 		}
 		
@@ -121,7 +121,7 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 
 if (!class_exists('StageShowSalesAdminVerifyListClass')) 
 {
-	class StageShowSalesAdminVerifyListClass extends MJSLibAdminListClass // Define class
+	class StageShowSalesAdminVerifyListClass extends StageShowLibAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{
@@ -142,8 +142,8 @@ if (!class_exists('StageShowSalesAdminVerifyListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array(MJSLibTableClass::TABLEPARAM_LABEL => 'Location',          MJSLibTableClass::TABLEPARAM_ID => 'verifyLocation',   MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array(MJSLibTableClass::TABLEPARAM_LABEL => 'Date and Time',     MJSLibTableClass::TABLEPARAM_ID => 'verifyDateTime',   MJSLibTableClass::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Location',          StageShowLibTableClass::TABLEPARAM_ID => 'verifyLocation',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Date and Time',     StageShowLibTableClass::TABLEPARAM_ID => 'verifyDateTime',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 			);
 		}		
 				

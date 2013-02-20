@@ -23,7 +23,7 @@ Copyright 2012 Malcolm Shergold
 if (!defined('STAGESHOW_DBASE_CLASS'))
 	define('STAGESHOW_DBASE_CLASS', 'StageShowDBaseClass');
 	
-include 'mjslib_sales_dbase_api.php';      
+include 'stageshowlib_sales_dbase_api.php';      
 
 if (!class_exists('StageShowDBaseClass')) 
 {
@@ -63,7 +63,7 @@ if (!class_exists('StageShowDBaseClass'))
 
 	define('STAGESHOW_TICKETNAME_DIVIDER', ' - ');
 	
-	class StageShowDBaseClass extends MJSLibSalesDBaseClass // Define class
+	class StageShowDBaseClass extends StageShowLibSalesDBaseClass // Define class
   	{
 		const STAGESHOW_DATE_FORMAT = 'Y-m-d';
 		
@@ -120,7 +120,7 @@ if (!class_exists('StageShowDBaseClass'))
 	    {
 			// FUNCTIONALITY: DBase - StageShow - On Activate ... Set EMail Template Path
 			$defOptions = array(
-		    'EMailTemplatePath' => STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH,
+		    	'EMailTemplatePath' => STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH,
 			);
 			
 			return $defOptions;			
@@ -230,11 +230,6 @@ if (!class_exists('StageShowDBaseClass'))
 			return 'stageshow';
 		}
 		
-		function UseTestPayPalSettings()
-		{
-			parent::UseTestPayPalSettings();
-		}
-		
 		function DeleteHostedButtons($buttonType)
 		{
 			$sql = 'SELECT perfPayPal'.$buttonType.'ButtonID FROM '.STAGESHOW_PERFORMANCES_TABLE;
@@ -318,20 +313,13 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 		}
 		
-		function LogSale($results)
-		{
-			$saleID = parent::LogSale($results);
-			
-			return $saleID;
-		}
-		
 		function CreateSample()
 		{
 			// FUNCTIONALITY: DBase - StageShow - Implement "Create Sample"
 			$showName1 = "The Wordpress Show";
 			if ( isset($this->testModeEnabled) ) 
 			{
-				$showName1 .= " (".MJSLibUtilsClass::GetSiteID().")";
+				$showName1 .= " (".StageShowLibUtilsClass::GetSiteID().")";
 			}
 			// Sample dates to reflect current date/time
 			$showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+28 days"))." 20:00:00";
@@ -365,35 +353,39 @@ if (!class_exists('StageShowDBaseClass'))
 			{
 				$this->UpdateCartButtons($perfsList);
 			}
-			// Add some ticket sales
-			$saleTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47";
-			$saleTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-3 days"))." 10:14:51";
-			$saleEMail = 'other@someemail.co.uk';
-			if (defined('STAGESHOW_SAMPLE_EMAIL'))
-				$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-			$saleID = $this->AddSale($saleTime1, 'A.N.Other', $saleEMail, 12.00, 'ABCD1234XX', 'Completed',
-			'Andrew Other', '1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
-			$this->AddSaleItem($saleID, $priceID1_C3, 4);
-			$this->AddSaleItem($saleID, $priceID1_A3, 1);
-			$saleEMail = 'mybrother@someemail.co.uk';
-			if (defined('STAGESHOW_SAMPLE_EMAIL'))
-				$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-			$saleID = $this->AddSale($saleTime2, 'M.Y.Brother', $saleEMail, 48.00, '87654321qa', 'Pending',
-			'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
-			$this->AddSaleItem($saleID, $priceID1_A4, 4);
-			$timeStamp = time();
-			if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
+			
+			if (!isset($this->adminOptions['Dev_NoSampleSales']) || (!$this->adminOptions['Dev_NoSampleSales']))
 			{
-				// Add a lot of ticket sales
-				for ($sampleSaleNo = 1; $sampleSaleNo<=STAGESHOW_EXTRA_SAMPLE_SALES; $sampleSaleNo++)
+				// Add some ticket sales
+				$saleTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47";
+				$saleTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-3 days"))." 10:14:51";
+				$saleEMail = 'other@someemail.co.zz';
+				if (defined('STAGESHOW_SAMPLE_EMAIL'))
+					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
+				$saleID = $this->AddSale($saleTime1, 'A.N.Other', $saleEMail, 12.00, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				'Andrew Other', '1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
+				$this->AddSaleItem($saleID, $priceID1_C3, 4);
+				$this->AddSaleItem($saleID, $priceID1_A3, 1);
+				$saleEMail = 'mybrother@someemail.co.zz';
+				if (defined('STAGESHOW_SAMPLE_EMAIL'))
+					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
+				$saleID = $this->AddSale($saleTime2, 'M.Y.Brother', $saleEMail, 48.00, '87654321qa', 'Pending',
+				'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
+				$this->AddSaleItem($saleID, $priceID1_A4, 4);
+				$timeStamp = time();
+				if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
 				{
-					$saleDate = date(self::MYSQL_DATETIME_FORMAT, $timeStamp);
-					$saleName = 'Sample Buyer'.$sampleSaleNo;
-					$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
-					$saleID = $this->AddSale($saleDate, $saleName, $saleEMail, 12.50, 'TXNID_'.$sampleSaleNo, 'Completed',
-					'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
-					$this->AddSaleItem($saleID, $priceID1_A3, 3);
-					$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
+					// Add a lot of ticket sales
+					for ($sampleSaleNo = 1; $sampleSaleNo<=STAGESHOW_EXTRA_SAMPLE_SALES; $sampleSaleNo++)
+					{
+						$saleDate = date(self::MYSQL_DATETIME_FORMAT, $timeStamp);
+						$saleName = 'Sample Buyer'.$sampleSaleNo;
+						$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
+						$saleID = $this->AddSale($saleDate, $saleName, $saleEMail, 12.50, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
+						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
+						$this->AddSaleItem($saleID, $priceID1_A3, 3);
+						$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
+					}
 				}
 			}
 		}
@@ -423,31 +415,38 @@ if (!class_exists('StageShowDBaseClass'))
 			$shows = $this->GetShowsList($showID);
 			$showName = $shows[0]->showName;
 			
-			// Create PayPal buttons ....
-			$ButtonStatus = $this->payPalAPIObj->CreateButton($hostedButtonID, $showName);				
-				
-			if ($ButtonStatus === PayPalAPIClass::PAYPAL_APILIB_CREATEBUTTON_ERROR)
+			if ($this->UseIntegratedTrolley())
 			{
-				// Error creating at least one button ... tidy up and report error
-				if ($ButtonStatus === PayPalAPIClass::PAYPAL_APILIB_CREATEBUTTON_OK)
-					$this->payPalAPIObj->DeleteButton($hostedButtonID);
-						
-				$rtnMsg = __('Error Creating PayPal Button(s)', $this->get_domain());
-			}
-			else if ($ButtonStatus === PayPalAPIClass::PAYPAL_APILIB_CREATEBUTTON_NOLOGIN)
-			{
-				$rtnMsg = __('PayPal Login Settings Invalid', $this->get_domain());
+				$hostedButtonID = 0;
 			}
 			else
 			{
-				// PayPal button(s) created - Add performance to database					
-				// Give performance unique Ref - Check what default reference IDs already exist in database
-				$perfID = $this->AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats, $hostedButtonID);
-				if ($perfID == 0)
-					$rtnMsg = __('Performance Reference is not unique', $this->get_domain());
-				else
-					$rtnMsg = __('New Performance Added', $this->get_domain());
+				// Create PayPal buttons ....
+				$ButtonStatus = $this->payPalAPIObj->CreateButton($hostedButtonID, $showName);				
+				
+				if ($ButtonStatus === PayPalButtonsAPIClass::PAYPAL_APILIB_CREATEBUTTON_ERROR)
+				{
+					// Error creating at least one button ... tidy up and report error
+					if ($ButtonStatus === PayPalButtonsAPIClass::PAYPAL_APILIB_CREATEBUTTON_OK)
+						$this->payPalAPIObj->DeleteButton($hostedButtonID);
+							
+					$rtnMsg = __('Error Creating PayPal Button(s)', $this->get_domain());
+					return $perfID;			
+				}
+				else if ($ButtonStatus === PayPalButtonsAPIClass::PAYPAL_APILIB_CREATEBUTTON_NOLOGIN)
+				{
+					$rtnMsg = __('PayPal Login Settings Invalid', $this->get_domain());
+					return $perfID;			
+				}
 			}
+		
+			// PayPal button(s) created - Add performance to database					
+			// Give performance unique Ref - Check what default reference IDs already exist in database
+			$perfID = $this->AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats, $hostedButtonID);
+			if ($perfID == 0)
+				$rtnMsg = __('Performance Reference is not unique', $this->get_domain());
+			else
+				$rtnMsg = __('New Performance Added', $this->get_domain());
 			
 			return $perfID;			
 		}
@@ -473,6 +472,9 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function UpdateCartButtons($perfsList)
 		{
+			if ($this->UseIntegratedTrolley())
+				return;
+				
 			$siteurl = get_option('siteurl');
 			foreach($perfsList as $perfEntry)
 			{
@@ -552,12 +554,14 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
 			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$sql .= " LEFT JOIN ".STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.priceID='.STAGESHOW_PRICES_TABLE.'.priceID';
+			$sql .= " LEFT JOIN ".STAGESHOW_SALES_TABLE.' ON '.STAGESHOW_SALES_TABLE.'.saleID='.STAGESHOW_TICKETS_TABLE.'.saleID';
 			
 			// Add SQL filter(s)
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			$sql .= $this->GetOptsSQL($sqlFilters);
 			
-			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+			//$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 			
 			$this->ShowSQL($sql); 
 			
@@ -615,7 +619,7 @@ if (!class_exists('StageShowDBaseClass'))
 			{
 				$showName = __('Unnamed Show', $this->get_domain());
 				if ( isset($this->testModeEnabled) ) 
-					$showName .= " (".MJSLibUtilsClass::GetSiteID().")";
+					$showName .= " (".StageShowLibUtilsClass::GetSiteID().")";
 			}
 						
 			$this->adminOptions['showName'] = $showName;
@@ -705,9 +709,11 @@ if (!class_exists('StageShowDBaseClass'))
 					if ($addTotalQty)	// Check if we need the totalQty field
 					{
 						if (!isset($results[$i]->totalQty))
-						{
 							$results[$i]->totalQty = NULL;
-						}
+						if (!isset($results[$i]->soldQty))
+							$results[$i]->soldQty = NULL;
+						if (!isset($results[$i]->soldValue))
+							$results[$i]->soldValue = NULL;						
 					}
 				}
 			}
@@ -765,7 +771,7 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function CanEditPayPalSettings()
 		{					
-			$results = $this->GetAllPerformancesList();		
+			$results = $this->GetAllShowsList();		
 			return (count($results) == 0);			
 		}
 		
@@ -807,7 +813,8 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
 			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$sql .= " LEFT JOIN ".STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.priceID='.STAGESHOW_PRICES_TABLE.'.priceID';
-			
+			$sql .= " LEFT JOIN ".STAGESHOW_SALES_TABLE.' ON '.STAGESHOW_SALES_TABLE.'.saleID='.STAGESHOW_TICKETS_TABLE.'.saleID';
+
 			// Add SQL filter(s)
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			$sql .= $this->GetOptsSQL($sqlFilters);
@@ -834,6 +841,20 @@ if (!class_exists('StageShowDBaseClass'))
 				$buttonsListArray[$index] = $results[$index]->perfPayPalButtonID;
 				
 			return $buttonsListArray;
+		}
+		
+		function GetPriceFromButtonId($perfPayPalButtonID, $priceType)
+		{
+			$sql = 'SELECT * FROM '.STAGESHOW_PERFORMANCES_TABLE;
+			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
+			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfPayPalButtonID ="'.$perfPayPalButtonID.'"';
+			$sql .= ' AND '.STAGESHOW_PRICES_TABLE.'.priceType 	="'.$priceType.'"';
+			
+			$this->ShowSQL($sql); 
+			
+			$results = $this->get_results($sql);
+			
+			return $results;
 		}
 
 		function CanDeletePerformance($perfsEntry)
@@ -1008,12 +1029,18 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->GetPricesList($sqlFilters);
 		}
 				
+		function GetPricesListByPriceID($priceID)
+		{
+			$sqlFilters['priceID'] = $priceID;
+			return $this->GetPricesList($sqlFilters);
+		}
+				
 		function GetPricesList($sqlFilters)
 		{
 			$sqlFilters['derivedJoins'] = true;
 
 			$selectFields  = '*';
-			if (isset($sqlFilters['saleID']) || isset($sqlFilters['priceID']))
+			if (isset($sqlFilters['saleID']))
 			{
 				// Explicitly add joined fields from "base" tables (otherwise values will be NULL if there is no matching JOIN)
 				$selectFields .= ', '.$this->opts['SalesTableName'].'.saleID';
@@ -1247,7 +1274,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$sqlJoin .= " $joinType ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.priceID='.STAGESHOW_TICKETS_TABLE.'.priceID';
 				$sqlJoin .= " $joinType ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
 			}
-			
+						
 			return $sqlJoin;
 		}
 		
@@ -1258,7 +1285,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			if (isset($sqlFilters['priceID']))
 			{
-				$sqlWhere .= $sqlCmd.STAGESHOW_TICKETS_TABLE.'.priceID="'.$sqlFilters['priceID'].'"';
+				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceID="'.$sqlFilters['priceID'].'"';
 				$sqlCmd = ' AND ';
 			}
 			
@@ -1340,8 +1367,19 @@ if (!class_exists('StageShowDBaseClass'))
 				
 		function TotalSalesField($sqlFilters)
 		{
-			$sql  = ' SUM(ticketQty) AS totalQty ';
-			$sql .= ',SUM(priceValue * ticketQty) AS totalValue ';
+			// totalQty may not included Pending sales (i.e. saleStatus=Checkout)) - add it here!
+			$sql  = '  SUM(ticketQty) AS totalQty ';
+			//$sql .= ', SUM(priceValue * ticketQty) AS totalValue ';
+			if ($this->UseIntegratedTrolley())
+			{
+				$sql .= ', SUM(IF(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'", priceValue * ticketQty, 0)) AS soldValue ';
+				$sql .= ', SUM(IF(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'", ticketQty, 0)) AS soldQty ';				
+			}
+			else
+			{
+				$sql .= ', SUM(priceValue * ticketQty) AS soldValue ';
+				$sql .= ', SUM(ticketQty) AS soldQty ';
+			}
 			return $sql;
 		}
 		
@@ -1537,15 +1575,6 @@ if (!class_exists('StageShowDBaseClass'))
 			return $rtnStatus;
 		}
 
-		function GetURL($optionURL)
-		{
-			// If URL contains a : treat is as an absolute URL
-			if (!strpos($optionURL, ':'))
-				return get_site_url().'/'.$optionURL;
-			else
-				return $optionURL;
-		}
-		
 		function GetSalesEMail()
 		{
 			return $this->adminOptions['AdminEMail'];
@@ -1643,11 +1672,11 @@ if (!class_exists('StageShowDBaseClass'))
 			if (isset($this->adminOptions['NewsUpdateTime']) && ($this->adminOptions['NewsUpdateTime'] !== '') )
 			{
 				$lastUpdate = $this->adminOptions['NewsUpdateTime'];
-				$latest['LastUpdate'] = date(MJSLibDBaseClass::MYSQL_DATETIME_FORMAT, $lastUpdate);
+				$latest['LastUpdate'] = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT, $lastUpdate);
 				
 				$updateInterval = STAGESHOW_NEWS_UPDATE_INTERVAL*24*60*60;
 				$nextUpdate = $lastUpdate + $updateInterval;
-				$latest['NextUpdate'] = date(MJSLibDBaseClass::MYSQL_DATETIME_FORMAT, $nextUpdate);
+				$latest['NextUpdate'] = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT, $nextUpdate);
 				
 				if ($nextUpdate > time())
 				{
@@ -1680,6 +1709,14 @@ if (!class_exists('StageShowDBaseClass'))
 			}				
 			
 			return $latest;
+		}
+		
+		function AddTableLocks($sql)
+		{
+			$sql = parent::AddTableLocks($sql);
+			$sql .= ', '.STAGESHOW_PRICES_TABLE.' READ';
+			$sql .= ', '.STAGESHOW_PERFORMANCES_TABLE.' READ';
+			return $sql;
 		}
 		
 	}
