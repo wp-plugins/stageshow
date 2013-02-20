@@ -33,7 +33,7 @@ StageShow Features Summary
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
 * Access to StageShow Admin pages/features controlled by custom capabilities
 
-Additional Features in StageShow+ (available <a href=http://corondeck.co.uk/StageShow/Plus>here</a>
+Additional Features in StageShow+ (available <a href=http://corondeck.co.uk/StageShow/Plus>here</a>)
 
 * No limit on number of Shows or Performances
 * Unlimited number of User defined "Price Plans" to set prices when adding a performance
