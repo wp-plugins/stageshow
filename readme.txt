@@ -6,7 +6,7 @@ Requires at least: 3.0
 Tested up to: 3.5
 Stable tag: 2.0
 
-The StageShow plugin adds an online Box-Office for websites of Small Theatres and Amateur Drama Groups, records sales and provides facilities for ticket validation and sales analysis.
+StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
 == Description ==
 
