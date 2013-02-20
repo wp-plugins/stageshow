@@ -20,10 +20,16 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include STAGESHOW_INCLUDE_PATH.'mjslib_paypal_settings.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_paypal_settings.php';
 
 if (!class_exists('StageShowSettingsAdminListClass')) 
 {
+	define('STAGESHOW_ORGANISATIONID_TEXTLEN',60);
+	define('STAGESHOW_MAIL_TEXTLEN',127);
+		
+	define('STAGESHOW_ORGANISATIONID_EDITLEN',60);
+	define('STAGESHOW_MAIL_EDITLEN', 60);
+	
 	class StageShowSettingsAdminListClass extends PayPalSettingsAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
@@ -55,12 +61,12 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 			$templatePath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/emails/';
 			
 			$rowDefs = array(
-				array(self::TABLEPARAM_LABEL => 'Organisation ID',                 self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'OrganisationID',		   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => STAGESHOW_ORGANISATIONID_TEXTLEN, self::TABLEPARAM_SIZE => 60, ),				
+				array(self::TABLEPARAM_LABEL => 'Organisation ID',                 self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'OrganisationID',		   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => STAGESHOW_ORGANISATIONID_TEXTLEN, self::TABLEPARAM_SIZE => STAGESHOW_ORGANISATIONID_EDITLEN, ),				
 				array(self::TABLEPARAM_LABEL => 'EMail Template File',             self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'EMailTemplatePath',       self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT,   self::TABLEPARAM_DIR => $templatePath, self::TABLEPARAM_EXTN => 'php', self::TABLEPARAM_BEFORE => 'AdminEMail', ),
 				array(self::TABLEPARAM_LABEL => 'StageShow Sales EMail',           self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'AdminEMail',			   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => STAGESHOW_MAIL_TEXTLEN,      self::TABLEPARAM_SIZE => STAGESHOW_MAIL_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'Bcc EMails to WP Admin',          self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'BccEMailsToAdmin',	   self::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, self::TABLEPARAM_TEXT => 'Send EMail confirmation to Administrator' ),
 				array(self::TABLEPARAM_LABEL => 'Currency Symbol',		           self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'UseCurrencySymbol',     self::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, self::TABLEPARAM_TEXT => 'Include in Box Office Output' ),
-				array(self::TABLEPARAM_LABEL => 'Items per Page',                  self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'PageLength',			   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => 3, self::TABLEPARAM_DEFAULT => MJSLIB_EVENTS_PER_PAGE),
+				array(self::TABLEPARAM_LABEL => 'Items per Page',                  self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'PageLength',			   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => 3, self::TABLEPARAM_DEFAULT => STAGESHOWLIB_EVENTS_PER_PAGE),
 				array(self::TABLEPARAM_LABEL => 'Max Ticket Qty',                  self::TABLEPARAM_TAB => 'stageshow-settings-tab', self::TABLEPARAM_ID => 'MaxTicketQty',          self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     self::TABLEPARAM_LEN => 2, self::TABLEPARAM_DEFAULT => STAGESHOW_MAXTICKETCOUNT),
 			);
 			

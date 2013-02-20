@@ -29,9 +29,12 @@ if (!defined('WP_UNINSTALL_PLUGIN'))
 $pluginPath = dirname(__FILE__);
 $pluginID = basename($pluginPath);
 
-if (file_exists($pluginPath.MJSLIB_UNINSTALL_TESTCODE))
+if (defined('STAGESHOWLIB_UNINSTALL_TESTCODE'))
 {
-	include $pluginPath.MJSLIB_UNINSTALL_TESTCODE;
+	if (file_exists($pluginPath.STAGESHOWLIB_UNINSTALL_TESTCODE))
+	{
+		include $pluginPath.STAGESHOWLIB_UNINSTALL_TESTCODE;
+	}	
 }
 	
 $uninstallerPath = $pluginID.'_uninstall.php';

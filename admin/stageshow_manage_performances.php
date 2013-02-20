@@ -20,11 +20,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include STAGESHOW_INCLUDE_PATH . 'mjslib_table.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
 
 if (!class_exists('StageShowPerformancesAdminListClass'))
 {
-	class StageShowPerformancesAdminListClass extends MJSLibAdminListClass // Define class
+	class StageShowPerformancesAdminListClass extends StageShowLibAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -56,11 +56,11 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 		{
 			// FUNCTIONALITY: Performances - Lists Performance Date & Time, Reference, Max Seats, Tickets Sold Count and Activation State
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Date & Time',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => 28, ),
-				array(self::TABLEPARAM_LABEL => 'Reference',    self::TABLEPARAM_ID => 'perfRef',      self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => STAGESHOW_PERFREF_TEXTLEN, ),
-				array(self::TABLEPARAM_LABEL => 'Max Seats',    self::TABLEPARAM_ID => 'perfSeats',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_DECODE =>'GetPerfMaxSeats',  self::TABLEPARAM_LEN => 4, ),						
-				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'totalQty',     self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
-				array(self::TABLEPARAM_LABEL => 'State',        self::TABLEPARAM_ID => 'perfState',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_DECODE =>'GetPerfState'),						
+				array(self::TABLEPARAM_LABEL => 'Date & Time',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => 28, ),
+				array(self::TABLEPARAM_LABEL => 'Reference',    self::TABLEPARAM_ID => 'perfRef',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => STAGESHOW_PERFREF_TEXTLEN, ),
+				array(self::TABLEPARAM_LABEL => 'Max Seats',    self::TABLEPARAM_ID => 'perfSeats',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_DECODE =>'GetPerfMaxSeats',  self::TABLEPARAM_LEN => 4, ),						
+				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'soldQty',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
+				array(self::TABLEPARAM_LABEL => 'State',        self::TABLEPARAM_ID => 'perfState',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_DECODE =>'GetPerfState'),						
 			);
 		}
 		
@@ -90,11 +90,11 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 	}
 }
 
-include STAGESHOW_INCLUDE_PATH . 'mjslib_admin.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_admin.php';
 
 if (!class_exists('StageShowPerformancesAdminClass'))
 {
-	class StageShowPerformancesAdminClass extends MJSLibAdminClass // Define class
+	class StageShowPerformancesAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env) //constructor	
 		{
@@ -353,9 +353,12 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 					
 					// Get the performance entry
 					$results = $myDBaseObj->GetPerformancesListByPerfID($recordId);
-					
-					// Delete any PayPal buttons ....
-					$myDBaseObj->payPalAPIObj->DeleteButton($results[0]->perfPayPalButtonID);
+
+					if (!$myDBaseObj->UseIntegratedTrolley())					
+					{
+						// Delete any PayPal buttons ....
+						$myDBaseObj->payPalAPIObj->DeleteButton($results[0]->perfPayPalButtonID);
+					}
 					
 					// Delete a performance entry
 					$myDBaseObj->DeletePerformanceByPerfID($recordId);

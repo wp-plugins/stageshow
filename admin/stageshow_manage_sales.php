@@ -21,7 +21,7 @@ Copyright 2012 Malcolm Shergold
 */
 
 include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
-include STAGESHOW_INCLUDE_PATH.'mjslib_paypal_salesadmin.php';      
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_paypal_salesadmin.php';      
 
 if (!class_exists('StageShowSalesAdminClass')) 
 {
@@ -69,6 +69,14 @@ if (!class_exists('StageShowSalesAdminClass'))
 			$perfsPageMsg = __('No Prices Defined', $this->myDomain).' - <a href='.$perfsPageURL.'>'.__('Add one Here', $this->myDomain).'</a>';
 			$perfsPageMsg = "<div class='error'><p>$perfsPageMsg</p></div>";
 			return $perfsPageMsg;
+		}
+		
+		function OuputAddSaleButton()
+		{
+			if ( current_user_can(STAGESHOW_CAPABILITY_SALESUSER) )
+			{
+				parent::OuputAddSaleButton();
+			}
 		}
 		
 		function DoActions()

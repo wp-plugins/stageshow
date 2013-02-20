@@ -65,13 +65,14 @@ if (!class_exists('StageShowTestEMailClass'))
 	<?php $caller->WPNonceField(); ?>
 	<table class="form-table">			
 		<tr valign="top">
-      <td><?php _e('Divert EMail To', $myDBaseObj->get_domain()); ?>:</td>
+      		<td><?php _e('Divert EMail To', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
 				<input name="DivertEMailTo" type="text" maxlength="110" size="50" value="<?php echo $DivertEMailTo; ?>" />
 			</td>
+			<td>&nbsp;</td>
 		</tr>
 		<tr valign="top">
-      <td><?php _e('Selected Sale', $myDBaseObj->get_domain()); ?>:</td>
+      		<td><?php _e('Selected Sale', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
 				<select name="TestSaleID">
 <?php		
@@ -81,12 +82,9 @@ foreach($results as $result) {
 ?>
 				</select>
 			</td>
-		</tr>
-		<tr valign="top">
-			<td>
+			<td width=25%>
 				<input class="button-primary" type="submit" name="testbutton_EMailSale" value="<?php _e('EMail Sale', $myDBaseObj->get_domain()); ?>"/>
 			</td>
-			<td>&nbsp;</td>
 		</tr>
 	</table>
 

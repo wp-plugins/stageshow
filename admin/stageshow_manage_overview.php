@@ -20,11 +20,11 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include STAGESHOW_INCLUDE_PATH.'mjslib_table.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_table.php';
 
 if (!class_exists('StageShowOverviewAdminListClass')) 
 {
-	class StageShowOverviewAdminListClass extends MJSLibAdminListClass // Define class
+	class StageShowOverviewAdminListClass extends StageShowLibAdminListClass // Define class
 	{		
 		function __construct($env) //constructor
 		{
@@ -32,7 +32,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			$editMode = false;
 			parent::__construct($env, $editMode);
 				
-			$this->HeadersPosn = MJSLibTableClass::HEADERPOSN_TOP;
+			$this->HeadersPosn = StageShowLibTableClass::HEADERPOSN_TOP;
 		}
 		
 		function GetTableID($result)
@@ -49,17 +49,17 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		{
 			// FUNCTIONALITY: Overview - Shows Performances Count, Ticket sales quantity (with link to Show Sales page) and Sales Values
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Show',         self::TABLEPARAM_ID => 'showName',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, ),
-				array(self::TABLEPARAM_LABEL => 'Performances', self::TABLEPARAM_ID => 'perfCount',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, ),						
-				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'totalQty',    self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
-				array(self::TABLEPARAM_LABEL => 'Sales Value',  self::TABLEPARAM_ID => 'totalValue',  self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array(self::TABLEPARAM_LABEL => 'Show',         self::TABLEPARAM_ID => 'showName',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, ),
+				array(self::TABLEPARAM_LABEL => 'Performances', self::TABLEPARAM_ID => 'perfCount',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, ),						
+				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'soldQty',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
+				array(self::TABLEPARAM_LABEL => 'Sales Value',  self::TABLEPARAM_ID => 'soldValue',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, ),						
 			);
 		}
 		
 		function GetDetailsRowsDefinition()
 		{
 			$ourOptions = array(
-//				array(self::TABLEPARAM_LABEL => 'Name',	                     self::TABLEPARAM_ID => 'showName',      self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+//				array(self::TABLEPARAM_LABEL => 'Name',	                     self::TABLEPARAM_ID => 'showName',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
@@ -69,7 +69,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		function GetDetailsRowsFooter()
 		{
 			$ourOptions = array(
-				array(self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_FUNCTION, self::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
+				array(self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_FUNCTION, self::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsFooter(), $ourOptions);
@@ -105,7 +105,8 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			foreach ($results as $key=>$result)
 			{
 				// Save Performances Lists in class object so it can be reused by ShowSaleDetails() function
-				$this->perfsList[$result->showID] = $this->myDBaseObj->GetPerformancesListByShowID($result->showID);				
+				$sqlFilter['salesCompleted'] = true;
+				$this->perfsList[$result->showID] = $this->myDBaseObj->GetPerformancesListByShowID($result->showID, $sqlFilter);				
 				$results[$key]->perfCount = count($this->perfsList[$result->showID]);
 			}
 			
@@ -117,14 +118,14 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 
 if (!class_exists('StageShowOverviewAdminDetailsListClass')) 
 {
-	class StageShowOverviewAdminDetailsListClass extends MJSLibAdminListClass // Define class
+	class StageShowOverviewAdminDetailsListClass extends StageShowLibAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{
 			// Call base constructor
 			parent::__construct($env, $editMode);
 			
-			$this->HeadersPosn = MJSLibTableClass::HEADERPOSN_TOP;
+			$this->HeadersPosn = StageShowLibTableClass::HEADERPOSN_TOP;
 		}
 		
 		function GetTableID($result)
@@ -141,9 +142,9 @@ if (!class_exists('StageShowOverviewAdminDetailsListClass'))
 		{
 			// FUNCTIONALITY: Overview - Show button lists performances, sales (with link) and value
 			$ourOptions = array(
-				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'totalQty',     self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
-				array(self::TABLEPARAM_LABEL => 'Sales Value',  self::TABLEPARAM_ID => 'totalValue',   self::TABLEPARAM_TYPE => MJSLibTableClass::TABLEENTRY_VALUE, ),						
+				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'soldQty',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
+				array(self::TABLEPARAM_LABEL => 'Sales Value',  self::TABLEPARAM_ID => 'soldValue',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, ),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
@@ -152,11 +153,11 @@ if (!class_exists('StageShowOverviewAdminDetailsListClass'))
 	}
 }
 
-include STAGESHOW_INCLUDE_PATH.'mjslib_admin.php';      
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_admin.php';      
 
 if (!class_exists('StageShowOverviewAdminClass')) 
 {
-	class StageShowOverviewAdminClass extends MJSLibAdminClass // Define class
+	class StageShowOverviewAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env)
 		{
@@ -187,7 +188,8 @@ if (!class_exists('StageShowOverviewAdminClass'))
 		{
 			// Stage Show Overview HTML Output - Start 
 			$this->Output_Overview();
-			$this->Output_ShortcodeHelp();
+			$this->Output_StageShowHelp();
+			$this->Output_TrolleyAndShortcodesHelp();
 			$this->Output_UpdateServerHelp();
 			$this->Output_UpdateInfo();
 		}
@@ -226,13 +228,39 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			}
 		}
 		
+		function Output_StageShowHelp()
+		{
+			$myDBaseObj = $this->myDBaseObj;
+?>
+	<br>			
+	<h2><?php _e('Help', $this->myDomain); ?></h2>
+<?php
+			$help_url  = get_option('siteurl');
+			$pluginID  = basename(dirname(dirname(__FILE__)));		
+			$help_url .= '/wp-content/plugins/'.$pluginID.'/docs/StageShowHelp.pdf';
+			
+			echo __('User Guide is Available', $this->myDomain).' <a href="'.$help_url.'">'.__('here', $this->myDomain).'</a> (PDF)<br>';
+		}
+		
+		function Output_TrolleyAndShortcodesHelp()
+		{
+			$myDBaseObj = $this->myDBaseObj;
+?>
+	<br>			
+	<h2><?php _e('Shopping Trolley and Shortcodes', $this->myDomain); ?></h2>
+<?php
+			echo  __('Using', $this->myDomain).' '.$myDBaseObj->GetTrolleyType()."<br>\n";
+			
+
+			echo '<br>'.__('StageShow generates output to your Wordpress pages for the following shortcodes:', $this->myDomain)."<br><br>\n";
+	
+			$this->Output_ShortcodeHelp();
+		}
+		
 		function Output_ShortcodeHelp()
 		{
 			// FUNCTIONALITY: Overview - Show Help for Shortcode(s))
 ?>
-	<br>			
-	<h2><?php _e('Shortcodes', $this->myDomain); ?></h2>
-	<?php _e('StageShow generates output to your Wordpress pages for the following shortcodes:', $this->myDomain); ?>
 			<table class="widefat" cellspacing="0">
 				<thead>
 					<tr>
