@@ -19,6 +19,7 @@ Features Summary
 * Image size can be specified by optional shortcode attribute
 * Map scale can be specified by optional shortcode attribute
 * Displays Ordnance Survey Mapping (GB locale only)
+* Shortcode Attributes can be replaced by URL Parameters
 
 == Installation ==
 
