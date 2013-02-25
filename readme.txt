@@ -10,14 +10,14 @@ The BingMaps plugin adds an interactive map(s) to your Wordpress Page or Post, u
 
 == Description ==
 
-An interactive map can be added to your website by adding a single shortcode. The location of the map is specified by x and Y parameters in the shortcode. Other (optional) parameters can be added to specify the scale of the map, screen size in pixels, and the map type.
+An interactive map can be added to your website by adding a single shortcode. The location the map can be specified either by shortcode attribute or URL parameters. Other (optional) values can be added to specify the scale of the map, screen size in pixels, and the map type.
 
 Features Summary
 
 * Adds an interactive map to your Wordpress Page or Page
-* Location specified by shortcode parameters
-* Image size can be specified by optional shortcode parameters
-* Map scale can be specified by optional shortcode parameters
+* Location specified by shortcode attribute
+* Image size can be specified by optional shortcode attribute
+* Map scale can be specified by optional shortcode attribute
 * Displays Ordnance Survey Mapping (GB locale only)
 
 == Installation ==
