@@ -24,8 +24,8 @@ include 'bingmapslib_utils.php';
  
 if (!class_exists('BingMapsLibTableClass')) 
 {
-	if (!defined('MJSLIB_EVENTS_PER_PAGE'))
-		define('MJSLIB_EVENTS_PER_PAGE', 20);
+	if (!defined('BINGMAPSLIB_EVENTS_PER_PAGE'))
+		define('BINGMAPSLIB_EVENTS_PER_PAGE', 20);
 	
 	class BingMapsLibTableClass // Define class
 	{
@@ -830,7 +830,7 @@ if (!class_exists('BingMapsLibAdminListClass'))
 			if (isset($this->myDBaseObj->adminOptions['PageLength']))
 				$this->SetRowsPerPage($this->myDBaseObj->adminOptions['PageLength']);
 			else
-				$this->SetRowsPerPage(MJSLIB_EVENTS_PER_PAGE);
+				$this->SetRowsPerPage(BINGMAPSLIB_EVENTS_PER_PAGE);
 				
 			$this->useTHTags = true;
 			$this->showDBIds = $this->myDBaseObj->getOption('Dev_ShowDBIds');					

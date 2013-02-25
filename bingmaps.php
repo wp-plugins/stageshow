@@ -5,7 +5,7 @@ Plugin Name: Bing Maps
 Plugin URI: http://wordpress.org/extend/plugins/bingmaps/
 Description: Adds a Bing Maps image to a web page
 Author: Malcolm Shergold
-Version: 0.2
+Version: 0.3
 Author URI: http://www.corondeck.co.uk
 */
 
@@ -156,7 +156,47 @@ if (!class_exists('BingMapsPluginClass'))
 	    {
 	    }
 
-		function OutputContent_Map( $atts )
+		function GetMapAttributeVal($atts, $attID, $index=0)
+		{
+			$rtnVal = '';
+			
+			if (isset($atts[$attID]))
+			{
+				$scodeAtt = $atts[$attID];
+				$matches = array();
+				
+				// Check if the shorcode parameter requests a URL parameter 
+				if (preg_match('|^{(.*)}$|', $scodeAtt, $matches) > 0)
+				{
+					// Parameter is enclosed by {} - content defines URL parameter
+					$paramID = $matches[1];
+					if ($index > 0)
+					{
+						$paramID .= $index;
+					}
+					if (isset($_GET[$paramID]))
+					{
+						// Get the URL parameter
+						$rtnVal = $_GET[$paramID];
+					}
+					return $rtnVal;				
+				}				
+			}
+			
+			if ($index > 0)
+			{
+				$attID .= $index;
+			}
+				
+			if (isset($atts[$attID]))
+			{
+				$rtnVal = $atts[$attID];				
+			}
+			
+			return $rtnVal;
+		}
+		
+		function OutputContent_Map( $passedAtts )
 		{
       		$myDBaseObj = $this->myDBaseObj;
 
@@ -170,29 +210,48 @@ if (!class_exists('BingMapsPluginClass'))
 			$defHeight = ($myDBaseObj->adminOptions['BingMapDefHeight'] > 0) ? $myDBaseObj->adminOptions['BingMapDefHeight'] : 400;
 			$defZoom   = ($myDBaseObj->adminOptions['BingMapDefZoom'] > 0) ? $myDBaseObj->adminOptions['BingMapDefZoom'] : 14;
 			
+			// Merge Shorcode Attributes with defaults
 			$atts = shortcode_atts(array(
-				'x'  => '',
-				'y'  => '',
+				'posn'  => '',
 				'w'  => $defWidth,
 				'h'  => $defHeight,
 				'zoom'  => 7,
 				'type' => 'road' 
-			), $atts );
+			), $passedAtts );
       
-	  		if (($atts['x'] === '') || ($atts['y'] ===''))
+			$posn = $this->GetMapAttributeVal($atts, 'posn');
+			
+			// Include x and y parameters for backwards compatibility
+	  		if ($posn === '')
 			{
-				echo __("BingMaps Shortcode must specify x and y Coordinates", $this->myDomain);
+	  			if (isset($atts['x']) && isset($atts['y']))
+				{
+					$posn = $atts['x'].','.$atts['y'];
+				}
+			}			
+	  
+	  		if ($posn === '')
+			{
+				echo __("BingMaps Shortcode must specify centre Coordinates", $this->myDomain);
 				return;
+			}
+			
+			$posn = $this->GetMapAttributeVal($atts, 'posn');
+			$coords = explode(',', $posn);
+			if (count($coords) != 2)
+			{
+				echo __("BingMaps Shortcode must specify BOTH centre Coordinates", $this->myDomain);
+				return;			
 			}
 			
 			$this->mapNo = isset($this->mapNo) ? $this->mapNo+1 : 1;
 			
 			$ctrlId = "mapDiv".$this->mapNo;
-			$xCoord = $atts['x'];									// 51.715278
-			$yCoord = $atts['y'];									// -2.623889
+			$zoom   = $this->GetMapAttributeVal($atts, 'zoom');
+			$mapType = $this->GetMapAttributeVal($atts, 'type');
+			
 			$bingKey = $myDBaseObj->adminOptions['BingMapsKey'];	// Al2Lm1tFrf8cRxrIv-4vtKal2ZVlKw4Z-NyzpDG4lf0Ff877Ae4WdRBDIC1xKCVg
-			$zoom = $atts['zoom'];
-			$mapType = 'Microsoft.Maps.MapTypeId.'.$atts['type'];	// Microsoft.Maps.MapTypeId.road / Microsoft.Maps.MapTypeId.ordnanceSurvey
+			$mapObjName = 'Microsoft.Maps.MapTypeId.'.$mapType;		// Microsoft.Maps.MapTypeId.road / Microsoft.Maps.MapTypeId.ordnanceSurvey
 			$libOpts = '&mkt=en-GB';
 			
 			ob_start();		
@@ -230,13 +289,36 @@ function GetMap'.$this->mapNo.'()
 	var map = new Microsoft.Maps.Map(document.getElementById("'.$ctrlId.'"), 
 		{
 		credentials: "'.$bingKey.'",
-		center: new Microsoft.Maps.Location('.$xCoord.', '.$yCoord.'),
-		mapTypeId: '.$mapType.',
+		center: new Microsoft.Maps.Location('.$posn.'),
+		mapTypeId: '.$mapObjName.',
 		showDashboard: true,
 		useInertia: false,
 		zoom: '.$zoom.'
 		}
 	);
+			';
+			
+			$pinIndex = 0;
+			while (true)
+			{
+				$pinIndex++;
+				$pinPosn = $this->GetMapAttributeVal($passedAtts, 'pin', $pinIndex);
+				if ($pinPosn == '')
+					break;
+				$pinParamID = 'pin'.$pinIndex;
+					
+				echo '
+	// Retrieve the location of the map center
+	var locn'.$pinIndex.' = new Microsoft.Maps.Location('.$pinPosn.');
+	
+	// Add a pin to the center of the map
+	var pin'.$pinIndex.' = new Microsoft.Maps.Pushpin(locn'.$pinIndex.');
+	
+	map.entities.push(pin'.$pinIndex.');
+				';	
+			}
+			
+			echo '
 }
 	  
 addLoadEvent(GetMap'.$this->mapNo.');	  

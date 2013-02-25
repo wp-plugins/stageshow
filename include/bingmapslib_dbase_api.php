@@ -24,8 +24,8 @@ include "bingmapslib_utils.php";
 
 if (!class_exists('BingMapsLibDBaseClass'))
 {
-	if (!defined('MJSLIB_EVENTS_PER_PAGE'))
-		define('MJSLIB_EVENTS_PER_PAGE', 20);
+	if (!defined('BINGMAPSLIB_EVENTS_PER_PAGE'))
+		define('BINGMAPSLIB_EVENTS_PER_PAGE', 20);
 	
 	class BingMapsLibDBaseClass // Define class
 	{
@@ -215,7 +215,7 @@ if (!class_exists('BingMapsLibDBaseClass'))
 				'EMailTemplatePath' => '',
 				
 				'LogsFolderPath' => '../logs',
-				'PageLength' => MJSLIB_EVENTS_PER_PAGE,
+				'PageLength' => BINGMAPSLIB_EVENTS_PER_PAGE,
 				
 				'Dev_EnableDebug' => false,
 				'Dev_ShowSQL' => false,

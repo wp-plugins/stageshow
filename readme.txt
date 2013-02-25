@@ -44,11 +44,27 @@ Features Summary
 
 Add the shortcode to either a new or existing page on your site. 
 
-Two typical shortcodes are as follows:
+= How do I specify the map coordinates in the shortcode? =
+
+Some typical shortcodes, where the coordinates are specified, as follows:
 
 [bingmaps-map x&#61;51.503146 y&#61;-0.002979]
 
-[bingmaps-map x&#61;51.477841 y&#61;-0.001548 zoom&#61;14 w&#61;800 h&#61;500 type&#61;ordnanceSurvey] (GB locale only)
+[bingmaps-map posn&#61;51.477841,-0.001548 zoom&#61;14 w&#61;800 h&#61;500 type&#61;ordnanceSurvey] (GB locale only)
+
+= How do I pass the map coordinates in the URL? =
+
+Shortcode Attributes can specify that a URL Parameter is to be used for the value, by enclosing the ID of the Parameter in braces. A typical shortcode where coordinates are passed in the URL is as follows:
+
+[bingmaps-map posn&#61;{myposn} zoom&#61;{myzoom} w&#61;{mywidth} h&#61;{myheight} type&#61;{mytype}] 
+
+The shortcode attributes above specify the ID of the URL parameter that will be used for the map coordinate etc. A typical URL for this shortcode would therefore be as follows:
+
+[YourPageURL]?myposn=51.477841,-0.001548&myzoom=14&mytype=ordnanceSurvey
+
+= How do I add pushpins to the map? =
+
+The Shortcode Attributes 'pin1', 'pin2' etc. specify the position of pushpins. Alternatively the use 'pin={mypin}' to specify that the URL Parameters mypin1, mypin2 etc. are to be used for pushpin positions.
 
 = What map types are available? =
 
@@ -65,6 +81,11 @@ The Bing Maps help page (http://msdn.microsoft.com/en-us/library/gg427625.aspx) 
 == Changelog ==
 
 * Version History for BingMaps Plugin
+
+= 0.3 =
+* Shortcode attributes can be specified by URL Parameters
+* 'x' and 'y' Shortcode Attributes replaced by a 'posn' Attribute
+* Added pushpins
 
 = 0.2 =
 * Shortcode help corrected
