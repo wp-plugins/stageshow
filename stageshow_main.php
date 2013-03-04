@@ -340,9 +340,9 @@ if (!class_exists('StageShowPluginClass'))
 					foreach ($totalSales as $perfID => $qty)
 					{						
 						$perfSaleQty = $this->myDBaseObj->GetSalesQtyByPerfID($perfID);	
+						$perfSaleQty += $qty;
 						$seatsAvailable = $perfSeats[$perfID];
-						$seatsAvailable -= 	$perfSaleQty;
-						if ($seatsAvailable < $qty) 
+						if ( ($seatsAvailable > 0) && ($seatsAvailable < $perfSaleQty) ) 
 						{
 							$ParamsOK = false;
 						}
@@ -797,7 +797,7 @@ if (!class_exists('StageShowPluginClass'))
 						<td width="'.$widthCol5.'" class="stageshow-boxoffice-add">
 							';
 																
-					if ($salesSummary[$perfIndex]->totalQty >= $result->perfSeats) 
+					if ( ($result->perfSeats >=0) && ($salesSummary[$perfIndex]->totalQty >= $result->perfSeats) )
 						echo __('Sold Out', $this->myDomain);
 					else 
 						echo '<input type="submit" value="Add"  alt="'.$altTag.'"/>';
