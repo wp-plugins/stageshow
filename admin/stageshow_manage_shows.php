@@ -34,8 +34,8 @@ if (!class_exists('StageShowShowsAdminListClass'))
 			
 			// FUNCTIONALITY: Shows - Bulk Actions - Activate/Deactivate and Delete
 			$this->bulkActions = array(
-				'activate' => __('Activate/Deactivate', $this->myDomain),
-				'delete'   => __('Delete', $this->myDomain),
+				StageShowLibAdminListClass::BULKACTION_TOGGLE => __('Activate/Deactivate', $this->myDomain),
+				StageShowLibAdminListClass::BULKACTION_DELETE => __('Delete', $this->myDomain),
 			);
 		}
 		
@@ -59,11 +59,10 @@ if (!class_exists('StageShowShowsAdminListClass'))
 			);
 		}
 		
-		function GetShowState($result)
+		function GetShowState($showState)
 		{
 			// FUNCTIONALITY: Shows - Report show state
-			$perfState = $this->myDBaseObj->IsStateActive($result->showState) ? __("Active", $this->myDomain) : __("INACTIVE", $this->myDomain);
-			return $perfState;
+			return $this->myDBaseObj->StateActiveText($showState);
 		}
 		
 		function OutputList($results, $updateFailed)
@@ -229,7 +228,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Shows - Bulk Action Delete - Block if tickets sold
 					// Don't delete if any tickets have been sold for this performance
 					$delShowEntry = $myDBaseObj->GetShowsList($recordId);
@@ -249,7 +248,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Shows - Bulk Action Delete - Remove Prices, Hosted Buttons, Performances and Show		
 					// Get a list of performances
 					$results = $myDBaseObj->GetPerformancesListByShowID($recordId);
@@ -276,14 +275,14 @@ if (!class_exists('StageShowShowsAdminClass'))
 					$delShowName = $myDBaseObj->DeleteShowByShowID($recordId);
 					return true;
 				
-				case 'activate':
+				case StageShowLibAdminListClass::BULKACTION_TOGGLE:
 					// FUNCTIONALITY: Shows - Bulk Action Activate/Deactivate Show		
 					$actionCount = 0;
 					$showEntry   = $myDBaseObj->GetShowsList($recordId);
 					if ($myDBaseObj->IsStateActive($showEntry[0]->showState))
-						$myDBaseObj->SetShowActivated($recordId, 'deactivate');
+						$myDBaseObj->SetShowActivated($recordId, STAGESHOW_STATE_INACTIVE);
 					else
-						$myDBaseObj->SetShowActivated($recordId, 'activate');
+						$myDBaseObj->SetShowActivated($recordId, STAGESHOW_STATE_ACTIVE);
 					
 					// TODO-PRIORITY - Update Inventory Settings for Performance Buttons
 					break;
@@ -299,7 +298,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Shows - Bulk Action Delete - Output Action Status Message
 					if ($this->errorCount > 0)
 						$actionMsg = ($this->errorCount == 1) ? __("1 Show has a Database Error", $this->myDomain) : $errorCount . ' ' . __("Shows have a Database Error", $this->myDomain);

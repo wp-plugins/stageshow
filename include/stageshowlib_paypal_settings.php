@@ -24,6 +24,9 @@ include 'stageshowlib_table.php';
 
 if (!class_exists('PayPalSettingsAdminListClass')) 
 {
+	define('PAYPAL_APILIB_URL_TEXTLEN',110);
+	define('PAYPAL_APILIB_URL_EDITLEN',110);
+		
 	class PayPalSettingsAdminListClass extends StageShowLibAdminListClass // Define class
 	{	
 		const TABLEPARAM_PAYPALLOCK = 'PayPalLock';
@@ -73,18 +76,25 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 				$currSelect[$index] .= ' ('.$currDef['Symbol'].') ';
 			}
 			
+			$trolleyOptions = array(
+				StageShowLibSalesDBaseClass::STAGESHOWLIB_TROLLEYTYPE_PAYPAL.'|'.__('PayPal Shopping Cart', $this->myDomain),
+				StageShowLibSalesDBaseClass::STAGESHOWLIB_TROLLEYTYPE_INTEGRATED.'|'.__('Integrated Shopping Trolley', $this->myDomain),
+				);
+				
 			$rowDefs = array(
-				array(self::TABLEPARAM_LABEL => 'Shopping Trolley',                self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'TrolleyType',           self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_ITEMS => array('PayPal|PayPal Shopping Cart', 'Integrated|Integrated Shopping Trolley'), self::TABLEPARAM_DEFAULT => 'Integrated', self::TABLEPARAM_ONCHANGE => 'onSalesInterfaceClick'),
+				array(self::TABLEPARAM_LABEL => 'Shopping Trolley',                self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'TrolleyType',           self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_ITEMS => $trolleyOptions, self::TABLEPARAM_DEFAULT => StageShowLibSalesDBaseClass::STAGESHOWLIB_TROLLEYTYPE_INTEGRATED, self::TABLEPARAM_ONCHANGE => 'onSalesInterfaceClick'),
 				array(self::TABLEPARAM_LABEL => 'Environment',                     self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalEnv',             self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_ITEMS => array('live|Live', 'sandbox|Sandbox'), ),
 				array(self::TABLEPARAM_LABEL => 'Merchant ID',                     self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalMerchantID',      self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_MERCHANTID_TEXTLEN,  self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'API User',                        self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalAPIUser',         self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_USER_TEXTLEN,        self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'API Password',                    self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalAPIPwd',          self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_PWD_TEXTLEN,         self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'API Signature',                   self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalAPISig',          self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_SIG_TEXTLEN,         self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN,  ),
 				array(self::TABLEPARAM_LABEL => 'Account EMail',                   self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalAPIEMail',        self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_EMAIL_TEXTLEN,       self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
-				//array(self::TABLEPARAM_LABEL => 'Checkout Timeout',                self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'CheckoutTimeout',       self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_CHECKOUT_TIMEOUT_TEXTLEN,    self::TABLEPARAM_SIZE => PAYPAL_APILIB_CHECKOUT_TIMEOUT_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => 'Checkout Timeout',                self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'CheckoutTimeout',       self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_CHECKOUT_TIMEOUT_TEXTLEN,    self::TABLEPARAM_SIZE => PAYPAL_APILIB_CHECKOUT_TIMEOUT_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'Currency',                        self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalCurrency',        self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_ITEMS => $currSelect, ),
 				array(self::TABLEPARAM_LABEL => 'PayPal Header Image File',        self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalHeaderImageFile', self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, self::TABLEPARAM_DIR => $paypalUploadImagesPath, self::TABLEPARAM_EXTN => 'gif', ),
 				array(self::TABLEPARAM_LABEL => 'EMail Logo Image File',           self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalLogoImageFile',   self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, self::TABLEPARAM_DIR => $paypalUploadImagesPath, self::TABLEPARAM_EXTN => 'jpg', ),
+				array(self::TABLEPARAM_LABEL => 'Checkout Complete URL',           self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'CheckoutCompleteURL',   self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         self::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
+				array(self::TABLEPARAM_LABEL => 'Checkout Cancelled URL',          self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'CheckoutCancelledURL',  self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         self::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
 			);
 			
 			$rowDefs = $this->MergeSettings(parent::GetDetailsRowsDefinition(), $rowDefs);

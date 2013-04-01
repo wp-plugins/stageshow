@@ -100,6 +100,9 @@ if (!class_exists('PayPalAPIClass'))
 		var		$APIemail;			//	PayPal primary email
 		var		$PayPalCurrency;	//  PayPal Currency Code
 		
+		var		$SaleCompleteURL = '';
+		var		$SaleCancelURL = '';
+			
 		function __construct( $caller )
 		{
 			//constructor
@@ -148,6 +151,16 @@ if (!class_exists('PayPalAPIClass'))
 			$this->APIemail = $email;
 			$this->PayPalCurrency = $currency;
 			$this->APIStatusMsg = '';
+		}
+		
+		function SetSaleCompleteURL($url)
+		{
+			$this->SaleCompleteURL = $url;
+		}
+		
+		function SetSaleCancelURL($url)
+		{
+			$this->SaleCancelURL = $url;
 		}
 		
 		function SetTestMode($testmode)
@@ -397,10 +410,27 @@ if (!class_exists('PayPalButtonsAPIClass'))
 			$this->InitAPICallParams('BMCreateButton');
 			$this->AddAPIParam('BUTTONTYPE', 'CART');
 			$this->AddAPIParam('BUTTONSUBTYPE', 'PRODUCTS');
+			
+			$this->AddCommonButtonParams($description, $reference);
+			
+			$this->AddAPIButtonVar('amount', $amount);			
+		}
+		
+		function AddCommonButtonParams($description, $reference)
+		{
 			$this->AddAPIButtonVar('item_name', $description);
 			$this->AddAPIButtonVar('item_number', $reference);
-			$this->AddAPIButtonVar('amount', $amount);
-			$this->AddAPIButtonVar('currency_code', $this->PayPalCurrency);			
+			$this->AddAPIButtonVar('currency_code', $this->PayPalCurrency);	
+					
+			if ($this->SaleCompleteURL != '')
+			{
+				$this->AddAPIButtonVar('return', $this->SaleCompleteURL);
+			}	
+			
+			if ($this->SaleCancelURL != '')
+			{
+				$this->AddAPIButtonVar('cancel_return', $this->SaleCancelURL);
+			}	
 		}
 		
 		function AddDeleteButtonParams($hostedButtonID)
@@ -452,10 +482,10 @@ if (!class_exists('PayPalButtonsAPIClass'))
 			$this->AddAPIParam('BUTTONCODE', 'HOSTED');
 			$this->AddAPIParam('BUTTONTYPE', 'CART');
 			$this->AddAPIParam('BUTTONSUBTYPE', 'PRODUCTS');
-			$this->AddAPIButtonVar('item_name', $description);
-			$this->AddAPIButtonVar('item_number', $reference);
+			
+			$this->AddCommonButtonParams($description, $reference);
+			
 			$this->AddAPIButtonVar('button_xref', get_site_url());
-			$this->AddAPIButtonVar('currency_code', $this->PayPalCurrency);
 		}
 		
 		function AddButtonOption ($optID, $optPrice)

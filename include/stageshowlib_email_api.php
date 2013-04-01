@@ -1,6 +1,6 @@
 <?php
 /* 
-Description: MJS Library EMail API functions
+Description: Core Library EMail API functions
  
 Copyright 2012 Malcolm Shergold
 

@@ -179,7 +179,7 @@ if (!class_exists('StageShowLibTableClass'))
 		{
 			$this->NewRow($result, 'id="'.$hiddenRowsID.'" '.$this->hiddenRowStyle.' class="hiddenRow"');
 			$this->AddToTable($result, $hiddenRows);
-// TODO ...
+
 			$this->maxCol = max($this->maxCol, $this->HeaderCols);
 		}
 
@@ -788,6 +788,9 @@ if (!class_exists('StageShowLibAdminListClass'))
 		const VIEWMODE = false;
 		const EDITMODE = true;
 		
+		const BULKACTION_TOGGLE = 'toggleactive';
+		const BULKACTION_DELETE = 'delete';
+		
 		var $env;
 		var $caller;
 		var $results;
@@ -1006,6 +1009,21 @@ if (!class_exists('StageShowLibAdminListClass'))
 			return $selectOptsArray;
 		}
 		
+		function GetSelectOptsText($settingOption, $controlValue)
+		{
+			$selectOptsArray = self::GetSelectOptsArray($settingOption);
+			foreach ($selectOptsArray as $selectOptValue => $selectOptText)
+			{
+				if ($controlValue == $selectOptValue)
+				{
+					$controlValue = $selectOptText;
+					break;
+				}
+			}
+			
+			return $controlValue;
+		}
+		
 		function GetHTMLTag($settingOption, $controlValue, $editMode = true)
 		{
 			$autocompleteTag = ' autocomplete="off"';
@@ -1020,9 +1038,13 @@ if (!class_exists('StageShowLibAdminListClass'))
 			{
 				switch ($settingType)
 				{
+					case self::TABLEENTRY_SELECT:
+						$controlValue = $this->GetSelectOptsText($settingOption, $controlValue);
+						$settingType = self::TABLEENTRY_VIEW;
+						break;						
+					
 					case self::TABLEENTRY_TEXT:
 					case self::TABLEENTRY_TEXTBOX:
-					case self::TABLEENTRY_SELECT:
 					case self::TABLEENTRY_CHECKBOX:
 					case self::TABLEENTRY_COOKIE:
 						$settingType = self::TABLEENTRY_VIEW;
@@ -1067,16 +1089,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					if (isset($settingOption[self::TABLEPARAM_ITEMS]))
 					{
 						// This was a drop down edit - Get User Prompt for this value
-						$selectOpts = $settingOption[self::TABLEPARAM_ITEMS];
-						foreach ($selectOpts as $selectOption)
-						{
-							$selectAttrs = explode('|', $selectOption);
-							if ($controlValue == $selectAttrs[0])
-							{
-								$editControl = $selectAttrs[1];
-								break;
-							}
-						}
+						$editControl = $this->GetSelectOptsText($settingOption, $controlValue);
 					}
 					$editControl .= '<input type="hidden" '.$controlIdDef.' value="'.$controlValue.'">'."\n";
 					break;
@@ -1151,8 +1164,9 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 
 					if (isset($columnDef[StageShowLibTableClass::TABLEPARAM_DECODE]))
 					{
+						$optionId = $columnDef[StageShowLibTableClass::TABLEPARAM_ID];
 						$funcName = $columnDef[StageShowLibTableClass::TABLEPARAM_DECODE];
-						$currVal = $this->$funcName($result);
+						$currVal = $this->$funcName($result->$optionId);
 					}
 					
 					if ($this->editMode)
@@ -1327,7 +1341,14 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 							if (isset($option[self::TABLEPARAM_TYPE]) && ($option[self::TABLEPARAM_TYPE] != self::TABLEENTRY_COOKIE))
 							{
 								if (isset($result->$optionId))
+								{
 									$currVal = $result->$optionId;
+									if (isset($option[StageShowLibTableClass::TABLEPARAM_DECODE]))
+									{
+										$funcName = $option[StageShowLibTableClass::TABLEPARAM_DECODE];
+										$currVal = $this->$funcName($currVal);
+									}
+								}
 								else if (isset($option[self::TABLEPARAM_DEFAULT]))
 									$currVal = $option[self::TABLEPARAM_DEFAULT];
 								else

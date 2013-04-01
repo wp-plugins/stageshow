@@ -1,6 +1,6 @@
 <?php
 /* 
-Description: MJS Library Database Access functions
+Description: Core Library Database Access functions
  
 Copyright 2012 Malcolm Shergold
 
@@ -32,24 +32,33 @@ include 'stageshowlib_email_api.php';
 
 if (!class_exists('StageShowLibSalesDBaseClass')) 
 {
-	define('STAGESHOWLIB_SALES_STOCKNAME_TEXTLEN',50);
-	define('STAGESHOWLIB_SALES_STOCKREF_TEXTLEN',10);
-	define('STAGESHOWLIB_SALES_STOCKTYPE_TEXTLEN',40);
-	define('STAGESHOWLIB_SALES_STOCKFILEPATH_TEXTLEN',60);
-	define('STAGESHOWLIB_SALES_STOCKPRICE_TEXTLEN',12);	// Decimal Number Precision = 9.2
-
+	/*
+	---------------------------------------------------------------------------------
+		StageShowLibSalesDBaseClass
+	---------------------------------------------------------------------------------
+	
+	This class provides database functionality to capture PayPal sales data and support
+	Instant Payment Notification (IPN).
+	*/
+	
 	if (!defined('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE'))
 		define('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE', '');
 	if (!defined('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE'))
 		define('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE', '');
 		
+	if (!defined('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH'))
+		define('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH', '');
+		
   	class StageShowLibSalesDBaseClass extends StageShowLibDBaseClass // Define class
   	{	
+		const STAGESHOWLIB_TROLLEYTYPE_INTEGRATED = 'Integrated';
+		const STAGESHOWLIB_TROLLEYTYPE_PAYPAL = 'PayPal';
+		
 		var	$emailObj;
 		
 		var		$PayPalURL;			//  URL for PayPal Payment Requests
 		var		$PayPalVerifyURL;	//  URL for PayPal Verify IPN Requests
-
+		
 		function __construct($opts)		//constructor		
 		{
 			parent::__construct($opts);
@@ -67,6 +76,27 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			// FUNCTIONALITY: DBase - On upgrade ... Copy sales templates to working folder
 			// Copy release templates to plugin persistent templates and images folders
 			StageShowLibUtilsClass::recurse_copy($salesDefaultTemplatesPath, $salesTemplatesPath);
+			
+			if (!isset($this->adminOptions['TrolleyType']))
+			{
+				// Set TrolleyType default ... detect if this is a new install
+				if ( ($this->adminOptions['PayPalAPIUser'] == '')
+				  && ($this->adminOptions['PayPalAPIPwd'] == '')
+				  && ($this->adminOptions['PayPalAPISig'] == '') )
+				 {
+					$this->adminOptions['TrolleyType'] = self::STAGESHOWLIB_TROLLEYTYPE_INTEGRATED;
+				 }
+				else
+					$this->adminOptions['TrolleyType'] = self::STAGESHOWLIB_TROLLEYTYPE_PAYPAL;
+					
+				$this->adminOptions['CheckoutTimeout'] = PAYPAL_APILIB_CHECKOUT_TIMEOUT_DEFAULT;
+			}
+			
+      		$this->saveOptions();      
+		}
+		
+		function PurgeDB()
+		{
 		}
 		
 		function uninstall()
@@ -122,8 +152,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		function getImageURL($optionId)
-		{
-			return $this->getImagesURL().$this->adminOptions[$optionId];
+		{			
+			return isset($this->adminOptions[$optionId]) ? $this->getImagesURL().$this->adminOptions[$optionId] : '';
 		}
 		
 		//Returns an array of admin options
@@ -149,7 +179,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'SalesEMail' => '',
 				                
 				'EMailTemplatePath' => '',
-				'TimeoutEMailTemplatePath' => STAGESHOW_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH,
+				'TimeoutEMailTemplatePath' => STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH,
 								
 				'Unused_EndOfList' => ''
 			);
@@ -196,7 +226,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$this->PayPalNotifyURL = $OurIPNListener;							
 			$this->PayPalURL = PayPalAPIClass::GetPayPalURL($payPalTestMode);
-				
+
 			/** URL for Plugin code to verify PayPal IPNs **/
 			if ($useLocalIPNServer)
 			{
@@ -219,6 +249,17 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$this->adminOptions['PayPalCurrency'], 
 				$this->adminOptions['PayPalAPIEMail'],
 				$useLocalIPNServer);
+								
+			if (isset($this->adminOptions['CheckoutCompleteURL']))
+			{
+				$this->payPalAPIObj->SetSaleCompleteURL($this->adminOptions['CheckoutCompleteURL']);
+			}
+			
+			if (isset($this->adminOptions['CheckoutCancelledURL']))
+			{
+				$this->payPalAPIObj->SetSaleCancelURL($this->adminOptions['CheckoutCancelledURL']);
+			}
+							
 								
 			if ($this->getOption('Dev_ShowPayPalIO') == 1)
 				$this->payPalAPIObj->EnableDebug();
@@ -330,7 +371,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if (!isset($this->adminOptions['TrolleyType']))
 				return false;
 				
-			return($this->adminOptions['TrolleyType'] == 'Integrated');
+			return($this->adminOptions['TrolleyType'] == self::STAGESHOWLIB_TROLLEYTYPE_INTEGRATED);
 		}
 		    
 		function GetTrolleyType()
@@ -338,6 +379,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $this->UseIntegratedTrolley() ? 'Integrated Trolley' : 'PayPal Shopping Cart';
 		}
 		    
+		function Output_TrolleyHelp()
+		{
+			echo  '<strong>'.__('Shopping Trolley', $this->get_domain()).':</strong> '.$this->GetTrolleyType()."<br>\n";			
+		}
+		
 		function UseTestPayPalSettings($testSettings)
 		{
 			if (!isset($this->adminOptions))
@@ -367,10 +413,40 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			parent::saveOptions($newOptions);
 		}
 		
+		function getTableDef($tableName)
+		{
+			$sql = parent::getTableDef($tableName);
+			
+			switch($tableName)
+			{
+				case $this->opts['SalesTableName']:
+					$sql .= '
+						saleID INT UNSIGNED NOT NULL AUTO_INCREMENT,
+						saleCheckoutTime DATETIME,
+						saleDateTime DATETIME NOT NULL,
+						saleName VARCHAR('.PAYPAL_APILIB_PPSALENAME_TEXTLEN.') NOT NULL,
+						saleEMail VARCHAR('.PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN.') NOT NULL,
+						salePPName VARCHAR('.PAYPAL_APILIB_PPSALEPPNAME_TEXTLEN.'),
+						salePPStreet VARCHAR('.PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN.'),
+						salePPCity VARCHAR('.PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN.'),
+						salePPState VARCHAR('.PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN.'),
+						salePPZip VARCHAR('.PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN.'),
+						salePPCountry VARCHAR('.PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN.'),
+						salePaid DECIMAL(9,2) NOT NULL,
+						saleFee DECIMAL(9,2) NOT NULL,
+						saleTxnId VARCHAR('.PAYPAL_APILIB_PPSALETXNID_TEXTLEN.') NOT NULL,
+						saleStatus VARCHAR('.PAYPAL_APILIB_PPSALESTATUS_TEXTLEN.'),
+					';
+					break;
+			}
+							
+			return $sql;
+		}
+		
 		function createDB($dropTable = false)
 		{
 			global $wpdb;
-      
+			
 			parent::createDB($dropTable);
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -380,27 +456,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if ($dropTable)
 				$wpdb->query("DROP TABLE IF EXISTS $table_name");
 
-			$sql = "CREATE TABLE ".$table_name.' ( 
-					saleID INT UNSIGNED NOT NULL AUTO_INCREMENT,
-					saleCheckoutTime DATETIME,
-					saleDateTime DATETIME NOT NULL,
-					saleName VARCHAR('.PAYPAL_APILIB_PPSALENAME_TEXTLEN.') NOT NULL,
-					saleEMail VARCHAR('.PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN.') NOT NULL,
-					salePPName VARCHAR('.PAYPAL_APILIB_PPSALEPPNAME_TEXTLEN.'),
-					salePPStreet VARCHAR('.PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN.'),
-					salePPCity VARCHAR('.PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN.'),
-					salePPState VARCHAR('.PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN.'),
-					salePPZip VARCHAR('.PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN.'),
-					salePPCountry VARCHAR('.PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN.'),
-					salePaid DECIMAL(9,2) NOT NULL,
-					saleTxnId VARCHAR('.PAYPAL_APILIB_PPSALETXNID_TEXTLEN.') NOT NULL,
-					saleStatus VARCHAR('.PAYPAL_APILIB_PPSALESTATUS_TEXTLEN.'),
-					UNIQUE KEY saleID (saleID)
+			$sql  = "CREATE TABLE ".$table_name.' (';
+			$sql .= $this->getTableDef($table_name);
+			$sql .= 'UNIQUE KEY saleID (saleID)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
 
 			//excecute the query
-			$this->ShowSQL($sql);
-			dbDelta($sql);
+			$this->dbDelta($sql);
 
 		}
 		
@@ -434,18 +496,37 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $sqlWhere;
 		}
 		
-		function GetOptsSQL($sqlFilters)
+		function AddSQLOpt($sql, $optName, $optValue)
 		{
-			$sqlOpts = '';
+			if (strstr($sql, $optName))
+			{
+				$sql = str_replace($optName, $optName.$optValue.',', $sql);
+			}
+			else
+			{
+				$sql .= $optName.$optValue;
+			}
+			
+			return $sql;
+		}
+		
+		function GetOptsSQL($sqlFilters, $sqlOpts = '')
+		{
+			if (isset($sqlFilters['orderBy']))
+			{
+				$sqlOpts = $this->AddSQLOpt($sqlOpts, ' ORDER BY ', $sqlFilters['orderBy']);
+			}
 			
 			if (isset($sqlFilters['limit']))
-				$sqlOpts .= ' LIMIT '.$sqlFilters['limit'];
+			{
+				$sqlOpts = $this->AddSQLOpt($sqlOpts, ' LIMIT ', $sqlFilters['limit']);
+			}
 			
 			return $sqlOpts;
 		}
 		
 		// Add Sale - Address details are optional
-		function AddSale($SaleDateTime = '', $saleName = '', $saleEMail = '', $salePaid = '', $Txnid = '', $saleStatus = '', $salePPName = '', $salePPStreet = '', $salePPCity = '', $salePPState = '', $salePPZip = '', $salePPCountry = '')
+		function AddSaleWithFee($SaleDateTime = '', $saleName = '', $saleEMail = '', $salePaid = 0, $saleFee = 0, $Txnid = '', $saleStatus = '', $salePPName = '', $salePPStreet = '', $salePPCity = '', $salePPState = '', $salePPZip = '', $salePPCountry = '')
 		{
 			global $wpdb;
 			
@@ -454,14 +535,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$SaleDateTime = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT);
 				$saleStatus = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
 				$saleName = $saleEMail = $Txnid = '';
-				$salePaid = 0;
-				$sql  = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime, saleName, saleEMail, salePaid, saleTxnId, saleStatus, saleCheckoutTime)';
-				$sql .= ' VALUES("'.$SaleDateTime.'", "'.$saleName.'", "'.$saleEMail.'", "'.$salePaid.'", "'.$Txnid.'", "'.$saleStatus.'", "'.$SaleDateTime.'")';				
+				$sql  = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime, saleName, saleEMail, salePaid, saleFee, saleTxnId, saleStatus, saleCheckoutTime)';
+				$sql .= ' VALUES("'.$SaleDateTime.'", "'.$saleName.'", "'.$saleEMail.'", "'.$salePaid.'", "'.$saleFee.'", "'.$Txnid.'", "'.$saleStatus.'", "'.$SaleDateTime.'")';				
 			}
 			else
 			{
-				$sql  = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime, saleName, saleEMail, salePaid, saleTxnId, saleStatus, salePPName, salePPStreet, salePPCity, salePPState, salePPZip, salePPCountry)';
-				$sql .= ' VALUES("'.$SaleDateTime.'", "'.$saleName.'", "'.$saleEMail.'", "'.$salePaid.'", "'.$Txnid.'", "'.$saleStatus.'", "'.$salePPName.'", "'.$salePPStreet.'", "'.$salePPCity.'", "'.$salePPState.'", "'.$salePPZip.'", "'.$salePPCountry.'")';				
+				$sql  = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime, saleName, saleEMail, salePaid, saleFee, saleTxnId, saleStatus, salePPName, salePPStreet, salePPCity, salePPState, salePPZip, salePPCountry)';
+				$sql .= ' VALUES("'.$SaleDateTime.'", "'.$saleName.'", "'.$saleEMail.'", "'.$salePaid.'", "'.$saleFee.'", "'.$Txnid.'", "'.$saleStatus.'", "'.$salePPName.'", "'.$salePPStreet.'", "'.$salePPCity.'", "'.$salePPState.'", "'.$salePPZip.'", "'.$salePPCountry.'")';				
 			}
 			$this->ShowSQL($sql); 
 			$wpdb->query($sql);
@@ -507,6 +587,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$sql .= ' ,   saleEMail="'.$results['saleEMail'].'"';
 			$sql .= ' ,   salePaid="'.$results['salePaid'].'"';
+			$sql .= ' ,   saleFee="'.$results['saleFee'].'"';
 			$sql .= ' ,   salePPStreet="'.$results['salePPStreet'].'"';
 			$sql .= ' ,   salePPCity="'.$results['salePPCity'].'"';
 			$sql .= ' ,   salePPState="'.$results['salePPState'].'"';
@@ -551,12 +632,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 		}
 		
-		function AddSaleItem($saleID, $stockID, $qty)
+		function AddSaleItem($saleID, $stockID, $qty, $paid)
 		{
 			global $wpdb;
 			
-			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').')';
-			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'")';
+			$paid *= $qty;
+			
+			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').')';
+			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'")';
 			$this->ShowSQL($sql); 
 			$wpdb->query($sql);
 			$orderID = mysql_insert_id();
@@ -564,13 +647,16 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $orderID;
 		}			
 		
-		function UpdateSaleItem($saleID, $stockID, $qty)
+		function UpdateSaleItem($saleID, $stockID, $qty, $paid)
 		{
 			global $wpdb;
 
+			$paid *= $qty;
+			
 			// Delete a show entry
 			$sql  = 'UPDATE '.$this->opts['OrdersTableName'];
 			$sql .= ' SET '.$this->DBField('orderQty').'="'.$qty.'"';
+			$sql .= ' ,   '.$this->DBField('orderPaid').'="'.$paid.'"';
 			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
 			$sql .= ' AND   '.$this->opts['OrdersTableName'].".".$this->DBField('stockID')."=$stockID";
 
@@ -677,9 +763,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			$sql .= $this->GetOptsSQL($sqlFilters);
 
-			if (isset($sqlFilters['orderBy']))
-				$sql .= ' ORDER BY '.$sqlFilters['orderBy'];
-			
 			$this->ShowSQL($sql); 
 			
 			$showOutput = $this->getOption('Dev_ShowDBOutput'); 
@@ -703,11 +786,24 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			return '';
 		}
+	
+		function AddGenericFields($EMailTemplate)
+		{
+			$EMailTemplate = str_replace('[organisation]', $this->adminOptions['OrganisationID'], $EMailTemplate);
+			
+			$EMailTemplate = str_replace('[salesEMail]', $this->GetSalesEMail(), $EMailTemplate);
+			$EMailTemplate = str_replace('[url]', get_option('siteurl'), $EMailTemplate);
+			
+			return $EMailTemplate;
+		}
 		
 		function AddEMailFields($EMailTemplate, $saleDetails)
 		{
-			// FUNCTIONALITY: DBase - Sales - Add generic DB fields to EMail
-			if ($this->adminOptions['Dev_ShowMiscDebug'])
+			// FUNCTIONALITY: DBase - Sales - Add DB fields to EMail
+			
+			$EMailTemplate = $this->AddGenericFields($EMailTemplate);
+			
+			if ($this->isOptionSet('Dev_ShowMiscDebug'))
 				StageShowLibUtilsClass::print_r($this->adminOptions, 'adminOptions');
 			
 			$emailFields = array(
@@ -725,10 +821,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'[salePPState]' => 'salePPState',
 				'[salePPZip]' => 'salePPZip',
 				'[salePPCountry]' => 'salePPCountry',
-
-				'[organisation]' => '',
-				'[salesEMail]' => '',
-				'[url]' => '',
 			);
 							
 			foreach ($emailFields as $tag => $field)
@@ -736,33 +828,22 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				switch ($tag)
 				{
 					case '[salePaid]';
-						$saleFieldValue = $this->FormatCurrency($saleDetails->salePaid);
-						break;
-					
-					case '[organisation]';
-						$saleFieldValue = $this->adminOptions['OrganisationID'];
-						break;
-					
-					case '[salesEMail]';
-						$saleFieldValue = $this->GetSalesEMail();
-						break;
-					
-					case '[url]';
-						$saleFieldValue = get_option('siteurl');
+						if (isset($saleDetails->$field))
+							$saleFieldValue = $this->FormatCurrency($saleDetails->$field);
+						else
+							$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
 						break;
 					
 					default:
-						$saleFieldValue = $saleDetails->$field;
+						if (isset($saleDetails->$field))
+							$saleFieldValue = $saleDetails->$field;
+						else
+							$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
 						break;
 				}
 				$EMailTemplate = str_replace($tag, $saleFieldValue, $EMailTemplate);
 			}
-/*						
-			$EMailTemplate = str_replace('[organisation]', $this->adminOptions['OrganisationID'], $EMailTemplate);
 			
-			$EMailTemplate = str_replace('[salesEMail]', $this->GetSalesEMail(), $EMailTemplate);
-			$EMailTemplate = str_replace('[url]', get_option('siteurl'), $EMailTemplate);
-*/			
 			return $EMailTemplate;
 		}
 		
@@ -797,7 +878,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->adminOptions[$templateID] = basename($templatePath);
 			//echo "Option[$templateID]: $templatePath -> ".$this->adminOptions[$templateID]."<br>\n";
 		}
-		
+
 		function GetEmailTemplatePath($templateID)
 		{
 			// EMail Template defaults to templates folder
@@ -806,7 +887,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 			return $templatePath;
 		}
-		
+
 		function EMailSale($saleID, $EMailTo = '')
 		{
 			$templatePath = $this->GetEmailTemplatePath('EMailTemplatePath');
@@ -817,6 +898,46 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				return 'salesList Empty';
 
 			return $this->SendEMailFromTemplate($salesList, $templatePath, $EMailTo);
+		}
+		
+		function ReadTemplateFile($Filepath)
+		{
+			$hfile = fopen($Filepath,"r");
+			if ($hfile != 0)
+			{
+				$fileLen = filesize($Filepath);
+				$fileContents = fread($hfile, $fileLen);
+				fclose($hfile);
+			}
+			else
+			{
+				echo "Error reading $Filepath<br>\n";
+				//echo "Error was $php_errormsg<br>\n";
+				$fileContents = '';
+			}
+
+			return $fileContents;
+		}
+		
+		function GetTemplateSection($mailTemplate, $startMark = '', $endMark = '', $delMarkedLine = false)
+		{
+			// Get template section starting from line after $startMark and ending line before $endMark
+			if ($startMark != '')
+			{
+				$posnStart = stripos($mailTemplate, $startMark);
+				if (($posnStart !== false) && $delMarkedLine) $posnStart = strpos($mailTemplate, "\n", $posnStart);
+				if ($posnStart !== false) $mailTemplate = substr($mailTemplate, $posnStart);			
+			}
+			
+			if ($endMark != '')
+			{
+				$posnEnd = stripos($mailTemplate, $endMark);
+				if ($posnEnd !== false) $posnEnd += strlen($endMark);
+				if (($posnEnd !== false) && $delMarkedLine) $posnEnd = strrpos(substr($mailTemplate, 0, $posnEnd), "\n");
+				if ($posnEnd !== false) $mailTemplate = substr($mailTemplate, 0, $posnEnd);
+			}
+			
+			return $mailTemplate;
 		}
 		
 		function SendEMailFromTemplate($emailContent, $templatePath, $EMailTo = '')
@@ -869,7 +990,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 			// Process the rest of the mail template
 			$saleConfirmation .= $this->AddEMailFields($mailTemplate, $emailContent[0]);
-
+			
 			// Get email address and organisation name from settings
 			$EMailFrom = $this->GetEmail($this->adminOptions, 'Sales');
 
@@ -928,7 +1049,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			if ($isCheckout)
 			{
-				$saleID = $this->AddSale();
+				$saleID = $this->AddSaleWithFee();
 			}
 			else if (isset($results['saleID']))
 			{
@@ -948,6 +1069,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$saleEMail  = $results['saleEMail'];
 				$saleStatus  = $results['saleStatus'];
 				$salePaid  = $results['salePaid'];
+				$saleFee  = $results['saleFee'];
 				$salePPName  = $results['salePPName'];
 				$salePPStreet  = $results['salePPStreet'];
 				$salePPCity  = $results['salePPCity'];
@@ -956,11 +1078,12 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$salePPCountry  = $results['salePPCountry'];
 				
 				// Log sale to Database
-				$saleID = $this->AddSale(
+				$saleID = $this->AddSaleWithFee(
 					$TxdDate, 
 					$saleName, 
 					$saleEMail, 
 					$salePaid, 
+					$saleFee,
 					$Txnid,
 					$saleStatus, 
 					$salePPName, 
@@ -988,15 +1111,16 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				}
 				else
 				{
-					$stockID = $results['itemID' . $itemNo];;
+					$stockID = $results['itemID' . $itemNo];
 				}
 				
 				$qty  = $results['qty' . $itemNo];
+				$itemPaid  = $results['itemPaid' . $itemNo];
 
 				if ($qty > 0)
 				{
 					// Log sale item to Database
-					$this->AddSaleItem($saleID, $stockID, $qty);
+					$this->AddSaleItem($saleID, $stockID, $qty, $itemPaid);
 			    
 					$lineNo++;
 				} // End of if ($qty > 0)
@@ -1033,6 +1157,31 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql  = 'UNLOCK TABLES';
 			$this->ShowSQL($sql); 
 			$wpdb->query($sql);
+		}
+		
+		function HTTPAnchor($url, $name = '')
+		{
+			if ($name == '') 
+			{
+				$name = $url;
+			}
+			$anchor  = '<a href="';
+			$anchor .= $url;
+			$anchor .= '">'.$name.'</a>';
+			
+			return $anchor;
+		}
+		
+		function DownloadBaseURL($currOptions)
+		{
+			if ($currOptions['DownloadURL'] !== '')
+				$downloadURL = $currOptions['DownloadURL'];
+			else if (isset($this->opts['DefaultDownloadURL']))
+				$downloadURL = $this->opts['DefaultDownloadURL'];
+			else
+				$downloadURL = '';
+			
+			return $downloadURL;
 		}
 		
 	    function HTTPAction($url, $urlParams = '', $method = 'POST', $redirect = true)

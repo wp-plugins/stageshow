@@ -1,6 +1,6 @@
 <?php
 /* 
-Description: MJS Library Admin Page functions
+Description: Core Library Admin Page functions
  
 Copyright 2012 Malcolm Shergold
 
@@ -184,6 +184,7 @@ function HideElement(obj)
 				if ($this->myDBaseObj->getOption('Dev_ShowWPOnce'))
 					echo "<!-- wp_nonce_field($referer) -->\n";
 				wp_nonce_field($referer);
+				echo "\n";
 			}
 		}
 		
