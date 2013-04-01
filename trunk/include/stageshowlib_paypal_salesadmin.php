@@ -46,7 +46,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			if (!$editMode)
 			{
 				$this->bulkActions = array(
-					'delete' => __('Delete', $this->myDomain),
+					StageShowLibAdminListClass::BULKACTION_DELETE => __('Delete', $this->myDomain),
 					);
 					
 				$this->HeadersPosn = StageShowLibTableClass::HEADERPOSN_BOTH;
@@ -90,6 +90,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 				array(self::TABLEPARAM_LABEL => $zip,                        self::TABLEPARAM_ID => 'salePPZip',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPZIP_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => $country,                    self::TABLEPARAM_ID => 'salePPCountry', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN, self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCOUNTRY_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'Paid',                      self::TABLEPARAM_ID => 'salePaid',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
+				array(self::TABLEPARAM_LABEL => 'Fee',                       self::TABLEPARAM_ID => 'saleFee',       self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(self::TABLEPARAM_LABEL => 'Transaction Date/Time',     self::TABLEPARAM_ID => 'saleDateTime',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(self::TABLEPARAM_LABEL => 'Transaction ID',            self::TABLEPARAM_ID => 'saleTxnId',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),						
 				array(self::TABLEPARAM_LABEL => 'Status',                    self::TABLEPARAM_ID => 'saleStatus',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),						
@@ -608,7 +609,9 @@ if (!class_exists('PayPalSalesAdminClass'))
 				// Add Transaction Number (from timestamp)
 				$saleTxnid = 'MAN-'.time();	
 				
-				$this->saleId = $myDBaseObj->AddSale(date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT), $saleName, $saleEMail, $this->salePaid, $saleTxnid, PAYPAL_APILIB_SALESTATUS_COMPLETED, $saleName, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry);				
+				// TODO - Manual Sale - Fee is zero .... Is this OK?
+				$saleFee = 0;
+				$this->saleId = $myDBaseObj->AddSaleWithFee(date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT), $saleName, $saleEMail, $this->salePaid, $saleFee, $saleTxnid, PAYPAL_APILIB_SALESTATUS_COMPLETED, $saleName, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry);				
 			}
 			else
 			{
@@ -621,6 +624,8 @@ if (!class_exists('PayPalSalesAdminClass'))
 				newQty = 0 and origQty > 0 ........... DeleteSaleItem
 				newQty <> origQty .................... UpdateSaleItem
 			*/
+			
+			// Loop through results from GetRequestedSaleQtys() call
 			foreach($this->results as $pricesEntry)
 			{
 				$itemID = $this->GetItemID($pricesEntry);						
@@ -630,7 +635,8 @@ if (!class_exists('PayPalSalesAdminClass'))
 				if (($newQty > 0) && ($origQty == 0))
 				{
 					if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) echo "ADDING Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
-					$myDBaseObj->AddSaleItem($this->saleId, $itemID, $newQty);
+					// TODO Add Edit of Ticket Sale Price
+					$myDBaseObj->AddSaleItem($this->saleId, $itemID, $newQty, $pricesEntry->stockPrice);
 				}
 				else if (($newQty == 0) && ($origQty > 0))
 				{
@@ -640,7 +646,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 				else if ($newQty != $origQty)
 				{
 					if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) echo "UPDATE Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
-					$myDBaseObj->UpdateSaleItem($this->saleId, $itemID, $newQty);
+					$myDBaseObj->UpdateSaleItem($this->saleId, $itemID, $newQty, $pricesEntry->stockPrice);
 				}
 			}
 					
@@ -692,7 +698,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		{
 			switch ($bulkAction)
 			{
-				case 'delete':		
+				case StageShowLibAdminListClass::BULKACTION_DELETE:		
 					$this->myDBaseObj->DeleteSale($recordId);
 					return true;
 			}
@@ -706,7 +712,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':		
+				case StageShowLibAdminListClass::BULKACTION_DELETE:		
 					if ($actionCount > 0)		
 						$actionMsg = ($actionCount == 1) ? __("1 Sale has been deleted", $this->myDomain) : $actionCount.' '.__("Sales have been deleted", $this->myDomain); 
 					else

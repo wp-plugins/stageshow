@@ -35,7 +35,7 @@ if (!class_exists('StageShowPricesAdminListClass'))
 			
 			// FUNCTIONALITY: Prices - Bulk Actions - Delete
 			$this->bulkActions = array(
-				'delete' => __('Delete', $this->myDomain),
+				StageShowLibAdminListClass::BULKACTION_DELETE => __('Delete', $this->myDomain),
 			);
 		}
 		
@@ -298,7 +298,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			switch ($bulkAction)
 			{
 				// FUNCTIONALITY: Prices - Bulk Action Delete - Block if tickets sold
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// Don't delete if any tickets have been sold for this performance
 					$results = $myDBaseObj->GetSalesListByPriceID($recordId);
 					if (count($results) > 0)
@@ -315,7 +315,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Prices - Action Bulk Action Delete
 					// Now delete the entry in the PRICES table
 					$delShowName = $myDBaseObj->DeletePriceByPriceID($recordId);
@@ -331,7 +331,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Prices - Bulk Action Delete - Output Action Status Message
 					if ($this->errorCount > 0)
 						$actionMsg = ($this->errorCount == 1) ? __("1 Price has a Database Error", $this->myDomain) : $errorCount . ' ' . __("Prices have a Database Error", $this->myDomain);

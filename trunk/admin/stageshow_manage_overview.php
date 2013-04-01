@@ -244,14 +244,10 @@ if (!class_exists('StageShowOverviewAdminClass'))
 		
 		function Output_TrolleyAndShortcodesHelp()
 		{
-			$myDBaseObj = $this->myDBaseObj;
-?>
-	<br>			
-	<h2><?php _e('Shopping Trolley and Shortcodes', $this->myDomain); ?></h2>
-<?php
-			echo  __('Using', $this->myDomain).' '.$myDBaseObj->GetTrolleyType()."<br>\n";
+			echo '<br><h2>'.__("Shopping Trolley and Shortcodes", $this->myDomain)."</h2>\n";
 			
-
+			$this->myDBaseObj->Output_TrolleyHelp();
+			
 			echo '<br>'.__('StageShow generates output to your Wordpress pages for the following shortcodes:', $this->myDomain)."<br><br>\n";
 	
 			$this->Output_ShortcodeHelp();

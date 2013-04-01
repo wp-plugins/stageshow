@@ -44,6 +44,26 @@ td.stageshow-boxoffice-perfnote
 	text-align: left;
 }
 
+.stageshow-boxoffice-datetime
+{
+	width: 25%;	
+}
+
+.stageshow-boxoffice-type
+{
+	width: 25%;	
+}
+
+.stageshow-boxoffice-price
+{
+	width: 15%;	
+}
+
+ .stageshow-boxoffice-qty
+{
+	width: 15%;	
+}
+
 /* Disable Qty drop down box and Add button in Box Office */
 .stageshow-boxoffice-qty,
 .stageshow-boxoffice-add
@@ -68,7 +88,6 @@ td.stageshow-boxoffice-perfnote
 /*                                                                             */
 /* --------------------------------------------------------------------------- */
 
-#XXcontent .stageshow-trolley,
 #content .stageshow-trolley div,
 #content .stageshow-trolley table,
 #content .stageshow-trolley tr,

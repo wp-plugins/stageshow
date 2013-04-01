@@ -144,7 +144,7 @@ if (!class_exists('IPNNotifyClass'))
 			{
 				$this->AddToLog('PayPal Environment: LIVE' );
 			}
-			$PayPalNotifyEMail = $ourOptions['PayPalAPIEMail'];
+			$PayPalNotifyEMail = trim($ourOptions['PayPalAPIEMail']);
 
 			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNLogRequests'))
 			{
@@ -202,6 +202,7 @@ if (!class_exists('IPNNotifyClass'))
 			$this->AddToLog('EMail:  ' . $Payer_email);
 			$this->AddToLog('TXN No: ' . $Txn_id);
 			$this->AddToLog('Payment:' . $Payment_amount);
+			$this->AddToLog('Fee:    ' . $Payment_fee);
 
 			// Check notification validation
 			if ($payPalResponse['APIStatus'] != 200 )
@@ -225,7 +226,7 @@ if (!class_exists('IPNNotifyClass'))
 				if ($IPNError === '')
 				{
 					// Check that $Receiver_email is the EMail we expected
-					if ((strlen($PayPalNotifyEMail)>0) && ($Receiver_email != $PayPalNotifyEMail))
+					if ((strlen($PayPalNotifyEMail)>0) && (strcasecmp(trim($Receiver_email), $PayPalNotifyEMail) != 0))
 					{
 						$this->AddToLog('Receiver Email INVALID');
 						$this->AddToLog('APIEmail: '.$PayPalNotifyEMail);

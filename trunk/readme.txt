@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -12,7 +12,7 @@ StageShow adds the facility for an online Box-Office for Small Theatres/Drama Gr
 
 StageShow provides a simple interface to define your Shows and then a single Wordpress shortcode adds a online BoxOffice to your website.
 
-StageShow uses either the PayPal Shopping Cart or its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
+StageShow uses either the PayPal Shopping Cart or its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments, which can be made using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
 
 Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and can be copied to the system administrator.
 
@@ -27,11 +27,13 @@ StageShow Features Summary
 * Unlimited number of Ticket Types for each performance with individually defined prices
 * Choice of Integrated Shopping Cart or PayPal Shopping Cart
 * Integrated PayPal Payment Collection
+* Payments accepted using Credit/Debit cards or from PayPal account
 * EMail confirmation of Booking to Client and Administrator
 * Manual entry of ticket sales for telephone sales etc.
 * Online and Offline Sale Transaction ID validation
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
 * Access to StageShow Admin pages/features controlled by custom capabilities
+* Extensive Help (in PDF format) file shipped with plugin
 
 Additional Features in StageShow+ (available <a href=http://corondeck.co.uk/StageShow/Plus>here</a>)
 
@@ -42,8 +44,8 @@ Additional Features in StageShow+ (available <a href=http://corondeck.co.uk/Stag
 * Ticket Verification and Logging
 * Multiple Terminal Support for Verification
 * Editing of Sale Entries
-* Custom (individually set) "Note" for each Show beforeits' Box Office entry
-* Custom (individually set) "Note" for each Performance (before or after) its' Box Office entry
+* Individually customisable additional Show title output (text or HTML) on Box Office page
+* Individually customisable additional Performance entry output (text or HTML) on Box Office page
 * Optional EMail with sales summary (to a specified email address) on each new sale 
 * Booking Closing Time determined by a StageShow setting
 
@@ -100,6 +102,10 @@ A performance cannot be deleted if there are sales recorded for it and the show 
 = How do I add a Booking Form to my site? =
 
 Add the tag [sshow-boxoffice] to either a new or existing page on your site. This will be replaced by the booking form when the page is viewed by a user.
+
+= Do my purchasers have to have a PayPal account? =
+
+No. Turning on the "PayPal Account Optional" setting on the sellers PayPal account allows purchasers to use a Credit or Debit card without the need for a PayPal account. Details are in the StageShow help file.
 
 = How can I customise the EMails? =
 
@@ -161,6 +167,17 @@ Custom images can be copied to this folder (using FTP) and can then be selected 
 == Changelog ==
 
 * Version History for StageShow Plugin 
+
+= 2.0.2 =
+* Bug Fix: TDT Export MIME type changed to text/tab-separated-values
+* Bug Fix: (StageShow+) Plugin Version check gave undefined error if Internet unavailable
+* Added Logging of PayPal Transaction Fees
+* Ticket Price logged with each sale
+* Export File Field Names now defined by translatable table
+* Checkout Timeout added to settings
+* Box Office columns widths set by style sheet (stageshow.css)
+* Implemented Checkout Complete and Checkout Cancelled URLs in settings
+* IPN "Callback" URL changed to stageshow_ipn_callback.php (was stageshow_NotifyURL.php)
 
 = 2.0.1 =
 * Bug Fix: Integrated Checkout fails for performances with unlimited ticket quantities

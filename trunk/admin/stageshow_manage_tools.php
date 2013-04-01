@@ -23,15 +23,13 @@ Copyright 2012 Malcolm Shergold
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_admin.php';      
 include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 
-if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_test_emailsale.php') ) 
-	include STAGESHOW_ADMIN_PATH.'stageshow_test_emailsale.php'; 
+if ( file_exists(STAGESHOW_INCLUDE_PATH.'stageshowlib_test_emailsale.php') ) 
+	include STAGESHOW_INCLUDE_PATH.'stageshowlib_test_emailsale.php'; 
  
 if (!class_exists('StageShowToolsAdminClass')) 
 {
 	class StageShowToolsAdminClass extends StageShowLibAdminClass // Define class
 	{
-		var $actionURL;
-		
 		function __construct($env) //constructor	
 		{
 			$this->pageTitle = 'Tools';
@@ -46,10 +44,6 @@ if (!class_exists('StageShowToolsAdminClass'))
 		
 		function Output_MainPage($updateFailed)
 		{			
-			$myPluginObj = $this->myPluginObj;
-			
-			$this->actionURL = STAGESHOW_ADMIN_URL.'stageshow_export.php';
-				
 ?>
 <div class="wrap">
 	<div class="stageshow-admin-form">
@@ -57,7 +51,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 			$this->Tools_Validate();
 			$this->Tools_Export();
 			if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) $this->Tools_FlushSalesRecords();				
-			if (class_exists('StageShowTestEMailClass') && current_user_can(STAGESHOW_CAPABILITY_DEVUSER)) new StageShowTestEMailClass($this);
+			if (class_exists('StageShowLibTableTestEMailClass') && current_user_can(STAGESHOW_CAPABILITY_DEVUSER)) new StageShowLibTableTestEMailClass($this);
 ?>
 	</div>
 </div>
@@ -78,7 +72,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 <script type="text/javascript">
 	function onSelectDownload(obj)
 	{
-	selectControl = document.getElementById("sshow_ex_type");
+	selectControl = document.getElementById("export_type");
 	newDownloadType = selectControl.value;
 	isSummaryDownload = newDownloadType == "summary";
 
@@ -105,7 +99,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 		}
 ?>
 			<tr>
-		<th><label for="sshow_ex_type"><?php _e('Transaction ID', $this->myDomain); ?></label></th>
+		<th><label for="export_type"><?php _e('Transaction ID', $this->myDomain); ?></label></th>
 				<td>
 			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
 						</td>
@@ -164,22 +158,38 @@ if (!class_exists('StageShowToolsAdminClass'))
 			return $saleID;
 		}
 		
+		function OutputExportFormatOptions()
+		{
+?>	
+	<option value="tdt" selected="selected"><?php _e('Tab Delimited Text', $this->myDomain); ?> </option>
+<?php
+		}
+		
 		function Tools_Export()
 		{
-			$this->actionURL = STAGESHOW_ADMIN_URL.'stageshow_export.php';
+			$actionURL = STAGESHOW_ADMIN_URL.STAGESHOW_FOLDER.'_export.php';
 				
 ?>
-
-<h3><?php _e('Export Data', $this->myDomain); ?></h3>
-<p><?php _e('Export Configuration and Ticket Sales to a "TAB Separated Text" format file on your computer.', $this->myDomain); ?></p>
+<h3><?php _e('Export', $this->myDomain); ?></h3>
+<p><?php _e('Export to a "TAB Separated Values" format file on your computer.', $this->myDomain); ?></p>
 <p><?php _e('This format can be imported to many applications including spreadsheets and databases.', $this->myDomain); ?></p>
-<form action="<?php echo $this->actionURL; ?>" method="get">
+<form action="<?php echo $actionURL; ?>" method="get">
 <?php $this->WPNonceField(); ?>
 <table class="form-table">
 <tr>
-<th><?php _e('Export', $this->myDomain); ?></th>
+<th><?php _e('Format', $this->myDomain); ?></th>
 <td>
-<select name="sshow_ex_type" id="sshow_ex_type" onchange=onSelectDownload(this)>
+<select name="export_format" id="export_format" onchange=onSelectDownload(this)>
+<?php
+	$this->OutputExportFormatOptions();
+?>	
+</select>
+</td>
+</tr>
+<tr>
+<th><?php _e('Type', $this->myDomain); ?></th>
+<td>
+<select name="export_type" id="export_type" onchange=onSelectDownload(this)>
 	<?php if (current_user_can(STAGESHOW_CAPABILITY_SETUPUSER)) { ?>
 	<option value="settings"><?php _e('Settings', $this->myDomain); ?> </option>
 	<?php } ?>

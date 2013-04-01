@@ -1,6 +1,6 @@
 <?php
 /* 
-Description: MJS Library Database Access functions
+Description: Core Library Database Access functions
 
 Copyright 2012 Malcolm Shergold
 
@@ -129,12 +129,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 				$rtnVal = $optionURL;
 			else if (strpos($optionURL, '{pluginpath}') !== false)
 			{
-/*
-				$pluginPath = plugin_basename($this->caller);
-				$posn = strpos($pluginPath, '/');
-				$pluginName = substr($pluginPath, 0, $posn);
-*/
-				$pluginName = $this->get_pluginInfo('Name');
+				$pluginName = basename(dirname(dirname(__FILE__)));
 				$rtnVal = str_replace('{pluginpath}', WP_PLUGIN_URL.'/'.$pluginName, $optionURL);
 			}
 			else
@@ -146,7 +141,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			// This function returns a default profile (for translations)
 			// Descendant classes can override this if required)
-			return basename(dirname(__FILE__));
+			return basename(dirname(dirname(__FILE__)));
 		}
 		
 		function get_name()
@@ -182,12 +177,28 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if ($this->getOption('Dev_ShowCallStack'))
 				$this->ShowCallStack();
 			
+			$sql = str_replace("\n", "<br>\n", $sql);
 			echo "<br>$sql<br>\n";
 			if (isset($values))
 			{
 				print_r($values);
 				echo "<br>\n";
 			}
+		}
+		
+		function getTableDef($tableName)
+		{
+			$sql = "";
+			
+			return $sql;
+		}
+		
+		function dbDelta($sql)
+		{
+			// Remove any blank lines - dbDelta is fussy and doesn't like them ...'
+			$sql = preg_replace('/^[ \t]*[\r\n]+/m', '', $sql);
+			$this->ShowSQL($sql);
+			dbDelta($sql);
 		}
 		
 		function get_results($sql)

@@ -35,8 +35,8 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 			
 			// FUNCTIONALITY: Performances - Bulk Actions - Activate/Deactivate and Delete
 			$this->bulkActions = array(
-				'activate' => __('Activate/Deactivate', $this->myDomain),
-				'delete' => __('Delete', $this->myDomain)
+				StageShowLibAdminListClass::BULKACTION_TOGGLE => __('Activate/Deactivate', $this->myDomain),
+				StageShowLibAdminListClass::BULKACTION_DELETE => __('Delete', $this->myDomain)
 			);
 			
 			$updateFailed = false;
@@ -64,20 +64,19 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 			);
 		}
 		
-		function GetPerfMaxSeats($result)
+		function GetPerfMaxSeats($perfSeats)
 		{
 			// FUNCTIONALITY: Performances - Negative Max Seats shown as infinity
-			$perfSeats = $result->perfSeats;
 			if ($perfSeats < 0)
 				$perfSeats = '&#8734';
 			return $perfSeats;
 		}
 		
-		function GetPerfState($result)
+		function GetPerfState($perfState)
 		{
 			// FUNCTIONALITY: Performances - Activation State shown as "Active" or "INACTIVE"
-			$perfState = $this->myDBaseObj->IsStateActive($result->perfState) ? __("Active", $this->myDomain) : __("INACTIVE", $this->myDomain);
-			return $perfState;
+			$perfStateText = $this->myDBaseObj->IsStateActive($perfState) ? __("Active", $this->myDomain) : __("INACTIVE", $this->myDomain);
+			return $perfStateText;
 		}
 		
 		function OutputList($results, $updateFailed)
@@ -326,7 +325,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Performances - Bulk Action Delete - Block if tickets sold
 					// Don't delete if any tickets have been sold for this performance
 					$delPerfEntry = $myDBaseObj->GetPerformancesListByPerfID($recordId);
@@ -346,7 +345,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Performances - Bulk Action Delete - Remove Prices, Hosted Buttons and Performance
 					// Delete all prices for this performance
 					$myDBaseObj->DeletePriceByPerfID($recordId);
@@ -364,13 +363,13 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 					$myDBaseObj->DeletePerformanceByPerfID($recordId);
 					return true;
 				
-				case 'activate':
+				case StageShowLibAdminListClass::BULKACTION_TOGGLE:
 					// FUNCTIONALITY: Performances - Bulk Action Activate/Deactivate
 					$perfEntry = $myDBaseObj->GetPerformancesListByPerfID($recordId);
 					if ($myDBaseObj->IsStateActive($perfEntry[0]->perfState))
-						$myDBaseObj->SetPerfActivated($recordId, 'deactivate');
+						$myDBaseObj->SetPerfActivated($recordId, STAGESHOW_STATE_INACTIVE);
 					else
-						$myDBaseObj->SetPerfActivated($recordId, 'activate');
+						$myDBaseObj->SetPerfActivated($recordId, STAGESHOW_STATE_ACTIVE);
 					return true;
 			}
 			
@@ -383,7 +382,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			
 			switch ($bulkAction)
 			{
-				case 'delete':
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Performances - Bulk Action Delete - Output Action Status Message
 					if ($this->errorCount > 0)
 						$actionMsg = ($this->errorCount == 1) ? __("1 Performance has a Database Error", $this->myDomain) : $errorCount . ' ' . __("Performances have a Database Error", $this->myDomain);
@@ -395,7 +394,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 						$actionMsg = __("Nothing to Delete", $this->myDomain);
 					break;
 				
-				case 'activate':
+				case StageShowLibAdminListClass::BULKACTION_TOGGLE:
 					// FUNCTIONALITY: Performances - Bulk Action Activate/Deactivate - Output Action Status Message
 					if ($actionCount > 0)
 						$actionMsg = ($actionCount == 1) ? __("1 Performance has been Activated/Deactivated", $this->myDomain) : $actionCount . ' ' . __("Performances have been Activated/Deactivated", $this->myDomain);

@@ -1,10 +1,8 @@
 <?php
 
-// Include wp-config.php - This will include wp settings and plugins ...
-include '../../../wp-config.php';
+// Historical target for IPN requests from PayPal ....
+// Does an include to effectively do a redirect
 
-include 'include/stageshowlib_NotifyURL.php';
-	
-new IPNNotifyClass(STAGESHOW_DBASE_CLASS, __FILE__);	
+include 'stageshow_ipn_callback.php';
 
 ?>
