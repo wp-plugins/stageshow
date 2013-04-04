@@ -24,7 +24,7 @@ include 'stageshow_sales.php';
 	
 if (!class_exists('StageShowPluginClass')) 
 {
-	class StageShowPluginClass  extends StageShowSalesPluginClass 
+	class StageShowPluginClass  extend StageShowSalesPluginClass 
 	{
 		var $ourPluginName;
 		var $myDBaseObj;
