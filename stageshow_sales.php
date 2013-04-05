@@ -201,7 +201,14 @@ if (!class_exists('StageShowSalesPluginClass'))
 		
 		function GetOnlineStoreRowHiddenTags($result)
 		{
-			parent::GetOnlineStoreRowHiddenTags($result);
+			$hiddenTags = parent::GetOnlineStoreRowHiddenTags($result);
+			
+			if (!$this->myDBaseObj->UseIntegratedTrolley())
+			{
+				$hiddenTags .= '<input type="hidden" name="os0" value="'.$result->priceType.'"/>'."\n";      
+			}
+			
+			return $hiddenTags;
 		}		
 
 		function OutputContent_OnlineStoreTitle($result)

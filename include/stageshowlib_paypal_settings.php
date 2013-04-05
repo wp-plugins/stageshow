@@ -145,7 +145,12 @@ if (!class_exists('PayPalSettingsAdminClass'))
 		function __construct($env) //constructor	
 		{
 			$this->myDBaseObj = $env['DBaseObj'];	// Copy here because CanEditPayPalSettings() may uses it ...
-			$this->blockPayPalEdit = !$this->myDBaseObj->CanEditPayPalSettings();
+			
+			if (!$this->myDBaseObj->getOption('Dev_DisablepayPalLock'))
+				$this->blockPayPalEdit = !$this->myDBaseObj->CanEditPayPalSettings();
+			else
+				$this->blockPayPalEdit = false;
+			
 			$env['BlockPayPalEdit'] = $this->blockPayPalEdit;
 			
 			// Call base constructor
