@@ -30,8 +30,9 @@ if (!class_exists('SalesPluginBaseClass'))
 		{
 			$this->myDomain = $this->myDBaseObj->get_domain();
 							
-			if (!isset($this->cssBaseID)) $this->cssBaseID = $this->myDomain.'-shop';
-			if (!isset($this->cssTrolleyBaseID)) $this->cssTrolleyBaseID = $this->myDomain.'-trolley';
+			if (!isset($this->cssDomain)) $this->cssDomain = $this->myDomain;
+			if (!isset($this->cssBaseID)) $this->cssBaseID = $this->cssDomain.'-shop';
+			if (!isset($this->cssTrolleyBaseID)) $this->cssTrolleyBaseID = $this->cssDomain.'-trolley';
 			
 			if (!isset($this->nameColID)) $this->nameColID = 'Name';
 			if (!isset($this->cssNameColID)) $this->cssNameColID = "name";			
@@ -70,7 +71,7 @@ if (!class_exists('SalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
-			return ($reqRecordId == 0) ? $myDBaseObj->GetPricesList(null) :  $this->GetOnlineStoreProductDetails($reqRecordId);
+			return (is_int($reqRecordId) && ($reqRecordId == 0)) ? $myDBaseObj->GetPricesList(null) :  $this->GetOnlineStoreProductDetails($reqRecordId);
 		}
 		
 		function GetOnlineStoreButtonID($result)
@@ -149,7 +150,7 @@ if (!class_exists('SalesPluginBaseClass'))
 		{
 			$itemPayPalButtonID = $this->GetOnlineStoreButtonID($result);
 								
-			echo '<input type="hidden" name="hosted_button_id" value="'.$itemPayPalButtonID.'"/>'."\n";
+			return '<input type="hidden" name="hosted_button_id" value="'.$itemPayPalButtonID.'"/>'."\n";
 		}
 		
 		function OutputContent_OnlineStoreTitle($result)
@@ -390,7 +391,7 @@ if (!class_exists('SalesPluginBaseClass'))
 			{
 				if (isset($this->checkoutError))
 				{
-					echo '<div id="message" class="'.$this->myDomain.'-error">'.$this->checkoutError.'</div>';					
+					echo '<div id="message" class="'.$this->cssDomain.'-error">'.$this->checkoutError.'</div>';					
 				}
 				
 				$cartContents = isset($_SESSION['$this->trolleyid']) ? $_SESSION['$this->trolleyid'] : array();
@@ -522,7 +523,7 @@ if (!class_exists('SalesPluginBaseClass'))
 			else if (isset($_POST['hosted_button_id']))
 			{
 				// Gets here if an attempt is made to add tickets when IPN Local Server debug option is selected
-				echo '<div id="message" class="'.$this->myDomain.'-error">'.__('PayPal checkout inaccessible - Using Local IPN Server', $this->myDomain).'</div>';							
+				echo '<div id="message" class="'.$this->cssDomain.'-error">'.__('PayPal checkout inaccessible - Using Local IPN Server', $this->myDomain).'</div>';							
 			}
 
 		}		
@@ -616,7 +617,7 @@ if (!class_exists('SalesPluginBaseClass'))
 				if ($paypalMethod == 'GET')
 				{
 					foreach ($paypalParams as $paypalArg => $paypalParam)
-						$paypalURL = add_query_arg($paypalArg, $paypalParam, $paypalURL);
+						$paypalURL = add_query_arg($paypalArg, urlencode($paypalParam), $paypalURL);
 					$paypalParams = array();					
 				}
 				

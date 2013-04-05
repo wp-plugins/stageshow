@@ -105,6 +105,14 @@ if (!class_exists('StageShowDBaseClass'))
 			// Add DB Tables
 			$this->createDB();
 			
+			// Remove priceRef field
+			if ($this->RemovePriceRefsField())
+			{
+				// Check that paypal buttons are OK if database changed
+				$perfsList = $this->GetAllPerformancesList();
+				$this->UpdateCartButtons($perfsList);
+			}
+					
 			// FUNCTIONALITY: DBase - On upgrade ... Add administrator capabilities
 			// Add administrator capabilities
 			$adminRole = get_role('administrator');
@@ -121,6 +129,16 @@ if (!class_exists('StageShowDBaseClass'))
 			$this->GetLatestNews();
 		}
 
+		function RemovePriceRefsField()
+		{
+			if (!$this->IfColumnExists(STAGESHOW_PRICES_TABLE, 'priceRef'))
+				return false;
+				
+			$this->deleteColumn(STAGESHOW_PRICES_TABLE, 'priceRef');
+					
+			return true;
+		}
+		
 		function PurgeDB()
 		{
 			// Call PurgeDB() in base class
@@ -832,7 +850,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		{
       		global $wpdb;
 			
-			$colSpec = $this->getColumnType($table_name, $oldColName);
+			$colSpec = $this->getColumnSpec($table_name, $oldColName);
 			if (!isset($colSpec->Field))
 				return __("DB Error", $this->get_domain()).": $oldColName ".__("Column does not exist", $this->get_domain());
 				
@@ -859,7 +877,13 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			return "OK";							
 		}
 		
-		function getColumnType($table_name, $colName)
+		function IfColumnExists($table_name, $colName)
+		{
+			$colSpec = $this->getColumnSpec($table_name, $colName);
+			return (isset($colSpec->Field));
+		}
+		
+		function getColumnSpec($table_name, $colName)
 		{
 			$sql = "SHOW COLUMNS FROM $table_name WHERE field = '$colName'";
 			$this->ShowSQL($sql); 
@@ -1725,7 +1749,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$updateCheckURL = str_replace('\\', '/', $updateCheckURL);
 			$updateCheckURL = str_replace("//$filename", "/$filename", $updateCheckURL);
 			
-			$updateCheckURL = add_query_arg('email', urlencode($this->adminOptions['AdminEMail']), $updateCheckURL);
+			//$updateCheckURL = add_query_arg('email', urlencode($this->adminOptions['AdminEMail']), $updateCheckURL);
 			$updateCheckURL = add_query_arg('ver', urlencode($this->get_version()), $updateCheckURL);
 			$updateCheckURL = add_query_arg('url', urlencode(get_option('siteurl')), $updateCheckURL);
 			
