@@ -50,7 +50,6 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php
 			$this->Tools_Validate();
 			$this->Tools_Export();
-			if (current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) $this->Tools_FlushSalesRecords();				
 			if (class_exists('StageShowLibTableTestEMailClass') && current_user_can(STAGESHOW_CAPABILITY_DEVUSER)) new StageShowLibTableTestEMailClass($this);
 ?>
 	</div>
@@ -207,32 +206,6 @@ if (!class_exists('StageShowToolsAdminClass'))
 <input type="hidden" name="download" value="true" />
 </p>
 </form>
-<?php
-		}
-		
-		function Tools_FlushSalesRecords()
-		{			
-	  		// FUNCTIONALITY: Tools - Flush Sales DB 
-			$myDBaseObj = $this->myDBaseObj;
-			if(isset($_POST['flushsalesbutton']))
-			{
-				$this->CheckAdminReferer();
-						
-				$myDBaseObj->DeleteOrphanedSales();
-			}
-	
-?>
-<h3><?php _e('Sales Records', $this->myDomain); ?></h3>
-<p><?php _e('Sales records are not deleted when shows or performances are deleted.', $this->myDomain); ?></p>
-<p><?php _e('Individual sales records can be deleted on the sales page. All sales records for sales where the corresponding show or performance has been removed can be deleted by clicking the button below.', $this->myDomain); ?></p>
-<form method="post">
-	<?php $this->WPNonceField(); ?>
-<p>
-<p class="submit">
-<input class="button-secondary" type="submit" name="flushsalesbutton" value="<?php _e('Flush Sales Records', $this->myDomain) ?>" onclick="javascript:return confirmDelete('Orphaned Sales Records')"/>
-</p>
-</form>
-
 <?php
 		}
 		

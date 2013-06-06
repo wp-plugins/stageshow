@@ -340,7 +340,7 @@ function onclickverify(obj)
 								$saleRec->$typeName = 0;
 							}
 							
-							$fieldsList = array('ticketName', 'saleEMail', 'saleDateTime', 'saleTxnId');
+							$fieldsList = array('ticketName', 'saleEMail', 'saleDateTime', 'saleTxnId', 'salePaid', 'saleFee');
 							foreach ($fieldsList as $fieldId)
 								$saleRec->$fieldId = $thisSale->$fieldId;
 								

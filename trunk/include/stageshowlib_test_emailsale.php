@@ -37,7 +37,7 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 			else if (defined('SALESMAN_SAMPLE_EMAIL'))
 				$DivertEMailTo = SALESMAN_SAMPLE_EMAIL;
 			else
-				$DivertEMailTo = 'malcolm@corondeck.co.uk';
+				$DivertEMailTo = get_bloginfo('admin_email');
 
 			$sqlFilters['limit'] = SALESMAN_TESTSALES_LIMIT;
 			$results = $myDBaseObj->GetAllSalesList($sqlFilters);		// Get list of sales (one row per sale)

@@ -369,7 +369,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 
 			echo $label;
 			
-			// TODO - Get performances list for this show
+			// Get performances list for this show
 			$perfsList = $myDBaseObj->GetPerformancesListByShowID($this->showID);
 			
 			echo '<select name="perfID">'."\n";

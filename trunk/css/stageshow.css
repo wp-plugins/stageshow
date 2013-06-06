@@ -21,6 +21,28 @@ Copyright 2012 Malcolm Shergold
 
 /* --------------------------------------------------------------------------- */
 /*                                                                             */
+/*                       StageShow Layout Styles                               */
+/*                                                                             */
+/* --------------------------------------------------------------------------- */
+
+.stageshow-layout-seat
+{
+	border: 2px;
+	padding: 3px;
+	XXtext-align: left !important;
+	XXalign: left;
+}
+
+.stageshow-layout-seat
+{
+	border: 2px;
+	padding: 3px;
+	XXtext-align: left !important;
+	XXalign: left;
+}
+
+/* --------------------------------------------------------------------------- */
+/*                                                                             */
 /*                     StageShow Box Office Styles                             */
 /*                                                                             */
 /* --------------------------------------------------------------------------- */
@@ -59,7 +81,7 @@ td.stageshow-boxoffice-perfnote
 	width: 15%;	
 }
 
- .stageshow-boxoffice-qty
+.stageshow-boxoffice-qty
 {
 	width: 15%;	
 }

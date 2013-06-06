@@ -170,10 +170,16 @@ if (!class_exists('StageShowLibDBaseClass'))
 		}
 		
 		function ShowSQL($sql, $values = null)
-		{
+		{			
 			if ($this->getOption('Dev_ShowSQL') <= 0)
 				return;
 			
+			if (function_exists('wp_get_current_user')) 
+			{
+				if (!current_user_can('manage_options'))
+				return;
+			}
+				
 			if ($this->getOption('Dev_ShowCallStack'))
 				$this->ShowCallStack();
 			
@@ -195,30 +201,61 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function dbDelta($sql)
 		{
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			
 			// Remove any blank lines - dbDelta is fussy and doesn't like them ...'
 			$sql = preg_replace('/^[ \t]*[\r\n]+/m', '', $sql);
 			$this->ShowSQL($sql);
 			dbDelta($sql);
 		}
 		
-		function get_results($sql)
+		function query($sql)
 		{
 			global $wpdb;
 			
+			$this->ShowSQL($sql);
+			return $wpdb->query($sql);			
+		}
+		
+		function DropTable($table_name)
+		{
+			global $wpdb;
+			
+			$sql = "DROP TABLE IF EXISTS $table_name";
+			$this->ShowSQL($sql);
+			$wpdb->query($sql);			
+		}
+		
+		function has_results($sql)
+		{
+			$results = $this->get_results($sql);
+			return true;
+			
+			return count($results > 0);
+		}
+		
+		function get_results($sql, $debugOutAllowed = true)
+		{
+			global $wpdb;
+			
+			$this->ShowSQL($sql);
 			$results = $wpdb->get_results($sql);
-			$this->show_results($results);
+			if ($debugOutAllowed) $this->show_results($results);
 			
 			return $results;
 		}
 		
 		function show_results($results)
 		{
-			if ($this->getOption('Dev_ShowDBOutput') == 1)
-			{
+			if ($this->getOption('Dev_ShowDBOutput') != 1)
+				return;
+				
+			if (!current_user_can('manage_options'))
+				return;
+				
 				echo "<br>Database Results:<br>\n";
 				for ($i = 0; $i < count($results); $i++)
 					echo "Array[$i] = " . print_r($results[$i], true) . "<br>\n";
-			}
 		}
 		
 		//Returns an array of admin options

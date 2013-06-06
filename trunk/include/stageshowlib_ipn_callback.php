@@ -119,15 +119,6 @@ if (!class_exists('IPNNotifyClass'))
 
 			// read post from PayPal server and add 'cmd'
 			$URLParamsArray = $this->GetQueryString();
-			
-			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNDumpParams'))
-			{
-	  			// FUNCTIONALITY: IPN Notify - Dump IPN Request to "IPNPacket.txt" if Dev_IPNDumpParams set
-				$logFileObj = new StageShowLibLogFileClass($this->LogsFolder);
-				$rawPostData = file_get_contents('php://input');
-				$logFileObj->DumpToFile("IPNPacket.txt", "IPN_RAW_POST_Data", $rawPostData);
-				$logFileObj->DumpToFile("IPNPacket.txt", "IPN_RX_Data", $URLParamsArray);
-			}			
 
 			$IPNRxdMsg = 'IPN Request Received at ' . date(DATE_RFC822);
 			$this->AddToLog($IPNRxdMsg);
@@ -166,12 +157,6 @@ if (!class_exists('IPNNotifyClass'))
 				echo "<br>\n";
 			}
 
-			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNDumpParams'))
-			{
-				$logFileObj = new StageShowLibLogFileClass($this->LogsFolder);
-				$logFileObj->DumpToFile("IPNPacket.txt", "IPN_TX_Data", $URLParamsArray);
-			}			
-
 			// Get URL to send verify message to PayPal
 			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNSkipServer'))
 			{
@@ -207,7 +192,7 @@ if (!class_exists('IPNNotifyClass'))
 			// Check notification validation
 			if ($payPalResponse['APIStatus'] != 200 )
 			{
-				$this->AddToLog("IPN Response: Status=".$payPalResponse['APIStatus']);
+				$this->AddToLog("IPN Response: Status=".$payPalResponse['APIStatus']." (".$payPalResponse['APIStatusMsg'].")");
 				// HTTP error handling
 			}			
 			else if ($payPalResponse['APIResponseText'] === 'VERIFIED')
@@ -283,7 +268,7 @@ if (!class_exists('IPNNotifyClass'))
 							$this->AddToLog('Quantity:     ' . $results['qty' . $lineNo]);
 							$lineNo++;
 						}
-						$results['saleDateTime'] = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT);
+						$results['saleDateTime'] = current_time('mysql');
 						
 						if ($ourDBaseObj->UseIntegratedTrolley())
 						{
@@ -303,7 +288,7 @@ if (!class_exists('IPNNotifyClass'))
 						}
 						else
 						{
-							// TODO-BEFORE_RELEASE ... Send Sale Rejected EMail 
+							// Send Sale Rejected EMail 
 							$this->AddToLog('Sale Rejected (Checkout Timed Out) - SaleID: '.$saleID);
 							
 							$templatePath = $this->notifyDBaseObj->GetEmailTemplatePath('TimeoutEMailTemplatePath');

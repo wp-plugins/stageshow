@@ -37,10 +37,10 @@ if (!class_exists('StageShowPluginClass'))
 		{
 			$myDBaseObj = $this->CreateDBClass($caller);
 			
-			$this->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_test.php');
+			$this->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
 			$myDBaseObj->testModeEnabled = $this->testModeEnabled;
 			$this->myDBaseObj = $myDBaseObj;
-						
+					
 			parent::__construct();
 			
 			//Actions
@@ -99,12 +99,6 @@ if (!class_exists('StageShowPluginClass'))
 			
 			$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
 			
-			if ($myDBaseObj->isOptionSet('Dev_RunDevCode'))
-			{
-				if (!defined('STAGESHOW_RUNDEVCODE'))
-					define('STAGESHOW_RUNDEVCODE', 1);
-			}
-						
 			return $myDBaseObj->adminOptions;
 		}
 		// Saves the admin options to the options data table
@@ -193,6 +187,11 @@ if (!class_exists('StageShowPluginClass'))
 	  		// FUNCTIONALITY: Runtime - Load language files
 			$langRelPath = STAGESHOW_LANG_RELPATH;
 			load_plugin_textdomain('stageshow', false, $langRelPath);
+			
+			// Get plugin version number
+			wp_update_plugins();
+
+			// TODO - Detect changes to plugin version number			
 		}
 
  		function OutputMetaTag()
@@ -278,12 +277,12 @@ if (!class_exists('StageShowPluginClass'))
 					break;
 							
 				case STAGESHOW_MENUPAGE_TESTSETTINGS:
-					include STAGESHOW_TEST_PATH.'stageshow_test.php';   
+					include STAGESHOW_TEST_PATH.'stageshow_testsettings.php';   
 					new StageShowTestSettingsAdminClass($this->env);
 					break;		
 					
 				case STAGESHOW_MENUPAGE_TEST:
-					include STAGESHOW_TEST_PATH.'stageshow_test.php';   
+					include STAGESHOW_TEST_PATH.'stageshow_testsettings.php';   
 					new StageShowTestAdminClass($this->env);
 					break;
 							
@@ -354,7 +353,7 @@ if (!class_exists('StageShowPluginClass'))
 
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', $this->myDomain),     __('Settings', $this->myDomain),    STAGESHOW_CAPABILITY_SETUPUSER,   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
 
-				// Show test menu if stageshow_test.php is present
+				// Show test menu if stageshow_testings.php is present
 				if ( $this->testModeEnabled )
 				{
 					add_submenu_page( 'options-general.php', 'StageShow Test', 'StageShow Test', STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TESTSETTINGS, array(&$this, 'printAdminPage'));
@@ -367,7 +366,7 @@ if (!class_exists('StageShowPluginClass'))
 								add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', $this->myDomain),    __('Buttons', $this->myDomain),   STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));							
 						}
 						
-						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('TEST', $this->myDomain), __('TEST', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
+						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEV TEST', $this->myDomain), __('DEV TEST', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
 					}
 				
 					if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))

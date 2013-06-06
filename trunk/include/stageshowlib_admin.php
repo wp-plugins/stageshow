@@ -274,16 +274,25 @@ function HideElement(obj)
 		
 		function AdminUpgradeNotice() 
 		{ 
-/*
-	Function to add notification to admin page
-			add_action( 'admin_notices', 'AdminUpgradeNotice' );
-*/
+			// Function to add notification to admin page
+			// add_action( 'admin_notices', 'AdminUpgradeNotice' );
 				
 ?>
 	<div id="message" class="updated fade">
 		<p><?php echo '<strong>Plugin is ready</strong>'; ?></p>
 	</div>
 <?php
+		}
+		
+		// Bespoke translation functions added to remove these translations from .po file
+		function getTL8($text, $domain = 'default') 
+		{ 
+			return __($text, $domain);
+		}
+		
+		function echoTL8($text, $domain = 'default') 
+		{ 
+			return _e($text, $domain);
 		}
 		
  	}

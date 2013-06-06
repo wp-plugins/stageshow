@@ -162,9 +162,9 @@ if (!class_exists('SalesPluginBaseClass'))
 			echo '
 				<table width="100%" border="0">
 					<tr>
-						<td>
+						<td class="'.$this->cssBaseID.'-header">
 							<table width="100%" cellspacing="0">
-								<tr class="'.$this->cssBaseID.'-header">
+								<tr>
 									<td class="'.$this->cssBaseID.'-'.$this->cssNameColID.'">'.$this->nameColID.'</td>
 									<td class="'.$this->cssBaseID.'-'.$this->cssRefColID.'">'.$this->refColID.'</td>
 									<td class="'.$this->cssBaseID.'-price">Price</td>
@@ -184,13 +184,15 @@ if (!class_exists('SalesPluginBaseClass'))
 			
 			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Sales', $this->myDomain);
 			$buttonURL = $myDBaseObj->getImageURL('AddCartButtonURL');
-						
+
+			$itemPrice = $myDBaseObj->FormatCurrency($this->GetOnlineStoreItemPrice($result));
+			
 			echo '
 				<table cellspacing="0">
 					<tr>
-						<td class="'.$this->cssBaseID.'-name">'.$result->stockName.'</td>
-						<td class="'.$this->cssBaseID.'-ref">'.$result->stockRef.'</td>
-						<td class="'.$this->cssBaseID.'-price">'.$result->stockPrice.'</td>
+						<td class="'.$this->cssBaseID.'-'.$this->cssNameColID.'">'.$result->stockName.'</td>
+						<td class="'.$this->cssBaseID.'-'.$this->cssRefColID.'">'.$result->stockRef.'</td>
+						<td class="'.$this->cssBaseID.'-price">'.$itemPrice.'</td>
 						<td class="'.$this->cssBaseID.'-qty">
 				';
 				
@@ -348,7 +350,6 @@ if (!class_exists('SalesPluginBaseClass'))
 				echo __('Sales Not Available Currently', $this->myDomain)."<br>\n";
 				
 			echo '
-				<br></br>
 				</div>
 				';
 

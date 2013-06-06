@@ -54,9 +54,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}			
 		    else
 			{
-				// Get ID of Shows in order of first performance
-				// TODO - Use SQL to only get "active" shows
-				$shows = $myDBaseObj->GetAllShowsList();
+				// Get ID of "active" Shows in order of first performance
+				$shows = $myDBaseObj->GetActiveShowsList();
 	      
 		  		// Count can be used to limit the number of Shows displayed
 				if (isset($atts['count']))
