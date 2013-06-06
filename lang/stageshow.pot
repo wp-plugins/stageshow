@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 2.0.4 \n"
+"Project-Id-Version: StageShow 2.0.5 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowplus\n"
-"POT-Creation-Date: 2013-05-21 20:36:31+00:00\n"
+"POT-Creation-Date: 2013-06-06 05:35:42+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,12 +13,12 @@ msgstr ""
 "Language-Team: EMAIL@ADDRESS\n"
 "Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
 
-#: admin\stageshow_manage_overview.php:205 stageshow_main.php:341
+#: admin\stageshow_manage_overview.php:205 stageshow_main.php:340
 msgid "Shows"
 msgstr ""
 
 #: admin\stageshow_manage_overview.php:214
-#: admin\stageshow_manage_performances.php:269
+#: admin\stageshow_manage_performances.php:285
 #: admin\stageshow_manage_prices.php:233 admin\stageshow_manage_shows.php:195
 msgid "No Show Configured"
 msgstr ""
@@ -75,108 +75,112 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:78
-#: include\stageshow_dbase_api.php:635
+#: admin\stageshow_manage_performances.php:82
+#: include\stageshow_dbase_api.php:706
 msgid "Active"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:78
-#: include\stageshow_dbase_api.php:637
+#: admin\stageshow_manage_performances.php:86
+#: include\stageshow_dbase_api.php:708
 msgid "INACTIVE"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:134
-msgid "Duplicated Performance Date"
-msgstr ""
-
-#: admin\stageshow_manage_performances.php:142
-msgid "Duplicated Performance Reference"
+#: admin\stageshow_manage_performances.php:90
+msgid "Deleted"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:150
+msgid "Duplicated Performance Date"
+msgstr ""
+
+#: admin\stageshow_manage_performances.php:158
+msgid "Duplicated Performance Reference"
+msgstr ""
+
+#: admin\stageshow_manage_performances.php:166
 msgid "Empty Date Entry"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:157
+#: admin\stageshow_manage_performances.php:173
 msgid "Invalid Date Entry"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:165
+#: admin\stageshow_manage_performances.php:181
 #: admin\stageshow_manage_prices.php:161 admin\stageshow_manage_shows.php:127
 #: admin\stageshowplus_manage_priceplans.php:160
 msgid "Settings have NOT been saved"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:228
+#: admin\stageshow_manage_performances.php:244
 #: admin\stageshow_manage_prices.php:198 admin\stageshow_manage_prices.php:211
 #: admin\stageshow_manage_shows.php:153
-#: admin\stageshowplus_manage_priceplans.php:162 include\mjslib_admin.php:323
+#: admin\stageshowplus_manage_priceplans.php:162 include\mjslib_admin.php:332
 #: include\mjslib_paypal_settings.php:248
 msgid "Settings have been saved"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:269
+#: admin\stageshow_manage_performances.php:285
 #: admin\stageshow_manage_prices.php:233 admin\stageshow_manage_prices.php:247
 #: admin\stageshow_manage_sales.php:69
 msgid "Add one Here"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:284
+#: admin\stageshow_manage_performances.php:300
 msgid "Show has No Performances"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:300
+#: admin\stageshow_manage_performances.php:316
 msgid "Add New Performance"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:306
+#: admin\stageshow_manage_performances.php:322
 #: admin\stageshow_manage_prices.php:279 admin\stageshow_manage_shows.php:213
-#: admin\stageshowplus_manage_priceplans.php:253 include\mjslib_admin.php:363
+#: admin\stageshowplus_manage_priceplans.php:253 include\mjslib_admin.php:372
 msgid "Save Changes"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:388
+#: admin\stageshow_manage_performances.php:404
 msgid "1 Performance has a Database Error"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:388
+#: admin\stageshow_manage_performances.php:404
 msgid "Performances have a Database Error"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:390
+#: admin\stageshow_manage_performances.php:406
 msgid "1 Performance cannot be deleted"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:390
+#: admin\stageshow_manage_performances.php:406
 #: admin\stageshow_manage_prices.php:339 admin\stageshow_manage_shows.php:306
 msgid "Tickets already sold!"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:390
+#: admin\stageshow_manage_performances.php:406
 msgid "Performances cannot be deleted"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:392
+#: admin\stageshow_manage_performances.php:408
 msgid "1 Performance has been deleted"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:392
+#: admin\stageshow_manage_performances.php:408
 msgid "Performances have been deleted"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:394
-#: admin\stageshow_manage_performances.php:402
+#: admin\stageshow_manage_performances.php:410
+#: admin\stageshow_manage_performances.php:418
 #: admin\stageshow_manage_prices.php:343 admin\stageshow_manage_shows.php:310
 #: admin\stageshowplus_manage_priceplans.php:300
-#: include\mjslib_paypal_salesadmin.php:719 test\paypal_manage_buttons.php:218
+#: include\mjslib_paypal_salesadmin.php:727
 msgid "Nothing to Delete"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:400
+#: admin\stageshow_manage_performances.php:416
 msgid "1 Performance has been Activated/Deactivated"
 msgstr ""
 
-#: admin\stageshow_manage_performances.php:400
+#: admin\stageshow_manage_performances.php:416
 msgid "Performances have been Activated/Deactivated"
 msgstr ""
 
@@ -285,94 +289,75 @@ msgstr ""
 msgid "Shows have been deleted"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:86
+#: admin\stageshow_manage_tools.php:85
 msgid "Validate Sale"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:95
+#: admin\stageshow_manage_tools.php:94
 msgid "Location / Computer ID"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:102 stageshowplus.php:123
+#: admin\stageshow_manage_tools.php:101 stageshowplus.php:123
 msgid "Transaction ID"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:117
+#: admin\stageshow_manage_tools.php:116
 msgid "Validate"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:140
+#: admin\stageshow_manage_tools.php:139
 msgid "Matching record found"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:153
+#: admin\stageshow_manage_tools.php:152
 msgid "No matching record"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:164
+#: admin\stageshow_manage_tools.php:163
 msgid "Tab Delimited Text"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:173
+#: admin\stageshow_manage_tools.php:172
 msgid "Export"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:174
+#: admin\stageshow_manage_tools.php:173
 msgid "Export to a \"TAB Separated Values\" format file on your computer."
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:175
+#: admin\stageshow_manage_tools.php:174
 msgid ""
 "This format can be imported to many applications including spreadsheets and "
 "databases."
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:180
+#: admin\stageshow_manage_tools.php:179
 msgid "Format"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:190 stageshowplus.php:15
+#: admin\stageshow_manage_tools.php:189 stageshowplus.php:15
 #: stageshowplus.php:66 stageshowplus.php:166
 msgid "Type"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:194 stageshow_main.php:355
+#: admin\stageshow_manage_tools.php:193 stageshow_main.php:354
 msgid "Settings"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:196 stageshow_sales.php:254
+#: admin\stageshow_manage_tools.php:195 stageshow_sales.php:253
 msgid "Tickets"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:197
+#: admin\stageshow_manage_tools.php:196
 msgid "Sales Summary"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:204
+#: admin\stageshow_manage_tools.php:203
 msgid "Download Export File"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:205
+#: admin\stageshow_manage_tools.php:204
 msgid "Download Offline Validator"
-msgstr ""
-
-#: admin\stageshow_manage_tools.php:225
-msgid "Sales Records"
-msgstr ""
-
-#: admin\stageshow_manage_tools.php:226
-msgid "Sales records are not deleted when shows or performances are deleted."
-msgstr ""
-
-#: admin\stageshow_manage_tools.php:227
-msgid ""
-"Individual sales records can be deleted on the sales page. All sales records "
-"for sales where the corresponding show or performance has been removed can "
-"be deleted by clicking the button below."
-msgstr ""
-
-#: admin\stageshow_manage_tools.php:232
-msgid "Flush Sales Records"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:34
@@ -681,15 +666,15 @@ msgstr ""
 msgid "OFX"
 msgstr ""
 
-#: include\mjslib_admin.php:330 include\mjslib_paypal_settings.php:255
+#: include\mjslib_admin.php:339 include\mjslib_paypal_settings.php:255
 msgid "Paypal settings have NOT been saved."
 msgstr ""
 
-#: include\mjslib_admin.php:355
+#: include\mjslib_admin.php:364
 msgid "No Settings Configured"
 msgstr ""
 
-#: include\mjslib_paypal_api.php:145
+#: include\mjslib_paypal_api.php:146
 msgid "Missing PayPal Login Param"
 msgstr ""
 
@@ -713,48 +698,48 @@ msgstr ""
 msgid "Postcode"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:292
+#: include\mjslib_paypal_salesadmin.php:291
 msgid "Sale Details have been saved"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:331
+#: include\mjslib_paypal_salesadmin.php:330
 msgid "Summary"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:333 stageshowplus.php:113
+#: include\mjslib_paypal_salesadmin.php:332 stageshowplus.php:113
 msgid "Add Sale"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:354
+#: include\mjslib_paypal_salesadmin.php:353
 #: include\mjslib_test_emailsale.php:54
 msgid "No Sales"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:363
+#: include\mjslib_paypal_salesadmin.php:362
 msgid "Save Sale"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:512
+#: include\mjslib_paypal_salesadmin.php:511
 msgid "INVALID Quantity (Non-numeric)"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:525
+#: include\mjslib_paypal_salesadmin.php:524
 msgid "INVALID Quantity (Negative)"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:576
+#: include\mjslib_paypal_salesadmin.php:578
 msgid "Out of Stock"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:585
+#: include\mjslib_paypal_salesadmin.php:587
 msgid "Total Quantity CANNOT be zero"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:717
+#: include\mjslib_paypal_salesadmin.php:725
 msgid "1 Sale has been deleted"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:717
+#: include\mjslib_paypal_salesadmin.php:725
 msgid "Sales have been deleted"
 msgstr ""
 
@@ -783,65 +768,65 @@ msgstr ""
 msgid "Cannot Create Logs Folder"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:384 stageshowplus.php:128
+#: include\mjslib_sales_dbase_api.php:382 stageshowplus.php:128
 msgid "Shopping Trolley"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:834
-#: include\mjslib_sales_dbase_api.php:841
+#: include\mjslib_sales_dbase_api.php:835
+#: include\mjslib_sales_dbase_api.php:842
 msgid "Undefined"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:1002
+#: include\mjslib_sales_dbase_api.php:1008
 msgid "EMail Sent to"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:185 stageshow_main.php:349
+#: include\mjslib_salesplugin.php:185 stageshow_main.php:348
 msgid "Sales"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:348
+#: include\mjslib_salesplugin.php:350
 msgid "Sales Not Available Currently"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:473
+#: include\mjslib_salesplugin.php:474
 msgid "Your Shopping Trolley"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:489
+#: include\mjslib_salesplugin.php:490
 msgid "Remove"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:504
+#: include\mjslib_salesplugin.php:505
 msgid "Total"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:512
+#: include\mjslib_salesplugin.php:513
 msgid "Checkout"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:526
+#: include\mjslib_salesplugin.php:527
 msgid "PayPal checkout inaccessible - Using Local IPN Server"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:576 include\mjslib_salesplugin.php:600
-#: include\mjslib_salesplugin.php:658
+#: include\mjslib_salesplugin.php:577 include\mjslib_salesplugin.php:601
+#: include\mjslib_salesplugin.php:659
 msgid "Cannot Checkout"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:577
+#: include\mjslib_salesplugin.php:578
 msgid "Shopping Cart Contents have changed"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:601
+#: include\mjslib_salesplugin.php:602
 msgid "Item(s) removed from Shopping Cart"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:648
+#: include\mjslib_salesplugin.php:649
 msgid "Using Local IPN Server - PayPal Checkout call blocked"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:659
+#: include\mjslib_salesplugin.php:660
 msgid "Sold out for one or more performances"
 msgstr ""
 
@@ -903,7 +888,7 @@ msgstr ""
 msgid "Divert EMail To"
 msgstr ""
 
-#: include\mjslib_test_emailsale.php:74 test\sales_test.php:156
+#: include\mjslib_test_emailsale.php:74
 msgid "Selected Sale"
 msgstr ""
 
@@ -911,115 +896,119 @@ msgstr ""
 msgid "EMail Sale"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:426 include\stageshowplus_dbase_api.php:518
+#: include\stageshow_dbase_api.php:497 include\stageshowplus_dbase_api.php:506
 msgid "Cannot Add Performances"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:492
+#: include\stageshow_dbase_api.php:563
 msgid "Internal Error - showID"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:518
+#: include\stageshow_dbase_api.php:589
 msgid "Error Creating PayPal Button(s)"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:523
+#: include\stageshow_dbase_api.php:594
 msgid "PayPal Login Settings Invalid"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:532
+#: include\stageshow_dbase_api.php:603
 msgid "Performance Reference is not unique"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:534
+#: include\stageshow_dbase_api.php:605
 msgid "New Performance Added"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:631
+#: include\stageshow_dbase_api.php:702
 msgid "DELETED"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:738 include\stageshowplus_dbase_api.php:666
+#: include\stageshow_dbase_api.php:833 include\stageshowplus_dbase_api.php:641
 msgid "Unnamed Show"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:855
+#: include\stageshow_dbase_api.php:943
 msgid "DB Error"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:855
+#: include\stageshow_dbase_api.php:943
 msgid "Column does not exist"
 msgstr ""
 
-#: stageshow_main.php:340
+#: include\stageshowplus_dbase_api.php:1102
+msgid "Error: Invalid Seat Specification"
+msgstr ""
+
+#: stageshow_main.php:339
 msgid "StageShow Overview"
 msgstr ""
 
-#: stageshow_main.php:340
+#: stageshow_main.php:339
 msgid "Overview"
 msgstr ""
 
-#: stageshow_main.php:341
+#: stageshow_main.php:340
 msgid "Show Editor"
 msgstr ""
 
-#: stageshow_main.php:343
+#: stageshow_main.php:342
 msgid "Price Plan Editor"
 msgstr ""
 
-#: stageshow_main.php:343
+#: stageshow_main.php:342
 msgid "Price Plans"
 msgstr ""
 
-#: stageshow_main.php:344
+#: stageshow_main.php:343
 msgid "Performance Editor"
 msgstr ""
 
-#: stageshow_main.php:344 stageshowplus.php:49
+#: stageshow_main.php:343 stageshowplus.php:49
 msgid "Performances"
 msgstr ""
 
-#: stageshow_main.php:345
+#: stageshow_main.php:344
 msgid "Price Edit"
 msgstr ""
 
-#: stageshow_main.php:345
+#: stageshow_main.php:344
 msgid "Prices"
 msgstr ""
 
-#: stageshow_main.php:349
+#: stageshow_main.php:348
 msgid "Sales Admin"
 msgstr ""
 
-#: stageshow_main.php:353
+#: stageshow_main.php:352
 msgid "Admin Tools"
 msgstr ""
 
-#: stageshow_main.php:353
+#: stageshow_main.php:352
 msgid "Tools"
 msgstr ""
 
-#: stageshow_main.php:355
+#: stageshow_main.php:354
 msgid "Edit Settings"
 msgstr ""
 
-#: stageshow_main.php:367
+#: stageshow_main.php:366
 msgid "Manage Buttons"
 msgstr ""
 
-#: stageshow_main.php:367
+#: stageshow_main.php:366
 msgid "Buttons"
 msgstr ""
 
-#: stageshow_main.php:370
-msgid "TEST"
+#: stageshow_main.php:369
+msgid "DEV TEST"
 msgstr ""
 
-#: stageshow_main.php:376
+#: stageshow_main.php:375
 msgid "DEBUG"
 msgstr ""
 
-#: stageshow_sales.php:300
+#: stageshow_sales.php:299
 msgid "Sold Out"
 msgstr ""
 
@@ -1230,24 +1219,4 @@ msgstr ""
 
 #: stageshowplus.php:168
 msgid "Quantity"
-msgstr ""
-
-#: test\paypal_manage_buttons.php:216
-msgid "1 Button has been deleted"
-msgstr ""
-
-#: test\paypal_manage_buttons.php:216
-msgid "Buttons have been deleted"
-msgstr ""
-
-#: test\sales_test.php:127
-msgid "Invalid SaleID"
-msgstr ""
-
-#: test\stageshow_test.php:328
-msgid "Barcodes"
-msgstr ""
-
-#: test\stageshow_test.php:345
-msgid "Test String"
 msgstr ""

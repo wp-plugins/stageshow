@@ -258,8 +258,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 						// Get ID of performance to delete
 						$delperfId = $result->perfID;
 						
-						// Delete all prices for this performance
-						$myDBaseObj->DeletePriceByPerfID($delperfId);
+						// Note: Prices are deleted by Database Cleanup - $myDBaseObj->DeletePriceByPerfID($delperfId);
 						
 						if (!$myDBaseObj->UseIntegratedTrolley())					
 						{
@@ -267,12 +266,13 @@ if (!class_exists('StageShowShowsAdminClass'))
 							$myDBaseObj->payPalAPIObj->DeleteButton($result->perfPayPalButtonID);
 						}
 												
-						// Delete a performances entry
+						// Delete a performances entry (Marks entry as deleted)
 						$myDBaseObj->DeletePerformanceByPerfID($delperfId);
 					}
 					
 					// Now delete the entry in the SHOWS table
 					$delShowName = $myDBaseObj->DeleteShowByShowID($recordId);
+					$myDBaseObj->PurgeDB();
 					return true;
 				
 				case StageShowLibAdminListClass::BULKACTION_TOGGLE:

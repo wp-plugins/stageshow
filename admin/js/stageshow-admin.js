@@ -6,6 +6,12 @@ function onSalesInterfaceClick(obj)
 	SetSalesInterfaceControls(obj);
 }
 
+function InitialiseSalesInterfaceControls()
+{
+	trolleyTypeObj = document.getElementById('TrolleyType');
+	SetSalesInterfaceControls(trolleyTypeObj);	
+}
+
 function SetSalesInterfaceControls(selectObj)
 {	
 	var isIntegratedCheckout = (selectObj.value == 'Integrated');
@@ -99,7 +105,7 @@ function SelectTab(selectedTabID)
 	
 	if (selectedTabID == 'paypal-settings-tab')
 	{
-		selectInterfaceElem = document.getElementById('CheckoutType');
+		selectInterfaceElem = document.getElementById('TrolleyType');
 		SetSalesInterfaceControls(selectInterfaceElem);
 	}
 }

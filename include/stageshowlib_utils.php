@@ -53,8 +53,8 @@ if (!class_exists('StageShowLibUtilsClass'))
 		static function isNewVersion($ourVersion, $serverVersion, $debug=false)
 		{
 			// Compare version numbers - format N1.N2.N3 .... etc.
-			$ourVersionVals = split('\.', $ourVersion);
-			$serverVersionVals = split('\.', $serverVersion);
+			$ourVersionVals = explode('.', $ourVersion);
+			$serverVersionVals = explode('.', $serverVersion);
 			if ($debug) echo "Compare Versions ($ourVersion , $serverVersion)<br>\n";					
 			for ($i=0; $i<max(count($ourVersionVals),count($serverVersionVals)); $i++)
 			{
@@ -206,10 +206,9 @@ if (!class_exists('StageShowLibUtilsClass'))
 				{
 					$fileName = basename(str_replace('[', '', str_replace(']', '', $fields2[1])));
 					echo ' - '.$fileName;
-/*					
-					if (adminOptions['cbCallStackParams'])
-						echo "    Params: ".$fields2[0]."\n";
-*/
+					
+					//if (adminOptions['cbCallStackParams'])
+					//	echo "    Params: ".$fields2[0]."\n";
 				}
 								
 				//echo $lineBreak;

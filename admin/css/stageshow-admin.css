@@ -68,3 +68,31 @@ th.column-paypal-settings-tab
 	padding: 6px 10px;
 }
 
+/* --------------------------------------------------------------------------- */
+/*                                                                             */
+/*                       StageShow Layout Styles                               */
+/*                                                                             */
+/* --------------------------------------------------------------------------- */
+
+td.stageshow-layout
+{
+	border: 2px none;
+	padding: 3px;
+	margin: 8px;
+}
+
+.stageshow-layout-seat,
+.stageshow-layout-space
+{
+	border: 2px solid #123456;
+	padding: 3px;
+	margin: 8px;
+	XXtext-align: left !important;
+	XXalign: left;
+}
+
+.stageshow-layout-space
+{
+	border: 2px none;
+}
+

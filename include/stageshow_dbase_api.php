@@ -78,6 +78,8 @@ if (!class_exists('StageShowDBaseClass'))
   	{
 		const STAGESHOW_DATE_FORMAT = 'Y-m-d';
 		
+		var $perfJoined = false;
+		
 		function __construct($caller) //constructor	
 		{
 			$opts = array (
@@ -97,7 +99,7 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function upgradeDB()
 		{
-			global $wpdb;
+			
 			// Call upgradeDB() in base class
 			parent::upgradeDB();
 			
@@ -138,59 +140,122 @@ if (!class_exists('StageShowDBaseClass'))
 					
 			return true;
 		}
+
+		function PurgeDeletedEntries($delField, $dbFields, $sqlOpts = '')
+		{
+			for ($i=0; $i<count($dbFields); $i++)
+			{
+				$dbField[$i] = $dbFields[$i];
+			
+				$dbFieldParts = explode('.', $dbField[$i]);
+				$dbTable[$i] = $dbFieldParts[0];
+				$dbColumn[$i] = $dbFieldParts[1];
+			}
+			
+			$subTableIndex = count($dbFields)-1;
+			
+			// Delete performances have been marked as deleted that have no sales
+			$sqlSelect  = 'SELECT '.$dbField[0].', '.$delField.' ';
+			$sql  = 'FROM '.$dbTable[0].' ';
+			for ($i=1; $i<count($dbFields); $i++)
+			{
+				$sql .= 'LEFT JOIN '.$dbTable[$i].' ON '.$dbTable[$i].'.'.$dbColumn[$i].'='.$dbTable[$i-1].'.'.$dbColumn[$i].'  ';
+			}
+			if ($sqlOpts != '')
+			{
+				$sql .= $sqlOpts.$dbField[0].' ';
+			}
+			
+			if ($this->getOption('Dev_ShowDBOutput'))
+			{
+				$this->get_results('SELECT * '.$sql);
+			}
+			
+			$sql .= ') AS delresults ';
+			$sql .= 'WHERE (delresults.'.$delField.' = "'.STAGESHOW_STATE_DELETED.'") ';
+			
+			$innerSql = $sqlSelect.$sql;
+			
+			$sql  = 'DELETE FROM '.$dbTable[0].' ';
+			$sql .= 'WHERE '.$dbColumn[0].' IN ( ';
+			$sql .= 'SELECT '.$dbColumn[0].' FROM ( ';
+			$sql .= $innerSql;
+			$sql .= ') ';
+
+			$this->query($sql);
+		}
+		
+		function PurgeOrphans($dbFields, $condition = '')
+		{
+			$masterCol = $dbFields[0];
+			
+			$dbFieldParts = explode('.', $masterCol);
+			$masterTable = $dbFieldParts[0];
+			$masterIndex = $dbFieldParts[1];
+			
+			$subCol = $dbFields[1];
+			
+			$dbFieldParts = explode('.', $subCol);
+			$subTable = $dbFieldParts[0];
+			$subIndex = $dbFieldParts[1];
+			$subFieldID = str_replace('.', '_', $subCol);
+			
+			$subCol = $subTable.'.'.$subIndex;
+			
+			$sqlSelect = 'SELECT '.$masterCol.', '.$subCol.' AS '.$subFieldID.' ';
+			$sql  = 'FROM '.$masterTable.' ';
+			$sql .= 'LEFT JOIN '.$subTable.' ON '.$masterTable.'.'.$subIndex.'='.$subTable.'.'.$subIndex.' ';
+			$sql .= 'WHERE '.$subTable.'.'.$subIndex.' IS NULL ';
+			
+			if ($condition != '')
+			{
+				$sql .= 'AND '.$condition.' ';
+			}
+			
+			if ($this->getOption('Dev_ShowDBOutput'))
+			{
+				$this->get_results('SELECT * '.$sql);
+			}
+			
+			$innerSql = $sqlSelect.$sql;
+			
+			$sql  = 'DELETE FROM '.$masterTable.' ';
+			$sql .= 'WHERE '.$masterIndex.' IN ( ';
+			$sql .= 'SELECT '.$masterIndex.' FROM ( ';
+			$sql .= $innerSql;
+			$sql .= ') AS subresults ';
+			$sql .= ') ';
+			
+			$this->query($sql);
+		}
 		
 		function PurgeDB()
 		{
 			// Call PurgeDB() in base class
 			parent::PurgeDB();
-/*			
-			$innerSQL  = 'SELECT '.STAGESHOW_SALES_TABLE.'.saleID, SUM('.STAGESHOW_PRICES_TABLE.'.priceID) AS CanDelete FROM '.STAGESHOW_SALES_TABLE;
-			$innerSQL .= 'JOIN '.STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.saleID='.STAGESHOW_SALES_TABLE.'.saleID';
-			$innerSQL .= 'LEFT JOIN '.STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.priceID='.STAGESHOW_TICKETS_TABLE.'.priceID';
-			$innerSQL .= 'GROUP BY '.STAGESHOW_SALES_TABLE.'.saleID;
-				
-			$sql .= 'SELECT * FROM '.STAGESHOW_SALES_TABLE.' AS salelist ('.$innerSQL.') ';
-			$sql .= 'AS dellist ON salelist.saleID=dellist.saleID';
-			$sql .= 'WHERE CanDelete IS NULL';
 			
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
-				
-			$sql .= 'SELECT * FROM '.STAGESHOW_SALES_TABLE.' AS salelist ('.$innerSQL.') ';
-			$sql .= 'AS dellist ON salelist.saleID=dellist.saleID';
-			$sql .= 'WHERE CanDelete IS NULL';
+			// Delete all Sales where all tickets are for performances that are deleted
+			$this->PurgeDeletedEntries('perfState', array(
+				STAGESHOW_SALES_TABLE.'.saleID',
+				STAGESHOW_TICKETS_TABLE.'.saleID',
+				STAGESHOW_PRICES_TABLE.'.priceID',
+				STAGESHOW_PERFORMANCES_TABLE.'.perfID',
+				),
+				'GROUP BY '
+				);
+
+			// Delete orphaned Tickets entries (no corresponding Sale)
+			$this->PurgeOrphans(array(STAGESHOW_TICKETS_TABLE.'.ticketID', STAGESHOW_SALES_TABLE.'.saleID'));
 			
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
-*/
+			// Delete all Performances marked as deleted that have no corresponding Sales
+			$this->PurgeDeletedEntries('perfState', array(
+				STAGESHOW_PERFORMANCES_TABLE.'.perfID',
+				STAGESHOW_PRICES_TABLE.'.perfID',
+				STAGESHOW_TICKETS_TABLE.'.priceID',
+				));
 
-/*		
-DELETE FROM wp_sshow_sales AS salelist 
-JOIN (
-SELECT wp_sshow_sales.saleID, SUM(wp_sshow_prices.priceID) AS CanDelete FROM wp_sshow_sales
-JOIN wp_sshow_tickets ON wp_sshow_tickets.saleID=wp_sshow_sales.saleID 
-LEFT JOIN wp_sshow_prices ON wp_sshow_prices.priceID=wp_sshow_tickets.priceID 
-GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHERE CanDelete IS NULL
-*/
-
-/*
-			// TODO - PurgeDB
-			1. Get List of Deleted Stock Items
-
-			2. For each deleted item ... Get Count of Sales that include a item that is NOT deleted 
-
-			3. If this count is zero then delete Stock Item
-
-			SELECT * FROM wp_sshow_perfs 
-			RIGHT JOIN wp_sshow_shows 
-			ON wp_sshow_shows.showID=wp_sshow_perfs.showID
-			LEFT JOIN wp_sshow_prices ON wp_sshow_prices.perfID=wp_sshow_perfs.perfID 
-			LEFT JOIN wp_sshow_tickets ON wp_sshow_tickets.priceID=wp_sshow_prices.priceID 
-			LEFT JOIN wp_sshow_sales ON wp_sshow_sales.saleID=wp_sshow_tickets.saleID 
-
-			LEFT JOIN wp_sshow_tickets AS wp_sshow_tickets2 ON wp_sshow_sales.saleID=wp_sshow_tickets2.saleID 
-			LEFT JOIN wp_sshow_prices AS wp_sshow_prices2 ON wp_sshow_tickets2.priceID=wp_sshow_prices2.priceID 
-*/			
+			// Delete orphaned Prices entries
+			$this->PurgeOrphans(array(STAGESHOW_PRICES_TABLE.'.priceID', STAGESHOW_PERFORMANCES_TABLE.'.perfID'));
 		}
 		
 		function init()
@@ -212,11 +277,11 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		function uninstall()
 		{
 			// FUNCTIONALITY: DBase - StageShow - Uninstall - Delete Performance, Prices and Tickets tables and Capabilities
-			global $wpdb;
+			
 			parent::uninstall();
-			$wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_PERFORMANCES_TABLE);      
-			$wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_PRICES_TABLE);      
-			$wpdb->query('DROP TABLE IF EXISTS '.STAGESHOW_TICKETS_TABLE);  			
+			$this->DropTable(STAGESHOW_PERFORMANCES_TABLE);      
+			$this->DropTable(STAGESHOW_PRICES_TABLE);      
+			$this->DropTable(STAGESHOW_TICKETS_TABLE);  			
 			
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_VALIDATEUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_SALESUSER);
@@ -323,13 +388,22 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		
 		function createDB($dropTable = false)
 		{
+			if ($dropTable && isset($this->adminOptions['showName']))
+			{
+				$this->adminOptions['showName'] = '';
+				$this->saveOptions();
+			}
+			
 			parent::createDB($dropTable);
 
 			$ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
 
 			$table_name = $this->opts['OrdersTableName'];
-			{
-				$sql = "CREATE TABLE ".$table_name.' ( 
+
+			if ($dropTable)
+				$this->DropTable($table_name);
+			
+			$sql = "CREATE TABLE ".$table_name.' ( 
 					ticketID INT UNSIGNED NOT NULL AUTO_INCREMENT,
 					saleID INT UNSIGNED NOT NULL,
 					priceID INT UNSIGNED NOT NULL,
@@ -341,15 +415,15 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 					UNIQUE KEY ticketID (ticketID)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
 
-				//excecute the query
-				require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-				$this->ShowSQL($sql);
-				$this->dbDelta($sql);
-			}
+			//excecute the query
+			$this->dbDelta($sql);
 
 			$table_name = STAGESHOW_PERFORMANCES_TABLE;
-			{
-				$sql = "CREATE TABLE ".$table_name.' ( 
+			
+			if ($dropTable)
+				$this->DropTable($table_name);
+			
+			$sql = "CREATE TABLE ".$table_name.' ( 
 					perfID INT UNSIGNED NOT NULL AUTO_INCREMENT,
 					showID INT UNSIGNED NOT NULL,
 					perfState VARCHAR('.STAGESHOW_ACTIVESTATE_TEXTLEN.'),
@@ -364,15 +438,15 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 					UNIQUE KEY perfID (perfID)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
 
-				//excecute the query
-				require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-				$this->ShowSQL($sql);
-				$this->dbDelta($sql);
-			}
+			//excecute the query
+			$this->dbDelta($sql);
 
 			$table_name = STAGESHOW_PRICES_TABLE;
-			{
-				$sql = "CREATE TABLE ".$table_name.' ( 
+
+			if ($dropTable)
+				$this->DropTable($table_name);
+			
+			$sql = "CREATE TABLE ".$table_name.' ( 
 					priceID INT UNSIGNED NOT NULL AUTO_INCREMENT,
 					perfID INT UNSIGNED NOT NULL,
 					priceType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL,
@@ -380,11 +454,8 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 					UNIQUE KEY priceID (priceID)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
 
-				//excecute the query
-				require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-				$this->ShowSQL($sql);
-				$this->dbDelta($sql);
-			}
+			//excecute the query
+			$this->dbDelta($sql);
     	}
     
 		function DBField($fieldName)
@@ -447,17 +518,17 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 				$saleEMail = 'other@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSaleWithFee($saleTime1, 'A.N.Other', $saleEMail, 12.00, 0.61, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime1, 'A.N.Other', $saleEMail, 12.00, 0.61, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'Andrew Other', '1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
 				$this->AddSaleItem($saleID, $priceID1_C3, 4, PRICEID1_C3);
 				$this->AddSaleItem($saleID, $priceID1_A3, 1, PRICEID1_A3);
 				$saleEMail = 'mybrother@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSaleWithFee($saleTime2, 'M.Y.Brother', $saleEMail, 48.00, 2.41, '87654321qa', 'Pending',
+				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.Brother', $saleEMail, 48.00, 2.41, '87654321qa', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
 				$this->AddSaleItem($saleID, $priceID1_A4, 4, PRICEID1_A4);
-				$timeStamp = time();
+				$timeStamp = current_time('timestamp');
 				if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
 				{
 					// Add a lot of ticket sales
@@ -466,7 +537,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 						$saleDate = date(self::MYSQL_DATETIME_FORMAT, $timeStamp);
 						$saleName = 'Sample Buyer'.$sampleSaleNo;
 						$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
-						$saleID = $this->AddSaleWithFee($saleDate, $saleName, $saleEMail, 12.50, 0.62, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
+						$saleID = $this->AddSampleSale($saleDate, $saleName, $saleEMail, 12.50, 0.62, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
 						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
 						$this->AddSaleItem($saleID, $priceID1_A3, 3, PRICEID1_A3);
 						$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
@@ -641,8 +712,37 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			return '';
 		}
 
+		function GetActiveShowsList()
+		{
+			$timeNow = current_time('mysql');
+			
+			$sqlFilters['derivedJoins'] = true;
+			
+			$selectFields  = '*';
+			$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
+			//$selectFields .= ', MAX(perfDateTime) AS maxPerfDateTime';
 
-		//	$this->myDBaseObj->IsStateActive($showState) ? __("Active", $this->myDomain) : __("INACTIVE", $this->myDomain);
+			$sqlFilters['groupBy'] = 'showID';
+			$sqlFilters['JoinType'] = 'RIGHT JOIN';
+			$sqlFilters['showState'] = STAGESHOW_STATE_ACTIVE;
+			$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
+			
+			$this->perfJoined = true;
+
+			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
+			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
+			
+			// Add SQL filter(s)
+			$sql .= $this->GetWhereSQL($sqlFilters);
+			$sql .= 'AND perfDateTime>"'.$timeNow.'" ';
+			$sql .= $this->GetOptsSQL($sqlFilters);
+			
+			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+			
+			$results = $this->get_results($sql, $sqlFilters);
+
+			return $results;
+		}
 		
 		function GetAllShowsList()
 		{
@@ -681,8 +781,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			//$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 			
-			$this->ShowSQL($sql); 
-			
 			$results = $this->get_results($sql, $sqlFilters);
 
 			return $results;
@@ -690,8 +788,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		
 		function UpdateSettings($result, $tableId, $settingId, $indexId, $index)
 		{
-			global $wpdb;
-			
 			$newVal = $_POST[$settingId.$index];
 			if ($newVal == $result->$settingId)
 				return;
@@ -699,9 +795,8 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql  = 'UPDATE '.$tableId;
 			$sql .= ' SET '.$settingId.'="'.$newVal.'"';
 			$sql .= ' WHERE '.$indexId.'='.$index;;
-			$this->ShowSQL($sql); 
-
-			$wpdb->query($sql);	
+			 
+			$this->query($sql);	
 		}
 		
 		function IsShowNameUnique($showName)
@@ -801,9 +896,9 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		
 		function get_results($sql, $sqlFilters = array())
 		{
-			global $wpdb;
-      
-			$results = $wpdb->get_results($sql);
+			$this->perfJoined = false;
+			
+			$results = parent::get_results($sql, false);
 
 			// Add Show Name
 			if (isset($this->adminOptions['showName']) && ($this->adminOptions['showName'] !== ''))
@@ -836,21 +931,14 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 				}
 			}
 			
-			if ($this->getOption('Dev_ShowDBOutput') == 1) 
-			{
-				echo "<br>Database Results:<br>\n"; 
-				for ($i=0; $i<count($results); $i++)
-					echo "Array[$i] = ".print_r($results[$i], true)."<br>\n"; 
-			}
+			$this->show_results($results);
 			
 			return $results;
 		}
 		
 		function renameColumn($table_name, $oldColName, $newColName)
 		{
-      		global $wpdb;
-			
-			$colSpec = $this->getColumnSpec($table_name, $oldColName);
+ 			$colSpec = $this->getColumnSpec($table_name, $oldColName);
 			if (!isset($colSpec->Field))
 				return __("DB Error", $this->get_domain()).": $oldColName ".__("Column does not exist", $this->get_domain());
 				
@@ -859,21 +947,16 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 				$sql .= " NOT NULL";
 			if ($colSpec->Default != '')
 				$sql .= " DEFAULT = '".$colSpec->Default."'";
-			
-			$this->ShowSQL($sql); 
 
-			$wpdb->query($sql);	
+			$this->query($sql);	
 			return "OK";							
 		}
 		
 		function deleteColumn($table_name, $colName)
 		{
-      		global $wpdb;
-			
-			$sql = "ALTER TABLE $table_name DROP $colName";
-			$this->ShowSQL($sql); 
+ 			$sql = "ALTER TABLE $table_name DROP $colName";
 
-			$wpdb->query($sql);	
+			$this->query($sql);	
 			return "OK";							
 		}
 		
@@ -886,7 +969,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		function getColumnSpec($table_name, $colName)
 		{
 			$sql = "SHOW COLUMNS FROM $table_name WHERE field = '$colName'";
-			$this->ShowSQL($sql); 
+			 
 
 			$typesArray = $this->get_results($sql);
 
@@ -933,6 +1016,8 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 					$selectFields .= ','.$totalSalesField;
 			}
 			
+			$this->perfJoined = true;
+			
 			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
 			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
 			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
@@ -945,8 +1030,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 			
-			$this->ShowSQL($sql); 
-			
 			$perfsListArray = $this->get_results($sql);
 
 			return $perfsListArray;
@@ -955,8 +1038,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		function GetOurButtonsList()
 		{
 			$sql = "SELECT perfPayPalButtonID FROM ".STAGESHOW_PERFORMANCES_TABLE;
-			
-			$this->ShowSQL($sql); 
 			
 			$results = $this->get_results($sql);
 
@@ -973,8 +1054,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfPayPalButtonID ="'.$perfPayPalButtonID.'"';
 			$sql .= ' AND '.STAGESHOW_PRICES_TABLE.'.priceType 	="'.$priceType.'"';
-			
-			$this->ShowSQL($sql); 
 			
 			$results = $this->get_results($sql);
 			
@@ -1002,16 +1081,13 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		
 		function SetPerfActivated($perfID, $perfState = STAGESHOW_STATE_ACTIVE)
 		{
-      		global $wpdb;
-      
 			$sqlFilters['perfID'] = $perfID;
 				 
 			$sql  = 'UPDATE '.STAGESHOW_PERFORMANCES_TABLE;
 			$sql .= ' SET perfState="'.$perfState.'"';
 			$sql .= $this->GetWhereSQL($sqlFilters);
-			$this->ShowSQL($sql); 
 
-			$wpdb->query($sql);	
+			$this->query($sql);	
 			return "OK";							
 		}
 		
@@ -1020,8 +1096,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql  = 'SELECT MAX(perfDateTime) AS LastPerf FROM '.STAGESHOW_PERFORMANCES_TABLE;
 			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.showID='.$showID;
 			
-			$this->ShowSQL($sql); 
-				
 			$results = $this->get_results($sql);
 			
 			if (count($results) == 0) return 0;
@@ -1044,8 +1118,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		{
 			$sql  = 'SELECT COUNT(*) AS MatchCount FROM '.STAGESHOW_PERFORMANCES_TABLE;
 			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfRef="'.$perfRef.'"';
-			$this->ShowSQL($sql); 
-			
+			 
 			$perfsCount = $this->get_results($sql);
 			return ($perfsCount[0]->MatchCount > 0) ? false : true;
 		}
@@ -1055,8 +1128,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$rtnVal = true;
 			
 			$sql  = 'SELECT COUNT(*) AS perfLen FROM '.STAGESHOW_PERFORMANCES_TABLE;
-			$this->ShowSQL($sql); 
-			
+			 
 			$results = $this->get_results($sql);
 			$rtnVal = (($this->adminOptions['PLen']==0) || ($results[0]->perfLen<$this->adminOptions['PLen']));
 			
@@ -1070,8 +1142,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		
 		function AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats, $perfPayPalButtonID)
 		{
-			global $wpdb;
-		      
 			if ($perfRef === '')
 			{
 				$perfRefNo = 1;
@@ -1092,9 +1162,8 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			
 			$sql  = 'INSERT INTO '.STAGESHOW_PERFORMANCES_TABLE.'(showID, perfState, perfDateTime, perfRef, perfSeats, perfPayPalButtonID)';
 			$sql .= ' VALUES('.$showID.', "'.$perfState.'", "'.$perfDateTime.'", "'.$perfRef.'", "'.$perfSeats.'", "'.$perfPayPalButtonID.'")';
-			$this->ShowSQL($sql); 
-			
-			$wpdb->query($sql);
+			 
+			$this->query($sql);
 			
      		return mysql_insert_id();
 		}
@@ -1124,16 +1193,13 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 				
 		function UpdatePerformanceEntry($perfID, $sqlSET)
 		{
-			global $wpdb;
-      
 			$sqlFilters['perfID'] = $perfID;
 				 
 			$sql  = 'UPDATE '.STAGESHOW_PERFORMANCES_TABLE;
 			$sql .= ' SET '.$sqlSET;
 			$sql .= $this->GetWhereSQL($sqlFilters);
-			$this->ShowSQL($sql); 
 
-			$wpdb->query($sql);	
+			$this->query($sql);	
 			return "OK";							
 		}
 		
@@ -1149,9 +1215,9 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			if ($activeOnly)
 			{
 				$sqlFilters['activePrices'] = true;
-				$sqlFilters['activePerfs'] = true;
+				$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
 			}
-				
+				 
 			$sqlFilters['showID'] = $showID;
 			return $this->GetPricesList($sqlFilters);
 		}
@@ -1192,8 +1258,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql .= ' , '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';			
 			$sql .= ' , '.STAGESHOW_PRICES_TABLE.'.priceType';
 			
-			$this->ShowSQL($sql); 
-			
 			return $this->get_results($sql);
 		}
 
@@ -1202,7 +1266,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql  = 'SELECT COUNT(*) AS MatchCount FROM '.STAGESHOW_PRICES_TABLE;
 			$sql .= ' WHERE '.STAGESHOW_PRICES_TABLE.'.priceType="'.$priceType.'"';
 			$sql .= ' AND '.STAGESHOW_PRICES_TABLE.'.perfID="'.$perfID.'"';
-			$this->ShowSQL($sql); 
 
 			$pricesEntries = $this->get_results($sql);
 			return ($pricesEntries[0]->MatchCount > 0) ? false : true;
@@ -1210,9 +1273,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		
 		function AddPrice($perfID, $priceType, $priceValue)
 		{
-      		global $wpdb;
-      
-      		if ($perfID <= 0) return 0;
+     		if ($perfID <= 0) return 0;
       
       		if ($priceType === '')
       		{
@@ -1234,9 +1295,9 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			
 			$sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceValue)';
 			$sql .= ' VALUES('.$perfID.', "'.$priceType.'", "'.$priceValue.'")';
-			$this->ShowSQL($sql); 
+			 
 			
-			$wpdb->query($sql);
+			$this->query($sql);
 			
      	return mysql_insert_id();
 		}
@@ -1261,14 +1322,11 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 				
 		function UpdatePriceEntry($priceID, $sqlSET)
 		{
-			global $wpdb;
-      
 			$sql  = 'UPDATE '.STAGESHOW_PRICES_TABLE;
 			$sql .= ' SET '.$sqlSET;			
 			$sql .= ' WHERE priceID='.$priceID;			
-			$this->ShowSQL($sql); 
 
-			$wpdb->query($sql);	
+			$this->query($sql);	
 			return "OK";							
 		}
 
@@ -1282,20 +1340,9 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			return $rtnVal;
 		}			
 		
-		function DeletePerformanceByPerfID($ID)
+		function DeletePerformanceByPerfID($perfID)
 		{
-			return $this->DeletePerformance($ID, 'perfID');
-		}			
-		
-		private function DeletePerformance($ID = 0, $IDfield = 'perfID')
-		{
-			global $wpdb;
-			
-			// Delete a performance entry
-			$sql  = 'DELETE FROM '.STAGESHOW_PERFORMANCES_TABLE;
-			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.".$IDfield=$ID";
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			$this->SetPerfActivated($perfID, STAGESHOW_STATE_DELETED);
 		}			
 		
 		function DeletePriceByPriceID($ID)
@@ -1310,12 +1357,10 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		
 		private function DeletePrice($ID, $IDfield)
 		{
-			global $wpdb;
-			
 			$sql  = 'DELETE FROM '.STAGESHOW_PRICES_TABLE;
 			$sql .= ' WHERE '.STAGESHOW_PRICES_TABLE.".$IDfield=$ID";
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			 
+			$this->query($sql);
 		}					
 
 		function GetAllTicketTypes()
@@ -1323,8 +1368,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql  = 'SELECT priceType FROM '.STAGESHOW_PRICES_TABLE;
 			$sql .= ' GROUP BY priceType';
 			$sql .= ' ORDER BY priceType';
-			$this->ShowSQL($sql); 
-			
+			 
 			return $this->get_results($sql);
 		}
 		
@@ -1334,8 +1378,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql .= ' JOIN '.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
 			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfID="'.$perfID.'"';
 			$sql .= ' ORDER BY priceType';
-			$this->ShowSQL($sql); 
-			
+			 			
 			return $this->get_results($sql);
 		}
 
@@ -1357,8 +1400,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql .= $this->GetOptsSQL($sqlFilters);
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 					
-			$this->ShowSQL($sql); 
-			
 			$salesListArray = $this->get_results($sql);
 			if (count($salesListArray) == 0)
 					return 0;
@@ -1401,11 +1442,13 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$joinType = isset($sqlFilters['JoinType']) ? $sqlFilters['JoinType'] : 'JOIN';
 			
 			// JOIN parent tables
-			if (!isset($sqlFilters['PerfsJoined']))
+			if (!isset($sqlFilters['PerfsJoined']) && !$this->perfJoined)
 			{
 				$sqlJoin .= " $joinType ".STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.saleID='.STAGESHOW_SALES_TABLE.'.saleID';
 				$sqlJoin .= " $joinType ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.priceID='.STAGESHOW_TICKETS_TABLE.'.priceID';
 				$sqlJoin .= " $joinType ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
+			
+				$this->perfJoined = true;						
 			}
 						
 			return $sqlJoin;
@@ -1424,16 +1467,40 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			
 			if (isset($sqlFilters['perfID']) && ($sqlFilters['perfID'] > 0))
 			{
+				// Select a specified Performance Record
 				$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfID="'.$sqlFilters['perfID'].'"';
 				$sqlCmd = ' AND ';
 			}
-			
-			if (isset($sqlFilters['activePerfs']))
+			else 
 			{
-				$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfState!="'.STAGESHOW_STATE_INACTIVE.'"';
-				$sqlCmd = ' AND ';
+				if ($this->perfJoined)
+				{
+					// Select multi performance records
+					if (isset($sqlFilters['perfState'])) 
+					{
+						if ($sqlFilters['perfState'] == STAGESHOW_STATE_ACTIVE)
+						{
+							$sqlCond  = '('.STAGESHOW_PERFORMANCES_TABLE.'.perfState="")';
+							$sqlCond .= ' OR ';
+							$sqlCond .= '('.STAGESHOW_PERFORMANCES_TABLE.'.perfState="'.STAGESHOW_STATE_ACTIVE.'")';
+							$sqlWhere .= $sqlCmd.'('.$sqlCond.')';							
+						}
+						else
+						{
+						$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfState="'.$sqlFilters['perfState'].'"';
+						}
+					}
+					else
+					{
+						$sqlCond  = '('.STAGESHOW_PERFORMANCES_TABLE.'.perfState IS NULL)';
+						$sqlCond .= ' OR ';
+						$sqlCond .= '('.STAGESHOW_PERFORMANCES_TABLE.'.perfState<>"'.STAGESHOW_STATE_DELETED.'")';
+						$sqlWhere .= $sqlCmd.'('.$sqlCond.')';
+					}
+						$sqlCmd = ' AND ';
+				}				
 			}
-			
+						
 			if (isset($sqlFilters['priceType']))
 			{
 				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceType="'.$sqlFilters['priceType'].'"';
@@ -1602,22 +1669,6 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			return $salesListArray;
 		}
 		
-		function GetOrphanedSales()
-		{
-			$sqlFilters['JoinType'] = 'LEFT JOIN';
-			
-			// This query gets a list of all sales where all the referenced performances have been deleted
-			$sql  = 'SELECT '.STAGESHOW_SALES_TABLE.'.saleID FROM '.STAGESHOW_SALES_TABLE;
-			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
-			$sql .= ' GROUP BY '.STAGESHOW_SALES_TABLE.'.saleID';
-			$sql .= ' HAVING COUNT('.STAGESHOW_PERFORMANCES_TABLE.'.perfID)=0';
-			
-			$this->ShowSQL($sql); 
-			$salesList = $this->get_results($sql);
-			
-			return $salesList;
-		}
-		
 		function GetWhereParam($fieldID, $whereID)
 		{
 			if (is_array($whereID))
@@ -1638,23 +1689,14 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 		
 		function DeleteSale($saleID)
 		{
-			global $wpdb;
-			
 			parent::DeleteSale($saleID);
 
 			// Delete a show entry
 			$sql  = 'DELETE FROM '.$this->opts['OrdersTableName'];
 			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID".$this->GetWhereParam('saleID', $saleID);
-
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+		 
+			$this->query($sql);
 		}			
-		
-		function DeleteOrphanedSales()
-		{
-			$orphanedSales = $this->GetOrphanedSales();
-			if (count($orphanedSales) > 0) $this->DeleteSale($orphanedSales);
-		}
 		
 // ----------------------------------------------------------------------
 //
@@ -1798,7 +1840,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 				$nextUpdate = $lastUpdate + $updateInterval;
 				$latest['NextUpdate'] = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT, $nextUpdate);
 				
-				if ($nextUpdate > time())
+				if ($nextUpdate > current_time('timestamp'))
 				{
 					$latest['Status'] = "UpToDate";
 					$latest['LatestNews'] = $this->adminOptions['LatestNews'];
@@ -1823,7 +1865,7 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 					
 				$this->adminOptions['LatestNews'] = $latest['LatestNews'];
 					
-				$this->adminOptions['NewsUpdateTime'] = time();
+				$this->adminOptions['NewsUpdateTime'] = current_time('timestamp');
 				$this->saveOptions();
 				//echo "News Updated<br>\n";
 			}				
@@ -1837,6 +1879,12 @@ GROUP BY wp_sshow_sales.saleID) As dellist ON salelist.saleID=dellist.saleID WHE
 			$sql .= ', '.STAGESHOW_PRICES_TABLE.' READ';
 			$sql .= ', '.STAGESHOW_PERFORMANCES_TABLE.' READ';
 			return $sql;
+		}
+		
+		function query($sql)
+		{
+			$this->perfJoined = false;
+			return parent::query($sql);
 		}
 		
 	}

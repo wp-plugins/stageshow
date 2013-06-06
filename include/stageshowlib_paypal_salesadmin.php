@@ -129,7 +129,6 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			}
 			
 			$myDBaseObj = $this->myDBaseObj;
-			// $saleResults = $myDBaseObj->GetSale($result->saleID); // TODO - Caller should pass $saleResults
 			return $this->BuildSaleDetails($saleResults);
 		}
 				
@@ -536,8 +535,11 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$this->newStockQtys[$buttonID] = isset($this->newStockQtys[$buttonID]) ? $this->newStockQtys[$buttonID] + $qty : $qty;
 			}
 			
-			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($this->newPriceQtys, 'this->newPriceQtys');
-			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($this->newStockQtys, 'this->newStockQtys');
+			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) 
+			{
+				StageShowLibUtilsClass::print_r($this->newPriceQtys, 'this->newPriceQtys');
+				StageShowLibUtilsClass::print_r($this->newStockQtys, 'this->newStockQtys');
+			}
 			
 			$this->salePaid = $newPrice;
 			
@@ -589,42 +591,48 @@ if (!class_exists('PayPalSalesAdminClass'))
 			return $errorId;
 		}
 				
-		function AddOrEditSale()
+		function AddOrEditSale($salesVals = array())
 		{	
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$errorId = '';
 			$saleId = isset($this->saleId) ? $this->saleId : 0;
 			
-			$saleName = $this->GetFormInput($saleId, 'saleName');
-			$saleEMail = $this->GetFormInput($saleId, 'saleEMail');
-			$salePPStreet = $this->GetFormInput($saleId, 'salePPStreet');
-			$salePPCity = $this->GetFormInput($saleId, 'salePPCity');
-			$salePPState = $this->GetFormInput($saleId, 'salePPState');
-			$salePPZip = $this->GetFormInput($saleId, 'salePPZip');
-			$salePPCountry = $this->GetFormInput($saleId, 'salePPCountry');
+			$salesVals['saleName'] = $this->GetFormInput($saleId, 'saleName');
+			$salesVals['saleEMail'] = $this->GetFormInput($saleId, 'saleEMail');
+			$salesVals['salePPStreet'] = $this->GetFormInput($saleId, 'salePPStreet');
+			$salesVals['salePPCity'] = $this->GetFormInput($saleId, 'salePPCity');
+			$salesVals['salePPState'] = $this->GetFormInput($saleId, 'salePPState');
+			$salesVals['salePPZip'] = $this->GetFormInput($saleId, 'salePPZip');
+			$salesVals['salePPCountry'] = $this->GetFormInput($saleId, 'salePPCountry');
 			
-			if (!isset($this->saleId))
+			$salesVals['salePaid'] = $this->salePaid;
+				
+			if ($saleId == 0)
 			{
 				// Add Transaction Number (from timestamp)
-				$saleTxnid = 'MAN-'.time();	
+				$salesVals['saleTxnid'] = 'MAN-'.time();	
 				
 				// TODO - Manual Sale - Fee is zero .... Is this OK?
-				$saleFee = 0;
-				$this->saleId = $myDBaseObj->AddSaleWithFee(date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT), $saleName, $saleEMail, $this->salePaid, $saleFee, $saleTxnid, PAYPAL_APILIB_SALESTATUS_COMPLETED, $saleName, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry);				
+				$salesVals['saleFee'] = 0;
+				$salesVals['saleStatus'] = PAYPAL_APILIB_SALESTATUS_COMPLETED;
+				
+				$saleId = $myDBaseObj->AddSale(current_time('mysql'), $salesVals);				
 			}
 			else
 			{
 				// Save edited sale details
-				$this->myDBaseObj->EditSale($this->saleId, $saleName, $saleEMail, $this->salePaid, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry);				
+				$this->myDBaseObj->EditSale($saleId, $salesVals);
 			}
-					
+			
 			/* Process Qty Update
 				newQty > 0 and origQty = 0 ........... AddSaleItem
 				newQty = 0 and origQty > 0 ........... DeleteSaleItem
 				newQty <> origQty .................... UpdateSaleItem
 			*/
 			
+			$this->saleId = $saleId;
+		
 			// Loop through results from GetRequestedSaleQtys() call
 			foreach($this->results as $pricesEntry)
 			{
@@ -636,7 +644,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 				{
 					if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) echo "ADDING Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
 					// TODO Add Edit of Ticket Sale Price
-					$myDBaseObj->AddSaleItem($this->saleId, $itemID, $newQty, $pricesEntry->stockPrice);
+					$myDBaseObj->AddSaleItem($this->saleId, $itemID, $newQty, $this->GetItemPrice($pricesEntry));
 				}
 				else if (($newQty == 0) && ($origQty > 0))
 				{
@@ -646,10 +654,10 @@ if (!class_exists('PayPalSalesAdminClass'))
 				else if ($newQty != $origQty)
 				{
 					if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) echo "UPDATE Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
-					$myDBaseObj->UpdateSaleItem($this->saleId, $itemID, $newQty, $pricesEntry->stockPrice);
+					$myDBaseObj->UpdateSaleItem($this->saleId, $itemID, $newQty, $this->GetItemPrice($pricesEntry));
 				}
 			}
-					
+			
 			$siteurl = get_option('siteurl');
 			foreach ($this->newStockQtys as $buttonID => $qty)
 			{

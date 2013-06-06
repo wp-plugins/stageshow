@@ -101,9 +101,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function uninstall()
 		{
-			global $wpdb;
-      
-			$wpdb->query('DROP TABLE IF EXISTS '.$this->opts['SalesTableName']);
+			$this->DropTable($this->opts['SalesTableName']);
 			
 			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
 			$salesTemplatesPath = WP_CONTENT_DIR . '/uploads/'.$pluginID;
@@ -227,7 +225,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->PayPalNotifyURL = $OurIPNListener;							
 			$this->PayPalURL = PayPalAPIClass::GetPayPalURL($payPalTestMode);
 
-			/** URL for Plugin code to verify PayPal IPNs **/
+			// URL for Plugin code to verify PayPal IPNs
 			if ($useLocalIPNServer)
 			{
 				$this->PayPalVerifyURL = $this->GetURL('{pluginpath}\test\paypal_VerifyIPNTest.php');	
@@ -445,16 +443,12 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function createDB($dropTable = false)
 		{
-			global $wpdb;
-			
 			parent::createDB($dropTable);
 
-			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-			
 			$table_name = $this->opts['SalesTableName'];
 
 			if ($dropTable)
-				$wpdb->query("DROP TABLE IF EXISTS $table_name");
+				$this->DropTable($table_name);
 
 			$sql  = "CREATE TABLE ".$table_name.' (';
 			$sql .= $this->getTableDef($table_name);
@@ -463,7 +457,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 			//excecute the query
 			$this->dbDelta($sql);
-
 		}
 		
 		function GetSaleStockID($itemRef, $itemOption)
@@ -526,78 +519,109 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		// Add Sale - Address details are optional
-		function AddSaleWithFee($SaleDateTime = '', $saleName = '', $saleEMail = '', $salePaid = 0, $saleFee = 0, $Txnid = '', $saleStatus = '', $salePPName = '', $salePPStreet = '', $salePPCity = '', $salePPState = '', $salePPZip = '', $salePPCountry = '')
+		function AddSampleSale($saleDateTime, $saleName, $saleEMail, $salePaid, $saleFee, $saleTxnId, $saleStatus, $salePPName, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry)
 		{
-			global $wpdb;
+			$salesVals['salePPName'] = $salePPName;
+			$salesVals['salePPStreet'] = $salePPStreet;
+			$salesVals['salePPCity'] = $salePPCity;
+			$salesVals['salePPState'] = $salePPState;
+			$salesVals['salePPZip'] = $salePPZip;
+			$salesVals['salePPCountry'] = $salePPCountry;				
 			
-			if ($SaleDateTime == '')
+			$salesVals['saleName'] = $saleName;
+			$salesVals['saleEMail'] = $saleEMail;
+			$salesVals['salePaid'] = $salePaid;
+			$salesVals['saleFee'] = $saleFee;
+			$salesVals['saleTxnId'] = $saleTxnId;
+			$salesVals['saleStatus'] = $saleStatus;
+			
+			return $this->AddSale($saleDateTime, $salesVals);
+		}
+		
+		function AddSale($saleDateTime = '', $salesVals = array())
+		{
+			$sqlFields = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime';
+			$sqlValues = ' VALUES("'.$saleDateTime.'"';
+			
+			foreach ($salesVals as $fieldID => $fieldVal)
 			{
-				$SaleDateTime = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT);
-				$saleStatus = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
-				$saleName = $saleEMail = $Txnid = '';
-				$sql  = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime, saleName, saleEMail, salePaid, saleFee, saleTxnId, saleStatus, saleCheckoutTime)';
-				$sql .= ' VALUES("'.$SaleDateTime.'", "'.$saleName.'", "'.$saleEMail.'", "'.$salePaid.'", "'.$saleFee.'", "'.$Txnid.'", "'.$saleStatus.'", "'.$SaleDateTime.'")';				
+				if ($fieldID == 'saleDateTime')
+					continue;
+					
+				$sqlFields .= ', '.$fieldID;
+				$sqlValues .= ', "'.$fieldVal.'"';
 			}
-			else
-			{
-				$sql  = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime, saleName, saleEMail, salePaid, saleFee, saleTxnId, saleStatus, salePPName, salePPStreet, salePPCity, salePPState, salePPZip, salePPCountry)';
-				$sql .= ' VALUES("'.$SaleDateTime.'", "'.$saleName.'", "'.$saleEMail.'", "'.$salePaid.'", "'.$saleFee.'", "'.$Txnid.'", "'.$saleStatus.'", "'.$salePPName.'", "'.$salePPStreet.'", "'.$salePPCity.'", "'.$salePPState.'", "'.$salePPZip.'", "'.$salePPCountry.'")';				
-			}
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			$sqlFields .= ')';
+			$sqlValues .= ')';
+			
+			$sql = $sqlFields.$sqlValues;
+			 
+			$this->query($sql);
 			$saleID = mysql_insert_id();
 	
 			return $saleID;
 		}
 		
 		// Edit Sale
-		function EditSale($saleID, $saleName, $saleEMail, $salePaid, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry)
+		function EditSale($saleID, $salesVals = array())
 		{
-			global $wpdb;
-			
 			$sql  = 'UPDATE '.$this->opts['SalesTableName'];
-			$sql .= ' SET saleName="'.$saleName.'"';
-			$sql .= ' ,   saleEMail="'.$saleEMail.'"';
-			$sql .= ' ,   salePaid="'.$salePaid.'"';
-			$sql .= ' ,   salePPStreet="'.$salePPStreet.'"';
-			$sql .= ' ,   salePPCity="'.$salePPCity.'"';
-			$sql .= ' ,   salePPState="'.$salePPState.'"';
-			$sql .= ' ,   salePPZip="'.$salePPZip.'"';
-			$sql .= ' ,   salePPCountry="'.$salePPCountry.'"';
 			
-			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleID='.$saleID;;
-			$this->ShowSQL($sql); 
+			$comma = ' SET ';
+			
+			foreach ($salesVals as $fieldID => $fieldVal)
+			{
+				$sql .= $comma.$fieldID.'="'.$fieldVal.'"';
+				$comma = ', ';			
+			}
+			$sql .= ')';
+			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleID='.$saleID;;		 
 
-			$wpdb->query($sql);	
+			$this->query($sql);	
+		}			
+		
+		function GetSalesFields()
+		{
+			return array
+			(
+				'saleName', 
+				'saleDateTime', 
+				'saleTxnId', 
+				'saleStatus', 
+				'salePPName', 
+				
+				'saleEMail', 
+				'salePaid', 
+				'saleFee', 
+				'salePPStreet', 
+				'salePPCity', 
+				'salePPState', 
+				'salePPZip', 
+				'salePPCountry', 
+			);
 		}			
 		
 		function UpdateSale($results)
 		{
-			global $wpdb;
-
 			$saleID = $results['saleID'];
 			
-			$sql  = 'UPDATE '.$this->opts['SalesTableName'];
-			$sql .= ' SET saleName="'.$results['saleName'].'"';
+			$fieldsList = $this->GetSalesFields();
 			
-			$sql .= ' ,   saleDateTime="'.$results['saleDateTime'].'"';
-			$sql .= ' ,   saleTxnId="'.$results['saleTxnId'].'"';
-			$sql .= ' ,   saleStatus="'.$results['saleStatus'].'"';
-			$sql .= ' ,   salePPName="'.$results['salePPName'].'"';
+			$fieldSep = 'UPDATE '.$this->opts['SalesTableName'].' SET ';
 			
-			$sql .= ' ,   saleEMail="'.$results['saleEMail'].'"';
-			$sql .= ' ,   salePaid="'.$results['salePaid'].'"';
-			$sql .= ' ,   saleFee="'.$results['saleFee'].'"';
-			$sql .= ' ,   salePPStreet="'.$results['salePPStreet'].'"';
-			$sql .= ' ,   salePPCity="'.$results['salePPCity'].'"';
-			$sql .= ' ,   salePPState="'.$results['salePPState'].'"';
-			$sql .= ' ,   salePPZip="'.$results['salePPZip'].'"';
-			$sql .= ' ,   salePPCountry="'.$results['salePPCountry'].'"';
+			$sql = '';
+			foreach ($fieldsList as $fieldName)
+			{
+				if (!isset($results[$fieldName]))
+					continue;
+					
+				$sql .= $fieldSep.$fieldName.'="'.$results[$fieldName].'"';
+				$fieldSep = ' , ';
+			}
 			
 			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleID='.$saleID;;
-			$this->ShowSQL($sql); 
-
-			$rtnVal = $wpdb->query($sql);	
+			 
+			$rtnVal = $this->query($sql);	
 			if ($this->getOption('Dev_ShowSQL'))
 			{
 				echo "<br>UpdateSale Returned: $rtnVal<br>\n";
@@ -611,8 +635,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function PurgePendingSales($timeout = '')
 		{
-			global $wpdb;
-			
 			if ($timeout == '')
 				$timeout = 60*$this->adminOptions['CheckoutTimeout'];	// 1 hour default
 				
@@ -621,27 +643,24 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql  = 'DELETE FROM '.$this->opts['SalesTableName'];
 			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleStatus="'.PAYPAL_APILIB_SALESTATUS_CHECKOUT.'"';
 			$sql .= ' AND   '.$this->opts['SalesTableName'].'.saleCheckoutTime < "'.$limitDateTime.'"';
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			 
+			$this->query($sql);
 			
 			$sql  = 'DELETE o FROM '.$this->opts['OrdersTableName'].' o ';
 			$sql .= 'LEFT OUTER JOIN '.$this->opts['SalesTableName'].' s ON o.saleID = s.saleID ';
 			$sql .= 'WHERE s.saleStatus IS NULL';
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
-
+			 
+			$this->query($sql);
 		}
 		
 		function AddSaleItem($saleID, $stockID, $qty, $paid)
 		{
-			global $wpdb;
-			
 			$paid *= $qty;
 			
 			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').')';
 			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'")';
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			 
+			$this->query($sql);
 			$orderID = mysql_insert_id();
 				
 			return $orderID;
@@ -649,8 +668,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function UpdateSaleItem($saleID, $stockID, $qty, $paid)
 		{
-			global $wpdb;
-
 			$paid *= $qty;
 			
 			// Delete a show entry
@@ -660,21 +677,17 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
 			$sql .= ' AND   '.$this->opts['OrdersTableName'].".".$this->DBField('stockID')."=$stockID";
 
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			$this->query($sql);
 		}
 		
 		function DeleteSaleItem($saleID, $stockID)
 		{
-			global $wpdb;
-
 			// Delete a show entry
 			$sql  = 'DELETE FROM '.$this->opts['OrdersTableName'];
 			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
 			$sql .= ' AND   '.$this->opts['OrdersTableName'].".".$this->DBField('stockID')."=$stockID";
-
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			 
+			$this->query($sql);
 		}
 		
 		function GetSalesQty($sqlFilters)
@@ -683,8 +696,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
 			$sql .= $this->GetWhereSQL($sqlFilters);
 					
-			$this->ShowSQL($sql); 
-			
 			$salesListArray = $this->get_results($sql);
 			if (count($salesListArray) == 0)
 					return 0;
@@ -699,8 +710,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function DeleteSale($saleID)
 		{
-			global $wpdb;
-			
 			// Delete a show entry
 			$sql  = 'DELETE FROM '.$this->opts['SalesTableName'];
 			if (is_array($saleID))
@@ -716,8 +725,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			else
 				$sql .= ' WHERE '.$this->opts['SalesTableName'].".saleID=$saleID";
 				
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			$this->query($sql);
 		}			
 
 		function GetSaleBuyer($saleID)
@@ -725,8 +733,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sqlFilters['saleID'] = $saleID;
 			$sql  = 'SELECT * FROM '.$this->opts['SalesTableName'];	
 			$sql .= $this->GetWhereSQL($sqlFilters);
-					
-			$this->ShowSQL($sql); 
 			
 			$salesListArray = $this->get_results($sql);
 			
@@ -762,16 +768,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			$sql .= $this->GetOptsSQL($sqlFilters);
-
-			$this->ShowSQL($sql); 
 			
-			$showOutput = $this->getOption('Dev_ShowDBOutput'); 
-			$this->adminOptions['Dev_ShowDBOutput'] = '';
-			
-			$salesListArray = $this->get_results($sql);			
+			// Get results ... but supress debug output until AddSaleFields has been called
+			$salesListArray = $this->get_results($sql, false);			
 			$this->AddSaleFields($salesListArray);
 			
-			$this->adminOptions['Dev_ShowDBOutput'] = $showOutput;
 			$this->show_results($salesListArray);
 					
 			return $salesListArray;
@@ -881,9 +882,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 		function GetEmailTemplatePath($templateID)
 		{
+			return $this->GetTemplatePath($templateID, 'emails');
+		}
+
+		function GetTemplatePath($templateID, $folder)
+		{
 			// EMail Template defaults to templates folder
 			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
-			$templatePath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/emails/'.$this->adminOptions[$templateID];
+			$templatePath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/'.$folder.'/'.$this->adminOptions[$templateID];
 
 			return $templatePath;
 		}
@@ -1007,7 +1013,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function GetTxnStatus($Txnid)
 		{
 			$sql = 'SELECT saleStatus FROM '.$this->opts['SalesTableName'].' WHERE saleTxnId="'.$Txnid.'"';
-			$this->ShowSQL($sql); 
+			 
 			$txnEntries = $this->get_results($sql);
 			
 			if (count($txnEntries) == 0) 
@@ -1023,14 +1029,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function UpdateSaleStatus($Txn_id, $Payment_status)
 		{
-			global $wpdb;
-			
 			$sql  = 'UPDATE '.$this->opts['SalesTableName'];
 			$sql .= ' SET saleStatus="'.$Payment_status.'"';		
 			$sql .= ' WHERE saleTxnId="'.$Txn_id.'"';							
-			$this->ShowSQL($sql); 
-			
-			$wpdb->query($sql);			
+			 
+			$this->query($sql);			
 		}
 		
 		function LogPendingSale($results)
@@ -1038,18 +1041,24 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $this->LogSale($results, true);
 		}
 		
-		function FlushPendingSales($timeout)
-		{
-			// TDOD - Implement and call FlushPendingSales()
-		}
-		
 		function LogSale($results, $isCheckout = false)
 		{
-			//$ourOptions = get_option($this->optionsID);
-			
 			if ($isCheckout)
 			{
-				$saleID = $this->AddSaleWithFee();
+				$saleDateTime = current_time('mysql'); 
+				
+				$saleVals['saleCheckoutTime'] = $saleDateTime;
+				$saleVals['saleStatus'] = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
+			
+				// Add empty values for fields that do not have a default value
+				$saleVals['saleName'] = '';	
+				$saleVals['saleEMail'] = '';
+				$saleVals['saleTxnid'] = '';
+
+				$saleVals['salePaid'] = '0.0';
+				$saleVals['saleFee'] = '0.0';
+								
+				$saleID = $this->AddSale($saleDateTime, $saleVals);
 			}
 			else if (isset($results['saleID']))
 			{
@@ -1063,35 +1072,19 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}				
 			else
 			{
-				$TxdDate  = $results['saleDateTime'];
-				$Txnid  = $results['saleTxnId'];
-				$saleName  = $results['saleName'];
-				$saleEMail  = $results['saleEMail'];
-				$saleStatus  = $results['saleStatus'];
-				$salePaid  = $results['salePaid'];
-				$saleFee  = $results['saleFee'];
-				$salePPName  = $results['salePPName'];
-				$salePPStreet  = $results['salePPStreet'];
-				$salePPCity  = $results['salePPCity'];
-				$salePPState  = $results['salePPState'];
-				$salePPZip  = $results['salePPZip'];
-				$salePPCountry  = $results['salePPCountry'];
+				$saleDateTime  = $results['saleDateTime'];
+				
+				foreach ($results as $fieldID => $fieldVal)
+				{
+					// Don't pass ticket details to AddSale() ... these are passed in AddSaleItem()
+					if (is_numeric(substr($fieldID, -1, 1)))
+						continue;
+						
+					$saleVals[$fieldID] = $fieldVal;
+				}
 				
 				// Log sale to Database
-				$saleID = $this->AddSaleWithFee(
-					$TxdDate, 
-					$saleName, 
-					$saleEMail, 
-					$salePaid, 
-					$saleFee,
-					$Txnid,
-					$saleStatus, 
-					$salePPName, 
-					$salePPStreet, 
-					$salePPCity, 
-					$salePPState, 
-					$salePPZip, 
-					$salePPCountry);				
+				$saleID = $this->AddSale($saleDateTime, $saleVals);
 			}
 		  		  
 			$itemNo = 1;
@@ -1123,7 +1116,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					$this->AddSaleItem($saleID, $stockID, $qty, $itemPaid);
 			    
 					$lineNo++;
-				} // End of if ($qty > 0)
+				}
 				$itemNo++;
 			}
 		  
@@ -1140,23 +1133,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function LockSalesTable()
 		{
-			global $wpdb;
-			
-			$sql  = 'LOCK TABLES ';
-			
-			$sql = $this->AddTableLocks($sql);
-			
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			$sql = $this->AddTableLocks('LOCK TABLES ');
+			$this->query($sql);
 		}
 		
 		function UnLockTables()
 		{
-			global $wpdb;
-			
 			$sql  = 'UNLOCK TABLES';
-			$this->ShowSQL($sql); 
-			$wpdb->query($sql);
+			$this->query($sql);
 		}
 		
 		function HTTPAnchor($url, $name = '')

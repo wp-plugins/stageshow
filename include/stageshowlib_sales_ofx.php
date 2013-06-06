@@ -105,7 +105,7 @@ if (!class_exists('StageShowLibOFXExportAdminClass'))
 		function ofx_datetime($timestamp = 0)
 		{
 			if ($timestamp == 0)
-				$timestamp = time();
+				$timestamp = current_time('timestamp');
 			$timeAndDate = date('YmdHis', $timestamp);
 			
 			$timezoneOffset = $timestamp = date('Z')/60*60;

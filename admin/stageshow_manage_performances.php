@@ -75,7 +75,23 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 		function GetPerfState($perfState)
 		{
 			// FUNCTIONALITY: Performances - Activation State shown as "Active" or "INACTIVE"
-			$perfStateText = $this->myDBaseObj->IsStateActive($perfState) ? __("Active", $this->myDomain) : __("INACTIVE", $this->myDomain);
+			switch ($perfState)
+			{
+				case STAGESHOW_STATE_ACTIVE:
+				default:
+					$perfStateText =__("Active", $this->myDomain);
+					break;
+					
+				case STAGESHOW_STATE_INACTIVE:
+					$perfStateText =__("INACTIVE", $this->myDomain);
+					break;
+					
+				case STAGESHOW_STATE_DELETED:
+					$perfStateText ='('.__("Deleted", $this->myDomain).')';
+					break;
+					
+			}
+			
 			return $perfStateText;
 		}
 		
@@ -347,8 +363,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			{
 				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Performances - Bulk Action Delete - Remove Prices, Hosted Buttons and Performance
-					// Delete all prices for this performance
-					$myDBaseObj->DeletePriceByPerfID($recordId);
+					// Note: Prices are deleted by Database Cleanup - $myDBaseObj->DeletePriceByPerfID($recordId);
 					
 					// Get the performance entry
 					$results = $myDBaseObj->GetPerformancesListByPerfID($recordId);
@@ -361,6 +376,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 					
 					// Delete a performance entry
 					$myDBaseObj->DeletePerformanceByPerfID($recordId);
+					$myDBaseObj->PurgeDB();
 					return true;
 				
 				case StageShowLibAdminListClass::BULKACTION_TOGGLE:
