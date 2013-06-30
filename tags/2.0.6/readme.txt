@@ -170,7 +170,7 @@ Custom images can be copied to this folder (using FTP) and can then be selected 
 
 = 2.0.6 =
 * Bug Fix: Currency codes in text emails changed to three letter currency code
-* Bug Fix: Surplus </table> tag in empty sales list
+* Bug Fix: Surplus &lt;/table&gt; tag in empty sales list
 
 = 2.0.5 =
 * Bug Fix: Undefined stockPrice in Sale Editor fixed
