@@ -342,12 +342,14 @@ if (!class_exists('SalesPluginBaseClass'))
 
 			}
 
+			if ($rowCount == 0) 
+				echo __('Sales Not Available Currently', $this->myDomain)."<br>\n";
+			else
+			{
 			echo '
 				</table>
 				';
-
-			if ($rowCount == 0) 
-				echo __('Sales Not Available Currently', $this->myDomain)."<br>\n";
+			}	
 				
 			echo '
 				</div>

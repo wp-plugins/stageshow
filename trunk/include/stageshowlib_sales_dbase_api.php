@@ -266,28 +266,28 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		static function GetCurrencyTable()
 		{
 			return array( 
-				array('Name' => 'Australian Dollars ',  'Currency' => 'AUD', 'Symbol' => '&#36;',        'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Brazilian Real ',      'Currency' => 'BRL', 'Symbol' => 'R&#36;',       'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Canadian Dollars ',    'Currency' => 'CAD', 'Symbol' => '&#36;',        'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Czech Koruna ',        'Currency' => 'CZK', 'Symbol' => '&#75;&#269;',  'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Danish Krone ',        'Currency' => 'DKK', 'Symbol' => 'kr',           'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Euros ',               'Currency' => 'EUR', 'Symbol' => '&#8364;',      'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Hong Kong Dollar ',    'Currency' => 'HKD', 'Symbol' => '&#36;',        'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Hungarian Forint ',    'Currency' => 'HUF', 'Symbol' => 'Ft',           'Position' => 'Left', 'Format' => '%d'),
-				array('Name' => 'Israeli Shekel ',      'Currency' => 'ILS', 'Symbol' => '&#x20aa;',     'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Mexican Peso ',        'Currency' => 'MXN', 'Symbol' => '&#36;',        'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'New Zealand Dollar ',  'Currency' => 'NZD', 'Symbol' => '&#36;',        'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Norwegian Krone ',     'Currency' => 'NOK', 'Symbol' => 'kr',           'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Philippine Pesos ',    'Currency' => 'PHP', 'Symbol' => 'P',            'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Polish Zloty ',        'Currency' => 'PLN', 'Symbol' => '&#122;&#322;', 'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Pounds Sterling ',     'Currency' => 'GBP', 'Symbol' => '&#x20a4;',     'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Singapore Dollar ',    'Currency' => 'SGD', 'Symbol' => '&#36;',        'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Swedish Krona ',       'Currency' => 'SEK', 'Symbol' => 'kr',           'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Swiss Franc ',         'Currency' => 'CHF', 'Symbol' => 'CHF',          'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Taiwan New Dollars ',  'Currency' => 'TWD', 'Symbol' => 'NT&#36;',      'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Thai Baht ',           'Currency' => 'THB', 'Symbol' => '&#xe3f;',      'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'U.S. Dollars ',        'Currency' => 'USD', 'Symbol' => '&#36;',        'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Yen ',                 'Currency' => 'JYP', 'Symbol' => '&#xa5;',       'Position' => 'Left', 'Format' => '%d'),
+				array('Name' => 'Australian Dollars ',  'Currency' => 'AUD', 'Symbol' => '&#36;',        'Char' => 'A$', 'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Brazilian Real ',      'Currency' => 'BRL', 'Symbol' => 'R&#36;',       'Char' => 'R$', 'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Canadian Dollars ',    'Currency' => 'CAD', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Czech Koruna ',        'Currency' => 'CZK', 'Symbol' => '&#75;&#269;',  'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Danish Krone ',        'Currency' => 'DKK', 'Symbol' => 'kr',           'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Euros ',               'Currency' => 'EUR', 'Symbol' => '&#8364;',      'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Hong Kong Dollar ',    'Currency' => 'HKD', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Hungarian Forint ',    'Currency' => 'HUF', 'Symbol' => 'Ft',           'Char' => '',   'Position' => 'Left', 'Format' => '%d'),
+				array('Name' => 'Israeli Shekel ',      'Currency' => 'ILS', 'Symbol' => '&#x20aa;',     'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Mexican Peso ',        'Currency' => 'MXN', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'New Zealand Dollar ',  'Currency' => 'NZD', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Norwegian Krone ',     'Currency' => 'NOK', 'Symbol' => 'kr',           'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Philippine Pesos ',    'Currency' => 'PHP', 'Symbol' => 'P',            'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Polish Zloty ',        'Currency' => 'PLN', 'Symbol' => '&#122;&#322;', 'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Pounds Sterling ',     'Currency' => 'GBP', 'Symbol' => '&#x20a4;',     'Char' => '£',  'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Singapore Dollar ',    'Currency' => 'SGD', 'Symbol' => 'S&#36;',       'Char' => 'S$', 'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Swedish Krona ',       'Currency' => 'SEK', 'Symbol' => 'kr',           'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Swiss Franc ',         'Currency' => 'CHF', 'Symbol' => 'CHF',          'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Taiwan New Dollars ',  'Currency' => 'TWD', 'Symbol' => 'NT&#36;',      'Char' => 'NT$','Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Thai Baht ',           'Currency' => 'THB', 'Symbol' => '&#xe3f;',      'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'U.S. Dollars ',        'Currency' => 'USD', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
+				array('Name' => 'Yen ',                 'Currency' => 'JYP', 'Symbol' => '&#xa5;',       'Char' => '',   'Position' => 'Left', 'Format' => '%d'),
 			);
 		}
 		
@@ -306,7 +306,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return null;
 		}
 		
-		function GetCurrencySymbol($currency)
+		function GetCurrencySymbol($currency)	// TODO - redundant?
 		{
 			$currencySymbol = '';
 			
@@ -319,7 +319,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $currencySymbol;
 		}
 		
-		function GetCurrencyFormat($currency)
+		function GetCurrencyFormat($currency)	// TODO - redundant?
 		{
 			$currencyFormat = '';
 			
@@ -332,13 +332,21 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $currencyFormat;
 		}
 		
-		function FormatCurrency($currency)
+		function FormatCurrency($amount, $asHTML = true)
 		{
-			$currencyText = sprintf($this->adminOptions['CurrencyFormat'], $currency);
-			if ($this->adminOptions['UseCurrencySymbol'])
+			$currencyText = sprintf($this->adminOptions['CurrencyFormat'], $amount);
+			if (!$this->adminOptions['UseCurrencySymbol'])
+				return $currencyText;
+				
+			if ($asHTML)
 			{
 				$currencyText = $this->adminOptions['CurrencySymbol'].$currencyText;				
 			}
+			else
+			{
+				$currencyText = $this->adminOptions['CurrencyText'].$currencyText;
+			}
+
 			return $currencyText;
 		}
 		
@@ -404,9 +412,20 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$newOptions = $this->adminOptions;
 				
 			$currency = $newOptions['PayPalCurrency'];
+			$currencyDef = StageShowLibSalesDBaseClass::GetCurrencyDef($currency);
 			
-			$newOptions['CurrencySymbol'] = $this->GetCurrencySymbol($currency);
-			$newOptions['CurrencyFormat'] = $this->GetCurrencyFormat($currency);
+			if (isset($currencyDef['Symbol']))
+			{
+				$newOptions['CurrencySymbol'] = $currencyDef['Symbol'];
+				$newOptions['CurrencyText']   = ($currencyDef['Char'] != '') ? $currencyDef['Char'] : $currency.'';
+				$newOptions['CurrencyFormat'] = $currencyDef['Format'];
+			}
+			else
+			{
+				$newOptions['CurrencySymbol'] = $currency.'';
+				$newOptions['CurrencyText']   = $currency.'';
+				$newOptions['CurrencyFormat'] = '%01.2f';
+			}			
 			
 			parent::saveOptions($newOptions);
 		}
@@ -574,7 +593,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$sql .= $comma.$fieldID.'="'.$fieldVal.'"';
 				$comma = ', ';			
 			}
-			$sql .= ')';
 			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleID='.$saleID;;		 
 
 			$this->query($sql);	
@@ -830,7 +848,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				{
 					case '[salePaid]';
 						if (isset($saleDetails->$field))
-							$saleFieldValue = $this->FormatCurrency($saleDetails->$field);
+							$saleFieldValue = $this->FormatCurrency($saleDetails->$field, false);
 						else
 							$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
 						break;
