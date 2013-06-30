@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -168,6 +168,10 @@ Custom images can be copied to this folder (using FTP) and can then be selected 
 
 * Version History for StageShow Plugin 
 
+= 2.0.6 =
+* Bug Fix: Currency codes in text emails changed to three letter currency code
+* Bug Fix: Surplus </table> tag in empty sales list
+
 = 2.0.5 =
 * Bug Fix: Undefined stockPrice in Sale Editor fixed
 * Bug Fix: Inconsistant visibility of Merchant ID, and API ***** fields in PayPal Settings
@@ -177,6 +181,7 @@ Custom images can be copied to this folder (using FTP) and can then be selected 
 * Bug Fix: Box Office shows inactive/expired shows
 * Deleted Shows, Performances and Prices only removed from DB when not referenced by Sales
 * Integrated Checkout syles rationised
+* Added salePaid and saleFee to Sales Summary export (StageShow+ only)
 * Flush Sales removed from Tools Menu
 
 = 2.0.4 =
@@ -191,6 +196,7 @@ Custom images can be copied to this folder (using FTP) and can then be selected 
 * Added Logging of PayPal Transaction Fees
 * Ticket Price logged with each sale
 * Export File Field Names now defined by translatable table
+* Added OFX format export (StageShow+ only)
 * Checkout Timeout added to settings
 * Box Office columns widths set by style sheet (stageshow.css)
 * Implemented Checkout Complete and Checkout Cancelled URLs in settings
