@@ -73,7 +73,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			// Check if updates required
 			
 			// Get current version from Wordpress API
-			$currentVersion = $this->get_version();
+			$currentVersion = $this->get_name().'-'.$this->get_version();
 			
 			// Get last known version from adminOptions
 			$lastVersion = $this->adminOptions['LastVersion'];
@@ -234,7 +234,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return count($results > 0);
 		}
 		
-		function get_results($sql, $debugOutAllowed = true)
+		function get_results($sql, $debugOutAllowed = true, $sqlFilters = array())
 		{
 			global $wpdb;
 			
@@ -335,7 +335,8 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if (!isset($this->adminOptions[$optionID]))
 				return '';
 			
-			return $this->adminOptions[$optionID];
+			$optionVal = $this->adminOptions[$optionID];
+			return $optionVal;
 		}
 		
 		function isOptionSet($optionID)

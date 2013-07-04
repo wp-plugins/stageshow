@@ -33,6 +33,8 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 			// Call base constructor
 			parent::__construct($env, true);
 			
+			$this->SetRowsPerPage(self::STAGESHOWLIB_EVENTS_UNPAGED);
+			
 			// FUNCTIONALITY: Performances - Bulk Actions - Activate/Deactivate and Delete
 			$this->bulkActions = array(
 				StageShowLibAdminListClass::BULKACTION_TOGGLE => __('Activate/Deactivate', $this->myDomain),
@@ -119,6 +121,44 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			parent::__construct($env);
 		}
 		
+		function ValidateEditPerformances($result)
+		{
+			// FUNCTIONALITY: Performances - Save Changes
+			$perfDateTime = stripslashes($_POST['perfDateTime' . $result->perfID]);
+			
+			// FUNCTIONALITY: Performances - Verify that the date value is valid
+			if (strlen($perfDateTime) == 0)
+			{
+				return __('Blank Date Entry', $this->myDomain) . ' (' . $perfDateTime . ')';
+			}
+			if (strtotime($perfDateTime) == FALSE)
+			{
+				return __('Invalid Date Entry', $this->myDomain) . ' (' . $perfDateTime . ')';
+			}
+						
+			// FUNCTIONALITY: Performances - Reject Duplicate Performance Date & Time
+			if (isset($this->datesList[$perfDateTime]))
+			{
+				return __('Duplicated Performance Date', $this->myDomain) . ' (' . $perfDateTime . ')';
+			}
+			$this->datesList[$perfDateTime] = true;
+						
+			$perfRef = stripslashes($_POST['perfRef' . $result->perfID]);
+			if ( ($perfRef != $result->perfRef) && !$this->myDBaseObj->IsPerfRefUnique($perfRef) )
+			{
+				return __('Duplicated Performance Reference', $this->myDomain) . ' (' . $perfRef . ')';
+			}
+						
+			// FUNCTIONALITY: Performances - Validate Performance Date/Time
+			// Verify that the date value is not empty
+			if (strlen($perfDateTime) == 0)
+			{
+				return __('Empty Date Entry', $this->myDomain);
+			}
+						
+			return '';
+		}
+		
 		function ProcessActionButtons()
 		{
 			$myPluginObj = $this->myPluginObj;
@@ -143,36 +183,9 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				{
 					foreach ($results as $result)
 					{
-						$perfDateTime = stripslashes($_POST['perfDateTime' . $result->perfID]);
-						// FUNCTIONALITY: Performances - Reject Duplicate Performance Date & Time
-						if (isset($datesList[$perfDateTime]))
-						{
-							$perfsMsg = __('Duplicated Performance Date', $this->myDomain) . ' (' . $perfDateTime . ')';
-							break;
-						}
-						$datesList[$perfDateTime] = true;
-						
-						$perfRef = stripslashes($_POST['perfRef' . $result->perfID]);
-						if ( ($perfRef != $result->perfRef) && !$myDBaseObj->IsPerfRefUnique($perfRef) )
-						{
-							$perfsMsg = __('Duplicated Performance Reference', $this->myDomain) . ' (' . $perfRef . ')';
-							break;
-						}
-						
-						// FUNCTIONALITY: Performances - Validate Performance Date/Time
-						// Verify that the date value is not empty
-						if (strlen($perfDateTime) == 0)
-						{
-							$perfsMsg = __('Empty Date Entry', $this->myDomain);
-							break;
-						}
-						
-						// Verify that the date value is valid
-						if (strtotime($perfDateTime) == FALSE)
-						{
-							$perfsMsg = __('Invalid Date Entry', $this->myDomain) . ' (' . $perfDateTime . ')';
-							break;
-						}
+						$perfsMsg = $this->ValidateEditPerformances($result);
+						if ($perfsMsg != '')
+							break;												
 					}
 				}
 				
@@ -415,7 +428,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 					if ($actionCount > 0)
 						$actionMsg = ($actionCount == 1) ? __("1 Performance has been Activated/Deactivated", $this->myDomain) : $actionCount . ' ' . __("Performances have been Activated/Deactivated", $this->myDomain);
 					else
-						$actionMsg = __("Nothing to Delete", $this->myDomain);
+						$actionMsg = __("Nothing to Activate/Deactivate", $this->myDomain);
 					break;
 			}
 			

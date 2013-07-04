@@ -74,6 +74,8 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEENTRY_VALUE = 'value';
 		const TABLEENTRY_COOKIE = 'cookie';
 		
+		const STAGESHOWLIB_EVENTS_UNPAGED = -1;
+		
 		var $tableContents = array();
 		var $rowAttr = array();
 		var $tableName = '';
@@ -127,7 +129,7 @@ if (!class_exists('StageShowLibTableClass'))
 			{
 				case self::TABLETYPE_HTML:
 				case self::TABLETYPE_RTF:
-				case self::TABLEENTRY_TEXT:
+				case self::TABLETYPE_TEXT:
 					break;
 					
 				default:
@@ -291,16 +293,24 @@ if (!class_exists('StageShowLibTableClass'))
 
 			$size = $maxlength+1;
 			
-			$content  = "name=$inputName ";
-			$content .= "id=$inputName ";
-			$content .= "maxlength=\"$maxlength\" ";
-			$content .= "size=\"$size\" ";
-			$content .= "value=\"$value\" ";
+			$params  = "name=$inputName ";
+			$params .= "id=$inputName ";
+			$params .= "maxlength=\"$maxlength\" ";
+			$params .= "size=\"$size\" ";
+			$params .= "value=\"$value\" ";
 			
 			if ($this->noAutoComplete)
-				$content .= "autocomplete=\"off\" "; 
+				$params .= "autocomplete=\"off\" "; 
 			
-			$content = "<input type=text $content />";
+			$content = "<input type=text $params />";
+			
+			$inputName = 'curr'.$inputName;
+			
+			$params  = "name=$inputName ";
+			$params .= "id=$inputName ";
+			$params .= "value=\"$value\" ";
+			
+			$content .= "<input type=hidden $params />";
 			
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
@@ -445,7 +455,7 @@ if (!class_exists('StageShowLibTableClass'))
 					echo "<tbody>\n";
 					break;
 				case self::TABLETYPE_RTF:
-				case self::TABLEENTRY_TEXT:
+				case self::TABLETYPE_TEXT:
 				default:
 					break;
 			}
@@ -463,7 +473,7 @@ if (!class_exists('StageShowLibTableClass'))
 						echo "</div>\n";		
 					break;
 				case self::TABLETYPE_RTF:
-				case self::TABLEENTRY_TEXT:
+				case self::TABLETYPE_TEXT:
 				default:
 					break;
 			}
@@ -657,7 +667,7 @@ function updateCheckboxes(obj)
 				case self::TABLETYPE_HTML:
 					break;
 				case self::TABLETYPE_RTF:
-				case self::TABLEENTRY_TEXT:
+				case self::TABLETYPE_TEXT:
 				default:
 					return;
 			}
@@ -692,7 +702,7 @@ function updateCheckboxes(obj)
 						break;
 					case self::TABLETYPE_RTF:
 						break;
-					case self::TABLEENTRY_TEXT:
+					case self::TABLETYPE_TEXT:
 					default:
 						break;
 				}
@@ -735,7 +745,7 @@ function updateCheckboxes(obj)
 							break;
 						case self::TABLETYPE_RTF:
 							if ($col > 1) echo '\tab ';
-						case self::TABLEENTRY_TEXT:
+						case self::TABLETYPE_TEXT:
 						default:
 							break;
 					}
@@ -750,7 +760,7 @@ function updateCheckboxes(obj)
 							break;
 						case self::TABLETYPE_RTF:
 							break;
-						case self::TABLEENTRY_TEXT:
+						case self::TABLETYPE_TEXT:
 						default:
 							echo "\t";
 							break;
@@ -768,7 +778,7 @@ function updateCheckboxes(obj)
 					case self::TABLETYPE_RTF:
 						echo '\par '."\n";
 						break;
-					case self::TABLEENTRY_TEXT:
+					case self::TABLETYPE_TEXT:
 					default:
 						echo "\n";
 						break;
@@ -1058,7 +1068,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 				case self::TABLEENTRY_COOKIE:
 					$editLen = $settingOption[self::TABLEPARAM_LEN];
 					$editSize = isset($settingOption[self::TABLEPARAM_SIZE]) ? $settingOption[self::TABLEPARAM_SIZE] : $editLen+1;
-					$editControl = '<input type="text"'.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" '.$controlIdDef.' value="'.$controlValue.'" />'."\n";
+					$editControl  = '<input type="text"'.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" '.$controlIdDef.' value="'.$controlValue.'" />'."\n";
+					$editControl .= '<input type="hidden" '.str_replace('="', '="curr', $controlIdDef).' value="'.$controlValue.'" />'."\n";					
 					break;
 
 				case self::TABLEENTRY_TEXTBOX:
@@ -1149,11 +1160,11 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 				foreach ($this->columnDefs as $columnDef)
 				{
 					$columnId = $columnDef[self::TABLEPARAM_ID];
+					$recId = $this->GetRecordID($result);
 					
-					if ($this->updateFailed)
+					if ($this->updateFailed && isset($_POST[$columnId.$recId]))
 					{
 						// Error updating values - Get value(s) from form controls
-						$recId = $this->GetRecordID($result);
 						$currVal = stripslashes($_POST[$columnId.$recId]);
 					}
 					else
@@ -1166,7 +1177,7 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 					{
 						$optionId = $columnDef[StageShowLibTableClass::TABLEPARAM_ID];
 						$funcName = $columnDef[StageShowLibTableClass::TABLEPARAM_DECODE];
-						$currVal = $this->$funcName($result->$optionId);
+						$currVal = $this->$funcName($result->$optionId, $result);
 					}
 					
 					if ($this->editMode)
@@ -1181,7 +1192,9 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 						
 						case self::TABLEENTRY_SELECT:
 							if (isset($columnDef[self::TABLEPARAM_ITEMS]))
-								$options = $columnDef[self::TABLEPARAM_ITEMS];
+							{
+								$options = self::GetSelectOptsArray($columnDef);
+							}
 							else
 							{
 								$functionId = $columnDef[self::TABLEPARAM_FUNC];
@@ -1341,18 +1354,17 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 							if (isset($option[self::TABLEPARAM_TYPE]) && ($option[self::TABLEPARAM_TYPE] != self::TABLEENTRY_COOKIE))
 							{
 								if (isset($result->$optionId))
-								{
 									$currVal = $result->$optionId;
-									if (isset($option[StageShowLibTableClass::TABLEPARAM_DECODE]))
-									{
-										$funcName = $option[StageShowLibTableClass::TABLEPARAM_DECODE];
-										$currVal = $this->$funcName($currVal);
-									}
-								}
 								else if (isset($option[self::TABLEPARAM_DEFAULT]))
 									$currVal = $option[self::TABLEPARAM_DEFAULT];
 								else
 									$currVal = '';
+									
+								if (isset($option[StageShowLibTableClass::TABLEPARAM_DECODE]))
+								{
+									$funcName = $option[StageShowLibTableClass::TABLEPARAM_DECODE];
+									$currVal = $this->$funcName($currVal, $result);
+								}
 							}
 							else if (isset($_COOKIE[$optionId]))
 								$currVal = $_COOKIE[$optionId];

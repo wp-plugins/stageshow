@@ -89,8 +89,14 @@ if (!class_exists('StageShowSalesAdminClass'))
 					// FUNCTIONALITY: Sales - Lists Sales for a Show
 					// List Sales for Show
 					$showID = $_GET['id']; 
+					$showEntry = $this->myDBaseObj->GetShowsList($showID);
+					if (count($showEntry) == 0)
+					{
+						// Invalid showID ... bail out!
+						break;
+					}
+					$this->salesFor = $showEntry[0]->showName.' - ';
 					$this->results = $this->myDBaseObj->GetSalesListByShowID($showID);	
-					$this->salesFor = $this->results[0]->showName.' - ';
 					for ($i=0; $i<count($this->results); $i++)
 						$this->results[$i]->ticketQty = $this->myDBaseObj->GetSalesQtyBySaleID($this->results[$i]->saleID);
 					$rtnVal = true;
@@ -100,8 +106,14 @@ if (!class_exists('StageShowSalesAdminClass'))
 					// FUNCTIONALITY: Sales - Lists Sales for a Performance
 					// List Sales for Performance
 					$perfID = $_GET['id']; 
+					$perfEntry = $this->myDBaseObj->GetPerformancesListByPerfID($perfID);
+					if (count($perfEntry) == 0)
+					{
+						// Invalid perfID ... bail out!
+						break;
+					}
 					$this->results = $this->myDBaseObj->GetSalesListByPerfID($perfID);
-					$this->salesFor = $this->results[0]->showName.' ('.$this->myDBaseObj->FormatDateForDisplay($this->results[0]->perfDateTime).') - ';
+					$this->salesFor = $perfEntry[0]->showName.' ('.$this->myDBaseObj->FormatDateForDisplay($perfEntry[0]->perfDateTime).') - ';
 					for ($i=0; $i<count($this->results); $i++)
 						$this->results[$i]->ticketQty = $this->myDBaseObj->GetSalesQtyBySaleID($this->results[$i]->saleID);
 					$rtnVal = true;

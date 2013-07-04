@@ -38,6 +38,7 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 			// Call base constructor
 			parent::__construct($env, true);
 			
+			$this->defaultTabId = 'paypal-settings-tab';
 			$this->HeadersPosn = StageShowLibTableClass::HEADERPOSN_TOP;
 		}
 		
@@ -56,7 +57,7 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 			$this->isTabbedOutput = true;
 			
 			$rowDefs = array(			
-				array(self::TABLEPARAM_LABEL => 'PayPal Settings',       self::TABLEPARAM_ID => 'paypal-settings-tab', ),
+				array(self::TABLEPARAM_LABEL => 'PayPal',       self::TABLEPARAM_ID => 'paypal-settings-tab', ),
 			);
 			
 			return $rowDefs;
@@ -129,8 +130,10 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 			// FUNCTIONALITY: Settings - Default settings tab "incremented"" once Prices configured
 			// Change default tab if PayPal settings have been set
 			$selectedTab = 0;
-			if ($myDBaseObj->IsPayPalConfigured() && (count($this->columnDefs)>0))
-				$selectedTab++;
+			if ($myDBaseObj->SettingsConfigured() && (count($this->columnDefs)>0))
+			{
+				$selectedTab = $this->GetSettingsRowIndex($this->columnDefs, $this->defaultTabId);
+			}
 			
 			parent::OutputJavascript($selectedTab);
 		}

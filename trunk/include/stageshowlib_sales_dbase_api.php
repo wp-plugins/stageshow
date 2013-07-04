@@ -112,17 +112,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			parent::uninstall();
 		}
-		
+				
 		function CheckIsConfigured()
 		{
-			if (!$this->usePayPal)
-			{
-				$isConfigured = $this->IsPayPalConfigured();
-			}
-			else
-			{
-				$isConfigured = $this->payPalAPIObj->IsConfigured();
-			}
+			$isConfigured = $this->SettingsConfigured();
 				
 			if (!$isConfigured)
 			{
@@ -207,7 +200,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			// Create PayPalAPIClass object here (if required) after Trolley type is known
 			$this->usePayPal = !$this->UseIntegratedTrolley();
-			//if (($this->usePayPal) && !isset($this->payPalAPIObj))
 			if (!isset($this->payPalAPIObj))
 			{
 				$this->payPalAPIObj = new PayPalButtonsAPIClass(__FILE__);
@@ -350,7 +342,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $currencyText;
 		}
 		
-		function IsPayPalConfigured()
+		function PayPalConfigured()
 		{
 			if ($this->UseIntegratedTrolley())
 			{
@@ -370,6 +362,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 			
 			return $this->payPalAPIObj->IsConfigured();
+		}
+		
+		function SettingsConfigured()
+		{
+			return $this->PayPalConfigured();
 		}
 		
 		function UseIntegratedTrolley()
@@ -411,7 +408,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if ($newOptions == null)
 				$newOptions = $this->adminOptions;
 				
-			$currency = $newOptions['PayPalCurrency'];
+			$currency = $newOptions['PayPalCurrency'];			
 			$currencyDef = StageShowLibSalesDBaseClass::GetCurrencyDef($currency);
 			
 			if (isset($currencyDef['Symbol']))
@@ -898,7 +895,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			//echo "Option[$templateID]: $templatePath -> ".$this->adminOptions[$templateID]."<br>\n";
 		}
 
-		function GetEmailTemplatePath($templateID)
+		function GetEmailTemplatePath($templateID, $sale = array())
 		{
 			return $this->GetTemplatePath($templateID, 'emails');
 		}
@@ -914,13 +911,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 		function EMailSale($saleID, $EMailTo = '')
 		{
-			$templatePath = $this->GetEmailTemplatePath('EMailTemplatePath');
-	
 			// Get sale	and ticket details
 			$salesList = $this->GetSale($saleID);
 			if (count($salesList) < 1) 
 				return 'salesList Empty';
 
+			$templatePath = $this->GetEmailTemplatePath('EMailTemplatePath', $salesList);
+	
 			return $this->SendEMailFromTemplate($salesList, $templatePath, $EMailTo);
 		}
 		
@@ -1023,8 +1020,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if (isset($this->emailObj))
 				$this->emailObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
 
-			echo '<div id="message" class="updated"><p>'.__('EMail Sent to', $this->get_domain()).' '.$EMailTo.'</p></div>';
-						
 			return 'OK';
 		}
 		
@@ -1043,6 +1038,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function DBField($fieldName)
 		{
 			return $fieldName;
+		}
+		
+		function UpdateSaleIDStatus($SaleId, $Payment_status)
+		{
+			$sql  = 'UPDATE '.$this->opts['SalesTableName'];
+			$sql .= ' SET saleStatus="'.$Payment_status.'"';		
+			$sql .= ' WHERE saleId="'.$SaleId.'"';							
+			 
+			$this->query($sql);			
 		}
 		
 		function UpdateSaleStatus($Txn_id, $Payment_status)

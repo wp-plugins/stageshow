@@ -315,6 +315,21 @@ if (!class_exists('PayPalAPIClass'))
 			return $response;			
 		}
 		
+		function GetTransactions($fromDate, $toDate = '')
+		{
+			// Check that the PayPal login parameters have been set
+			if (!$this->IsConfigured())
+				return;	// Cannot Execute - API Not Configured
+				
+			$this->InitAPICallParams('TransactionSearch');
+			$this->AddAPIParam('STARTDATE', $fromDate);
+			if ($toDate != '')
+			{
+				$this->AddAPIParam('ENDDATE', $toDate);
+			}
+			return $this->APIAction('Get Transactions ');
+		}
+		
 		function GetTransaction($txnId)
 		{
 			// Check that the PayPal login parameters have been set

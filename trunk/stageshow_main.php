@@ -148,6 +148,8 @@ if (!class_exists('StageShowPluginClass'))
 			if ( !empty($adminRole) ) 
 			{
 				// Adding Manage StageShow Capabilities to Administrator					
+				if (!$adminRole->has_cap(STAGESHOW_CAPABILITY_RESERVEUSER))
+					$adminRole->add_cap(STAGESHOW_CAPABILITY_RESERVEUSER);
 				if (!$adminRole->has_cap(STAGESHOW_CAPABILITY_VALIDATEUSER))
 					$adminRole->add_cap(STAGESHOW_CAPABILITY_VALIDATEUSER);
 				if (!$adminRole->has_cap(STAGESHOW_CAPABILITY_SALESUSER))
@@ -242,13 +244,15 @@ if (!class_exists('StageShowPluginClass'))
 					break;
 					
 				case STAGESHOW_MENUPAGE_PRICES :
-					include 'admin/stageshow_manage_prices.php';      
-					new StageShowPricesAdminClass($this->env);
+					include 'admin/'.$this->adminClassFilePrefix.'_manage_prices.php';      
+					$classId = $this->adminClassPrefix.'PricesAdminClass';
+					new $classId($this->env);
 					break;
 					
 				case STAGESHOW_MENUPAGE_PRICEPLANS :
-					include 'admin/stageshowplus_manage_priceplans.php';      
-					new StageShowPlusPricePlansAdminClass($this->env);
+					include 'admin/'.$this->adminClassFilePrefix.'_manage_priceplans.php';      
+					$classId = $this->adminClassPrefix.'PricePlansAdminClass';
+					new $classId($this->env);
 					break;
 					
 				case STAGESHOW_MENUPAGE_SALES :
@@ -312,7 +316,7 @@ if (!class_exists('StageShowPluginClass'))
 				return;
 			}
 
-			// Array of capabilities in decreasing order of functionality
+			// Array of Admin capabilities in decreasing order of functionality
 			$stageShow_caps = array(
 				STAGESHOW_CAPABILITY_DEVUSER,
 				STAGESHOW_CAPABILITY_SETUPUSER,
@@ -366,7 +370,7 @@ if (!class_exists('StageShowPluginClass'))
 								add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', $this->myDomain),    __('Buttons', $this->myDomain),   STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));							
 						}
 						
-						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEV TEST', $this->myDomain), __('DEV TEST', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
+						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
 					}
 				
 					if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))

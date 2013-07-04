@@ -97,7 +97,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 				return $myDBaseObj->GetPricesList(null);
 			}
 			
-			$results = $myDBaseObj->GetPricesListByShowID($showID);
+			// Get the prices list for a single show
+			$results = $myDBaseObj->GetPricesListByShowID($showID, true);
 			$myDBaseObj->prepareBoxOffice($showID);			
 			if (count($results) == 0)
 			{
@@ -322,6 +323,23 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$this->trolleyHeaderCols = 6;	// Count of the number of columns in the header
 		}
 				
+		function OutputContent_OnlineCheckoutButton()
+		{
+			if ($this->myDBaseObj->UseIntegratedTrolley())
+			{
+				if ($this->myDBaseObj->getOption('EnableReservations') && current_user_can(STAGESHOW_CAPABILITY_RESERVEUSER))
+				{
+					echo '<input class="button-primary" type="submit" name="reserve" value="'.__('Reserve', $this->myDomain).'"/>';
+					echo '&nbsp;&nbsp;&nbsp;&nbsp;';
+				}				
+			}
+			
+			if ($this->myDBaseObj->PayPalConfigured())
+			{
+				parent::OutputContent_OnlineCheckoutButton();
+			}
+		}
+		
 		function OutputContent_OnlineTrolleyRow($priceEntry, $qty)
 		{
 			$showName = $priceEntry->showName;
@@ -338,6 +356,93 @@ if (!class_exists('StageShowSalesPluginClass'))
 			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.$total.'</td>'."\n";
 
 			return $total;
+		}
+				
+		function GetUserInfo($user_metaInfo, $fieldId, $fieldSep = '')
+		{
+			if (isset($this->myDBaseObj->adminOptions[$fieldId]))
+			{
+				$metaField = $this->myDBaseObj->adminOptions[$fieldId];
+			}
+			else
+			{
+				$metaField = $fieldId;
+			}
+			
+			if ($metaField == '')
+				return '';
+				
+			if (!isset($user_metaInfo[$metaField][0]))
+				return $fieldSep == '' ? __('Unknown', $this->myDomain) : '';
+			
+			$userInfoVal = 	$user_metaInfo[$metaField][0];
+			return $fieldSep.$userInfoVal;
+		}
+		
+		function OnlineStore_ProcessCheckout()
+		{
+			$myDBaseObj = $this->myDBaseObj;
+				
+			if (isset($_POST['reserve']))	// 'checkout' without online payment
+			{
+				if (!current_user_can(STAGESHOW_CAPABILITY_RESERVEUSER))
+					return;
+						
+				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
+				if (isset($checkoutRslt->checkoutError)) return;
+				
+				// Lock tables so we can commit the pending sale
+				$this->myDBaseObj->LockSalesTable();
+					
+				// Check quantities before we commit 
+				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt->totalSales, $checkoutRslt->maxSales);
+					
+				if ($ParamsOK)
+	  			{
+					$saleDateTime = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT);
+						
+					// Get User details from User DB
+					$loggedInUser = wp_get_current_user();										
+					$user_metaInfo = get_user_meta($loggedInUser->ID);
+
+					// TODO - Make sure that TxnID is unique
+					$saleTxnid = 'RES-'.time();	
+					
+					$checkoutRslt->saleDetails['saleName'] = $this->GetUserInfo($user_metaInfo, 'first_name').$this->GetUserInfo($user_metaInfo, 'last_name', ' ');	
+					$checkoutRslt->saleDetails['saleEMail'] = $loggedInUser->data->user_email;
+					$checkoutRslt->saleDetails['saleTxnid'] = $saleTxnid;
+
+					$checkoutRslt->saleDetails['salePaid'] = $checkoutRslt->totalDue;
+					$checkoutRslt->saleDetails['saleFee'] = '0.0';
+								
+					$checkoutRslt->saleDetails['saleDateTime'] = $saleDateTime;
+					$checkoutRslt->saleDetails['saleStatus'] = STAGESHOW_SALESTATUS_RESERVED;
+									
+					$checkoutRslt->saleDetails['salePPName'] = $checkoutRslt->saleDetails['saleName'];
+					
+					$checkoutRslt->saleDetails['salePPStreet']  = $this->GetUserInfo($user_metaInfo, 'UserAddress1');
+					$checkoutRslt->saleDetails['salePPStreet'] .= $this->GetUserInfo($user_metaInfo, 'UserAddress2', "\n");
+					$checkoutRslt->saleDetails['salePPStreet'] .= $this->GetUserInfo($user_metaInfo, 'UserAddress3', "\n");
+						
+					$checkoutRslt->saleDetails['salePPCity'] = $this->GetUserInfo($user_metaInfo, 'UserCity');
+					$checkoutRslt->saleDetails['salePPState'] = $this->GetUserInfo($user_metaInfo, 'UserCounty');
+					$checkoutRslt->saleDetails['salePPZip'] = $this->GetUserInfo($user_metaInfo, 'UserPostcode');
+					$checkoutRslt->saleDetails['salePPCountry'] = $this->GetUserInfo($user_metaInfo, 'UserCountry');
+			
+					// Log sale to DB
+					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails);
+					$emailStatus = $this->myDBaseObj->EMailSale($saleId);
+						
+					$_SESSION['$this->trolleyid'] = array();	// Clear the shopping cart
+					
+					$this->checkoutError = __('Tickets reserved - Confirmation EMail sent to ', $this->myDomain).$checkoutRslt->saleDetails['saleEMail'];					
+				}
+						
+				// Release Tables
+				$this->myDBaseObj->UnLockTables();					
+			}
+					
+			parent::OnlineStore_ProcessCheckout();
 		}
 		
 		
