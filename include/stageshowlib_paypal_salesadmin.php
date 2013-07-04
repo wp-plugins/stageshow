@@ -46,7 +46,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			if (!$editMode)
 			{
 				$this->bulkActions = array(
-					StageShowLibAdminListClass::BULKACTION_DELETE => __('Delete', $this->myDomain),
+					self::BULKACTION_DELETE => __('Delete', $this->myDomain),
 					);
 					
 				$this->HeadersPosn = StageShowLibTableClass::HEADERPOSN_BOTH;
@@ -71,6 +71,13 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			);
 		}		
 		
+		function GetStatusOptions()
+		{
+			return array(
+				PAYPAL_APILIB_SALESTATUS_COMPLETED.'|'.__('Completed', $this->myDomain),
+				);
+		}		
+		
 		function GetDetailsRowsDefinition()
 		{
 			// FUNCTIONALITY: Sales - Use PAYPAL_APILIB_******* consts if defined
@@ -79,6 +86,8 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			$state   = defined('PAYPAL_APILIB_STATE_LABEL')   ? PAYPAL_APILIB_STATE_LABEL   : __('County', $this->myDomain);
 			$zip     = defined('PAYPAL_APILIB_ZIP_LABEL')     ? PAYPAL_APILIB_ZIP_LABEL  : __('Postcode', $this->myDomain);
 			$country = defined('PAYPAL_APILIB_COUNTRY_LABEL') ? PAYPAL_APILIB_COUNTRY_LABEL : __('Country', $this->myDomain);
+			
+			$statusOptions = $this->GetStatusOptions();
 			
 			$ourOptions = array(
 				array(self::TABLEPARAM_LABEL => 'Name',	                     self::TABLEPARAM_ID => 'saleName',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
@@ -89,11 +98,11 @@ if (!class_exists('PayPalSalesAdminListClass'))
 				array(self::TABLEPARAM_LABEL => $state,	                     self::TABLEPARAM_ID => 'salePPState',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN,   self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTATE_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => $zip,                        self::TABLEPARAM_ID => 'salePPZip',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPZIP_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => $country,                    self::TABLEPARAM_ID => 'salePPCountry', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN, self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCOUNTRY_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => 'Paid',                      self::TABLEPARAM_ID => 'salePaid',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
+				array(self::TABLEPARAM_LABEL => 'Total Paid/Due',            self::TABLEPARAM_ID => 'salePaid',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(self::TABLEPARAM_LABEL => 'Fee',                       self::TABLEPARAM_ID => 'saleFee',       self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(self::TABLEPARAM_LABEL => 'Transaction Date/Time',     self::TABLEPARAM_ID => 'saleDateTime',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(self::TABLEPARAM_LABEL => 'Transaction ID',            self::TABLEPARAM_ID => 'saleTxnId',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),						
-				array(self::TABLEPARAM_LABEL => 'Status',                    self::TABLEPARAM_ID => 'saleStatus',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),						
+				array(self::TABLEPARAM_LABEL => 'Status',                    self::TABLEPARAM_ID => 'saleStatus',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, self::TABLEPARAM_ITEMS => $statusOptions),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
@@ -173,6 +182,8 @@ if (!class_exists('PayPalSalesDetailsAdminClass'))
 		{
 			// Call base constructor
 			parent::__construct($env, $editMode);
+			
+			$this->SetRowsPerPage(self::STAGESHOWLIB_EVENTS_UNPAGED);
 			
 			$this->HeadersPosn = StageShowLibTableClass::HEADERPOSN_TOP;
 		}
@@ -607,6 +618,8 @@ if (!class_exists('PayPalSalesAdminClass'))
 			$salesVals['salePPCountry'] = $this->GetFormInput($saleId, 'salePPCountry');
 			
 			$salesVals['salePaid'] = $this->salePaid;
+				
+			$salesVals['saleStatus'] = $this->GetFormInput($saleId, 'saleStatus');
 				
 			if ($saleId == 0)
 			{

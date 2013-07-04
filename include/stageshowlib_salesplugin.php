@@ -346,11 +346,11 @@ if (!class_exists('SalesPluginBaseClass'))
 				echo __('Sales Not Available Currently', $this->myDomain)."<br>\n";
 			else
 			{
-			echo '
-				</table>
-				';
+				echo '
+					</table>
+					';
 			}	
-				
+			
 			echo '
 				</div>
 				';
@@ -387,6 +387,11 @@ if (!class_exists('SalesPluginBaseClass'))
 			return $total;
 		}
 		
+		function OutputContent_OnlineCheckoutButton()
+		{
+			echo '<input class="button-primary" type="submit" name="checkout" value="'.__('Checkout', $this->myDomain).'"/>'."\n";
+		}
+		
 		function OnlineStore_HandleTrolley()
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -398,137 +403,244 @@ if (!class_exists('SalesPluginBaseClass'))
 				}
 				
 				$cartContents = isset($_SESSION['$this->trolleyid']) ? $_SESSION['$this->trolleyid'] : array();
-				
-				$myDBaseObj = $this->myDBaseObj;
-				
-				if (isset($_POST['hosted_button_id']))
-				{
-					// Get the product ID from posted data
-					//$ticketType = $_POST['os0'];
-					$ticketQty = $_POST['quantity'];
-					
-					$itemID = $_POST['hosted_button_id'];
-					
-					// Interogate the database to confirm that the item exists
-					$priceEntries = $this->GetOnlineStoreProductDetails($itemID);
-/*									
-					$priceEntry = $priceEntries[0];
-					
-					$itemID = $this->GetOnlineStoreItemID($priceEntry);	
-*/
-					// Add the item to the shopping trolley
-					if (count($priceEntries) > 0)
-					{
-						if (isset($cartContents[$itemID]))
-						{
-							$cartContents[$itemID] += $ticketQty;
-						}
-						else
-						{
-							$cartContents[$itemID] = $ticketQty;
-						}
-						$_SESSION['$this->trolleyid'] = $cartContents;
-					}
-				}
-				
-				if (count($cartContents) > 0)
-				{
-					$hiddenTags  = "\n";
 			
-					$doneHeader = false;
-
-					if (isset($_GET['action']))
-					{
-						switch($_GET['action'])
-						{
-							case 'remove':
-								if (!isset($_GET['id']))
-									break;
-								$itemID = $_GET['id'];
-								unset($cartContents[$itemID]);
-								$_SESSION['$this->trolleyid'] = $cartContents;
-								break;
-						}
-					}
-					
-					$cartIndex = 0;		
-					$runningTotal = 0;			
-					foreach ($cartContents as $itemID => $qty)
-					{
-						$cartIndex++;
-						
-						$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
-						if (count($priceEntries) == 0)
-						{
-							echo "Shopping Cart Cleared<br>";
-							if (current_user_can('manage_options'))
-							{
-								echo "No entry for ItemID:$itemID<br>";
-								StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
-							}
-							$_SESSION['$this->trolleyid'] = array();
-							return;
-						}
-						
-						$priceEntry = $priceEntries[0];
-						if (!$doneHeader)
-						{
-							echo '<div class="'.$this->cssTrolleyBaseID.'-header"><h2>'.__('Your Shopping Trolley', $this->myDomain).'</h2></div>'."\n";
-							echo '<div class="'.$this->cssTrolleyBaseID.'">'."\n";
-							echo '<form method="post">'."\n";
-							echo "<table>\n";
-							$this->OutputContent_OnlineTrolleyHeader($priceEntry);
-							
-							$doneHeader = true;
-						}
-						
-						echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";
-						
-						$runningTotal += $this->OutputContent_OnlineTrolleyRow($priceEntry, $qty);
-						
-						$removeLineURL = get_permalink();
-						$removeLineURL  = add_query_arg('action', 'remove', $removeLineURL);
-						$removeLineURL  = add_query_arg('id', $itemID, $removeLineURL);
-						echo '<td class="'.$this->cssTrolleyBaseID.'-remove"><a href=' . $removeLineURL . '>'.__('Remove', $this->myDomain).'</a></td>'."\n";
-						
-						echo "</tr>\n";
-						
-						$hiddenTags .= '<input type="hidden" name="id'.$cartIndex.'" value="'.$itemID.'"/>'."\n";
-						$hiddenTags .= '<input type="hidden" name="qty'.$cartIndex.'" value="'.$qty.'"/>'."\n";
-					}
-					
-					if ($doneHeader)
-					{	
-						// Add totals row and checkout button
-						$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);
-					
-						echo '<tr class="'.$this->cssTrolleyBaseID.'-totalrow">'."\n";
-						echo '<td>&nbsp;</td>'."\n";
-						echo '<td>'.__('Total', $this->myDomain).'</td>'."\n";
-						echo '<td class="'.$this->cssTrolleyBaseID.'-total">'.$runningTotal.'</td>'."\n";
-						//echo '<td colspan="'.'">&nbsp;</td>'."\n"; // .$this->trolleyHeaderCols-3.'';
-						echo '<td colspan="'.($this->trolleyHeaderCols-3).'">&nbsp;</td>'."\n";
-						echo "</tr>\n";
-					
-						echo '<tr>'."\n";
-						echo '<td align="right" colspan="'.$this->trolleyHeaderCols.'" class="'.$this->cssTrolleyBaseID.'-checkout">'."\n";
-						echo '<input class="button-primary" type="submit" name="checkout" value="'.__('Checkout', $this->myDomain).'"/>'."\n";
-						echo '</td>'."\n";
-						echo "</tr>\n";
-					
-						echo "</table>\n";
-						echo $hiddenTags;						
-						echo '</form>'."\n";					
-						echo '</div>'."\n";
-					}					
-				}
-			}
+				$this->OnlineStore_HandleTrolleyButtons($cartContents);
+			}				
 			else if (isset($_POST['hosted_button_id']))
 			{
 				// Gets here if an attempt is made to add tickets when IPN Local Server debug option is selected
 				echo '<div id="message" class="'.$this->cssDomain.'-error">'.__('PayPal checkout inaccessible - Using Local IPN Server', $this->myDomain).'</div>';							
 			}
+				
+		}
+		
+		function OnlineStore_HandleTrolleyButtons($cartContents)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			if (isset($_POST['hosted_button_id']))
+			{
+				// Get the product ID from posted data
+				//$ticketType = $_POST['os0'];
+				$ticketQty = $_POST['quantity'];
+					
+				$itemID = $_POST['hosted_button_id'];
+					
+				// Interogate the database to confirm that the item exists
+				$priceEntries = $this->GetOnlineStoreProductDetails($itemID);
+	/*									
+				$priceEntry = $priceEntries[0];
+					
+				$itemID = $this->GetOnlineStoreItemID($priceEntry);	
+	*/
+				// Add the item to the shopping trolley
+				if (count($priceEntries) > 0)
+				{
+					if (isset($cartContents[$itemID]))
+					{
+						$cartContents[$itemID] += $ticketQty;
+					}
+					else
+					{
+						$cartContents[$itemID] = $ticketQty;
+					}
+					$_SESSION['$this->trolleyid'] = $cartContents;
+				}
+			}
+				
+			if (count($cartContents) > 0)
+			{
+				$hiddenTags  = "\n";
+			
+				$doneHeader = false;
 
+				if (isset($_GET['action']))
+				{
+					switch($_GET['action'])
+					{
+						case 'remove':
+							if (!isset($_GET['id']))
+								break;
+							$itemID = $_GET['id'];
+							unset($cartContents[$itemID]);
+							$_SESSION['$this->trolleyid'] = $cartContents;
+							break;
+					}
+				}
+					
+				$cartIndex = 0;		
+				$runningTotal = 0;			
+				foreach ($cartContents as $itemID => $qty)
+				{
+					$cartIndex++;
+						
+					$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
+					if (count($priceEntries) == 0)
+					{
+						echo "Shopping Cart Cleared<br>";
+						if (current_user_can('manage_options'))
+						{
+							echo "No entry for ItemID:$itemID<br>";
+							StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
+						}
+						$_SESSION['$this->trolleyid'] = array();
+						return;
+					}
+						
+					$priceEntry = $priceEntries[0];
+					if (!$doneHeader)
+					{
+						echo '<div class="'.$this->cssTrolleyBaseID.'-header"><h2>'.__('Your Shopping Trolley', $this->myDomain).'</h2></div>'."\n";
+						if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'header') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+						{
+							echo $myDBaseObj->getOption('CheckoutNote');
+						}
+						echo '<div class="'.$this->cssTrolleyBaseID.'">'."\n";
+						echo '<form method="post">'."\n";
+						echo "<table>\n";
+						if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'titles') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+						{
+							echo $myDBaseObj->getOption('CheckoutNote');
+						}
+						$this->OutputContent_OnlineTrolleyHeader($priceEntry);
+							
+						$doneHeader = true;
+					}
+						
+					echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";
+						
+					$runningTotal += $this->OutputContent_OnlineTrolleyRow($priceEntry, $qty);
+						
+					$removeLineURL = get_permalink();
+					$removeLineURL  = add_query_arg('action', 'remove', $removeLineURL);
+					$removeLineURL  = add_query_arg('id', $itemID, $removeLineURL);
+					echo '<td class="'.$this->cssTrolleyBaseID.'-remove"><a href=' . $removeLineURL . '>'.__('Remove', $this->myDomain).'</a></td>'."\n";
+						
+					echo "</tr>\n";
+						
+					$hiddenTags .= '<input type="hidden" name="id'.$cartIndex.'" value="'.$itemID.'"/>'."\n";
+					$hiddenTags .= '<input type="hidden" name="qty'.$cartIndex.'" value="'.$qty.'"/>'."\n";
+				}
+					
+				if ($doneHeader)
+				{	
+					// Add totals row and checkout button
+					$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);
+				
+					echo '<tr class="'.$this->cssTrolleyBaseID.'-totalrow">'."\n";
+					echo '<td>&nbsp;</td>'."\n";
+					echo '<td>'.__('Total', $this->myDomain).'</td>'."\n";
+					echo '<td class="'.$this->cssTrolleyBaseID.'-total">'.$runningTotal.'</td>'."\n";
+					//echo '<td colspan="'.'">&nbsp;</td>'."\n"; // .$this->trolleyHeaderCols-3.'';
+					echo '<td colspan="'.($this->trolleyHeaderCols-3).'">&nbsp;</td>'."\n";
+					echo "</tr>\n";
+				
+					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'above') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+					{
+						echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
+					}
+						
+					echo '<tr>'."\n";
+					echo '<td align="right" colspan="'.$this->trolleyHeaderCols.'" class="'.$this->cssTrolleyBaseID.'-checkout">'."\n";
+					
+					$this->OutputContent_OnlineCheckoutButton();
+						
+					echo '</td>'."\n";
+					echo "</tr>\n";
+					
+					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'below') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+					{
+						echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
+					}
+						
+					echo "</table>\n";
+					echo $hiddenTags;						
+					echo '</form>'."\n";					
+					echo '</div>'."\n";
+					
+					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'bottom') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+					{
+						echo $myDBaseObj->getOption('CheckoutNote');
+					}
+					
+				}					
+			}
+		}
+
+		function OnlineStore_ScanCheckoutSales()
+		{
+			$myDBaseObj = $this->myDBaseObj;
+				
+			// Remove any incomplete Checkouts
+			$myDBaseObj->PurgePendingSales();
+					
+			// Check that request matches contents of cart
+			$passedParams = array();	// Dummy array used when checking passed params
+			$rslt->paypalParams = array();
+			$ParamsOK = true;
+			
+			$rslt->totalDue = 0;
+								
+			$cartContents = isset($_SESSION['$this->trolleyid']) ? $_SESSION['$this->trolleyid'] : array();
+			if ($myDBaseObj->isOptionSet('Dev_ShowTrolley'))
+			{
+				StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
+			}
+				
+			// Build request parameters for redirect to PayPal checkout
+			$cartIndex = 0;					
+			foreach ($cartContents as $itemID => $qty)
+			{
+				$cartIndex++;
+					
+				$priceEntries = $this->GetOnlineStoreProductDetails($itemID);
+				if (count($priceEntries) == 0)
+					return $rslt;
+					
+				// Get sales quantities for each item
+				$priceEntry = $priceEntries[0];
+				$stockID = $this->GetOnlineStoreStockID($priceEntry);
+				isset($rslt->totalSales[$stockID]) ? $rslt->totalSales[$stockID] += $qty : $rslt->totalSales[$stockID] = $qty;
+						
+				// Save the maximum number of sales for this stock item to a class variable
+				$rslt->maxSales[$stockID] = $this->GetOnlineStoreMaxSales($priceEntry);
+				
+				$ParamsOK &= $this->CheckPayPalParam($passedParams, "id" , $itemID, $cartIndex);
+				$ParamsOK &= $this->CheckPayPalParam($passedParams, "qty" , $qty, $cartIndex);
+				if (!$ParamsOK)
+				{
+					$rslt->checkoutError  = __('Cannot Checkout', $this->myDomain).' - ';
+					$rslt->checkoutError .= __('Shopping Cart Contents have changed', $this->myDomain);
+					return $rslt;
+				}
+					
+				$itemPrice = $this->GetOnlineStoreItemPrice($priceEntry);
+				$shipping = 0.0;
+						
+				$rslt->paypalParams['item_name_'.$cartIndex] = $this->GetOnlineStoreItemName($priceEntry);
+				$rslt->paypalParams['amount_'.$cartIndex] = $itemPrice;
+				$rslt->paypalParams['quantity_'.$cartIndex] = $qty;
+				$rslt->paypalParams['shipping_'.$cartIndex] = $shipping;
+					
+				$rslt->saleDetails['itemID' . $cartIndex] = $itemID;
+				$rslt->saleDetails['qty' . $cartIndex] = $qty;
+				$rslt->saleDetails['itemPaid' . $cartIndex] = $itemPrice;
+				
+				$rslt->totalDue += ($itemPrice * $qty);
+			}
+				
+			// Shopping Cart contents have changed if there are "extra" passed parameters 
+			$cartIndex++;
+			$ParamsOK &= !isset($_POST['id'.$cartIndex]);
+			$ParamsOK &= !isset($_POST['qty'.$cartIndex]);
+			if (!$ParamsOK)
+			{
+				$rslt->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
+				$rslt->checkoutError .= __('Item(s) removed from Shopping Cart', $this->myDomain);
+				return $rslt;
+			}
+			
+			return $rslt;
 		}		
 
 		function OnlineStore_ProcessCheckout()
@@ -539,129 +651,65 @@ if (!class_exists('SalesPluginBaseClass'))
 			{
 				$myDBaseObj = $this->myDBaseObj;
 				
-				// Remove any incomplete Checkouts
-				$myDBaseObj->PurgePendingSales();
-					
-				// Check that request matches contents of cart
-				$paypalURL = 'http://www.paypal.com/cgi-bin/webscr';
-				$passedParams = array();	// Dummy array used when checking passed params
-				$paypalParams = array();
-				$ParamsOK = true;
-								
-				$cartContents = isset($_SESSION['$this->trolleyid']) ? $_SESSION['$this->trolleyid'] : array();
-				if ($myDBaseObj->isOptionSet('Dev_ShowTrolley'))
-				{
-					StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
-				}
+				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
+				if (isset($checkoutRslt->checkoutError)) return;
 				
-				// Build request parameters for redirect to PayPal checkout
-				$cartIndex = 0;					
-				foreach ($cartContents as $itemID => $qty)
-				{
-					$cartIndex++;
-					
-					$priceEntries = $this->GetOnlineStoreProductDetails($itemID);
-					if (count($priceEntries) == 0)
-						return;
-					
-					// Get sales quantities for each item
-					$priceEntry = $priceEntries[0];
-					$stockID = $this->GetOnlineStoreStockID($priceEntry);
-					isset($totalSales[$stockID]) ? $totalSales[$stockID] += $qty : $totalSales[$stockID] = $qty;
-						
-					// Save the maximum number of sales for this stock item to a class variable
-					$maxSales[$stockID] = $this->GetOnlineStoreMaxSales($priceEntry);
-					
-					$ParamsOK &= $this->CheckPayPalParam($passedParams, "id" , $itemID, $cartIndex);
-					$ParamsOK &= $this->CheckPayPalParam($passedParams, "qty" , $qty, $cartIndex);
-					if (!$ParamsOK)
-					{
-						$this->checkoutError  = __('Cannot Checkout', $this->myDomain).' - ';
-						$this->checkoutError .= __('Shopping Cart Contents have changed', $this->myDomain);
-						return;
-					}
-					
-					$itemPrice = $this->GetOnlineStoreItemPrice($priceEntry);
-					$shipping = 0.0;
-						
-					$paypalParams['item_name_'.$cartIndex] = $this->GetOnlineStoreItemName($priceEntry);
-					$paypalParams['amount_'.$cartIndex] = $itemPrice;
-					$paypalParams['quantity_'.$cartIndex] = $qty;
-					$paypalParams['shipping_'.$cartIndex] = $shipping;
-					
-					$saleDetails['itemID' . $cartIndex] = $itemID;
-					$saleDetails['qty' . $cartIndex] = $qty;
-					$saleDetails['itemPaid' . $cartIndex] = $itemPrice;
-				}
-				
-				// Shopping Cart contents have changed if there are "extra" passed parameters 
-				$cartIndex++;
-				$ParamsOK &= !isset($_POST['id'.$cartIndex]);
-				$ParamsOK &= !isset($_POST['qty'.$cartIndex]);
-				if (!$ParamsOK)
-				{
-					$this->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
-					$this->checkoutError .= __('Item(s) removed from Shopping Cart', $this->myDomain);
-					return;
-				}
-
-				$paypalParams['image_url'] = $myDBaseObj->getImageURL('PayPalLogoImageFile');
-				$paypalParams['cpp_header_image'] = $myDBaseObj->getImageURL('PayPalHeaderImageFile');
-				$paypalParams['no_shipping'] = '2';
-				$paypalParams['business'] = $myDBaseObj->adminOptions['PayPalMerchantID'];	// Can use adminOptions['PayPalAPIEMail']
-				$paypalParams['currency_code'] = $myDBaseObj->adminOptions['PayPalCurrency'];
-				$paypalParams['cmd'] = '_cart';
-				$paypalParams['upload'] = '1';
-				//$paypalParams['rm'] = '2';
-				//$paypalParams['return'] = 'http://tigs/TestBed';
-				$paypalParams['notify_url'] = $myDBaseObj->PayPalNotifyURL;
+				$checkoutRslt->paypalParams['image_url'] = $myDBaseObj->getImageURL('PayPalLogoImageFile');
+				$checkoutRslt->paypalParams['cpp_header_image'] = $myDBaseObj->getImageURL('PayPalHeaderImageFile');
+				$checkoutRslt->paypalParams['no_shipping'] = '2';
+				$checkoutRslt->paypalParams['business'] = $myDBaseObj->adminOptions['PayPalMerchantID'];	// Can use adminOptions['PayPalAPIEMail']
+				$checkoutRslt->paypalParams['currency_code'] = $myDBaseObj->adminOptions['PayPalCurrency'];
+				$checkoutRslt->paypalParams['cmd'] = '_cart';
+				$checkoutRslt->paypalParams['upload'] = '1';
+				//$checkoutRslt->paypalParams['rm'] = '2';
+				//$checkoutRslt->paypalParams['return'] = 'http://tigs/TestBed';
+				$checkoutRslt->paypalParams['notify_url'] = $myDBaseObj->PayPalNotifyURL;
 			
+				$paypalURL = 'http://www.paypal.com/cgi-bin/webscr';
+				
 				$paypalMethod = 'GET';				
 				if ($paypalMethod == 'GET')
 				{
-					foreach ($paypalParams as $paypalArg => $paypalParam)
+					foreach ($checkoutRslt->paypalParams as $paypalArg => $paypalParam)
 						$paypalURL = add_query_arg($paypalArg, urlencode($paypalParam), $paypalURL);
-					$paypalParams = array();					
+					$checkoutRslt->paypalParams = array();					
 				}
 				
+				// Lock tables so we can commit the pending sale
+				$this->myDBaseObj->LockSalesTable();
+					
+				// Check quantities before we commit 
+				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt->totalSales, $checkoutRslt->maxSales);
+					
 				if ($ParamsOK)
   				{
-					// Lock tables so we can commit the pending sale
-					$this->myDBaseObj->LockSalesTable();
-					
-					// Check quantities before we commit 
-					$ParamsOK = $this->IsOnlineStoreItemAvailable($totalSales, $maxSales);
-					
-					if ($ParamsOK)
-	  				{
-						// Update quantities ...
-						$saleId = $this->myDBaseObj->LogPendingSale($saleDetails);
-						$paypalURL = add_query_arg('custom', $saleId, $paypalURL);		
-					}
+					// Update quantities ...
+					$saleId = $this->myDBaseObj->LogPendingSale($checkoutRslt->saleDetails);
+					$paypalURL = add_query_arg('custom', $saleId, $paypalURL);		
+				}
 						
-					// Release Tables
-					$this->myDBaseObj->UnLockTables();
+				// Release Tables
+				$this->myDBaseObj->UnLockTables();
 					
-					if ($ParamsOK)
-	  				{
-						$_SESSION['$this->trolleyid'] = array();	// Clear the shopping cart
-					
-						if ($this->myDBaseObj->isOptionSet('Dev_IPNLocalServer'))
-						{
-							$this->checkoutError .= __('Using Local IPN Server - PayPal Checkout call blocked', $this->myDomain);
-						}
-						else 
-						{
-							header( 'Location: '.$paypalURL ) ;
-							exit;
-						}
-					}
-					else
+				if ($ParamsOK)
+  				{
+					$_SESSION['$this->trolleyid'] = array();	// Clear the shopping cart
+				
+					if ($this->myDBaseObj->isOptionSet('Dev_IPNLocalServer'))
 					{
-						$this->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
-						$this->checkoutError .= __('Sold out for one or more performances', $this->myDomain);
-						return;						
+						$this->checkoutError .= __('Using Local IPN Server - PayPal Checkout call blocked', $this->myDomain);
 					}
+					else 
+					{
+						header( 'Location: '.$paypalURL ) ;
+						exit;
+					}
+				}
+				else
+				{
+					$this->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
+					$this->checkoutError .= __('Sold out for one or more performances', $this->myDomain);
+					return;						
 				}
 				
 			}			

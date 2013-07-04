@@ -32,6 +32,8 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			$editMode = false;
 			parent::__construct($env, $editMode);
 				
+			$this->SetRowsPerPage(self::STAGESHOWLIB_EVENTS_UNPAGED);
+			
 			$this->HeadersPosn = StageShowLibTableClass::HEADERPOSN_TOP;
 		}
 		

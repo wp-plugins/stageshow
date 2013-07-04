@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.5.1
-Stable tag: 2.0.6
+Tested up to: 3.5.2
+Stable tag: 2.1
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -39,15 +39,18 @@ Additional Features in StageShow+ (available <a href=http://corondeck.co.uk/Stag
 
 * No limit on number of Shows or Performances
 * Unlimited number of User defined "Price Plans" to set prices when adding a performance
+* Optional ticket Reservations for logged in users (i.e. Unpaid ticket sales)
+* Allows ticket prices to be defined as "Admin Only" (only available via Admin menus)
+* Reservation Client Details captured from Users Profile extended by any 3rd party plugin
 * MIME Encoded EMails so HTML/Text mixed format emails supported
 * Optional Barcode of Transaction ID in sale confirmation emails
-* Ticket Verification and Logging
+* Logging of Online Ticket Validation attempts
 * Multiple Terminal Support for Verification
 * Editing of Sale Entries
 * Individually customisable additional Show title output (text or HTML) on Box Office page
 * Individually customisable additional Performance entry output (text or HTML) on Box Office page
 * Optional EMail with sales summary (to a specified email address) on each new sale 
-* Booking Closing Time determined by a StageShow setting
+* Booking Closing Time can be specified for each performance
 
 == Installation ==
 
@@ -157,20 +160,42 @@ Custom images can be copied to this folder (using FTP) and can then be selected 
 4. Screenshot 4: Ticket Types and Prices Setup 
 5. Screenshot 5: Sales Log Summary 
 6. Screenshot 6: Sales Log Summary (Showing Details) 
-7. Screenshot 7: Sales Log Show Summary 
-8. Screenshot 8: Sales Log Performance Summary 
-9. Screenshot 9: Admin Tools Page 
-10. Screenshot 10: PayPal Settings Page 
-11. Screenshot 11: Stageshow Settings Page 
-12. Screenshot 12: Shows Box Office Page 
+7. Screenshot 7: Admin Tools Page 
+8. Screenshot 8: PayPal Settings Page 
+9. Screenshot 9: General Settings Page 
+10. Screenshot 10: Advanced Settings Page 
+11. Screenshot 11: Shows Box Office Page 
+12. Screenshot 12: Sample EMail 
 
 == Changelog ==
 
 * Version History for StageShow Plugin 
 
+= 2.1 =
+* Bug Fix: Performance name not shown when Performance sales log has no sales
+* Bug Fix: Shows Lists have inoperative pagination controls (sometimes)
+* Bug Fix: Performance Lists have inoperative pagination controls (sometimes)
+* Bug Fix: Sales Lists have inoperative pagination controls (sometimes)
+* Bug Fix: Show name not shown when Show sales log has no sales
+* Bug Fix: Bulk actions do not report error if nothing changed
+* Bug Fix: Status message not shown for Activate/Deactivate Show action
+* Bug Fix: Prices entires for unchanged show(s) blank after duplicate price ref error (StageShow+ only)
+* Bug Fix: Default Performance Expires time does not track changes in performance time
+* Bug Fix: Incorrect value for Sample Sales total paid values
+* Added Reservations (StageShow+ only)
+* EMail Template File renamed "Sale EMail Template" in settings
+* Fuctions in one or both of PayPal mode and Reservation mode (StageShow+ only)
+* Implemented "Visibility" setting for prices (StageShow+ only)
+* Performance Expiry time made editable (StageShow+ only)
+* Sales use "local time" for sale time/date
+* Leading and trailing spaces removed from text settings entries
+* Settings tabs renamed
+* Paid/Due column added to Sales List
+* Added Checkout Notes
+
 = 2.0.6 =
 * Bug Fix: Currency codes in text emails changed to three letter currency code
-* Bug Fix: Surplus &lt;/table&gt; tag in empty sales list
+* Bug Fix: Surplus /table tag in empty sales list
 
 = 2.0.5 =
 * Bug Fix: Undefined stockPrice in Sale Editor fixed
@@ -214,7 +239,7 @@ Custom images can be copied to this folder (using FTP) and can then be selected 
 * Added Currency Formatting
 * Admin Javascript moved to stageshow_admin.js
 * Added "Sold Out" message on BoxOffice output when all tickets sold 
-* Added missing <div> tag to Sales Admin page
+* Added missing &lt;div&gt; tag to Sales Admin page
 * Added Users Guide (in PDF format)
 
 = 1.2.1 =
@@ -359,7 +384,7 @@ Custom images can be copied to this folder (using FTP) and can then be selected 
 * Added styles to BoxOffice page and updated default style
 
 = 0.9.2 =
-* Bug Fix: Malformed &ltform&gt tag on BoxOffice page fixed
+* Bug Fix: Malformed &lt;form&gt; tag on BoxOffice page fixed
 * BoxOffice time/date format now uses WordPress settings
 * (Note: Private release)
 

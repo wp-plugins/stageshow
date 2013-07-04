@@ -33,7 +33,8 @@ if (!class_exists('StageShowPricesAdminListClass'))
 			// Call base constructor
 			parent::__construct($env, true);
 			
-			// FUNCTIONALITY: Prices - Bulk Actions - Delete
+			$this->SetRowsPerPage(self::STAGESHOWLIB_EVENTS_UNPAGED);
+			
 			$this->bulkActions = array(
 				StageShowLibAdminListClass::BULKACTION_DELETE => __('Delete', $this->myDomain),
 			);
@@ -52,11 +53,13 @@ if (!class_exists('StageShowPricesAdminListClass'))
 		function GetMainRowsDefinition()
 		{
 			// FUNCTIONALITY: Prices - Lists Performance, Type and Price
-			return array(
+			$ourOptions = array(
 				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 				array(self::TABLEPARAM_LABEL => 'Type',         self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
 				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, ),						
 			);
+			
+			return $ourOptions;
 		}
 		
 		function PerfDates($result)
@@ -91,6 +94,31 @@ if (!class_exists('StageShowPricesAdminClass'))
 			
 			// Call base constructor
 			parent::__construct($env);
+		}
+		
+		function SavePriceEntry($result)
+		{
+			$myDBaseObj  = $this->myDBaseObj;
+			$pricesUpdated = false;
+							
+			// FUNCTIONALITY: Prices - Save Price Ref and Price
+			$newPriceType = stripslashes($_POST['priceType' . $result->priceID]);
+			if ($newPriceType != $result->priceType)
+			{
+				$myDBaseObj->UpdatePriceType($result->priceID, $newPriceType);
+				$result->priceType = $newPriceType;
+				$pricesUpdated     = true;
+			}
+							
+			$newPriceValue = stripslashes($_POST['priceValue' . $result->priceID]);
+			if ($newPriceValue != $result->priceValue)
+			{
+				$myDBaseObj->UpdatePriceValue($result->priceID, $newPriceValue);
+				$result->priceValue = $newPriceValue;
+				$pricesUpdated      = true;
+			}
+							
+			return $pricesUpdated;
 		}
 		
 		function ProcessActionButtons()
@@ -168,24 +196,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 					{
 						foreach ($results as $result)
 						{
-							$pricesUpdated = false;
-							
-							// FUNCTIONALITY: Prices - Save Price Ref and Price
-							$newPriceType = stripslashes($_POST['priceType' . $result->priceID]);
-							if ($newPriceType != $result->priceType)
-							{
-								$myDBaseObj->UpdatePriceType($result->priceID, $newPriceType);
-								$result->priceType = $newPriceType;
-								$pricesUpdated     = true;
-							}
-							
-							$newPriceValue = stripslashes($_POST['priceValue' . $result->priceID]);
-							if ($newPriceValue != $result->priceValue)
-							{
-								$myDBaseObj->UpdatePriceValue($result->priceID, $newPriceValue);
-								$result->priceValue = $newPriceValue;
-								$pricesUpdated      = true;
-							}
+							$pricesUpdated = $this->SavePriceEntry($result);
 							
 							if ($pricesUpdated)
 								$perfsList[count($perfsList)] = $result;
@@ -316,7 +327,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			switch ($bulkAction)
 			{
 				case StageShowLibAdminListClass::BULKACTION_DELETE:
-					// FUNCTIONALITY: Prices - Action Bulk Action Delete
+					// FUNCTIONALITY: Prices - Bulk Action Delete 
 					// Now delete the entry in the PRICES table
 					$delShowName = $myDBaseObj->DeletePriceByPriceID($recordId);
 					return true;

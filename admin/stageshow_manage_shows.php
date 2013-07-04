@@ -32,6 +32,8 @@ if (!class_exists('StageShowShowsAdminListClass'))
 			// Call base constructor
 			parent::__construct($env, true);
 			
+			$this->SetRowsPerPage(self::STAGESHOWLIB_EVENTS_UNPAGED);
+			
 			// FUNCTIONALITY: Shows - Bulk Actions - Activate/Deactivate and Delete
 			$this->bulkActions = array(
 				StageShowLibAdminListClass::BULKACTION_TOGGLE => __('Activate/Deactivate', $this->myDomain),
@@ -285,7 +287,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 						$myDBaseObj->SetShowActivated($recordId, STAGESHOW_STATE_ACTIVE);
 					
 					// TODO-PRIORITY - Update Inventory Settings for Performance Buttons
-					break;
+					return true;
 					
 			}
 			
@@ -308,6 +310,14 @@ if (!class_exists('StageShowShowsAdminClass'))
 						$actionMsg = ($actionCount == 1) ? __("1 Show has been deleted", $this->myDomain) : $actionCount . ' ' . __("Shows have been deleted", $this->myDomain);
 					else
 						$actionMsg = __("Nothing to Delete", $this->myDomain);
+					break;
+					
+				case StageShowLibAdminListClass::BULKACTION_TOGGLE:
+					// FUNCTIONALITY: Shows - Bulk Action Delete - Output Action Status Message
+					if ($actionCount > 0)
+						$actionMsg = ($actionCount == 1) ? __("1 Show has been Activated/Deactivated", $this->myDomain) : $actionCount . ' ' . __("Shows have been Activated/Deactivated", $this->myDomain);
+					else
+						$actionMsg = __("Nothing to Activate/Deactivate", $this->myDomain);
 					break;
 			}
 			

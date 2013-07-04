@@ -31,6 +31,7 @@ define('STAGESHOW_OPTIONS_NAME', 'stageshowsettings');
 
 define('STAGESHOW_DEFAULT_SETUPUSER', 'administrator');
 
+define('STAGESHOW_CAPABILITY_RESERVEUSER', 'StageShow_Reservations');	// A user that can reserve seats without paying online
 define('STAGESHOW_CAPABILITY_VALIDATEUSER', 'StageShow_Validate');
 define('STAGESHOW_CAPABILITY_SALESUSER', 'StageShow_Sales');			// A user that can view and edit sales
 define('STAGESHOW_CAPABILITY_ADMINUSER', 'StageShow_Admin');			// A user that can edit shows, performances

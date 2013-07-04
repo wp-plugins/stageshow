@@ -61,7 +61,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'salePPStreet'       => __('Street', $this->myDomain),
 				'salePPZip'          => __('Zip', $this->myDomain),
 				'saleStatus'         => __('Sale Status', $this->myDomain),
-				'saleTxnId'          => __('Transaction Id', $this->myDomain),
+				'saleTxnId'          => __('Transaction ID', $this->myDomain),
 				'showEMail'          => __('Show EMail', $this->myDomain),
 				'showExpires'        => __('Show Expires', $this->myDomain),
 				'showID'             => __('Show ID', $this->myDomain),

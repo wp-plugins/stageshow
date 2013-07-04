@@ -135,17 +135,48 @@ if (!class_exists('StageShowToolsAdminClass'))
 				$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
 						
 				if (count($results) > 0)
-				{						
-					$validateMsg .= __('Matching record found', $this->myDomain);
-					echo '<tr><td colspan="2"><div id="message" class="updated"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+				{					
+					$salerecord = $results[0];
 					
+					$validateMsg .= __('Matching record found', $this->myDomain);
+					switch($salerecord->saleStatus)
+					{
+						case PAYPAL_APILIB_SALESTATUS_COMPLETED:
+							$msgClass = 'updated ok';
+							break;
+							
+						case STAGESHOW_SALESTATUS_RESERVED:
+							$msgClass = 'error alert';
+							$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
+							break;
+							
+						default:
+							$msgClass = 'error';
+							$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
+							break;
+							
+							
+					}
+					
+					echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+					
+					echo '<tr><td>'.__('Sale Status', $this->myDomain).':</td><td>'.__($salerecord->saleStatus, $this->myDomain).'</td></tr>'."\n";
+					if ($salerecord->saleStatus == STAGESHOW_SALESTATUS_RESERVED)
+					{
+						echo '<tr><td>'.__('Total Due', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+					}
+					else
+					{
+						echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+					}
+				
 					$salesList = new StageShowSalesAdminDetailsListClass($env);		
 							
 					echo '<tr><td colspan="2">'."\n";
 					$salesList->OutputList($results);	
-					echo "</tr></td>\n";
+					echo "</td></tr>\n";
 							 
-					$saleID = $results[0]->saleID;
+					$saleID = $salerecord->saleID;
 				}
 				else
 				{

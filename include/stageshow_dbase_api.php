@@ -31,6 +31,7 @@ if (!class_exists('StageShowDBaseClass'))
 	global $wpdb;
 	
 	define('STAGESHOW_TABLE_PREFIX', $wpdb->prefix.'sshow_');
+	define('STAGESHOW_SHOWS_TABLE', STAGESHOW_TABLE_PREFIX.'shows');
 	define('STAGESHOW_PERFORMANCES_TABLE', STAGESHOW_TABLE_PREFIX.'perfs');
 	define('STAGESHOW_PRICES_TABLE', STAGESHOW_TABLE_PREFIX.'prices');
 	define('STAGESHOW_SALES_TABLE', STAGESHOW_TABLE_PREFIX.'sales');
@@ -46,6 +47,7 @@ if (!class_exists('StageShowDBaseClass'))
 	define('STAGESHOW_SHOWNAME_TEXTLEN', 80);
 	define('STAGESHOW_PERFREF_TEXTLEN', 16);
 	define('STAGESHOW_PRICETYPE_TEXTLEN', 10);
+	define('STAGESHOW_PRICEVISIBILITY_TEXTLEN', 10);	
 	define('STAGESHOW_PLANREF_TEXTLEN', 20);
 	define('STAGESHOW_TICKETNAME_TEXTLEN', 110);
 	define('STAGESHOW_TICKETTYPE_TEXTLEN', 32);
@@ -66,6 +68,11 @@ if (!class_exists('StageShowDBaseClass'))
 	define('STAGESHOW_STATE_ACTIVE', 'activate');
 	define('STAGESHOW_STATE_INACTIVE', 'deactivate');
 	define('STAGESHOW_STATE_DELETED', 'deleted');
+
+	define('STAGESHOW_VISIBILITY_PUBLIC', 'public');
+	define('STAGESHOW_VISIBILITY_ADMIN', 'admin');
+
+	define('STAGESHOW_SALESTATUS_RESERVED', 'Reserved');
 
 	define('PRICEID1_A1', '12.50');
 	define('PRICEID1_A2', '5.50');
@@ -229,11 +236,22 @@ if (!class_exists('StageShowDBaseClass'))
 			$this->query($sql);
 		}
 		
-		function PurgeDB()
+		function PurgeDB()	// TODO - TEST
 		{
 			// Call PurgeDB() in base class
 			parent::PurgeDB();
 			
+			// Delete all Sales where all tickets are for shows that are deleted
+			$this->PurgeDeletedEntries('showState', array(
+				STAGESHOW_SALES_TABLE.'.saleID',
+				STAGESHOW_TICKETS_TABLE.'.saleID',
+				STAGESHOW_PRICES_TABLE.'.priceID',
+				STAGESHOW_PERFORMANCES_TABLE.'.perfID',
+				STAGESHOW_SHOWS_TABLE.'.showID',
+				),
+				'GROUP BY '
+				);
+
 			// Delete all Sales where all tickets are for performances that are deleted
 			$this->PurgeDeletedEntries('perfState', array(
 				STAGESHOW_SALES_TABLE.'.saleID',
@@ -256,6 +274,10 @@ if (!class_exists('StageShowDBaseClass'))
 
 			// Delete orphaned Prices entries
 			$this->PurgeOrphans(array(STAGESHOW_PRICES_TABLE.'.priceID', STAGESHOW_PERFORMANCES_TABLE.'.perfID'));
+			
+			// Delete Shows marked as deleted that have no Performance
+			$condition = STAGESHOW_SHOWS_TABLE.'.showState = "'.STAGESHOW_STATE_DELETED.'"';
+			$this->PurgeOrphans(array(STAGESHOW_SHOWS_TABLE.'.showID', STAGESHOW_PERFORMANCES_TABLE.'.showID'), $condition);						
 		}
 		
 		function init()
@@ -279,10 +301,12 @@ if (!class_exists('StageShowDBaseClass'))
 			// FUNCTIONALITY: DBase - StageShow - Uninstall - Delete Performance, Prices and Tickets tables and Capabilities
 			
 			parent::uninstall();
+      		$this->DropTable(STAGESHOW_SHOWS_TABLE);
 			$this->DropTable(STAGESHOW_PERFORMANCES_TABLE);      
 			$this->DropTable(STAGESHOW_PRICES_TABLE);      
 			$this->DropTable(STAGESHOW_TICKETS_TABLE);  			
 			
+			$this->DeleteCapability(STAGESHOW_CAPABILITY_RESERVEUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_VALIDATEUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_SALESUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_ADMINUSER);
@@ -291,12 +315,11 @@ if (!class_exists('StageShowDBaseClass'))
 		}
 		
 		//Returns an array of admin options
-			function getOptions($childOptions = array())
-			{
+		function getOptions($childOptions = array())
+		{
 			// Initialise settings array with default values
 			$ourOptions = array(        
 		        'loaded' => true,
-		        'showName' => '',
 		        
 				'SetupUserRole' => STAGESHOW_DEFAULT_SETUPUSER,
 		        'AuthTxnEMail' => '',                
@@ -370,7 +393,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			return $currOptions;
 		}
-    
+        
 		function get_domain()
 		{
 			// This function returns the domain id (for translations) 
@@ -388,9 +411,11 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function createDB($dropTable = false)
 		{
+      		global $wpdb;
+     
 			if ($dropTable && isset($this->adminOptions['showName']))
 			{
-				$this->adminOptions['showName'] = '';
+				unset($this->adminOptions['showName']);
 				$this->saveOptions();
 			}
 			
@@ -418,6 +443,57 @@ if (!class_exists('StageShowDBaseClass'))
 			//excecute the query
 			$this->dbDelta($sql);
 
+			// ------------------- STAGESHOW_SHOWS_TABLE -------------------
+			$table_name = STAGESHOW_SHOWS_TABLE;
+
+			if ($dropTable)
+				$this->DropTable($table_name);
+			else
+			{
+				if( mysql_num_rows( mysql_query("SHOW TABLES LIKE '".STAGESHOW_PERFORMANCES_TABLE."'")) > 0)
+					$addingShowsTable = ($wpdb->get_var("SHOW TABLES LIKE '".STAGESHOW_SHOWS_TABLE."'") != STAGESHOW_SHOWS_TABLE);
+				else
+					$addingShowsTable = false;			
+			}
+				
+			$sql = "CREATE TABLE ".$table_name.' ( 
+				showID INT UNSIGNED NOT NULL AUTO_INCREMENT,
+				showName VARCHAR('.STAGESHOW_SHOWNAME_TEXTLEN.') NOT NULL,
+				showState VARCHAR('.STAGESHOW_ACTIVESTATE_TEXTLEN.'), 
+				UNIQUE KEY showID (showID)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
+
+			//excecute the query
+			$this->dbDelta($sql);
+			
+			// StageShow to StageShow-Plus Update
+			if ($addingShowsTable && isset($this->adminOptions['showName']))
+			{
+				// See if we have a show configured for StageShow before adding SHOWS table
+				if ($this->adminOptions['showName'] != '')
+				{
+					$showName = $this->adminOptions['showName'];
+					$showState = $this->adminOptions['showState'];
+					
+					//$this->LogToDebugFile("Activate.log", "StageShow Shows: ");		
+					//$this->LogToDebugFile("Activate.log", print_r($showName, true));		
+					
+					$this->AddShow($showName, $showState);
+					
+					if (isset($this->adminOptions['showName']))
+					{
+						unset($this->adminOptions['showName']);
+						unset($this->adminOptions['showState']);
+						$this->saveOptions();
+					}
+					
+					//$this->LogToDebugFile("Activate.log", "Updated in StageShowDBaseClass() constructor ");	
+					//$this->LogToDebugFile("Activate.log", "adminOptions: ");																					
+					//$this->LogToDebugFile("Activate.log", print_r($this->adminOptions, true));												
+				}
+			}
+			
+			// ------------------- STAGESHOW_PERFORMANCES_TABLE -------------------
 			$table_name = STAGESHOW_PERFORMANCES_TABLE;
 			
 			if ($dropTable)
@@ -451,13 +527,14 @@ if (!class_exists('StageShowDBaseClass'))
 					perfID INT UNSIGNED NOT NULL,
 					priceType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL,
 					priceValue DECIMAL(9,2) NOT NULL,
+					priceVisibility VARCHAR('.STAGESHOW_PRICEVISIBILITY_TEXTLEN.') NOT NULL DEFAULT "public",
 					UNIQUE KEY priceID (priceID)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
 
 			//excecute the query
 			$this->dbDelta($sql);
     	}
-    
+        
 		function DBField($fieldName)
 		{
 			switch($fieldName)
@@ -518,14 +595,14 @@ if (!class_exists('StageShowDBaseClass'))
 				$saleEMail = 'other@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime1, 'A.N.Other', $saleEMail, 12.00, 0.61, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime1, 'A.N.Other', $saleEMail, 12.00, 0.60, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'Andrew Other', '1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
 				$this->AddSaleItem($saleID, $priceID1_C3, 4, PRICEID1_C3);
 				$this->AddSaleItem($saleID, $priceID1_A3, 1, PRICEID1_A3);
 				$saleEMail = 'mybrother@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.Brother', $saleEMail, 48.00, 2.41, '87654321qa', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.Brother', $saleEMail, 24.00, 1.01, '87654321qa', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
 				$this->AddSaleItem($saleID, $priceID1_A4, 4, PRICEID1_A4);
 				$timeStamp = current_time('timestamp');
@@ -716,8 +793,6 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			$timeNow = current_time('mysql');
 			
-			$sqlFilters['derivedJoins'] = true;
-			
 			$selectFields  = '*';
 			$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			//$selectFields .= ', MAX(perfDateTime) AS maxPerfDateTime';
@@ -729,17 +804,17 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			$this->perfJoined = true;
 
-			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
-			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
+			$sql  = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
+			$sql .= " JOIN ".STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
 			
 			// Add SQL filter(s)
 			$sql .= $this->GetWhereSQL($sqlFilters);
-			$sql .= 'AND perfDateTime>"'.$timeNow.'" ';
+			$sql .= ' AND perfDateTime>"'.$timeNow.'" ';
 			$sql .= $this->GetOptsSQL($sqlFilters);
 			
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 			
-			$results = $this->get_results($sql, $sqlFilters);
+			$results = $this->get_results($sql, true, $sqlFilters);
 
 			return $results;
 		}
@@ -751,9 +826,8 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function GetShowsList($showID = 0)
 		{
-			$sqlFilters['derivedJoins'] = true;
-			
 			$selectFields  = '*';
+			$selectFields .= ','.STAGESHOW_SHOWS_TABLE.'.showID';
 			$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$selectFields .= ','.STAGESHOW_PRICES_TABLE.'.priceID';
 
@@ -768,8 +842,8 @@ if (!class_exists('StageShowDBaseClass'))
 					$selectFields .= ','.$totalSalesField;
 			}
 			
-			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
-			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
+			$sql = "SELECT $selectFields FROM ".STAGESHOW_SHOWS_TABLE;
+			$sql .= " LEFT JOIN ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.showID='.STAGESHOW_SHOWS_TABLE.'.showID';
 			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$sql .= " LEFT JOIN ".STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.priceID='.STAGESHOW_PRICES_TABLE.'.priceID';
 			$sql .= " LEFT JOIN ".STAGESHOW_SALES_TABLE.' ON '.STAGESHOW_SALES_TABLE.'.saleID='.STAGESHOW_TICKETS_TABLE.'.saleID';
@@ -778,10 +852,9 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			$sql .= $this->GetOptsSQL($sqlFilters);
 			
-			//$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 			
-			$results = $this->get_results($sql, $sqlFilters);
+			$results = $this->get_results($sql, true, $sqlFilters);
 
 			return $results;
 		}
@@ -801,61 +874,80 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function IsShowNameUnique($showName)
 		{
-			return true;
+			$sql  = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
+			$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showName="'.$showName.'"';
+			
+			$showsEntries = $this->get_results($sql);
+			return (count($showsEntries) > 0) ? false : true;
 		}
 		
 		function SetShowActivated($showID, $showState = STAGESHOW_STATE_ACTIVE)
 		{
-			// Set Show Activated Flag in Options
-			$this->adminOptions['showState'] = $showState;
-			$this->saveOptions();
+			$sql  = 'UPDATE '.STAGESHOW_SHOWS_TABLE;
+			$sql .= ' SET showState="'.$showState.'"';
+			$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showID='.$showID;;
+
+			$this->query($sql);	
+			return "OK";							
 		}
 		
 		function CanAddShow()
 		{		
-			// FUNCTIONALITY: Shows - StageShow limits to a single show
-			// Check if a show is already configured
-			if ( (isset($this->adminOptions['showName'])) && (strlen($this->adminOptions['showName']) > 0) )
-				return false;
-						
-			return true;
+			// FUNCTIONALITY: Shows - StageShow only supports a single show
+			$rtnVal = true;
+			
+			$sql  = 'SELECT COUNT(*) AS showLen FROM '.STAGESHOW_SHOWS_TABLE;
+			 
+			$results = $this->get_results($sql);
+			$rtnVal = ($results[0]->showLen < 1);
+			
+			return $rtnVal;
 		}
 		 
 		function AddShow($showName = '', $showState = STAGESHOW_STATE_ACTIVE)
 		{
 			// FUNCTIONALITY: Shows - StageShow - Add Show
-			// Check if a show is already configured
+			// Check if a show can be added
 			if (!$this->CanAddShow())
 				return 0;
 				
-			if ($showName === '') 
+	      	if ($showName === '')
+	      	{
+				$newNameNo = 1;
+				while (true)
+				{
+					$showName = __('Unnamed Show', $this->get_domain());
+					if ($newNameNo > 1) $showName .= ' '.$newNameNo;
+					if ( isset($this->testModeEnabled) ) 
+						$showName .= " (".StageShowLibUtilsClass::GetSiteID().")";
+						
+					if ($this->IsShowNameUnique($showName))
+						break;
+					$newNameNo++;
+				}
+			}
+			else
 			{
-				$showName = __('Unnamed Show', $this->get_domain());
-				if ( isset($this->testModeEnabled) ) 
-					$showName .= " (".StageShowLibUtilsClass::GetSiteID().")";
+				if (!$this->IsShowNameUnique($showName))
+					return 0;	// Error - Show Name is not unique
 			}
 						
-			$this->adminOptions['showName'] = $showName;
-			$this->saveOptions();
-			
-			$this->SetShowActivated(1, $showState);
-			
-     		return 1;
+			$sql = 'INSERT INTO '.STAGESHOW_SHOWS_TABLE.'(showName, showState) VALUES("'.$showName.'", "'.$showState.'")';
+			$this->query($sql);	
+					
+     		return mysql_insert_id();
 		}
 				
 		function UpdateShowName($showID, $showName)
 		{
-			// FUNCTIONALITY: Shows - StageShow - Update Show
 			if (!$this->IsShowNameUnique($showName))
 				return "ERROR";
 				
-			if ($showID != 1)	// Only one show supported
-				return "ERROR";
-				
-			// Save Show Name()
-			$this->adminOptions['showName'] = $showName;
-			$this->saveOptions();
-			
+			$sql  = 'UPDATE '.STAGESHOW_SHOWS_TABLE;
+			$sql .= ' SET showName="'.$showName.'"';
+			$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showID='.$showID;;
+			$this->query($sql);	
+
 			// FUNCTIONALITY: Shows - StageShow - Show Name Changed ... Updated Any Hosted Buttons
 			$perfsList = $this->GetPerformancesListByShowID($showID);
 			$this->UpdateCartButtons($perfsList);
@@ -865,10 +957,11 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function GetShowID($showName)
 		{
-			if ($showName != $this->adminOptions['showName']) 
-				return 0;
+			$sql  = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
+			$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showName="'.$showName.'"';
 			
-			return 0;
+			$showsEntries = $this->get_results($sql);
+			return (count($showsEntries) > 0) ? $showsEntries[0]->showID : 0;
 		}
 		
 		function CanDeleteShow($showEntry)
@@ -894,44 +987,11 @@ if (!class_exists('StageShowDBaseClass'))
 			return $canDelete;		
 		}
 		
-		function get_results($sql, $sqlFilters = array())
+		function get_results($sql, $debugOutAllowed = true, $sqlFilters = array())
 		{
 			$this->perfJoined = false;
 			
-			$results = parent::get_results($sql, false);
-
-			// Add Show Name
-			if (isset($this->adminOptions['showName']) && ($this->adminOptions['showName'] !== ''))
-			{
-				if ((count($results) == 0) && isset($sqlFilters['JoinType']) && ($sqlFilters['JoinType'] === 'RIGHT JOIN'))
-				{				
-					$results[0] = new stdClass();
-				}
-				
-				$addTotalQty = (strpos($sql, 'totalQty') !== false);
-			
-				for ($i=0; $i<count($results); $i++)
-				{
-					if (isset($results[$i]->showName))
-						break;
-							
-					$results[$i]->showName = $this->adminOptions['showName'];
-					$results[$i]->showID = 1;
-					$results[$i]->showState = (isset($this->adminOptions['showState'])) ? $this->adminOptions['showState'] : STAGESHOW_STATE_ACTIVE;
-					
-					if ($addTotalQty)	// Check if we need the totalQty field
-					{
-						if (!isset($results[$i]->totalQty))
-							$results[$i]->totalQty = NULL;
-						if (!isset($results[$i]->soldQty))
-							$results[$i]->soldQty = NULL;
-						if (!isset($results[$i]->soldValue))
-							$results[$i]->soldValue = NULL;						
-					}
-				}
-			}
-			
-			$this->show_results($results);
+			$results = parent::get_results($sql, $debugOutAllowed);
 			
 			return $results;
 		}
@@ -1001,8 +1061,6 @@ if (!class_exists('StageShowDBaseClass'))
 				
 		private function GetPerformancesList($sqlFilters = null)
 		{
-			$sqlFilters['derivedJoins'] = true;
-			
 			$selectFields  = '*';
 			$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$selectFields .= ','.STAGESHOW_PRICES_TABLE.'.priceID';
@@ -1017,9 +1075,9 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 			
 			$this->perfJoined = true;
-			
+
 			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
-			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
+			$sql .= " LEFT JOIN ".STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
 			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$sql .= " LEFT JOIN ".STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.priceID='.STAGESHOW_PRICES_TABLE.'.priceID';
 			$sql .= " LEFT JOIN ".STAGESHOW_SALES_TABLE.' ON '.STAGESHOW_SALES_TABLE.'.saleID='.STAGESHOW_TICKETS_TABLE.'.saleID';
@@ -1214,6 +1272,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			if ($activeOnly)
 			{
+				$sqlFilters['publicPrices'] = true;
 				$sqlFilters['activePrices'] = true;
 				$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
 			}
@@ -1236,8 +1295,6 @@ if (!class_exists('StageShowDBaseClass'))
 				
 		function GetPricesList($sqlFilters)
 		{
-			$sqlFilters['derivedJoins'] = true;
-
 			$selectFields  = '*';
 			if (isset($sqlFilters['saleID']))
 			{
@@ -1251,7 +1308,7 @@ if (!class_exists('StageShowDBaseClass'))
 						
 			$sql  = 'SELECT '.$selectFields.' FROM '.STAGESHOW_PRICES_TABLE;
       		$sql .= ' '.$joinCmd.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
-			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
+      		$sql .= ' '.$joinCmd.STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID';
@@ -1271,7 +1328,7 @@ if (!class_exists('StageShowDBaseClass'))
 			return ($pricesEntries[0]->MatchCount > 0) ? false : true;
 		}
 		
-		function AddPrice($perfID, $priceType, $priceValue)
+		function AddPrice($perfID, $priceType, $priceValue, $priceVisibility = STAGESHOW_VISIBILITY_PUBLIC)
 		{
      		if ($perfID <= 0) return 0;
       
@@ -1293,8 +1350,8 @@ if (!class_exists('StageShowDBaseClass'))
 					return 0;	// Error - Performance Reference is not unique
 			}
 			
-			$sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceValue)';
-			$sql .= ' VALUES('.$perfID.', "'.$priceType.'", "'.$priceValue.'")';
+			$sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceValue, priceVisibility)';
+			$sql .= ' VALUES('.$perfID.', "'.$priceType.'", "'.$priceValue.'", "'.$priceVisibility.'")';
 			 
 			
 			$this->query($sql);
@@ -1320,6 +1377,12 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->UpdatePriceEntry($priceID, $sqlSET);
 		}								
 				
+		function UpdatePriceVisibility($priceID, $newPriceVisibility)
+		{
+			$sqlSET = 'priceVisibility="'.$newPriceVisibility.'"';
+			return $this->UpdatePriceEntry($priceID, $sqlSET);
+		}								
+				
 		function UpdatePriceEntry($priceID, $sqlSET)
 		{
 			$sql  = 'UPDATE '.STAGESHOW_PRICES_TABLE;
@@ -1330,14 +1393,18 @@ if (!class_exists('StageShowDBaseClass'))
 			return "OK";							
 		}
 
-		function DeleteShowByShowID($ID)
+		function DeleteShowByShowID($showID)
 		{
-			// Get the current name and then clear it
-			$rtnVal = $this->adminOptions['showName'];
-			$this->adminOptions['showName'] = '';
-			$this->saveOptions();
+			// Get the show name
+			$sql = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
+			$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.".showID=$showID";
+			$results = $this->get_results($sql);
+			
+			if (count($results) == 0) return '';
+			
+			$this->SetShowActivated($showID, STAGESHOW_STATE_DELETED);
 
-			return $rtnVal;
+			return $results[0]->showName;
 		}			
 		
 		function DeletePerformanceByPerfID($perfID)
@@ -1434,22 +1501,19 @@ if (!class_exists('StageShowDBaseClass'))
 		function GetJoinedTables($sqlFilters = null, $classID = '')
 		{
 			$sqlJoin = '';
-			if ($classID != __CLASS__)
-				$sqlJoin .= parent::GetJoinedTables($sqlFilters, $classID);
-			else if (isset($sqlFilters['derivedJoins']))
-				return $sqlJoin;
 			
 			$joinType = isset($sqlFilters['JoinType']) ? $sqlFilters['JoinType'] : 'JOIN';
 			
 			// JOIN parent tables
-			if (!isset($sqlFilters['PerfsJoined']) && !$this->perfJoined)
-			{
-				$sqlJoin .= " $joinType ".STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.saleID='.STAGESHOW_SALES_TABLE.'.saleID';
-				$sqlJoin .= " $joinType ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.priceID='.STAGESHOW_TICKETS_TABLE.'.priceID';
-				$sqlJoin .= " $joinType ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
+			$sqlJoin .= " $joinType ".STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.saleID='.STAGESHOW_SALES_TABLE.'.saleID';
+			$sqlJoin .= " $joinType ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.priceID='.STAGESHOW_TICKETS_TABLE.'.priceID';
+			$sqlJoin .= " $joinType ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
 			
-				$this->perfJoined = true;						
-			}
+			$this->perfJoined = true;						
+			
+			$sqlJoin .= " $joinType ".STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
+						
+			$this->showJoined = true;
 						
 			return $sqlJoin;
 		}
@@ -1487,7 +1551,7 @@ if (!class_exists('StageShowDBaseClass'))
 						}
 						else
 						{
-						$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfState="'.$sqlFilters['perfState'].'"';
+							$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfState="'.$sqlFilters['perfState'].'"';
 						}
 					}
 					else
@@ -1506,12 +1570,37 @@ if (!class_exists('StageShowDBaseClass'))
 				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceType="'.$sqlFilters['priceType'].'"';
 				$sqlCmd = ' AND ';
 			}
+						
+			if (isset($sqlFilters['publicPrices']))
+			{
+				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceVisibility="'.STAGESHOW_VISIBILITY_PUBLIC.'"';
+				$sqlCmd = ' AND ';
+			}
 			
 			if (isset($sqlFilters['activePrices']))
 			{
 				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceValue>"0"';
 				$sqlCmd = ' AND ';
 			}			
+			
+			if (isset($sqlFilters['showID']) && ($sqlFilters['showID'] > 0))
+			{
+				$sqlWhere .= $sqlCmd.STAGESHOW_SHOWS_TABLE.'.showID="'.$sqlFilters['showID'].'"';
+				$sqlCmd = ' AND ';
+			}
+			else if (!isset($sqlFilters['perfID']) && isset($this->showJoined) )
+			{
+				if (!isset($sqlFilters['showState']))
+				{
+					$sqlWhere .= $sqlCmd.STAGESHOW_SHOWS_TABLE.'.showState<>"'.STAGESHOW_STATE_DELETED.'"';
+					$sqlCmd = ' AND ';
+				}
+				else
+				{
+					$sqlWhere .= $sqlCmd.STAGESHOW_SHOWS_TABLE.'.showState="'.$sqlFilters['showState'].'"';
+					$sqlCmd = ' AND ';				
+				}
+			}
 			
 			return $sqlWhere;
 		}
@@ -1527,7 +1616,7 @@ if (!class_exists('StageShowDBaseClass'))
 						break;
 						
 					case 'showID':
-						$sqlOpts = $this->AddSQLOpt($sqlOpts, ' GROUP BY ', STAGESHOW_PERFORMANCES_TABLE.'.showID');
+						$sqlOpts = $this->AddSQLOpt($sqlOpts, ' GROUP BY ', STAGESHOW_SHOWS_TABLE.'.showID');
 						break;
 						
 					case 'perfID':
@@ -1546,7 +1635,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$sqlOpts = parent::GetOptsSQL($sqlFilters, $sqlOpts);
 			return $sqlOpts;
 		}
-		
+				
 // ----------------------------------------------------------------------
 //
 //			Start of GENERIC SALES functions
@@ -1573,13 +1662,16 @@ if (!class_exists('StageShowDBaseClass'))
 				
 		function TotalSalesField($sqlFilters)
 		{
-			// totalQty may not included Pending sales (i.e. saleStatus=Checkout)) - add it here!
+			// totalQty may not include Pending sales (i.e. saleStatus=Checkout)) - add it here!
 			$sql  = '  SUM(ticketQty) AS totalQty ';
 			//$sql .= ', SUM(priceValue * ticketQty) AS totalValue ';
 			if ($this->UseIntegratedTrolley())
 			{
-				$sql .= ', SUM(IF(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'", priceValue * ticketQty, 0)) AS soldValue ';
-				$sql .= ', SUM(IF(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'", ticketQty, 0)) AS soldQty ';				
+				$statusOptions  = '(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'")';
+				$statusOptions .= ' OR ';
+				$statusOptions .= '(saleStatus="'.STAGESHOW_SALESTATUS_RESERVED.'")';
+				$sql .= ', SUM(IF('.$statusOptions.', priceValue * ticketQty, 0)) AS soldValue ';
+				$sql .= ', SUM(IF('.$statusOptions.', ticketQty, 0)) AS soldQty ';				
 			}
 			else
 			{
@@ -1619,7 +1711,9 @@ if (!class_exists('StageShowDBaseClass'))
 
 		function GetAllSalesListBySaleTxnId($saleTxnId)
 		{
+			// Add TotalSalesField .... groupBy does the trick!
 			$sqlFilters['saleTxnId'] = $saleTxnId;
+			//$sqlFilters['groupBy'] = 'saleID';
 			return $this->GetSalesList($sqlFilters);
 		}
 				
@@ -1642,8 +1736,6 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			$selectFields  = '*';
 			
-			$sqlFilters['PerfsJoined'] = true;		// Prices table is joined in base query
-			
 			$sqlWhere = ' WHERE '.STAGESHOW_TICKETS_TABLE.'.saleID = "'.$saleID.'"';
 			
 			$sql  = 'SELECT '.$selectFields;
@@ -1651,7 +1743,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql .= ' RIGHT JOIN ( SELECT * FROM '.STAGESHOW_PRICES_TABLE.' ) AS prices';
 			$sql .= ' ON sales.priceID = prices.priceID';
 			$sql .= ' JOIN '.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID=prices.perfID';			
-			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
+			$sql .= ' JOIN '.STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
 			$sql .= ' LEFT JOIN '.STAGESHOW_SALES_TABLE.' ON '.STAGESHOW_SALES_TABLE.'.saleID=sales.saleID';
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime, prices.priceType';
 
@@ -1878,14 +1970,22 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql = parent::AddTableLocks($sql);
 			$sql .= ', '.STAGESHOW_PRICES_TABLE.' READ';
 			$sql .= ', '.STAGESHOW_PERFORMANCES_TABLE.' READ';
+			$sql .= ', '.STAGESHOW_SHOWS_TABLE.' READ';
 			return $sql;
 		}
-		
+				
 		function query($sql)
 		{
 			$this->perfJoined = false;
 			return parent::query($sql);
 		}
+		
+		function ShowSQL($sql, $values = null)
+		{
+			parent::ShowSQL($sql, $values);
+			
+			unset($this->showJoined);
+		}	
 		
 	}
 }
