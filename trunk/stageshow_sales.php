@@ -346,14 +346,15 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$perfDateTime = $this->myDBaseObj->FormatDateForDisplay($priceEntry->perfDateTime);
 			$priceType = $priceEntry->priceType;
 			$priceValue = $this->GetOnlineStoreItemPrice($priceEntry);
-			$total = $this->myDBaseObj->FormatCurrency($priceValue * $qty);
+			$total = $priceValue * $qty;
+			$formattedTotal = $this->myDBaseObj->FormatCurrency($total);
 			$shipping = 0.0;
 						
 			echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.$showName.'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.$perfDateTime.'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-type">'.$priceType.'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.$qty.'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.$total.'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.$formattedTotal.'</td>'."\n";
 
 			return $total;
 		}
