@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 2.1 \n"
+"Project-Id-Version: StageShow 2.1.1 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowplus\n"
-"POT-Creation-Date: 2013-07-03 20:59:50+00:00\n"
+"POT-Creation-Date: 2013-07-05 21:35:51+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1089,11 +1089,11 @@ msgstr ""
 msgid "Reserve"
 msgstr ""
 
-#: stageshow_sales.php:376
+#: stageshow_sales.php:377
 msgid "Unknown"
 msgstr ""
 
-#: stageshow_sales.php:438
+#: stageshow_sales.php:439
 msgid "Tickets reserved - Confirmation EMail sent to "
 msgstr ""
 
