@@ -654,6 +654,13 @@ if (!class_exists('SalesPluginBaseClass'))
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
 				if (isset($checkoutRslt->checkoutError)) return;
 				
+				if ($checkoutRslt->totalDue == 0)
+				{
+					$this->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
+					$this->checkoutError .= __('Total sale is zero', $this->myDomain);
+					return;						
+				}
+				
 				$checkoutRslt->paypalParams['image_url'] = $myDBaseObj->getImageURL('PayPalLogoImageFile');
 				$checkoutRslt->paypalParams['cpp_header_image'] = $myDBaseObj->getImageURL('PayPalHeaderImageFile');
 				$checkoutRslt->paypalParams['no_shipping'] = '2';

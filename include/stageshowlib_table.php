@@ -485,17 +485,21 @@ if (!class_exists('StageShowLibTableClass'))
 			
 			$this->OutputCheckboxScript();
 			
-			$tagNo = $which === 'top' ? '' : '2';
+			$ctrlPosn = $which === 'top' ? '_t' : '_b';
+			$buttonId = 'action_'.$this->tableName.$ctrlPosn;
 			
 			$bulkActions = __('Bulk Actions', $this->myDomain);
 			
+			$onclickParam = '';
+			//$onclickParam = "onclick=\"return confirmBulkAction(this, '$buttonId')\"";
+			
 			$output  = "<div class='alignleft actions'>\n";
-			$output .= "<select name='action$tagNo'>\n"; 
+			$output .= "<select id='$buttonId' name='action$ctrlPosn'>\n"; 
 			$output .= "<option value='-1' selected='selected'>$bulkActions &nbsp;&nbsp;</option>\n"; 
 			foreach ($this->bulkActions as $action => $actionID)
 				$output .= "<option value='$action'>$actionID</option>\n"; 
 			$output .= "</select>\n"; 
-			$output .= "<input type='submit' name='' id='doaction' class='button-secondary action' value=".__('Apply', $this->myDomain)."  />\n"; 
+			$output .= "<input type='submit' name='doaction$ctrlPosn' id='doaction$ctrlPosn' $onclickParam class='button-secondary action' value=".__('Apply', $this->myDomain)."  />\n"; 
 			$output .= "</div>\n"; 
 			
 			return $output;
@@ -580,6 +584,7 @@ function updateCheckboxes(obj)
 		
 	//var eventtype = event.type;
 }
+
 
 </script>
 			";
