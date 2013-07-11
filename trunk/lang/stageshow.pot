@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 2.1.1 \n"
+"Project-Id-Version: StageShow 2.1.2 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowplus\n"
-"POT-Creation-Date: 2013-07-05 21:35:51+00:00\n"
+"POT-Creation-Date: 2013-07-11 06:15:28+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: admin\stageshow_manage_overview.php:216
 #: admin\stageshow_manage_performances.php:298
-#: admin\stageshow_manage_prices.php:244 admin\stageshow_manage_shows.php:197
+#: admin\stageshow_manage_prices.php:237 admin\stageshow_manage_shows.php:197
 msgid "No Show Configured"
 msgstr ""
 
@@ -110,21 +110,21 @@ msgid "Empty Date Entry"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:194
-#: admin\stageshow_manage_prices.php:189 admin\stageshow_manage_shows.php:129
-#: admin\stageshowplus_manage_priceplans.php:171
+#: admin\stageshow_manage_prices.php:182 admin\stageshow_manage_shows.php:129
+#: admin\stageshowplus_manage_priceplans.php:190
 msgid "Settings have NOT been saved"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:257
-#: admin\stageshow_manage_prices.php:209 admin\stageshow_manage_prices.php:222
+#: admin\stageshow_manage_prices.php:202 admin\stageshow_manage_prices.php:215
 #: admin\stageshow_manage_shows.php:155
-#: admin\stageshowplus_manage_priceplans.php:173 include\mjslib_admin.php:353
+#: admin\stageshowplus_manage_priceplans.php:192 include\mjslib_admin.php:363
 #: include\mjslib_paypal_settings.php:251
 msgid "Settings have been saved"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:298
-#: admin\stageshow_manage_prices.php:244 admin\stageshow_manage_prices.php:258
+#: admin\stageshow_manage_prices.php:237 admin\stageshow_manage_prices.php:251
 #: admin\stageshow_manage_sales.php:69
 msgid "Add one Here"
 msgstr ""
@@ -138,8 +138,8 @@ msgid "Add New Performance"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:335
-#: admin\stageshow_manage_prices.php:290 admin\stageshow_manage_shows.php:215
-#: admin\stageshowplus_manage_priceplans.php:264 include\mjslib_admin.php:393
+#: admin\stageshow_manage_prices.php:283 admin\stageshow_manage_shows.php:215
+#: admin\stageshowplus_manage_priceplans.php:283 include\mjslib_admin.php:403
 msgid "Save Changes"
 msgstr ""
 
@@ -156,7 +156,7 @@ msgid "1 Performance cannot be deleted"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:419
-#: admin\stageshow_manage_prices.php:350 admin\stageshow_manage_shows.php:308
+#: admin\stageshow_manage_prices.php:343 admin\stageshow_manage_shows.php:308
 msgid "Tickets already sold!"
 msgstr ""
 
@@ -173,8 +173,8 @@ msgid "Performances have been deleted"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:423
-#: admin\stageshow_manage_prices.php:354 admin\stageshow_manage_shows.php:312
-#: admin\stageshowplus_manage_priceplans.php:311
+#: admin\stageshow_manage_prices.php:347 admin\stageshow_manage_shows.php:312
+#: admin\stageshowplus_manage_priceplans.php:330
 #: include\mjslib_paypal_salesadmin.php:740
 msgid "Nothing to Delete"
 msgstr ""
@@ -192,60 +192,48 @@ msgstr ""
 msgid "Nothing to Activate/Deactivate"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:158
-msgid "Duplicated Price Entry"
-msgstr ""
-
 #: admin\stageshow_manage_prices.php:165
-msgid "Price Not Specified"
+msgid "Duplicated Price Type"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:172
-msgid "Invalid Price Entry"
-msgstr ""
-
-#: admin\stageshow_manage_prices.php:179
-msgid "Price Entry cannot be zero"
-msgstr ""
-
-#: admin\stageshow_manage_prices.php:258
+#: admin\stageshow_manage_prices.php:251
 msgid "has No Performances"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:271
+#: admin\stageshow_manage_prices.php:264
 msgid "Show has No Prices"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:285
-#: admin\stageshowplus_manage_priceplans.php:260
+#: admin\stageshow_manage_prices.php:278
+#: admin\stageshowplus_manage_priceplans.php:279
 msgid "Add New Price"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:348
+#: admin\stageshow_manage_prices.php:341
 msgid "1 Price has a Database Error"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:348
+#: admin\stageshow_manage_prices.php:341
 msgid "Prices have a Database Error"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:350
+#: admin\stageshow_manage_prices.php:343
 msgid "1 Price cannot be deleted"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:350
+#: admin\stageshow_manage_prices.php:343
 msgid "Prices cannot be deleted"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:352
+#: admin\stageshow_manage_prices.php:345
 msgid "1 Price has been deleted"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:352
+#: admin\stageshow_manage_prices.php:345
 msgid "Prices have been deleted"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:371
+#: admin\stageshow_manage_prices.php:364
 msgid "for performance"
 msgstr ""
 
@@ -654,51 +642,51 @@ msgstr ""
 msgid "No Price Plan"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:109
+#: admin\stageshowplus_manage_priceplans.php:120
 msgid "Empty Price Ref Entry"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:115
+#: admin\stageshowplus_manage_priceplans.php:126
 msgid "Duplicated Price Ref Entry"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:132
+#: admin\stageshowplus_manage_priceplans.php:151
 msgid "Duplicated Price Plan ID"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:184
+#: admin\stageshowplus_manage_priceplans.php:203
 msgid "Cannot add a price plan"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:186
+#: admin\stageshowplus_manage_priceplans.php:205
 msgid "Default price plan added - Edit and Save to update it."
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:199
+#: admin\stageshowplus_manage_priceplans.php:218
 msgid "Cannot add a price"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:201
+#: admin\stageshowplus_manage_priceplans.php:220
 msgid "Default price entry added - Edit and Save to update it."
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:221
+#: admin\stageshowplus_manage_priceplans.php:240
 msgid "No Price Plans Configured"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:248
+#: admin\stageshowplus_manage_priceplans.php:267
 msgid "Price Plan has No Presets"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:278
+#: admin\stageshowplus_manage_priceplans.php:297
 msgid "Add New Price Plan"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:309
+#: admin\stageshowplus_manage_priceplans.php:328
 msgid "1 Price Plan has been deleted"
 msgstr ""
 
-#: admin\stageshowplus_manage_priceplans.php:309
+#: admin\stageshowplus_manage_priceplans.php:328
 msgid "Price Plans have been deleted"
 msgstr ""
 
@@ -739,11 +727,11 @@ msgstr ""
 msgid "OFX"
 msgstr ""
 
-#: include\mjslib_admin.php:360 include\mjslib_paypal_settings.php:258
+#: include\mjslib_admin.php:370 include\mjslib_paypal_settings.php:258
 msgid "Paypal settings have NOT been saved."
 msgstr ""
 
-#: include\mjslib_admin.php:385
+#: include\mjslib_admin.php:395
 msgid "No Settings Configured"
 msgstr ""
 
@@ -751,7 +739,7 @@ msgstr ""
 msgid "Missing PayPal Login Param"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:37 include\mjslib_table.php:863
+#: include\mjslib_paypal_salesadmin.php:37 include\mjslib_table.php:868
 msgid "Details"
 msgstr ""
 
@@ -879,7 +867,7 @@ msgid "Total"
 msgstr ""
 
 #: include\mjslib_salesplugin.php:612 include\mjslib_salesplugin.php:638
-#: include\mjslib_salesplugin.php:710
+#: include\mjslib_salesplugin.php:659 include\mjslib_salesplugin.php:717
 msgid "Cannot Checkout"
 msgstr ""
 
@@ -891,11 +879,15 @@ msgstr ""
 msgid "Item(s) removed from Shopping Cart"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:700
+#: include\mjslib_salesplugin.php:660
+msgid "Total sale is zero"
+msgstr ""
+
+#: include\mjslib_salesplugin.php:707
 msgid "Using Local IPN Server - PayPal Checkout call blocked"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:711
+#: include\mjslib_salesplugin.php:718
 msgid "Sold out for one or more performances"
 msgstr ""
 
@@ -907,45 +899,45 @@ msgstr ""
 msgid "Hide"
 msgstr ""
 
-#: include\mjslib_table.php:490
+#: include\mjslib_table.php:491
 msgid "Bulk Actions"
 msgstr ""
 
-#: include\mjslib_table.php:498
+#: include\mjslib_table.php:502
 msgid "Apply"
 msgstr ""
 
-#: include\mjslib_table.php:601
+#: include\mjslib_table.php:606
 msgid "1 item"
 msgid_plural "%s items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: include\mjslib_table.php:617
+#: include\mjslib_table.php:622
 msgid "Go to the first page"
 msgstr ""
 
-#: include\mjslib_table.php:624
+#: include\mjslib_table.php:629
 msgid "Go to the previous page"
 msgstr ""
 
-#: include\mjslib_table.php:633
+#: include\mjslib_table.php:638
 msgid "Current page"
 msgstr ""
 
-#: include\mjslib_table.php:640
+#: include\mjslib_table.php:645
 msgid "of"
 msgstr ""
 
-#: include\mjslib_table.php:644
+#: include\mjslib_table.php:649
 msgid "Go to the next page"
 msgstr ""
 
-#: include\mjslib_table.php:651
+#: include\mjslib_table.php:656
 msgid "Go to the last page"
 msgstr ""
 
-#: include\mjslib_table.php:969
+#: include\mjslib_table.php:974
 msgid "Show all Events"
 msgstr ""
 
@@ -1007,6 +999,22 @@ msgstr ""
 
 #: include\stageshow_dbase_api.php:1003
 msgid "Column does not exist"
+msgstr ""
+
+#: include\stageshow_dbase_api.php:1326
+msgid "Price Not Specified"
+msgstr ""
+
+#: include\stageshow_dbase_api.php:1332
+msgid "Invalid Price Entry"
+msgstr ""
+
+#: include\stageshow_dbase_api.php:1340
+msgid "Zero Price only valid with Integrated Trolley"
+msgstr ""
+
+#: include\stageshow_dbase_api.php:1347
+msgid "Price Entry cannot be negative"
 msgstr ""
 
 #: include\stageshowplus_dbase_api.php:912

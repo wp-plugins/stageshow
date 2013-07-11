@@ -50,13 +50,23 @@ if (!class_exists('StageShowPricesAdminListClass'))
 			return $result->priceID;
 		}
 		
+		function DecodePrice($value, $result)
+		{
+			if ($value == STAGESHOW_PRICE_UNKNOWN)
+			{
+				return '';
+			}
+			
+			return $value;
+		}
+		
 		function GetMainRowsDefinition()
 		{
 			// FUNCTIONALITY: Prices - Lists Performance, Type and Price
 			$ourOptions = array(
 				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 				array(self::TABLEPARAM_LABEL => 'Type',         self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
-				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, ),						
+				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, self::TABLEPARAM_DECODE => 'DecodePrice'),
 			);
 			
 			return $ourOptions;
@@ -137,8 +147,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 				$showID  = $_POST['showID'];
 				$results = $myDBaseObj->GetPricesListByShowID($showID);
 				
-				// Verify that Price Types are unique for each performance				
-				
+				// Verify that Price Types are unique for each performance								
 				if (count($results) > 0)
 				{
 					foreach ($results as $result)
@@ -153,31 +162,15 @@ if (!class_exists('StageShowPricesAdminClass'))
 						if (isset($entriesList[$priceEntry]))
 						{
 							// Convert the perfID to a Performance Date & Time to display to the user
-							$perfsList = $myDBaseObj->GetPerformancesListByPerfID($newPerfID);
-							
-							$this->adminMsg = __('Duplicated Price Entry', $this->myDomain) . ' (' . $perfsList[0]->perfDateTime . ' - ' . $newPriceType . ')';
+							$this->adminMsg = __('Duplicated Price Type', $this->myDomain) . ' (' . $result->perfDateTime . ' - ' . $newPriceType . ')';
 							break;
 						}
 						
-						// Verify that the price value is not empty
-						if (strlen($newPriceValue) == 0)
+						$this->adminMsg = $myDBaseObj->IsPriceValid($newPriceValue, $result);
+						if ($this->adminMsg !== '')
 						{
-							$this->adminMsg = __('Price Not Specified', $this->myDomain) . ' (' . $perfsList[0]->perfDateTime . ' - ' . $newPriceType . ')';
-							break;
-						}
-						
-						// Verify that the price value is a numeric value
-						if (!is_numeric($newPriceValue))
-						{
-							$this->adminMsg = __('Invalid Price Entry', $this->myDomain) . ' (' . $newPriceValue . ')';
-							break;
-						}
-						
-						// Verify that the price value is non-zero
-						if ($newPriceValue == 0.0)
-						{
-							$this->adminMsg = __('Price Entry cannot be zero', $this->myDomain);
-							break;
+							$this->adminMsg .= ' (' . $result->perfDateTime . ' - ' . $newPriceType . ')';
+							break;				
 						}
 						
 						$entriesList[$priceEntry] = true;
@@ -216,8 +209,8 @@ if (!class_exists('StageShowPricesAdminClass'))
 				$showID = $_POST['showID'];
 				
 				// Performance ID of first performance is passed with call - Type ID is null ... AddPrice() will add (unique) value
-				$perfID = $_POST['perfID'];
-				$myDBaseObj->AddPrice($perfID, '', '0.00');
+				$perfID = $_POST['perfID'];		
+				$myDBaseObj->AddPrice($perfID, '');
 				
 				echo '<div id="message" class="updated"><p>' . __('Settings have been saved', $this->myDomain) . '</p></div>';
 			}

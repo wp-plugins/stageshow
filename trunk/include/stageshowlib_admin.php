@@ -82,13 +82,23 @@ if (!class_exists('StageShowLibAdminClass'))
 			
 			$this->adminMsg = '';			
 
-			if ( isset( $_POST['action'] ) && (-1 != $_POST['action']) )
-				$bulkAction = $_POST['action'];
-			else if ( isset( $_POST['action2'] ) && (-1 != $_POST['action2']) )
-				$bulkAction =  $_POST['action2'];
-			else
-				$bulkAction = '';
-				
+			$bulkAction = '';
+			if ( isset( $_POST['doaction_t'] ) )
+			{
+				if ( isset( $_POST['action_t'] ) && (-1 != $_POST['action_t']) )
+				{
+					$bulkAction = $_POST['action_t'];
+				}
+			}
+			
+			if ( isset( $_POST['doaction_b'] ) )
+			{
+				if ( isset( $_POST['action_b'] ) && (-1 != $_POST['action_b']) )
+				{
+					$bulkAction = $_POST['action_b'];
+				}
+			}
+			
  			if (($bulkAction !== '') && isset($_POST['rowSelect']))
  			{
 				// Bulk Action Apply button actions

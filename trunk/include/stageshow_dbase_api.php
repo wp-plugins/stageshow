@@ -1318,6 +1318,38 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->get_results($sql);
 		}
 
+		function IsPriceValid($newPriceValue, $result)
+		{
+			// Verify that the price value is not empty
+			if (strlen($newPriceValue) == 0)
+			{
+				return __('Price Not Specified', $this->get_domain());
+			}
+
+			// Verify that the price value is a numeric value
+			if (!is_numeric($newPriceValue))
+			{
+				return __('Invalid Price Entry', $this->get_domain());
+			}
+
+			if (!$this->UseIntegratedTrolley()) 
+			{
+				// Verify that the price value is non-zero
+				if ($newPriceValue == 0.0)
+				{
+					return __('Zero Price only valid with Integrated Trolley', $this->get_domain());
+				}
+			}
+
+			// Verify that the price value is positive!
+			if ($newPriceValue < 0.0)
+			{
+				return __('Price Entry cannot be negative', $this->get_domain());
+			}
+			
+			return '';
+		}
+
 		function IsPriceTypeUnique($perfID, $priceType)
 		{
 			$sql  = 'SELECT COUNT(*) AS MatchCount FROM '.STAGESHOW_PRICES_TABLE;
@@ -1328,7 +1360,7 @@ if (!class_exists('StageShowDBaseClass'))
 			return ($pricesEntries[0]->MatchCount > 0) ? false : true;
 		}
 		
-		function AddPrice($perfID, $priceType, $priceValue, $priceVisibility = STAGESHOW_VISIBILITY_PUBLIC)
+		function AddPrice($perfID, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $priceVisibility = STAGESHOW_VISIBILITY_PUBLIC)
 		{
      		if ($perfID <= 0) return 0;
       
@@ -1579,7 +1611,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			if (isset($sqlFilters['activePrices']))
 			{
-				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceValue>"0"';
+				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceValue>="0"';
 				$sqlCmd = ' AND ';
 			}			
 			
