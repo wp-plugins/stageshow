@@ -21,17 +21,9 @@ Copyright 2012 Malcolm Shergold
 
 /* --------------------------------------------------------------------------- */
 /*                                                                             */
-/*                       StageShow Layout Styles                               */
+/*                    StageShow Seat Layout Styles                             */
 /*                                                                             */
 /* --------------------------------------------------------------------------- */
-
-.stageshow-layout-seat
-{
-	border: 2px;
-	padding: 3px;
-	XXtext-align: left !important;
-	XXalign: left;
-}
 
 .stageshow-layout-seat
 {
@@ -53,12 +45,10 @@ td.stageshow-boxoffice-perfnote
 	align: left;
 }
 
-#content .stageshow-boxoffice,
-#content .stageshow-boxoffice div,
-#content .stageshow-boxoffice table,
-#content .stageshow-boxoffice tr,
-#content .stageshow-boxoffice td,
-#content .stageshow-boxoffice select
+div.stageshow-boxoffice table,
+div.stageshow-boxoffice tr,
+div.stageshow-boxoffice td,
+div.stageshow-boxoffice select
 {
 	padding: 0 0 0 0;
 	margin: 0 0 0 0;
@@ -93,36 +83,33 @@ td.stageshow-boxoffice-perfnote
 	/* display:none; */
 }
 
-#content .stageshow-boxoffice input
+div.stageshow-boxoffice input
 {
 	margin: 0 0 0 0;
 	text-align: left;
 }
 
-#content .stageshow-boxoffice td
+div.stageshow-boxoffice td
 {
 	text-align: center;
 }
 
 /* --------------------------------------------------------------------------- */
 /*                                                                             */
-/*                      StageShow Checkout Styles                              */
+/*                       StageShow Trolley Styles                              */
 /*                                                                             */
 /* --------------------------------------------------------------------------- */
 
-#content .stageshow-trolley div,
-#content .stageshow-trolley table,
-#content .stageshow-trolley tr,
-#content .stageshow-trolley td,
-#content .stageshow-trolley select
+div.stageshow-trolley table,
+div.stageshow-trolley tr,
+div.stageshow-trolley td
 {
 	padding: 0 0 0 0;
 	margin: 0 0 0 0;
 	border: 0 none;
-	text-align: left;
 }
 
-#content .stageshow-trolley td
+div.stageshow-trolley td
 {
 	padding: 3px 10px 3px 10px;
 }
@@ -135,17 +122,24 @@ div.stageshow-trolley
 	
 	padding: 0 0 10px 0;
 	margin: 0 0 10px 0;
+	
+	text-align: center;
 }
 
-#content .stageshow-trolley input
+div.stageshow-trolley table
+{
+	width: 100%;
+}
+
+div.stageshow-trolley td
+{
+	text-align: center;
+}
+
+div.stageshow-trolley input
 {
 	margin: 0 0 0 0;
 	text-align: left;
-}
-
-#content .stageshow-trolley td
-{
-	text-align: center;
 }
 
 /* --------------------------------------------------------------------------- */
