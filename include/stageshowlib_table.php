@@ -485,13 +485,14 @@ if (!class_exists('StageShowLibTableClass'))
 			
 			$this->OutputCheckboxScript();
 			
+			$this->OutputBulkActionsScript($this->bulkActions);
+			
 			$ctrlPosn = $which === 'top' ? '_t' : '_b';
 			$buttonId = 'action_'.$this->tableName.$ctrlPosn;
 			
 			$bulkActions = __('Bulk Actions', $this->myDomain);
 			
-			$onclickParam = '';
-			//$onclickParam = "onclick=\"return confirmBulkAction(this, '$buttonId')\"";
+			$onclickParam = "onclick=\"return confirmBulkAction(this, '$buttonId')\"";
 			
 			$output  = "<div class='alignleft actions'>\n";
 			$output .= "<select id='$buttonId' name='action$ctrlPosn'>\n"; 
@@ -507,8 +508,8 @@ if (!class_exists('StageShowLibTableClass'))
 		
 		function OutputMoreButtonScript()
 		{
-			if ($this->moreScriptsOutput) return;
-			$this->moreScriptsOutput = true;
+			if (isset($this->myPluginObj->moreScriptsOutput)) return;
+			$this->myPluginObj->moreScriptsOutput = true;
 			
 			$moreText = $this->moreText;
 			$lessText = $this->lessText;
@@ -543,8 +544,9 @@ function HideOrShowRows(buttonId, rowId)
 		
 		function OutputCheckboxScript()
 		{
-			if ($this->scriptsOutput) return;
-			$this->scriptsOutput = true;
+			if (isset($this->myPluginObj->scriptsOutput)) return;
+			$this->myPluginObj->scriptsOutput = true;
+			
 			
 			echo "
 <script>
@@ -588,6 +590,97 @@ function updateCheckboxes(obj)
 
 </script>
 			";
+		}
+		
+		function OutputBulkActionsScript($bulkActions)
+		{
+			if (isset($this->myPluginObj->bulkActionScriptsOutput)) return;
+			$this->myPluginObj->bulkActionScriptsOutput = true;
+						
+			echo "
+<script>
+
+var confirmActionsArray = new Array(
+			";
+			
+			foreach ($bulkActions as $action => $actionID)
+			{
+				if ($this->NeedsConfirmation($action))
+				{
+					echo "\"$actionID\", // $action => $actionID - Confirm Required\n"; 					
+				}
+			}
+			
+			echo "
+\"\");
+
+function confirmBulkAction(obj, ctrlId)
+{
+	var elem = getParentNode(obj, 'FORM');
+	var count = getCheckboxesCount(elem);
+	if (count == 0)
+	{
+		return false;
+	}
+	
+	var actionObj = document.getElementById(ctrlId);	
+	var actionIndex = actionObj.selectedIndex;
+	if (actionIndex == 0)
+	{
+		return false;
+	}
+	
+	var actionText = actionObj.options[actionIndex].text;
+	
+	var mustConfirm = false;
+	for (i=0; i<confirmActionsArray.length; i++)
+	{
+		if (confirmActionsArray[i] == actionText)
+		{
+			mustConfirm = true;
+			break;
+		}
+	}
+	
+	if (!mustConfirm)
+	{
+		return true;
+	}
+		
+	var confirmMsg = 'Do ' + actionText + ' on ' + count + ' entries?';
+	var agree = confirm(confirmMsg);
+	if (!agree)
+	{
+		return false;
+	}
+
+	return true;	
+}
+	
+function getCheckboxesCount(elem)
+{
+	var boxid = 'rowSelect[]';
+	
+	elem = elem.elements;
+	
+	var checkedCount = 0;				
+	for(var i = 0; i < elem.length; i++)
+	{
+		if (elem[i].name == boxid) 
+		{
+			if (elem[i].checked)
+			{
+				checkedCount++;
+			}
+		}
+	} 
+		
+	return checkedCount;
+}
+
+</script>
+			";
+			
 		}
 		
 		function ShowPageNavigation( $which = 'top' ) 
@@ -872,6 +965,18 @@ if (!class_exists('StageShowLibAdminListClass'))
 					$this->hiddenRowsButtonId = '';
 					$this->moreText = '';
 				}
+			}
+		}
+		
+		function NeedsConfirmation($bulkAction)
+		{
+			switch ($bulkAction)
+			{
+				case self::BULKACTION_DELETE:
+					return true;
+					
+				default:
+					return false;
 			}
 		}
 		

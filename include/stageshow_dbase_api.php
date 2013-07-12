@@ -699,8 +699,14 @@ if (!class_exists('StageShowDBaseClass'))
 				// Use Wordpress Date and Time Format
 				$dateFormat = get_option( 'date_format' ).' '.get_option( 'time_format' );
 				
-			// Return Time & Date formatted for display to user
-			return date($dateFormat, $timestamp);
+			// Get Time & Date formatted for display to user
+			$dateAndTime = date($dateFormat, $timestamp);
+			if (strlen($dateAndTime) < 2)
+			{
+				$dateAndTime = '[Invalid WP Date/Time Format]';
+			}
+			
+			return $dateAndTime;
 		}
 		
 		function UpdateCartButtons($perfsList)

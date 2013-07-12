@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 2.1.2 \n"
+"Project-Id-Version: StageShow 2.1.3 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowplus\n"
-"POT-Creation-Date: 2013-07-11 06:15:28+00:00\n"
+"POT-Creation-Date: 2013-07-12 17:41:44+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -76,12 +76,12 @@ msgid "Delete"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:84
-#: include\stageshow_dbase_api.php:783
+#: include\stageshow_dbase_api.php:789
 msgid "Active"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:88
-#: include\stageshow_dbase_api.php:785
+#: include\stageshow_dbase_api.php:791
 msgid "INACTIVE"
 msgstr ""
 
@@ -694,20 +694,20 @@ msgstr ""
 msgid "Set Completed"
 msgstr ""
 
-#: admin\stageshowplus_manage_sales.php:61
+#: admin\stageshowplus_manage_sales.php:73
 msgid "Reserved"
 msgstr ""
 
-#: admin\stageshowplus_manage_sales.php:175
+#: admin\stageshowplus_manage_sales.php:187
 msgid "1 Sale has been changed to Completed"
 msgstr ""
 
-#: admin\stageshowplus_manage_sales.php:175
+#: admin\stageshowplus_manage_sales.php:187
 #: include\mjslib_paypal_salesadmin.php:738
 msgid "Sales have been deleted"
 msgstr ""
 
-#: admin\stageshowplus_manage_sales.php:177
+#: admin\stageshowplus_manage_sales.php:189
 msgid "Nothing to Update"
 msgstr ""
 
@@ -739,7 +739,7 @@ msgstr ""
 msgid "Missing PayPal Login Param"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:37 include\mjslib_table.php:868
+#: include\mjslib_paypal_salesadmin.php:37 include\mjslib_table.php:961
 msgid "Details"
 msgstr ""
 
@@ -899,45 +899,45 @@ msgstr ""
 msgid "Hide"
 msgstr ""
 
-#: include\mjslib_table.php:491
+#: include\mjslib_table.php:493
 msgid "Bulk Actions"
 msgstr ""
 
-#: include\mjslib_table.php:502
+#: include\mjslib_table.php:503
 msgid "Apply"
 msgstr ""
 
-#: include\mjslib_table.php:606
+#: include\mjslib_table.php:699
 msgid "1 item"
 msgid_plural "%s items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: include\mjslib_table.php:622
+#: include\mjslib_table.php:715
 msgid "Go to the first page"
 msgstr ""
 
-#: include\mjslib_table.php:629
+#: include\mjslib_table.php:722
 msgid "Go to the previous page"
 msgstr ""
 
-#: include\mjslib_table.php:638
+#: include\mjslib_table.php:731
 msgid "Current page"
 msgstr ""
 
-#: include\mjslib_table.php:645
+#: include\mjslib_table.php:738
 msgid "of"
 msgstr ""
 
-#: include\mjslib_table.php:649
+#: include\mjslib_table.php:742
 msgid "Go to the next page"
 msgstr ""
 
-#: include\mjslib_table.php:656
+#: include\mjslib_table.php:749
 msgid "Go to the last page"
 msgstr ""
 
-#: include\mjslib_table.php:974
+#: include\mjslib_table.php:1079
 msgid "Show all Events"
 msgstr ""
 
@@ -985,35 +985,35 @@ msgstr ""
 msgid "New Performance Added"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:779
+#: include\stageshow_dbase_api.php:785
 msgid "DELETED"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:919
+#: include\stageshow_dbase_api.php:925
 msgid "Unnamed Show"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1003
+#: include\stageshow_dbase_api.php:1009
 msgid "DB Error"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1003
+#: include\stageshow_dbase_api.php:1009
 msgid "Column does not exist"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1326
+#: include\stageshow_dbase_api.php:1332
 msgid "Price Not Specified"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1332
+#: include\stageshow_dbase_api.php:1338
 msgid "Invalid Price Entry"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1340
+#: include\stageshow_dbase_api.php:1346
 msgid "Zero Price only valid with Integrated Trolley"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1347
+#: include\stageshow_dbase_api.php:1353
 msgid "Price Entry cannot be negative"
 msgstr ""
 
