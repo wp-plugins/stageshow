@@ -683,6 +683,13 @@ function getCheckboxesCount(elem)
 			
 		}
 		
+		function GetCurrentURL() 
+		{			
+			$currentURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			$currentURL = ( function_exists('add_query_arg') ) ? add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($this->caller) ), $currentURL ) : $currentURL;
+			return $currentURL;
+		}
+		
 		function ShowPageNavigation( $which = 'top' ) 
 		{			
 			if ($this->rowsPerPage <= 0) 
@@ -698,9 +705,9 @@ function getCheckboxesCount(elem)
 			
 			$output .= '<span class="displaying-num">' . sprintf( _n( '1 item', '%s items', $this->totalRows ), number_format_i18n( $this->totalRows ) ) . '</span>';
 
-			$current_url = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			$current_url = $this->GetCurrentURL();
 
-			$current_url = remove_query_arg( array( 'hotkeys_highlight_last', 'hotkeys_highlight_first' ), $current_url );
+			$current_url = remove_query_arg( array( 'hotkeys_highlight_last', 'hotkeys_highlight_first', 'paged' ), $current_url );
 
 			$page_links = array();
 
@@ -1349,7 +1356,7 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 								else
 								{
 									$currValLink .= $recId;
-									$currValLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($currValLink, plugin_basename($this->caller)) : $currValLink;
+									$currValLink = ( function_exists('add_query_arg') ) ? add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($this->caller) ), $currValLink ) : $currValLink;
 									$target = '';
 								}
 								$currVal = '<a href="'.$currValLink.'" '.$target.'>'.$currVal.'</a>';

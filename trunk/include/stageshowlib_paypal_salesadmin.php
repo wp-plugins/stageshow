@@ -62,6 +62,16 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			return $result->saleID;
 		}
 		
+		function GetCurrentURL() 
+		{			
+			$currentURL = parent::GetCurrentURL();
+			if (isset($this->env['SearchText']))
+			{
+				$currentURL .= '&lastsalessearch='.$this->env['SearchText'];
+			}
+			return $currentURL;
+		}
+		
 		function GetMainRowsDefinition()
 		{
 			return array(
@@ -235,6 +245,32 @@ if (!class_exists('PayPalSalesAdminClass'))
 			parent::__construct($env);
 		}
 		
+		function DoSalesSearch()
+		{
+			if (isset($_POST['searchsalesbutton']) && ($_POST['searchsalesbutton'] != ''))
+			{
+				$this->searchsalestext = $_POST['searchsalestext'];
+			}
+			else if (isset($_GET['lastsalessearch']))
+			{
+				$this->searchsalestext = $_GET['lastsalessearch'];
+			}
+			else
+			{
+				return;
+			}
+			
+			// Search sales records
+			$this->CheckAdminReferer();
+				
+			if (isset($this->searchsalestext))
+			{
+				$this->results = $this->myDBaseObj->SearchSalesList($this->searchsalestext);
+				$this->env['SearchText'] = $this->searchsalestext;
+			}
+			
+		}
+		
 		function ProcessActionButtons()
 		{
 			$myPluginObj = $this->myPluginObj;
@@ -245,6 +281,20 @@ if (!class_exists('PayPalSalesAdminClass'))
      
 			$this->detailsSaleId = 0;
 			$this->salesFor = '';
+			
+			if (isset($_POST['addsalebutton']))
+			{
+				// Add a new sale
+				$this->CheckAdminReferer();
+				
+				$this->pricesList = $this->myDBaseObj->GetPricesListWithSales(0);
+				if (count($this->pricesList) == 0) break;
+				$this->editSaleEntry[0] = $this->pricesList[0];
+
+				$this->editingRecord = true;
+			}
+			
+			$this->DoSalesSearch();
 			
 			if (isset($_POST['emailsale']))
 			{
@@ -330,19 +380,27 @@ if (!class_exists('PayPalSalesAdminClass'))
 			}
 			
 			// HTML Output - Start 
-			$formClass = $this->myDomain.'-admin-form';
+			$formClass = $this->myDomain.'-admin-form '.$this->myDomain.'-sales-summary';
 			echo '<div class="'.$formClass.'">'."\n";
 ?>
 	<form method="post">
 <?php
 
-			echo "<h3>";
 			if (!$this->editingRecord)
-				_e('Summary', $this->myDomain); 
+			{
+				echo '<h3>'; 
+				if ( isset($this->searchsalestext) )
+					_e('Search Results', $this->myDomain); 
+				else
+					_e('Summary', $this->myDomain); 
+				echo "</h3>"; 
+				$this->OuputSearchSalesButton();
+			}
 			else if (!isset($this->saleId))
-				_e('Add Sale', $this->myDomain); 
-			echo "</h3>";
-			
+			{
+				echo "<h3>".__('Add Sale', $this->myDomain)."</h3>"; 
+			}
+						
 			if (isset($this->saleId))
 				echo "\n".'<input type="hidden" name="saleID" value="'.$this->saleId.'"/>'."\n";
 				
@@ -376,7 +434,9 @@ if (!class_exists('PayPalSalesAdminClass'))
 			{
 				$pricesList = $myDBaseObj->GetPricesList(null);
 				if (count($pricesList) > 0)
+				{
 					$this->OuputAddSaleButton();
+				}			
 				else
 					echo $this->NoStockMessage();
 			}
@@ -398,9 +458,16 @@ if (!class_exists('PayPalSalesAdminClass'))
 			return 'No Stock';
 		}
 		
+		function OuputSearchSalesButton()
+		{
+			echo '<div class="'.$this->myDomain.'-searchsales"><input type="text" maxlength="'.PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN.'" size="20" name="searchsalestext" id="searchsaletext" value="" autocomplete="off" />'."\n";
+			$this->OutputButton("searchsalesbutton", __("Search Sales", $this->myDomain));					
+			echo '</div>'."\n";
+		}
+		
 		function OuputAddSaleButton()
 		{
-			echo StageShowLibAdminClass::ActionButtonHTML('Add Sale', $this->caller, $this->myDomain, 'tablenav_bottom_actions'); 
+			$this->OutputButton("addsalebutton", __("Add Sale", $this->myDomain));
 		}
 		
 		function DoActions()
@@ -409,17 +476,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 
 			switch ($_GET['action'])
 			{
-				case 'addsale':
-					// FUNCTIONALITY: Sales - Add a sale
-					$this->CheckAdminReferer();
-					
-					$this->pricesList = $this->myDBaseObj->GetPricesListWithSales(0);
-					if (count($this->pricesList) == 0) break;
-					$this->editSaleEntry[0] = $this->pricesList[0];
-
-					$this->editingRecord = true;
-					break;
-					
 				default:
 					break;					
 			}

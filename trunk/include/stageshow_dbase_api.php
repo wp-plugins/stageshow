@@ -1640,6 +1640,22 @@ if (!class_exists('StageShowDBaseClass'))
 				}
 			}
 			
+			if (isset($sqlFilters['searchtext']))
+			{
+				$searchFields = array('saleEMail', 'saleName', 'salePPName');
+				
+				$sqlWhere .= $sqlCmd.'(';
+				$sqlOr = '';				
+				foreach ($searchFields as $searchField)
+				{
+					$sqlWhere .= $sqlOr;
+					$sqlWhere .= STAGESHOW_SALES_TABLE.'.'.$searchField.' LIKE "'.$sqlFilters['searchtext'].'"';
+					$sqlOr = ' OR ';
+				}
+				$sqlWhere .= ')';
+				$sqlCmd = ' AND ';
+			}
+			
 			return $sqlWhere;
 		}
 		
@@ -1747,6 +1763,12 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->GetSalesList($sqlFilters);
 		}
 
+		function SearchSalesList($searchtext)
+		{
+			$sqlFilters['searchtext'] = '%'.$searchtext.'%';
+			return $this->GetAllSalesList($sqlFilters);
+		}						
+		
 		function GetAllSalesListBySaleTxnId($saleTxnId)
 		{
 			// Add TotalSalesField .... groupBy does the trick!

@@ -272,11 +272,12 @@ if (!class_exists('StageShowPricesAdminClass'))
 
       				echo '<input type="hidden" name="showID" value="'.$showList->showID.'" />'."\n";
 
-					{
-						// FUNCTIONALITY: Prices - Output "Add New Price" Button (if valid)
-						$this->showID = $showList->showID;
-						$this->OutputButton("addpricebutton", __("Add New Price", $this->myDomain));
-					}
+					// FUNCTIONALITY: Prices - Output "Add New Price" Button (if valid)
+					$this->showID = $showList->showID;
+					$this->OutputButton("addpricebutton", __("Add New Price", $this->myDomain));
+
+					// Output Performance Select
+					$this->OutputPerformanceSelect('&nbsp; '.__('for performance', $this->myDomain).' &nbsp;');
 				
 					// FUNCTIONALITY: Prices - Output "Save Changes" Button (if there are entries)
 					if (count($results) > 0)
@@ -349,21 +350,6 @@ if (!class_exists('StageShowPricesAdminClass'))
 			}
 			
 			return $actionMsg;
-		}
-		
-		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
-		{
-			// Overload OutputButton function to add a performance drop-down box
-			parent::OutputButton($buttonId, $buttonText, $buttonClass);
-			
-			switch ($buttonId)
-			{
-				case "addpricebutton":
-					// FUNCTIONALITY: Performances - StageShow+ - Add "Performance" select to new Price button
-					echo "<!-- Price Plan Select -->\n";
-					$this->OutputPerformanceSelect('&nbsp; '.__('for performance', $this->myDomain).' &nbsp;');
-					break;
-			}
 		}
 		
 		function OutputPerformanceSelect($label = '')
