@@ -276,7 +276,7 @@ function HideElement(obj)
 				
 			$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
 			if ($elementId !== 0) $editLink .= '&id='.$elementId;
-			$editLink = ( function_exists('wp_nonce_url') ) ? wp_nonce_url($editLink, plugin_basename($caller)) : $editLink;
+			$editLink = ( function_exists('add_query_arg') ) ? add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($caller) ), $editLink ) : $editLink;
 			$editControl = '<div class='.$buttonClass.'><a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a></div>'."\n";  
 			return $editControl;    
 		}

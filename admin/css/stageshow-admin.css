@@ -58,6 +58,16 @@ th.column-paypal-settings-tab
 	width: 33%;
 }
 
+div.stageshow-sales-summary h3
+{
+	display: inline;
+}
+
+div.stageshow-searchsales
+{
+	float: right;
+}
+
 /* ----------------------------------------------------------------------------------------------------------------
 	Styles for Settings Page
 ---------------------------------------------------------------------------------------------------------------- */
