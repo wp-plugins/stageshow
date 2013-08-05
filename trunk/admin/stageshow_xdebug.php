@@ -1,6 +1,6 @@
 <?php
 /* 
-Description: Code for Managing Prices Configuration
+Description: Code for Setting Debug Configuration
  
 Copyright 2012 Malcolm Shergold
 
