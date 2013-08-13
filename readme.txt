@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.5.2
-Stable tag: 2.1.4
+Tested up to: 3.6
+Stable tag: 2.1.5
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -175,6 +175,12 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugin 
+
+= 2.1.5 (04/08/2013) =
+* Added "Contact Phone" to Sale Log details
+* Updated for compatibility with WP 3.6 - depracated split() recoded
+* Separated FirstName and LastName in DB and Export files
+* Removed seconds from performance time display
 
 = 2.1.4 (31/07/2013) =
 * Bug Fix: Admin URLs with _wpnonce arg may have html encoded arg separator

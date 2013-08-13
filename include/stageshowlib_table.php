@@ -224,17 +224,17 @@ if (!class_exists('StageShowLibTableClass'))
 
 		function SetColWidths($newColWidths)
 		{
-			$this->colWidth = split(',', ','.$newColWidths);
+			$this->colWidth = explode(',', ','.$newColWidths);
 		}
 
 		function SetColAlign($newColAlign)
 		{			
-			$this->colAlign = split(',', ','.$newColAlign);
+			$this->colAlign = explode(',', ','.$newColAlign);
 		}
 
 		function SetColClass($newColClass)
 		{			
-			$this->colClass = split(',', ','.$newColClass);
+			$this->colClass = explode(',', ','.$newColClass);
 		}
 
 		function SetListHeaders($headerId, $columns = null, $headerPosn = self::HEADERPOSN_BOTH)

@@ -146,7 +146,7 @@ if (!class_exists('StageShowLibLogFileClass'))
 			$Filepath = "testlog.txt";
 			
 			self::LogToFileAbs($Filepath, "------------------------------------------------\n");
-			self::LogToFileAbs($Filepath, 'Log Time/Date:'.date("Y-m-d H:i:s")."\n");
+			self::LogToFileAbs($Filepath, 'Log Time/Date:'.date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT)."\n");
 			//self::LogToFileAbs($Filepath, 'Request URL:'.$_SERVER['REQUEST_URI']."\n");
 			self::LogToFileAbs($Filepath, self::ShowCallStack(false));
 			self::LogToFileAbs($Filepath, $LogLine."\n");

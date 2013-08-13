@@ -67,6 +67,29 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$this->emailObj = new StageShowLibEMailAPIClass($this);
 		}
 
+		function SplitSaleNameField()
+		{
+			if (!$this->IfColumnExists(STAGESHOW_SALES_TABLE, 'saleName'))
+				return false;
+				
+			// Split saleName field into two parts 			
+			$sql  = 'UPDATE '.STAGESHOW_SALES_TABLE.' SET ';
+			$sql .= 'saleName = CONCAT(" ", REPLACE(saleName, ".", " "))';
+			$this->query($sql);	
+
+			$sql  = 'UPDATE '.STAGESHOW_SALES_TABLE.' SET ';
+			$sql .= 'saleFirstName = TRIM(SUBSTR(saleName, 1, LENGTH(saleName) - LOCATE(" ", REVERSE(saleName))))';
+			$this->query($sql);	
+
+			$sql  = 'UPDATE '.STAGESHOW_SALES_TABLE.' SET ';
+			$sql .= 'saleLastName = TRIM(SUBSTR(saleName, 1 + (LENGTH(saleName) - LOCATE(" ", REVERSE(saleName)))))';
+			$this->query($sql);	
+
+			$this->deleteColumn(STAGESHOW_SALES_TABLE, 'saleName');
+					
+			return true;
+		}
+
 	    function upgradeDB()
 	    {
 			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
@@ -93,6 +116,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 			
       		$this->saveOptions();      
+			
+			// FUNCTIONALITY: DBase - On upgrade ... Add any database fields
+			// Add DB Tables
+			$this->createDB();
+			
+			// Remove the saleName field - Move data first
+			$this->SplitSaleNameField();
 		}
 		
 		function PurgeDB()
@@ -253,6 +283,40 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 								
 			if ($this->getOption('Dev_ShowPayPalIO') == 1)
 				$this->payPalAPIObj->EnableDebug();
+		}
+		
+		static function FormatDateForAdminDisplay($dateInDB)
+		{
+			// Convert time string to UNIX timestamp
+			$timestamp = strtotime( $dateInDB );
+			
+			// Get Time & Date formatted for display to user
+			return date(STAGESHOWLIB_DATETIME_ADMIN_FORMAT, $timestamp);
+		}
+		
+		static function FormatDateForDisplay($dateInDB)
+		{
+			// Convert time string to UNIX timestamp
+			$timestamp = strtotime( $dateInDB );
+			return StageShowDBaseClass::FormatTimestampForDisplay($timestamp);
+		}
+		
+		static function FormatTimestampForDisplay($timestamp)
+		{
+			if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
+				$dateFormat = STAGESHOW_DATETIME_BOXOFFICE_FORMAT;
+			else
+				// Use Wordpress Date and Time Format
+				$dateFormat = get_option( 'date_format' ).' '.get_option( 'time_format' );
+				
+			// Get Time & Date formatted for display to user
+			$dateAndTime = date($dateFormat, $timestamp);
+			if (strlen($dateAndTime) < 2)
+			{
+				$dateAndTime = '[Invalid WP Date/Time Format]';
+			}
+			
+			return $dateAndTime;
 		}
 		
 		static function GetCurrencyTable()
@@ -438,7 +502,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						saleID INT UNSIGNED NOT NULL AUTO_INCREMENT,
 						saleCheckoutTime DATETIME,
 						saleDateTime DATETIME NOT NULL,
-						saleName VARCHAR('.PAYPAL_APILIB_PPSALENAME_TEXTLEN.') NOT NULL,
+						saleFirstName VARCHAR('.PAYPAL_APILIB_PPSALENAME_TEXTLEN.') NOT NULL,
+						saleLastName VARCHAR('.PAYPAL_APILIB_PPSALENAME_TEXTLEN.') NOT NULL,
 						saleEMail VARCHAR('.PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN.') NOT NULL,
 						salePPName VARCHAR('.PAYPAL_APILIB_PPSALEPPNAME_TEXTLEN.'),
 						salePPStreet VARCHAR('.PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN.'),
@@ -446,6 +511,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						salePPState VARCHAR('.PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN.'),
 						salePPZip VARCHAR('.PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN.'),
 						salePPCountry VARCHAR('.PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN.'),
+						salePPPhone VARCHAR('.PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN.'),
 						salePaid DECIMAL(9,2) NOT NULL,
 						saleFee DECIMAL(9,2) NOT NULL,
 						saleTxnId VARCHAR('.PAYPAL_APILIB_PPSALETXNID_TEXTLEN.') NOT NULL,
@@ -478,6 +544,18 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function GetSaleStockID($itemRef, $itemOption)
 		{
 			return 0;
+		}
+		
+		function GetSaleName($result)
+		{
+			if (is_array($result))
+			{
+				return trim($result['saleFirstName'].' '.$result['saleLastName']);
+			}
+			else
+			{
+				return trim($result->saleFirstName.' '.$result->saleLastName);
+			}
 		}
 		
 		function GetJoinedTables($sqlFilters = null, $classID = '')
@@ -535,16 +613,18 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		// Add Sale - Address details are optional
-		function AddSampleSale($saleDateTime, $saleName, $saleEMail, $salePaid, $saleFee, $saleTxnId, $saleStatus, $salePPName, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry)
+		function AddSampleSale($saleDateTime, $saleFirstName, $saleLastName, $saleEMail, $salePaid, $saleFee, $saleTxnId, $saleStatus, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry, $salePPPhone = '')
 		{
-			$salesVals['salePPName'] = $salePPName;
+			$salesVals['salePPName'] = trim($saleFirstName & ' ' & $saleLastName);
 			$salesVals['salePPStreet'] = $salePPStreet;
 			$salesVals['salePPCity'] = $salePPCity;
 			$salesVals['salePPState'] = $salePPState;
 			$salesVals['salePPZip'] = $salePPZip;
 			$salesVals['salePPCountry'] = $salePPCountry;				
+			$salesVals['salePPPhone'] = $salePPPhone;				
 			
-			$salesVals['saleName'] = $saleName;
+			$salesVals['saleFirstName'] = $saleFirstName;
+			$salesVals['saleLastName'] = $saleLastName;
 			$salesVals['saleEMail'] = $saleEMail;
 			$salesVals['salePaid'] = $salePaid;
 			$salesVals['saleFee'] = $saleFee;
@@ -599,7 +679,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			return array
 			(
-				'saleName', 
+				'saleFirstName', 
+				'saleLastName', 
 				'saleDateTime', 
 				'saleTxnId', 
 				'saleStatus', 
@@ -613,6 +694,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'salePPState', 
 				'salePPZip', 
 				'salePPCountry', 
+				'salePPPhone', 
 			);
 		}			
 		
@@ -813,6 +895,46 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $EMailTemplate;
 		}
 		
+		function IsCurrencyField($tag)
+		{
+			switch ($tag)
+			{
+				case '[saleFee]':
+				case '[salePaid]':
+					return true;
+			}
+			
+			return false;					
+		}
+		
+		function FormatEMailField($tag, $field, $saleDetails)
+		{
+			if ($this->IsCurrencyField($tag))
+			{
+				if (isset($saleDetails->$field))
+				{
+					$saleFieldValue = $this->FormatCurrency($saleDetails->$field, false);
+				}
+				else
+					$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
+			}
+			else switch ($tag)
+			{
+				case '[saleName]':
+					$saleFieldValue = $this->GetSaleName($saleDetails);
+					break;
+					
+				default:
+					if (isset($saleDetails->$field))
+						$saleFieldValue = $saleDetails->$field;
+					else
+						$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
+						break;
+			}
+			
+			return $saleFieldValue;
+		}
+		
 		function AddEMailFields($EMailTemplate, $saleDetails)
 		{
 			// FUNCTIONALITY: DBase - Sales - Add DB fields to EMail
@@ -823,13 +945,16 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				StageShowLibUtilsClass::print_r($this->adminOptions, 'adminOptions');
 			
 			$emailFields = array(
-				// Details from User Profile
+				// Details from Sale Record
 				'[saleDateTime]' => 'saleDateTime',
-				'[saleName]' => 'saleName',
+				'[saleFirstName]' => 'saleFirstName',
+				'[saleLastName]' => 'saleLastName',
 				'[saleEMail]' => 'saleEMail',
 				'[salePaid]' => 'salePaid',
 				'[saleTxnId]' => 'saleTxnId',
 				'[saleStatus]' => 'saleStatus',
+
+				'[saleName]' => 'saleName',
 
 				'[salePPName]' => 'salePPName',
 				'[salePPStreet]' => 'salePPStreet',
@@ -837,34 +962,27 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'[salePPState]' => 'salePPState',
 				'[salePPZip]' => 'salePPZip',
 				'[salePPCountry]' => 'salePPCountry',
+				'[salePPPhone]' => 'salePPPhone',
 			);
 							
 			foreach ($emailFields as $tag => $field)
 			{
-				switch ($tag)
-				{
-					case '[salePaid]';
-						if (isset($saleDetails->$field))
-							$saleFieldValue = $this->FormatCurrency($saleDetails->$field, false);
-						else
-							$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
-						break;
-					
-					default:
-						if (isset($saleDetails->$field))
-							$saleFieldValue = $saleDetails->$field;
-						else
-							$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
-						break;
-				}
+				$saleFieldValue = $this->FormatEMailField($tag, $field, $saleDetails);
 				$EMailTemplate = str_replace($tag, $saleFieldValue, $EMailTemplate);
 			}
 			
 			return $EMailTemplate;
 		}
 		
-		function AddSalesDetailsEMailFields($EMailTemplate, $orderDetails)
+		function AddSalesDetailsEMailFields($EMailTemplate, $saleDetails)
 		{
+			foreach ($saleDetails as $key => $value)
+			{
+				$tag = '['.$key.']';
+				$value = $this->FormatEMailField($tag, $key, $saleDetails);
+				$EMailTemplate = str_replace($tag, $value, $EMailTemplate);
+			}
+			
 			return $EMailTemplate;
 		}			
 
@@ -1073,7 +1191,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$saleVals['saleStatus'] = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
 			
 				// Add empty values for fields that do not have a default value
-				$saleVals['saleName'] = '';	
+				$saleVals['saleFirstName'] = '';	
+				$saleVals['saleLastName'] = '';	
 				$saleVals['saleEMail'] = '';
 				$saleVals['saleTxnid'] = '';
 

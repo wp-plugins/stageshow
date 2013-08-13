@@ -232,7 +232,8 @@ if (!class_exists('IPNNotifyClass'))
 					else
 					{
 						$results['saleTxnId'] = $Txn_id;
-						$results['saleName'] = $Payer_name;
+						$results['saleFirstName'] = $this->HTTPParam('first_name');
+						$results['saleLastName'] = $this->HTTPParam('last_name');
 						$results['saleEMail'] = $Payer_email;
 						$results['saleStatus'] = $Payment_status;
 						$results['salePaid'] = $Payment_amount;
@@ -243,6 +244,7 @@ if (!class_exists('IPNNotifyClass'))
 						$results['salePPState'] = $this->HTTPParam('address_state');
 						$results['salePPZip'] = $this->HTTPParam('address_zip');
 						$results['salePPCountry'] = $this->HTTPParam('address_country');
+						$results['salePPPhone'] = $this->HTTPParam('contact_phone');
 						$itemNo = 0;
 						$lineNo = 1;
 						while (true)

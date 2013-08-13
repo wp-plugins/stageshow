@@ -285,9 +285,9 @@ if (!class_exists('StageShowPluginClass'))
 					new StageShowTestSettingsAdminClass($this->env);
 					break;		
 					
-				case STAGESHOW_MENUPAGE_TEST:
-					include STAGESHOW_TEST_PATH.'stageshow_testsettings.php';   
-					new StageShowTestAdminClass($this->env);
+				case STAGESHOW_MENUPAGE_DEVTEST:
+					include STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php';   
+					new StageShowDevCalllerClass($this->env);
 					break;
 							
 				case STAGESHOW_MENUPAGE_DEBUG:
@@ -357,27 +357,25 @@ if (!class_exists('StageShowPluginClass'))
 
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', $this->myDomain),     __('Settings', $this->myDomain),    STAGESHOW_CAPABILITY_SETUPUSER,   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
 
-				// Show test menu if stageshow_testings.php is present
+				// Show test menu if stageshow_testsettings.php is present
 				if ( $this->testModeEnabled )
 				{
 					add_submenu_page( 'options-general.php', 'StageShow Test', 'StageShow Test', STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TESTSETTINGS, array(&$this, 'printAdminPage'));
-
-					if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
+				}
+				
+				if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
+				{
+					if (!$myDBaseObj->UseIntegratedTrolley())
 					{
-						if (!$myDBaseObj->UseIntegratedTrolley())
-						{
-							if ( file_exists(STAGESHOW_TEST_PATH.'paypal_manage_buttons.php') ) 
-								add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', $this->myDomain),    __('Buttons', $this->myDomain),   STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));							
-						}
-						
-						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TEST, array(&$this, 'printAdminPage'));
+						if ( file_exists(STAGESHOW_TEST_PATH.'paypal_manage_buttons.php') ) 
+							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', $this->myDomain),    __('Buttons', $this->myDomain),   STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));							
 					}
 				
-					if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
-					{
-						if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_debug.php') )
-							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEBUG', $this->myDomain), __('DEBUG', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEBUG, array(&$this, 'printAdminPage'));
-					}
+					if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php') ) 
+						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));
+
+					if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_debug.php') )
+						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEBUG', $this->myDomain), __('DEBUG', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEBUG, array(&$this, 'printAdminPage'));
 				}
 			}	
 			

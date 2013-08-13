@@ -21,11 +21,11 @@ Copyright 2012 Malcolm Shergold
 */
 
 include 'stageshowlib_admin.php';      
-include 'stageshowlib_table.php';      
+include 'stageshow_admin.php';      
 
 if (!class_exists('PayPalSalesAdminListClass')) 
 {
-	class PayPalSalesAdminListClass extends StageShowLibAdminListClass // Define class
+	class PayPalSalesAdminListClass extends StageShowAdminListClass // Define class
 	{	
 		function __construct($env, $editMode /* = false */) //constructor
 		{
@@ -72,10 +72,15 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			return $currentURL;
 		}
 		
+		function DecodeSaleName($value, $result)
+		{
+			return $this->myDBaseObj->GetSaleName($result);
+		}
+		
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Name',	            self::TABLEPARAM_ID => 'saleName',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Name',	            self::TABLEPARAM_ID => 'saleLastName', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, self::TABLEPARAM_DECODE => 'DecodeSaleName', ),
 				array(self::TABLEPARAM_LABEL => 'Transaction Date', self::TABLEPARAM_ID => 'saleDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 				array(self::TABLEPARAM_LABEL => 'Status',           self::TABLEPARAM_ID => 'saleStatus',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 			);
@@ -94,20 +99,21 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			$address = defined('PAYPAL_APILIB_STREET_LABEL')  ? PAYPAL_APILIB_STREET_LABEL  : __('Address', $this->myDomain);
 			$city    = defined('PAYPAL_APILIB_CITY_LABEL')    ? PAYPAL_APILIB_CITY_LABEL    : __('Town/City', $this->myDomain);
 			$state   = defined('PAYPAL_APILIB_STATE_LABEL')   ? PAYPAL_APILIB_STATE_LABEL   : __('County', $this->myDomain);
-			$zip     = defined('PAYPAL_APILIB_ZIP_LABEL')     ? PAYPAL_APILIB_ZIP_LABEL  : __('Postcode', $this->myDomain);
+			$zip     = defined('PAYPAL_APILIB_ZIP_LABEL')     ? PAYPAL_APILIB_ZIP_LABEL     : __('Postcode', $this->myDomain);
 			$country = defined('PAYPAL_APILIB_COUNTRY_LABEL') ? PAYPAL_APILIB_COUNTRY_LABEL : __('Country', $this->myDomain);
+			$phone   = defined('PAYPAL_APILIB_PHONE_LABEL')   ? PAYPAL_APILIB_PHONE_LABEL   : __('Phone', $this->myDomain);
 			
 			$statusOptions = $this->GetStatusOptions();
 			
 			$ourOptions = array(
-				array(self::TABLEPARAM_LABEL => 'Name',	                     self::TABLEPARAM_ID => 'saleName',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => 'Name',	                     self::TABLEPARAM_ID => 'saleLastName', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, self::TABLEPARAM_DECODE => 'DecodeSaleName', ),
 				array(self::TABLEPARAM_LABEL => 'EMail',	                 self::TABLEPARAM_ID => 'saleEMail',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEEMAIL_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => 'PayPal Username',	         self::TABLEPARAM_ID => 'salePPName',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(self::TABLEPARAM_LABEL => $address,	                 self::TABLEPARAM_ID => 'salePPStreet',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN,  self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTREET_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => $city,	                     self::TABLEPARAM_ID => 'salePPCity',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN,    self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCITY_EDITLEN, ),			
 				array(self::TABLEPARAM_LABEL => $state,	                     self::TABLEPARAM_ID => 'salePPState',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN,   self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTATE_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => $zip,                        self::TABLEPARAM_ID => 'salePPZip',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPZIP_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => $country,                    self::TABLEPARAM_ID => 'salePPCountry', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN, self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCOUNTRY_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => $phone,                      self::TABLEPARAM_ID => 'salePPPhone',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN,   self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPPHONE_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'Total Paid/Due',            self::TABLEPARAM_ID => 'salePaid',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(self::TABLEPARAM_LABEL => 'Fee',                       self::TABLEPARAM_ID => 'saleFee',       self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(self::TABLEPARAM_LABEL => 'Transaction Date/Time',     self::TABLEPARAM_ID => 'saleDateTime',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
@@ -186,7 +192,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 
 if (!class_exists('PayPalSalesDetailsAdminClass')) 
 {
-	class PayPalSalesDetailsAdminClass extends StageShowLibAdminListClass // Define class
+	class PayPalSalesDetailsAdminClass extends StageShowAdminListClass // Define class
 	{		
 		function __construct($env, $editMode /* = false */) //constructor
 		{
@@ -665,13 +671,15 @@ if (!class_exists('PayPalSalesAdminClass'))
 			$errorId = '';
 			$saleId = isset($this->saleId) ? $this->saleId : 0;
 			
-			$salesVals['saleName'] = $this->GetFormInput($saleId, 'saleName');
+			$salesVals['saleFirstName'] = $this->GetFormInput($saleId, 'saleFirstName');
+			$salesVals['saleLastName'] = $this->GetFormInput($saleId, 'saleLastName');
 			$salesVals['saleEMail'] = $this->GetFormInput($saleId, 'saleEMail');
 			$salesVals['salePPStreet'] = $this->GetFormInput($saleId, 'salePPStreet');
 			$salesVals['salePPCity'] = $this->GetFormInput($saleId, 'salePPCity');
 			$salesVals['salePPState'] = $this->GetFormInput($saleId, 'salePPState');
 			$salesVals['salePPZip'] = $this->GetFormInput($saleId, 'salePPZip');
 			$salesVals['salePPCountry'] = $this->GetFormInput($saleId, 'salePPCountry');
+			$salesVals['salePPPhone'] = $this->GetFormInput($saleId, 'salePPPhone');
 			
 			$salesVals['salePaid'] = $this->salePaid;
 				

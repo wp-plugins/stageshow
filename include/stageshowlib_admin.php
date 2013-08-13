@@ -47,6 +47,33 @@ if (!class_exists('StageShowLibAdminBaseClass'))
 			$env['Domain'] = $callerContext->myDomain;
 			return $env;
 		}
+		
+		function CheckAdminReferer()	 // check nonce created by wp_nonce_field()
+		{
+			$referer = plugin_basename($this->caller);
+			
+			if ($this->myDBaseObj->getOption('Dev_ShowWPOnce'))
+			{
+				echo "<!-- check_admin_referer($referer) -->\n";
+				if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
+					echo "<br><strong>check_admin_referer FAILED - verifyResult: $verifyResult - Referer: $referer </strong></br>\n";
+				return;
+			}
+			
+			check_admin_referer($referer);
+		}
+
+		// Bespoke translation functions added to remove these translations from .po file
+		function getTL8($text, $domain = 'default') 
+		{ 
+			return __($text, $domain);
+		}
+		
+		function echoTL8($text, $domain = 'default') 
+		{ 
+			return _e($text, $domain);
+		}
+		
   	}
 }
 
@@ -219,21 +246,6 @@ function HideElement(obj)
 			}
 		}
 		
-		function CheckAdminReferer()	 // check nonce created by wp_nonce_field()
-		{
-			$referer = plugin_basename($this->caller);
-			
-			if ($this->myDBaseObj->getOption('Dev_ShowWPOnce'))
-			{
-				echo "<!-- check_admin_referer($referer) -->\n";
-				if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
-					echo "<br><strong>check_admin_referer FAILED - verifyResult: $verifyResult - Referer: $referer </strong></br>\n";
-				return;
-			}
-			
-			check_admin_referer($referer);
-		}
-
 		function UpdateHiddenRowValues($result, $index, $settings, $dbOpts)
 		{
 			// Save option extensions
@@ -313,17 +325,6 @@ function HideElement(obj)
 		<p><?php echo '<strong>Plugin is ready</strong>'; ?></p>
 	</div>
 <?php
-		}
-		
-		// Bespoke translation functions added to remove these translations from .po file
-		function getTL8($text, $domain = 'default') 
-		{ 
-			return __($text, $domain);
-		}
-		
-		function echoTL8($text, $domain = 'default') 
-		{ 
-			return _e($text, $domain);
 		}
 		
  	}

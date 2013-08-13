@@ -57,6 +57,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'salePPCity'         => __('City', $this->myDomain),
 				'salePPCountry'      => __('Country', $this->myDomain),
 				'salePPName'         => __('Name', $this->myDomain),
+				'salePPPhone'        => __('Phone', $this->myDomain),
 				'salePPState'        => __('State', $this->myDomain),
 				'salePPStreet'       => __('Street', $this->myDomain),
 				'salePPZip'          => __('Zip', $this->myDomain),
