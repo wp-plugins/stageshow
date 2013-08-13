@@ -20,11 +20,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshow_admin.php';
 
 if (!class_exists('StageShowPricesAdminListClass'))
 {
-	class StageShowPricesAdminListClass extends StageShowLibAdminListClass // Define class
+	class StageShowPricesAdminListClass extends StageShowAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -64,7 +64,7 @@ if (!class_exists('StageShowPricesAdminListClass'))
 		{
 			// FUNCTIONALITY: Prices - Lists Performance, Type and Price
 			$ourOptions = array(
-				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW,   self::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
 				array(self::TABLEPARAM_LABEL => 'Type',         self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
 				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, self::TABLEPARAM_DECODE => 'DecodePrice'),
 			);
@@ -365,7 +365,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			echo '<select name="perfID">'."\n";
 			foreach ($perfsList as $perfRecord)
 			{
-				$perfDateTime = $perfRecord->perfDateTime.'&nbsp;&nbsp;';
+				$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
 				$perfID = $perfRecord->perfID;
 				echo "<option value=\"$perfID\">$perfDateTime</option>\n";
 			}

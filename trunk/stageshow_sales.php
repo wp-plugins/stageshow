@@ -409,7 +409,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 					// TODO - Make sure that TxnID is unique
 					$saleTxnid = 'RES-'.time();	
 					
-					$checkoutRslt->saleDetails['saleName'] = $this->GetUserInfo($user_metaInfo, 'first_name').$this->GetUserInfo($user_metaInfo, 'last_name', ' ');	
+					$checkoutRslt->saleDetails['saleFirstName'] = $this->GetUserInfo($user_metaInfo, 'first_name');
+					$checkoutRslt->saleDetails['saleLastName'] = $this->GetUserInfo($user_metaInfo, 'last_name');	
 					$checkoutRslt->saleDetails['saleEMail'] = $loggedInUser->data->user_email;
 					$checkoutRslt->saleDetails['saleTxnid'] = $saleTxnid;
 
@@ -419,7 +420,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 					$checkoutRslt->saleDetails['saleDateTime'] = $saleDateTime;
 					$checkoutRslt->saleDetails['saleStatus'] = STAGESHOW_SALESTATUS_RESERVED;
 									
-					$checkoutRslt->saleDetails['salePPName'] = $checkoutRslt->saleDetails['saleName'];
+					$checkoutRslt->saleDetails['salePPName'] = $myDBaseObj->GetSaleName($checkoutRslt->saleDetails);
 					
 					$checkoutRslt->saleDetails['salePPStreet']  = $this->GetUserInfo($user_metaInfo, 'UserAddress1');
 					$checkoutRslt->saleDetails['salePPStreet'] .= $this->GetUserInfo($user_metaInfo, 'UserAddress2', "\n");
@@ -429,6 +430,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 					$checkoutRslt->saleDetails['salePPState'] = $this->GetUserInfo($user_metaInfo, 'UserCounty');
 					$checkoutRslt->saleDetails['salePPZip'] = $this->GetUserInfo($user_metaInfo, 'UserPostcode');
 					$checkoutRslt->saleDetails['salePPCountry'] = $this->GetUserInfo($user_metaInfo, 'UserCountry');
+					$checkoutRslt->saleDetails['salePPPhone'] = $this->GetUserInfo($user_metaInfo, 'UserPhone');
 			
 					// Log sale to DB
 					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails);

@@ -20,11 +20,11 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include STAGESHOW_INCLUDE_PATH.'stageshowlib_table.php';
+include STAGESHOW_INCLUDE_PATH.'stageshow_admin.php';
 
 if (!class_exists('StageShowOverviewAdminListClass')) 
 {
-	class StageShowOverviewAdminListClass extends StageShowLibAdminListClass // Define class
+	class StageShowOverviewAdminListClass extends StageShowAdminListClass // Define class
 	{		
 		function __construct($env) //constructor
 		{
@@ -120,7 +120,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 
 if (!class_exists('StageShowOverviewAdminDetailsListClass')) 
 {
-	class StageShowOverviewAdminDetailsListClass extends StageShowLibAdminListClass // Define class
+	class StageShowOverviewAdminDetailsListClass extends StageShowAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{
@@ -144,7 +144,7 @@ if (!class_exists('StageShowOverviewAdminDetailsListClass'))
 		{
 			// FUNCTIONALITY: Overview - Show button lists performances, sales (with link) and value
 			$ourOptions = array(
-				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, self::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
 				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'soldQty',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
 				array(self::TABLEPARAM_LABEL => 'Sales Value',  self::TABLEPARAM_ID => 'soldValue',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, ),						
 			);

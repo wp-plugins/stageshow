@@ -20,11 +20,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshow_admin.php';
 
 if (!class_exists('StageShowPerformancesAdminListClass'))
 {
-	class StageShowPerformancesAdminListClass extends StageShowLibAdminListClass // Define class
+	class StageShowPerformancesAdminListClass extends StageShowAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -58,7 +58,7 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 		{
 			// FUNCTIONALITY: Performances - Lists Performance Date & Time, Reference, Max Seats, Tickets Sold Count and Activation State
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Date & Time',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => 28, ),
+				array(self::TABLEPARAM_LABEL => 'Date & Time',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => 28, self::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
 				array(self::TABLEPARAM_LABEL => 'Reference',    self::TABLEPARAM_ID => 'perfRef',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => STAGESHOW_PERFREF_TEXTLEN, ),
 				array(self::TABLEPARAM_LABEL => 'Max Seats',    self::TABLEPARAM_ID => 'perfSeats',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_DECODE =>'GetPerfMaxSeats',  self::TABLEPARAM_LEN => 4, ),						
 				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'soldQty',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						

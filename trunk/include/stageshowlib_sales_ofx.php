@@ -198,7 +198,7 @@ if (!class_exists('StageShowLibOFXExportAdminClass'))
 			$this->ofx_line('<DTPOSTED>'.$this->ofx_datetime($saletimestamp), false);
 			$this->ofx_line('<TRNAMT>'.$salePaid, false);
 			$this->ofx_line('<FITID>'.$saleTxnId, false);
-			$this->ofx_line('<NAME>'.$sale->saleName, false);
+			$this->ofx_line('<NAME>'.$this->myDBaseObj->GetSaleName($sale), false);
 			
 			if ($memo != '')
 				$this->ofx_line('<MEMO>'.$memo, false);

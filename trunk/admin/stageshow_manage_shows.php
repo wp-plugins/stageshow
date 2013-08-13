@@ -19,11 +19,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
-include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshow_admin.php';
 
 if (!class_exists('StageShowShowsAdminListClass'))
 {
-	class StageShowShowsAdminListClass extends StageShowLibAdminListClass // Define class
+	class StageShowShowsAdminListClass extends StageShowAdminListClass // Define class
 	{
 		var $updateFailed;
 		

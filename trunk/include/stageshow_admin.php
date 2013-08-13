@@ -1,6 +1,6 @@
 <?php
 /* 
-Description: Code for Managing Prices Configuration
+Description: Core Library Admin Page functions
  
 Copyright 2012 Malcolm Shergold
 
@@ -19,27 +19,19 @@ Copyright 2012 Malcolm Shergold
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
-	
-include STAGESHOW_INCLUDE_PATH.'stageshowlib_debug.php';      
 
-if (!class_exists('StageShowDebugAdminClass')) 
+include "stageshowlib_table.php";
+
+if (!class_exists('StageShowAdminListClass')) 
 {
-	class StageShowDebugAdminClass extends StageShowLibDebugSettingsClass // Define class
-	{
-		function GetOptionsDefs()
+	class StageShowAdminListClass extends StageShowLibAdminListClass // Define class
+	{		
+	
+		static function FormatDateForAdminDisplay($dateInDB)
 		{
-			$testOptionDefs = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowTrolley',     StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowTrolley', ),
-			);
-			
-			$childOptions = parent::GetOptionsDefs();
-			
-			$ourOptions = array_merge($childOptions, $testOptionDefs);
-			
-			return $ourOptions;
+			// Get Time & Date formatted for display to user
+			return StageShowLibSalesDBaseClass::FormatDateForAdminDisplay($dateInDB);
 		}
 		
 	}
 }
-		
-?>

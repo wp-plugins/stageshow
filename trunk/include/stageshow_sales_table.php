@@ -97,7 +97,7 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 		{
 			return array(
 				array(self::TABLEPARAM_LABEL => 'Show',        self::TABLEPARAM_ID => 'showName',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Performance', self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Performance', self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, self::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
 				array(self::TABLEPARAM_LABEL => 'Type',        self::TABLEPARAM_ID => 'ticketType',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 				array(self::TABLEPARAM_LABEL => 'Price',       self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),						
 				array(self::TABLEPARAM_LABEL => 'Quantity',    self::TABLEPARAM_ID => 'ticketQty',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 4, ),						

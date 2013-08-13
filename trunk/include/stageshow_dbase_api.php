@@ -110,10 +110,6 @@ if (!class_exists('StageShowDBaseClass'))
 			// Call upgradeDB() in base class
 			parent::upgradeDB();
 			
-			// FUNCTIONALITY: DBase - On upgrade ... Add any database fields
-			// Add DB Tables
-			$this->createDB();
-			
 			// Remove priceRef field
 			if ($this->RemovePriceRefsField())
 			{
@@ -554,10 +550,10 @@ if (!class_exists('StageShowDBaseClass'))
 				$showName1 .= " (".StageShowLibUtilsClass::GetSiteID().")";
 			}
 			// Sample dates to reflect current date/time
-			$showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+28 days"))." 20:00:00";
-			$showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+29 days"))." 20:00:00";
-			$showTime3 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 14:30:00";
-			$showTime4 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 20:00:00";
+			$showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+28 days"))." 20:00";
+			$showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+29 days"))." 20:00";
+			$showTime3 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 14:30";
+			$showTime4 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 20:00";
 			// Populate table
 			$showID1 = $this->AddShow($showName1);
 			$statusMsg = '';
@@ -595,15 +591,15 @@ if (!class_exists('StageShowDBaseClass'))
 				$saleEMail = 'other@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime1, 'A.N.Other', $saleEMail, 12.00, 0.60, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
-				'Andrew Other', '1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
+				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 0.60, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				'1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
 				$this->AddSaleItem($saleID, $priceID1_C3, 4, PRICEID1_C3);
 				$this->AddSaleItem($saleID, $priceID1_A3, 1, PRICEID1_A3);
 				$saleEMail = 'mybrother@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.Brother', $saleEMail, 24.00, 1.01, '87654321qa', PAYPAL_APILIB_SALESTATUS_COMPLETED,
-				'Matt Brother', 'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
+				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, 24.00, 1.01, '87654321qa', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
 				$this->AddSaleItem($saleID, $priceID1_A4, 4, PRICEID1_A4);
 				$timeStamp = current_time('timestamp');
 				if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
@@ -612,9 +608,10 @@ if (!class_exists('StageShowDBaseClass'))
 					for ($sampleSaleNo = 1; $sampleSaleNo<=STAGESHOW_EXTRA_SAMPLE_SALES; $sampleSaleNo++)
 					{
 						$saleDate = date(self::MYSQL_DATETIME_FORMAT, $timeStamp);
-						$saleName = 'Sample Buyer'.$sampleSaleNo;
+						$saleFirstName = 'Sample'.$sampleSaleNo;
+						$saleLastName = 'Buyer'.$sampleSaleNo;
 						$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
-						$saleID = $this->AddSampleSale($saleDate, $saleName, $saleEMail, 12.50, 0.62, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
+						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 0.62, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
 						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
 						$this->AddSaleItem($saleID, $priceID1_A3, 3, PRICEID1_A3);
 						$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
@@ -682,31 +679,6 @@ if (!class_exists('StageShowDBaseClass'))
 				$rtnMsg = __('New Performance Added', $this->get_domain());
 			
 			return $perfID;			
-		}
-		
-		static function FormatDateForDisplay($dateInDB)
-		{
-			// Convert time string to UNIX timestamp
-			$timestamp = strtotime( $dateInDB );
-			return StageShowDBaseClass::FormatTimestampForDisplay($timestamp);
-		}
-		
-		static function FormatTimestampForDisplay($timestamp)
-		{
-			if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
-				$dateFormat = STAGESHOW_DATETIME_BOXOFFICE_FORMAT;
-			else
-				// Use Wordpress Date and Time Format
-				$dateFormat = get_option( 'date_format' ).' '.get_option( 'time_format' );
-				
-			// Get Time & Date formatted for display to user
-			$dateAndTime = date($dateFormat, $timestamp);
-			if (strlen($dateAndTime) < 2)
-			{
-				$dateAndTime = '[Invalid WP Date/Time Format]';
-			}
-			
-			return $dateAndTime;
 		}
 		
 		function UpdateCartButtons($perfsList)
@@ -1489,7 +1461,7 @@ if (!class_exists('StageShowDBaseClass'))
 
 		function GetTicketsListByPerfID($perfID)
 		{
-			$sqlFilters['orderBy'] = 'saleName,'.STAGESHOW_SALES_TABLE.'.saleID DESC';
+			$sqlFilters['orderBy'] = 'saleLastName,'.STAGESHOW_SALES_TABLE.'.saleID DESC';
 			$sqlFilters['perfID'] = $perfID;
 			return $this->GetSalesList($sqlFilters);
 		}
@@ -1642,7 +1614,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			if (isset($sqlFilters['searchtext']))
 			{
-				$searchFields = array('saleEMail', 'saleName', 'salePPName');
+				$searchFields = array('saleEMail', 'saleFirstName', 'saleLastName');
 				
 				$sqlWhere .= $sqlCmd.'(';
 				$sqlOr = '';				
@@ -1787,7 +1759,7 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			for ($i=0; $i<count($salesListArray); $i++)
 			{
-				$salesListArray[$i]->ticketName = $salesListArray[$i]->showName.' - '.$salesListArray[$i]->perfDateTime;
+				$salesListArray[$i]->ticketName = $salesListArray[$i]->showName.' - '.StageShowDBaseClass::FormatDateForDisplay($salesListArray[$i]->perfDateTime);
 				$salesListArray[$i]->ticketType = $salesListArray[$i]->priceType;
 			}			
 		}
@@ -1894,13 +1866,20 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->adminOptions['AdminEMail'];
 		}
 		
-		function AddSalesDetailsEMailFields($EMailTemplate, $saleDetails)
+		function IsCurrencyField($tag)
 		{
-			foreach ($saleDetails as $key => $value)
+			switch ($tag)
 			{
-				$EMailTemplate = str_replace("[$key]", $value, $EMailTemplate);
+				case '[ticketPaid]':
+				case '[priceValue]':
+					return true;
 			}
 			
+			return parent::IsCurrencyField($tag);					
+		}
+		
+		function AddSalesDetailsEMailFields($EMailTemplate, $saleDetails)
+		{
 			return parent::AddSalesDetailsEMailFields($EMailTemplate, $saleDetails);
 		}
 		
