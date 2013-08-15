@@ -65,7 +65,7 @@ if (!class_exists('StageShowPricesAdminListClass'))
 			// FUNCTIONALITY: Prices - Lists Performance, Type and Price
 			$ourOptions = array(
 				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW,   self::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
-				array(self::TABLEPARAM_LABEL => 'Type',         self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
+				array(self::TABLEPARAM_LABEL => 'Ticket Type',  self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
 				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, self::TABLEPARAM_DECODE => 'DecodePrice'),
 			);
 			

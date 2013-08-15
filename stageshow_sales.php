@@ -32,7 +32,9 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			$this->cssBaseID = "stageshow-boxoffice";
 			
-			$this->nameColID = 'Date/Time';
+			// nameColID and refColID are defined here
+			// Note: The same text strings must be used on admin pages for translations to work
+			$this->nameColID = 'Date & Time';
 			$this->cssNameColID = "datetime";
 
 			$this->refColID = 'Ticket Type';
@@ -312,11 +314,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 		function OutputContent_OnlineTrolleyHeader($result)
 		{
 			echo '<tr class="'.$this->cssTrolleyBaseID.'-titles">'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-show">Show</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">Date/Time</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-type">Type</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">Quantity</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-price">Price</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.__('Show', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.__('Date & Time', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-type">'.__('Ticket Type', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.__('Quantity', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.__('Price', $this->myDomain).'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
 			echo "</tr>\n";
 			

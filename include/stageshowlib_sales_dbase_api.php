@@ -298,7 +298,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			// Convert time string to UNIX timestamp
 			$timestamp = strtotime( $dateInDB );
-			return StageShowDBaseClass::FormatTimestampForDisplay($timestamp);
+			return self::FormatTimestampForDisplay($timestamp);
 		}
 		
 		static function FormatTimestampForDisplay($timestamp)
