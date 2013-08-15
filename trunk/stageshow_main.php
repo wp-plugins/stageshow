@@ -186,9 +186,18 @@ if (!class_exists('StageShowPluginClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			$myDBaseObj->init($this->env['caller']);
 			
-	  		// FUNCTIONALITY: Runtime - Load language files
+		    $domain = 'stageshow';
+			
+	  		// FUNCTIONALITY: Runtime - Load custom language file in core language folder
+		    // The "plugin_locale" filter is also used in load_plugin_textdomain()
+		    $locale = apply_filters('plugin_locale', get_locale(), 'stageshow');
+			$subFolder = '/';	// '/stageshow/';
+			$langFilePath = WP_LANG_DIR.$subFolder.$domain.'-'.$locale.'.mo';
+		    load_textdomain($domain, $langFilePath);
+	
+	  		// FUNCTIONALITY: Runtime - Load common language files
 			$langRelPath = STAGESHOW_LANG_RELPATH;
-			load_plugin_textdomain('stageshow', false, $langRelPath);
+			load_plugin_textdomain($domain, false, $langRelPath);
 			
 			// Get plugin version number
 			wp_update_plugins();

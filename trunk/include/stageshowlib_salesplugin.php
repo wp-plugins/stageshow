@@ -34,6 +34,8 @@ if (!class_exists('SalesPluginBaseClass'))
 			if (!isset($this->cssBaseID)) $this->cssBaseID = $this->cssDomain.'-shop';
 			if (!isset($this->cssTrolleyBaseID)) $this->cssTrolleyBaseID = $this->cssDomain.'-trolley';
 			
+			// nameColID and refColID are defined here
+			// Note: The same text strings must be used on admin pages for translations to work
 			if (!isset($this->nameColID)) $this->nameColID = 'Name';
 			if (!isset($this->cssNameColID)) $this->cssNameColID = "name";			
 			
@@ -159,16 +161,19 @@ if (!class_exists('SalesPluginBaseClass'))
 			
 		function OutputContent_OnlineStoreHeader($result)
 		{
+			$nameColLabel = __($this->nameColID, $this->myDomain);
+			$refColLabel = __($this->refColID, $this->myDomain);
+				
 			echo '
 				<table width="100%" border="0">
 					<tr>
 						<td class="'.$this->cssBaseID.'-header">
 							<table width="100%" cellspacing="0">
 								<tr>
-									<td class="'.$this->cssBaseID.'-'.$this->cssNameColID.'">'.$this->nameColID.'</td>
-									<td class="'.$this->cssBaseID.'-'.$this->cssRefColID.'">'.$this->refColID.'</td>
-									<td class="'.$this->cssBaseID.'-price">Price</td>
-									<td class="'.$this->cssBaseID.'-qty">Qty</td>
+									<td class="'.$this->cssBaseID.'-'.$this->cssNameColID.'">'.$nameColLabel.'</td>
+									<td class="'.$this->cssBaseID.'-'.$this->cssRefColID.'">'.$refColLabel.'</td>
+									<td class="'.$this->cssBaseID.'-price">'.__('Price', $this->myDomain).'</td>
+									<td class="'.$this->cssBaseID.'-qty">'.__('Quantity', $this->myDomain).'</td>
 									<td class="'.$this->cssBaseID.'-add">&nbsp;</td>
 								</tr>
 							</table>
@@ -361,10 +366,10 @@ if (!class_exists('SalesPluginBaseClass'))
 		function OutputContent_OnlineTrolleyHeader($result)
 		{
 			echo '<tr class="'.$this->cssTrolleyBaseID.'-titles">'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-name">Name</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-ref">Ref</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-price">Price</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">Quantity</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-name">'.__('Name', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-ref">'.__('Ref', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.__('Price', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.__('Quantity', $this->myDomain).'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
 			echo "</tr>\n";
 			
@@ -704,7 +709,7 @@ if (!class_exists('SalesPluginBaseClass'))
 				
 					if ($this->myDBaseObj->isOptionSet('Dev_IPNLocalServer'))
 					{
-						$this->checkoutError .= __('Using Local IPN Server - PayPal Checkout call blocked', $this->myDomain);
+						$this->checkoutError .= __('Using Local IPN Server - PayPal Checkout call skipped', $this->myDomain);
 					}
 					else 
 					{
