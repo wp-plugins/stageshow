@@ -1697,4 +1697,18 @@ if (!class_exists('Template_For_ClassDerivedFrom_StageShowLibAdminListClass'))
 	}
 }
 
+if (!class_exists('StageShowLibSalesAdminListClass')) 
+{
+	class StageShowLibSalesAdminListClass extends StageShowLibAdminListClass // Define class
+	{		
+	
+		static function FormatDateForAdminDisplay($dateInDB)
+		{
+			// Get Time & Date formatted for display to user
+			return StageShowLibSalesDBaseClass::FormatDateForAdminDisplay($dateInDB);
+		}
+		
+	}
+}
+
 ?>

@@ -20,11 +20,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include STAGESHOW_INCLUDE_PATH . 'stageshow_admin.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
 
 if (!class_exists('StageShowPricesAdminListClass'))
 {
-	class StageShowPricesAdminListClass extends StageShowAdminListClass // Define class
+	class StageShowPricesAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -183,21 +183,12 @@ if (!class_exists('StageShowPricesAdminClass'))
 				}
 				else
 				{
-					$perfsList = array();
-					
 					if (count($results) > 0)
 					{
 						foreach ($results as $result)
 						{
 							$pricesUpdated = $this->SavePriceEntry($result);
-							
-							if ($pricesUpdated)
-								$perfsList[count($perfsList)] = $result;
-							
 						} // End foreach
-						
-						if (count($perfsList) > 0)
-							$myDBaseObj->UpdateCartButtons($perfsList);
 					}
 					echo '<div id="message" class="updated"><p>' . __('Settings have been saved', $this->myDomain) . '</p></div>';
 				}

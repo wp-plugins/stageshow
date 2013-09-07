@@ -35,19 +35,6 @@ $myDBaseObj = new $stageShowDBaseClass(__FILE__);
 
 $myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
 
-// Delete any PayPal Hosted buttons in the Performance Table
-$results = $myDBaseObj->GetAllPerformancesList();
-
-//echo "<br>Class of myDBaseObj is ".get_class($myDBaseObj)."<br>\n";
-//echo "<br>Performances:<br>\n"; print_r($results);
-//die;
-
-// FUNCTIONALITY: Uninstall - Delete PayPal buttons
-foreach($results as $result)
-{
-	$myDBaseObj->payPalAPIObj->DeleteButton($result->perfPayPalButtonID);
-}
-
 $myDBaseObj->uninstall();
 
 // FUNCTIONALITY: Uninstall - Delete StageShow entries from Wordpress options 

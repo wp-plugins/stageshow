@@ -47,7 +47,10 @@ if (!class_exists('StageShowPluginClass'))
 			register_activation_hook( $caller, array(&$this, 'activate') );
 			register_deactivation_hook( $caller, array(&$this, 'deactivate') );	
 	
-			add_action('wp_enqueue_scripts', array(&$this, 'load_user_styles') );
+			add_action('wp_print_styles', array(&$this, 'load_user_styles') );
+			add_action('wp_print_scripts', array(&$this, 'load_user_scripts') );
+			
+			//add_action('wp_enqueue_scripts', array(&$this, 'load_user_scrips') );
 			add_action('admin_enqueue_scripts', array(&$this, 'load_admin_styles') );
 			
 			// Add a reference to the header
@@ -161,20 +164,6 @@ if (!class_exists('StageShowPluginClass'))
 			}				
 			
       		$myDBaseObj->upgradeDB();
-			
-			if (!$myDBaseObj->UseIntegratedTrolley())
-			{
-				if (!$myDBaseObj->adminOptions['PayPalInvChecked'])
-				{
-					// Check that all PayPal buttons have the SOLDOUTURL set			
-					$results = $myDBaseObj->GetAllPerformancesList();
-					foreach ($results as $result)
-						$myDBaseObj->payPalAPIObj->AdjustInventory($result->perfPayPalButtonID, 0);
-					
-					$myDBaseObj->adminOptions['PayPalInvChecked'] = true;
-				}				
-			}
-			
 		}
 
 	    function deactivate()
@@ -306,6 +295,12 @@ if (!class_exists('StageShowPluginClass'))
 			}
 		}//End function printAdminPage()	
 		
+		function load_user_scripts()
+		{
+			// Add our own Javascript
+			wp_enqueue_script( 'stageshow', plugins_url( 'admin/js/stageshow.js', __FILE__ ));
+		}	
+		
 		function load_admin_styles()
 		{
 			//echo "<!-- load_admin_styles called! ".plugins_url( 'admin/css/stageshow-admin.css', __FILE__ )." -->\n";
@@ -374,12 +369,6 @@ if (!class_exists('StageShowPluginClass'))
 				
 				if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
 				{
-					if (!$myDBaseObj->UseIntegratedTrolley())
-					{
-						if ( file_exists(STAGESHOW_TEST_PATH.'paypal_manage_buttons.php') ) 
-							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Manage Buttons', $this->myDomain),    __('Buttons', $this->myDomain),   STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_BUTTONS,      array(&$this, 'printAdminPage'));							
-					}
-				
 					if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php') ) 
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));
 

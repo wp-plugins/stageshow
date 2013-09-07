@@ -77,13 +77,7 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 				$currSelect[$index] .= ' ('.$currDef['Symbol'].') ';
 			}
 			
-			$trolleyOptions = array(
-				StageShowLibSalesDBaseClass::STAGESHOWLIB_TROLLEYTYPE_PAYPAL.'|'.__('PayPal Shopping Cart', $this->myDomain),
-				StageShowLibSalesDBaseClass::STAGESHOWLIB_TROLLEYTYPE_INTEGRATED.'|'.__('Integrated Shopping Trolley', $this->myDomain),
-				);
-				
 			$rowDefs = array(
-				array(self::TABLEPARAM_LABEL => 'Shopping Trolley',                self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'TrolleyType',           self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_ITEMS => $trolleyOptions, self::TABLEPARAM_DEFAULT => StageShowLibSalesDBaseClass::STAGESHOWLIB_TROLLEYTYPE_INTEGRATED, self::TABLEPARAM_ONCHANGE => 'onSalesInterfaceClick'),
 				array(self::TABLEPARAM_LABEL => 'Environment',                     self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalEnv',             self::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_ITEMS => array('live|Live', 'sandbox|Sandbox'), ),
 				array(self::TABLEPARAM_LABEL => 'Merchant ID',                     self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalMerchantID',      self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_MERCHANTID_TEXTLEN,  self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'API User',                        self::TABLEPARAM_TAB => 'paypal-settings-tab', self::TABLEPARAM_ID => 'PayPalAPIUser',         self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALLOCK => true, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_USER_TEXTLEN,        self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),

@@ -19,11 +19,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
-include STAGESHOW_INCLUDE_PATH . 'stageshow_admin.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
 
 if (!class_exists('StageShowShowsAdminListClass'))
 {
-	class StageShowShowsAdminListClass extends StageShowAdminListClass // Define class
+	class StageShowShowsAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -262,12 +262,6 @@ if (!class_exists('StageShowShowsAdminClass'))
 						
 						// Note: Prices are deleted by Database Cleanup - $myDBaseObj->DeletePriceByPerfID($delperfId);
 						
-						if (!$myDBaseObj->UseIntegratedTrolley())					
-						{
-							// Delete any PayPal buttons ....
-							$myDBaseObj->payPalAPIObj->DeleteButton($result->perfPayPalButtonID);
-						}
-												
 						// Delete a performances entry (Marks entry as deleted)
 						$myDBaseObj->DeletePerformanceByPerfID($delperfId);
 					}

@@ -110,12 +110,9 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $results;
 		}
 		
-		function GetOnlineStoreButtonID($result)
+		function GetOnlineStorePriceID($result)
 		{
-			if ($this->myDBaseObj->UseIntegratedTrolley())
 				return $result->priceID;
-			else
-				return $result->perfPayPalButtonID;
 		}
 			
 		function GetOnlineStoreStockID($result)
@@ -193,22 +190,13 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			$hiddenTags  = parent::GetOnlineStoreHiddenTags();
 
-			if (!$myDBaseObj->UseIntegratedTrolley())
-			{
-				$hiddenTags .= '<input type="hidden" name="on0" value="TicketType"/>'."\n";      
-			}
-    
 			return $hiddenTags;
 		}
 		
 		function GetOnlineStoreRowHiddenTags($result)
 		{
-			$hiddenTags = parent::GetOnlineStoreRowHiddenTags($result);
-			
-			if (!$this->myDBaseObj->UseIntegratedTrolley())
-			{
-				$hiddenTags .= '<input type="hidden" name="os0" value="'.$result->priceType.'"/>'."\n";      
-			}
+			$hiddenTags  = '<input type="hidden" name="PerfId" value="'.$result->perfID.'"/>'."\n";
+			$hiddenTags .= parent::GetOnlineStoreRowHiddenTags($result);
 			
 			return $hiddenTags;
 		}		
@@ -255,16 +243,14 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', $this->myDomain);
 						
-			if ($myDBaseObj->UseIntegratedTrolley())
 				$perfPayPalButtonID = $result->priceID;
-			else
-				$perfPayPalButtonID = $result->perfPayPalButtonID;
 					
 			$separator = '';
 			if (($this->lastPerfDateTime !== $result->perfDateTime) || defined('STAGESHOW_BOXOFFICE_ALLDATES'))
 			{
 				$formattedPerfDateTime = $myDBaseObj->FormatDateForDisplay($result->perfDateTime);
 				if ($lastPerfID != 0) $separator = "\n".'<tr><td class="stageshow-boxoffice-separator">&nbsp;</td></tr>';
+				$this->lastPerfDateTime = $result->perfDateTime;
 			}
 			else
 			{
@@ -292,7 +278,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 					</select>
 					</td>
 					<td class="stageshow-boxoffice-add">
-					<input type="submit" value="Add"  alt="'.$altTag.'"/>
+					<input type="submit" value='.__("Add", $this->myDomain).' alt="'.$altTag.'"/>
 					</td>
 				';
 			}
@@ -308,7 +294,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 				</table>
 				';
 				
-			$this->lastPerfDateTime = $result->perfDateTime;
 		}
 		
 		function OutputContent_OnlineTrolleyHeader($result)
@@ -327,7 +312,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 				
 		function OutputContent_OnlineCheckoutButton()
 		{
-			if ($this->myDBaseObj->UseIntegratedTrolley())
 			{
 				if ($this->myDBaseObj->getOption('EnableReservations') && current_user_can(STAGESHOW_CAPABILITY_RESERVEUSER))
 				{

@@ -47,7 +47,7 @@ if (!class_exists('PayPalAPIClass'))
 	define('PAYPAL_APILIB_SALESTATUS_PENDING', 'Pending');
 	define('PAYPAL_APILIB_SALESTATUS_CHECKOUT', 'Checkout');
 		
-	define('PAYPAL_APILIB_PPLOGIN_MERCHANTID_TEXTLEN', 16);
+	define('PAYPAL_APILIB_PPLOGIN_MERCHANTID_TEXTLEN', 65);
 	define('PAYPAL_APILIB_PPLOGIN_USER_TEXTLEN', 127);
 	define('PAYPAL_APILIB_PPLOGIN_PWD_TEXTLEN', 65);
 	define('PAYPAL_APILIB_PPLOGIN_SIG_TEXTLEN', 65);
@@ -639,7 +639,7 @@ if (!class_exists('PayPalButtonsAPIClass'))
 			return $this->APIAction('Inventory ' . $hostedButtonID);
 		}
 		
-		function AdjustInventory($hostedButtonID, $qtyOffset, $soldOutUrl = '', $reference = 'X')
+		function AdjustInventory($hostedButtonID, $qtyOffset, $soldOutUrl = '', $reference = 'X') // Function Unused
 		{
 			// Check that the PayPal login parameters have been set
 			if (!$this->IsConfigured())
@@ -763,6 +763,7 @@ if (!class_exists('PayPalButtonsAPIClass'))
 			*/      
 			// Tidy up - Button was only to check login and get email .... delete it!
 			$this->DeleteButton($hostedButtonID);
+			
 			// VerifyPayPalLogin - Returned $this->APIStatusMsg 
 			return ($this->APIStatusMsg === 'OK');
 		}
