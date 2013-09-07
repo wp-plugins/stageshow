@@ -69,23 +69,23 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 		function SplitSaleNameField()
 		{
-			if (!$this->IfColumnExists(STAGESHOW_SALES_TABLE, 'saleName'))
+			if (!$this->IfColumnExists($this->opts['SalesTableName'], 'saleName'))
 				return false;
 				
 			// Split saleName field into two parts 			
-			$sql  = 'UPDATE '.STAGESHOW_SALES_TABLE.' SET ';
+			$sql  = 'UPDATE '.$this->opts['SalesTableName'].' SET ';
 			$sql .= 'saleName = CONCAT(" ", REPLACE(saleName, ".", " "))';
 			$this->query($sql);	
 
-			$sql  = 'UPDATE '.STAGESHOW_SALES_TABLE.' SET ';
+			$sql  = 'UPDATE '.$this->opts['SalesTableName'].' SET ';
 			$sql .= 'saleFirstName = TRIM(SUBSTR(saleName, 1, LENGTH(saleName) - LOCATE(" ", REVERSE(saleName))))';
 			$this->query($sql);	
 
-			$sql  = 'UPDATE '.STAGESHOW_SALES_TABLE.' SET ';
+			$sql  = 'UPDATE '.$this->opts['SalesTableName'].' SET ';
 			$sql .= 'saleLastName = TRIM(SUBSTR(saleName, 1 + (LENGTH(saleName) - LOCATE(" ", REVERSE(saleName)))))';
 			$this->query($sql);	
 
-			$this->deleteColumn(STAGESHOW_SALES_TABLE, 'saleName');
+			$this->deleteColumn($this->opts['SalesTableName'], 'saleName');
 					
 			return true;
 		}
@@ -100,18 +100,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			// Copy release templates to plugin persistent templates and images folders
 			StageShowLibUtilsClass::recurse_copy($salesDefaultTemplatesPath, $salesTemplatesPath);
 			
-			if (!isset($this->adminOptions['TrolleyType']))
+			if (!isset($this->adminOptions['CheckoutTimeout']))
 			{
-				// Set TrolleyType default ... detect if this is a new install
-				if ( ($this->adminOptions['PayPalAPIUser'] == '')
-				  && ($this->adminOptions['PayPalAPIPwd'] == '')
-				  && ($this->adminOptions['PayPalAPISig'] == '') )
-				 {
-					$this->adminOptions['TrolleyType'] = self::STAGESHOWLIB_TROLLEYTYPE_INTEGRATED;
-				 }
-				else
-					$this->adminOptions['TrolleyType'] = self::STAGESHOWLIB_TROLLEYTYPE_PAYPAL;
-					
 				$this->adminOptions['CheckoutTimeout'] = PAYPAL_APILIB_CHECKOUT_TIMEOUT_DEFAULT;
 			}
 			
@@ -192,8 +182,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'PayPalLogoImageFile' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE,
 				'PayPalHeaderImageFile' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE,
 				        
-				'PayPalInvChecked' => false,	// Set to true when SS is activated and Inventory URLs have been verified
-				        
 				'CurrencySymbol' => '',
 
 				'SalesID' => '',        
@@ -229,7 +217,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->adminOptions = $currOptions;
 			
 			// Create PayPalAPIClass object here (if required) after Trolley type is known
-			$this->usePayPal = !$this->UseIntegratedTrolley();
 			if (!isset($this->payPalAPIObj))
 			{
 				$this->payPalAPIObj = new PayPalButtonsAPIClass(__FILE__);
@@ -256,33 +243,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			{
 				$this->PayPalVerifyURL = $this->PayPalURL;
 			}				
-			
-			if ($this->UseIntegratedTrolley())	
-				return;
-				
-			$this->payPalAPIObj->SetTestMode($payPalTestMode);
-			
-			$this->payPalAPIObj->SetLoginParams(
-				$this->adminOptions['PayPalAPIUser'], 
-				$this->adminOptions['PayPalAPIPwd'], 
-				$this->adminOptions['PayPalAPISig'], 
-				$this->adminOptions['PayPalCurrency'], 
-				$this->adminOptions['PayPalAPIEMail'],
-				$useLocalIPNServer);
-								
-			if (isset($this->adminOptions['CheckoutCompleteURL']))
-			{
-				$this->payPalAPIObj->SetSaleCompleteURL($this->adminOptions['CheckoutCompleteURL']);
-			}
-			
-			if (isset($this->adminOptions['CheckoutCancelledURL']))
-			{
-				$this->payPalAPIObj->SetSaleCancelURL($this->adminOptions['CheckoutCancelledURL']);
-			}
-							
-								
-			if ($this->getOption('Dev_ShowPayPalIO') == 1)
-				$this->payPalAPIObj->EnableDebug();
 		}
 		
 		static function FormatDateForAdminDisplay($dateInDB)
@@ -408,7 +368,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function PayPalConfigured()
 		{
-			if ($this->UseIntegratedTrolley())
 			{
 				if (!isset($this->adminOptions['PayPalMerchantID']))
 					return false;
@@ -424,8 +383,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				
 				return true;				
 			}
-			
-			return $this->payPalAPIObj->IsConfigured();
 		}
 		
 		function SettingsConfigured()
@@ -433,17 +390,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $this->PayPalConfigured();
 		}
 		
-		function UseIntegratedTrolley()
-		{
-			if (!isset($this->adminOptions['TrolleyType']))
-				return false;
-				
-			return($this->adminOptions['TrolleyType'] == self::STAGESHOWLIB_TROLLEYTYPE_INTEGRATED);
-		}
-		    
 		function GetTrolleyType()
 		{
-			return $this->UseIntegratedTrolley() ? 'Integrated Trolley' : 'PayPal Shopping Cart';
+			return 'Integrated Trolley';
 		}
 		    
 		function Output_TrolleyHelp()
@@ -735,7 +684,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if ($timeout == '')
 				$timeout = 60*$this->adminOptions['CheckoutTimeout'];	// 1 hour default
 				
-			$limitDateTime = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT, time() - $timeout);
+			$limitDateTime = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT, current_time( 'timestamp' ) - $timeout);
 			
 			$sql  = 'DELETE FROM '.$this->opts['SalesTableName'];
 			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleStatus="'.PAYPAL_APILIB_SALESTATUS_CHECKOUT.'"';
@@ -750,12 +699,12 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->query($sql);
 		}
 		
-		function AddSaleItem($saleID, $stockID, $qty, $paid)
+		function AddSaleItem($saleID, $stockID, $qty, $paid, $detail = '')
 		{
 			$paid *= $qty;
 			
-			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').')';
-			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'")';
+			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').', '.$this->DBField('orderDetail').')';
+			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'", "'.$detail.'")';
 			 
 			$this->query($sql);
 			$orderID = mysql_insert_id();
@@ -909,15 +858,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function FormatEMailField($tag, $field, $saleDetails)
 		{
+			if (!property_exists($saleDetails, $field))
+			{
+				return "**** $field ".__("Undefined", $this->get_domain())." ****";
+			}
+			
 			if ($this->IsCurrencyField($tag))
 			{
-				if (isset($saleDetails->$field))
-				{
 					$saleFieldValue = $this->FormatCurrency($saleDetails->$field, false);
 				}
-				else
-					$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
-			}
 			else switch ($tag)
 			{
 				case '[saleName]':
@@ -925,10 +874,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					break;
 					
 				default:
-					if (isset($saleDetails->$field))
 						$saleFieldValue = $saleDetails->$field;
-					else
-						$saleFieldValue = "**** $field ".__("Undefined", $this->get_domain())." ****";
 						break;
 			}
 			
@@ -1033,6 +979,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$salesList = $this->GetSale($saleID);
 			if (count($salesList) < 1) 
 				return 'salesList Empty';
+
+			$salesList[0]->saleName = $this->GetSaleName($saleDetails);
 
 			$templatePath = $this->GetEmailTemplatePath('EMailTemplatePath', $salesList);
 	

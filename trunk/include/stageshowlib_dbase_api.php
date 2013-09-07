@@ -217,6 +217,33 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $wpdb->query($sql);			
 		}
 		
+		function CheckVersionNumber($stockRec)
+		{
+		}
+			
+		function getColumnSpec($table_name, $colName)
+		{
+			$sql = "SHOW COLUMNS FROM $table_name WHERE field = '$colName'";			 
+
+			$typesArray = $this->get_results($sql);
+
+			return isset($typesArray[0]) ? $typesArray[0] : '';
+		}
+		
+		function deleteColumn($table_name, $colName)
+		{
+ 			$sql = "ALTER TABLE $table_name DROP $colName";
+
+			$this->query($sql);	
+			return "OK";							
+		}
+		
+		function IfColumnExists($table_name, $colName)
+		{
+			$colSpec = $this->getColumnSpec($table_name, $colName);
+			return (isset($colSpec->Field));
+		}
+		
 		function DropTable($table_name)
 		{
 			global $wpdb;

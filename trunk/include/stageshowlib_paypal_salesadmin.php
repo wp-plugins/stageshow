@@ -21,11 +21,11 @@ Copyright 2012 Malcolm Shergold
 */
 
 include 'stageshowlib_admin.php';      
-include 'stageshow_admin.php';      
+include 'stageshowlib_table.php';      
 
 if (!class_exists('PayPalSalesAdminListClass')) 
 {
-	class PayPalSalesAdminListClass extends StageShowAdminListClass // Define class
+	class PayPalSalesAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{	
 		function __construct($env, $editMode /* = false */) //constructor
 		{
@@ -192,7 +192,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 
 if (!class_exists('PayPalSalesDetailsAdminClass')) 
 {
-	class PayPalSalesDetailsAdminClass extends StageShowAdminListClass // Define class
+	class PayPalSalesDetailsAdminClass extends StageShowLibSalesAdminListClass // Define class
 	{		
 		function __construct($env, $editMode /* = false */) //constructor
 		{
@@ -218,10 +218,10 @@ if (!class_exists('PayPalSalesDetailsAdminClass'))
 		{
 			// FUNCTIONALITY: Sales - List Item, Type, Price and Quantity
 			return array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Item',     StageShowLibTableClass::TABLEPARAM_ID => 'saleShowName', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Type',     StageShowLibTableClass::TABLEPARAM_ID => 'ticketType',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Price',    StageShowLibTableClass::TABLEPARAM_ID => 'price',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),						
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Quantity', StageShowLibTableClass::TABLEPARAM_ID => 'quantity',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, ),						
+				array(self::TABLEPARAM_LABEL => 'Item',     self::TABLEPARAM_ID => 'saleShowName', self::TABLEPARAM_TYPE => self::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Type',     self::TABLEPARAM_ID => 'ticketType',   self::TABLEPARAM_TYPE => self::TABLEENTRY_VIEW, ),
+				array(self::TABLEPARAM_LABEL => 'Price',    self::TABLEPARAM_ID => 'price',        self::TABLEPARAM_TYPE => self::TABLEENTRY_VIEW, ),						
+				array(self::TABLEPARAM_LABEL => 'Quantity', self::TABLEPARAM_ID => 'quantity',     self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT, ),						
 			);
 		}		
 				
@@ -735,19 +735,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 				}
 			}
 			
-			$siteurl = get_option('siteurl');
-			foreach ($this->newStockQtys as $buttonID => $qty)
-			{
-				if (isset($this->currStockQtys[$buttonID])) $qty -= $this->currStockQtys[$buttonID];						
-				if ($qty == 0) continue;
-						
-				// Update Inventory for this stock item
-				if ($this->payPalAPIObj->AdjustInventory($buttonID, 0-$qty) !== 'OK')
-				{
-					// TODO-PRIORITY Deal with paypal inventory error ??
-				}
-			}
-					
 			return $errorId;
 		}
 				

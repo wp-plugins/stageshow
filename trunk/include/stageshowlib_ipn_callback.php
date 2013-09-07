@@ -271,11 +271,7 @@ if (!class_exists('IPNNotifyClass'))
 							$lineNo++;
 						}
 						$results['saleDateTime'] = current_time('mysql');
-						
-						if ($ourDBaseObj->UseIntegratedTrolley())
-						{
-							$results['saleID'] = $this->HTTPParam('custom');
-						}
+						$results['saleID'] = $this->HTTPParam('custom');
 						
 	  					// FUNCTIONALITY: IPN Notify - Log Sale to DB
 						$saleID = $this->notifyDBaseObj->LogSale($results);

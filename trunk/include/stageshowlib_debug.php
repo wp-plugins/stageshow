@@ -60,9 +60,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			$testOptionDefs = array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show SQL',          StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowSQL',          StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowSQL', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Output',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBOutput',     StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowDBOutput', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show PayPal IO',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowPayPalIO',     StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowPayPalIO', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show EMail Msgs',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowEMailMsgs',    StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowEMailMsgs', ),
-				
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log IPN Requests',  StageShowLibTableClass::TABLEPARAM_NAME => 'cbLogIPNRequests',   StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_IPNLogRequests', ),
 			);
 			

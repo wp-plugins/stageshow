@@ -111,12 +111,7 @@ if (!class_exists('StageShowDBaseClass'))
 			parent::upgradeDB();
 			
 			// Remove priceRef field
-			if ($this->RemovePriceRefsField())
-			{
-				// Check that paypal buttons are OK if database changed
-				$perfsList = $this->GetAllPerformancesList();
-				$this->UpdateCartButtons($perfsList);
-			}
+			$this->RemovePriceRefsField();
 					
 			// FUNCTIONALITY: DBase - On upgrade ... Add administrator capabilities
 			// Add administrator capabilities
@@ -348,13 +343,6 @@ if (!class_exists('StageShowDBaseClass'))
 					$currOptions['PayPalAPISig']  = $currOptions['PayPalAPITestSig'];
 					$currOptions['PayPalAPIPwd'] = $currOptions['PayPalAPITestPwd'];
 					$currOptions['PayPalAPIEMail'] = $currOptions['PayPalAPITestEMail'];
-					
-					$this->renameColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalTESTButtonID', 'perfPayPalButtonID');
-					
-					// Delete any buttons with perfPayPalLIVEButtonID set
-					$this->DeleteHostedButtons('LIVE');
-					
-					$this->deleteColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalLIVEButtonID');
 				}
 				else
 				{
@@ -362,14 +350,10 @@ if (!class_exists('StageShowDBaseClass'))
 					$currOptions['PayPalAPISig']  = $currOptions['PayPalAPILiveSig'];
 					$currOptions['PayPalAPIPwd'] = $currOptions['PayPalAPILivePwd'];
 					$currOptions['PayPalAPIEMail'] = $currOptions['PayPalAPILiveEMail'];
-					
-					$this->renameColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalLIVEButtonID', 'perfPayPalButtonID');
-					
-					// Delete any buttons with perfPayPalTESTButtonID set
-					$this->DeleteHostedButtons('TEST');
+				}
 					
 					$this->deleteColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalTESTButtonID');					
-				}
+				$this->deleteColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalLIVEButtonID');
 
 				unset($currOptions['PayPalAPILiveUser']);
 				unset($currOptions['PayPalAPILiveSig']);
@@ -395,14 +379,6 @@ if (!class_exists('StageShowDBaseClass'))
 			// This function returns the domain id (for translations) 
 			// The domain is the same for all stageshow derivatives
 			return 'stageshow';
-		}
-		
-		function DeleteHostedButtons($buttonType)
-		{
-			$sql = 'SELECT perfPayPal'.$buttonType.'ButtonID FROM '.STAGESHOW_PERFORMANCES_TABLE;
-			$buttonList = $this->get_results($sql);
-			foreach ($buttonList as $buttonId)
-				$this->payPalAPIObj->DeleteButton($buttonId);						
 		}
 		
 		function createDB($dropTable = false)
@@ -578,11 +554,6 @@ if (!class_exists('StageShowDBaseClass'))
 			$priceID1_C2 = $this->AddPrice($perfID2, 'Child', PRICEID1_C2);
 			$priceID1_C3 = $this->AddPrice($perfID3, 'Child', PRICEID1_C3);
 			
-			$perfsList = $this->GetPerformancesListByShowID($showID1);
-			{
-				$this->UpdateCartButtons($perfsList);
-			}
-			
 			if (!$this->isOptionSet('Dev_NoSampleSales'))
 			{
 				// Add some ticket sales
@@ -645,29 +616,8 @@ if (!class_exists('StageShowDBaseClass'))
 			$shows = $this->GetShowsList($showID);
 			$showName = $shows[0]->showName;
 			
-			if ($this->UseIntegratedTrolley())
 			{
 				$hostedButtonID = 0;
-			}
-			else
-			{
-				// Create PayPal buttons ....
-				$ButtonStatus = $this->payPalAPIObj->CreateButton($hostedButtonID, $showName);				
-				
-				if ($ButtonStatus === PayPalButtonsAPIClass::PAYPAL_APILIB_CREATEBUTTON_ERROR)
-				{
-					// Error creating at least one button ... tidy up and report error
-					if ($ButtonStatus === PayPalButtonsAPIClass::PAYPAL_APILIB_CREATEBUTTON_OK)
-						$this->payPalAPIObj->DeleteButton($hostedButtonID);
-							
-					$rtnMsg = __('Error Creating PayPal Button(s)', $this->get_domain());
-					return $perfID;			
-				}
-				else if ($ButtonStatus === PayPalButtonsAPIClass::PAYPAL_APILIB_CREATEBUTTON_NOLOGIN)
-				{
-					$rtnMsg = __('PayPal Login Settings Invalid', $this->get_domain());
-					return $perfID;			
-				}
 			}
 		
 			// PayPal button(s) created - Add performance to database					
@@ -679,37 +629,6 @@ if (!class_exists('StageShowDBaseClass'))
 				$rtnMsg = __('New Performance Added', $this->get_domain());
 			
 			return $perfID;			
-		}
-		
-		function UpdateCartButtons($perfsList)
-		{
-			if ($this->UseIntegratedTrolley())
-				return;
-				
-			$siteurl = get_option('siteurl');
-			foreach($perfsList as $perfEntry)
-			{
-				$description = $perfEntry->showName.' - '.$this->FormatDateForDisplay($perfEntry->perfDateTime);
-				$reference = $perfEntry->showID.'-'.$perfEntry->perfID;
-				
-				$perfSales = $this->GetSalesQtyByPerfID($perfEntry->perfID);								
-				$quantity = $perfEntry->perfSeats - $perfSales;								
-				$pricesList = $this->GetPricesListByPerfID($perfEntry->perfID);
-				
-				$priceIDs = (array)null;
-				$ticketPrices = (array)null;
-					
-				foreach($pricesList as $pricesEntry)
-				{
-					// Add Ticket IDs and Prices for this performance to an array 
-					array_push($priceIDs, $pricesEntry->priceType);
-					array_push($ticketPrices, $pricesEntry->priceValue);
-				}
-						
-				// FUNCTIONALITY: DBase Update Performance Inventory
-				$this->payPalAPIObj->UpdateButton($perfEntry->perfPayPalButtonID, $description, $reference, $ticketPrices, $priceIDs);
-				$this->payPalAPIObj->UpdateInventory($perfEntry->perfPayPalButtonID, $quantity, $siteurl, $reference);
-			}
 		}
 		
 		function GetEmail($ourOptions, $emailRole = '')
@@ -926,10 +845,6 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showID='.$showID;;
 			$this->query($sql);	
 
-			// FUNCTIONALITY: Shows - StageShow - Show Name Changed ... Updated Any Hosted Buttons
-			$perfsList = $this->GetPerformancesListByShowID($showID);
-			$this->UpdateCartButtons($perfsList);
-													
 			return "OK";
 		}
 		
@@ -988,30 +903,6 @@ if (!class_exists('StageShowDBaseClass'))
 
 			$this->query($sql);	
 			return "OK";							
-		}
-		
-		function deleteColumn($table_name, $colName)
-		{
- 			$sql = "ALTER TABLE $table_name DROP $colName";
-
-			$this->query($sql);	
-			return "OK";							
-		}
-		
-		function IfColumnExists($table_name, $colName)
-		{
-			$colSpec = $this->getColumnSpec($table_name, $colName);
-			return (isset($colSpec->Field));
-		}
-		
-		function getColumnSpec($table_name, $colName)
-		{
-			$sql = "SHOW COLUMNS FROM $table_name WHERE field = '$colName'";
-			 
-
-			$typesArray = $this->get_results($sql);
-
-			return isset($typesArray[0]) ? $typesArray[0] : '';
 		}
 		
 		function CanEditPayPalSettings()
@@ -1310,15 +1201,6 @@ if (!class_exists('StageShowDBaseClass'))
 				return __('Invalid Price Entry', $this->get_domain());
 			}
 
-			if (!$this->UseIntegratedTrolley()) 
-			{
-				// Verify that the price value is non-zero
-				if ($newPriceValue == 0.0)
-				{
-					return __('Zero Price only valid with Integrated Trolley', $this->get_domain());
-				}
-			}
-
 			// Verify that the price value is positive!
 			if ($newPriceValue < 0.0)
 			{
@@ -1478,8 +1360,6 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 					
 			$salesListArray = $this->get_results($sql);
-			if (count($salesListArray) == 0)
-					return 0;
 							 
 			return $salesListArray;
 		}
@@ -1690,8 +1570,7 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			// totalQty may not include Pending sales (i.e. saleStatus=Checkout)) - add it here!
 			$sql  = '  SUM(ticketQty) AS totalQty ';
-			//$sql .= ', SUM(priceValue * ticketQty) AS totalValue ';
-			if ($this->UseIntegratedTrolley())
+			
 			{
 				$statusOptions  = '(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'")';
 				$statusOptions .= ' OR ';
@@ -1699,11 +1578,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$sql .= ', SUM(IF('.$statusOptions.', priceValue * ticketQty, 0)) AS soldValue ';
 				$sql .= ', SUM(IF('.$statusOptions.', ticketQty, 0)) AS soldQty ';				
 			}
-			else
-			{
-				$sql .= ', SUM(priceValue * ticketQty) AS soldValue ';
-				$sql .= ', SUM(ticketQty) AS soldQty ';
-			}
+
 			return $sql;
 		}
 		

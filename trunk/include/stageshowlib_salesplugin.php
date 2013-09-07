@@ -22,6 +22,11 @@ Copyright 2012 Malcolm Shergold
 
 if (!class_exists('SalesPluginBaseClass')) 
 {
+	define('STAGESHOWLIB_STATE_DOWNLOAD',  'Download');
+	define('STAGESHOWLIB_STATE_POST',      'Post');
+	define('STAGESHOWLIB_STATE_DELETED',   'deleted');
+	define('STAGESHOWLIB_STATE_DISCARDED', 'discarded');
+			
 	class SalesPluginBaseClass
 	{
 		var $lastItemID = '';
@@ -42,7 +47,13 @@ if (!class_exists('SalesPluginBaseClass'))
 			if (!isset($this->refColID)) $this->refColID = 'Ref';
 			if (!isset($this->cssRefColID)) $this->cssRefColID = "ref";
 			
-			if (!isset($this->trolleyid)) $this->trolleyid = $this->myDomain.'_cart_contents';
+			if (!isset($this->trolleyid)) 
+			{
+				if (defined('STAGESHOWLIB_TROLLEYID'))
+					$this->trolleyid = STAGESHOWLIB_TROLLEYID.'_cart_contents';
+				else
+					$this->trolleyid = $this->myDomain.'_cart_contents';
+			}
 			if (!isset($this->shortcode)) $this->shortcode = $this->myDomain.'-store';
 			
 			// Add an action to check for PayPal redirect
@@ -76,12 +87,9 @@ if (!class_exists('SalesPluginBaseClass'))
 			return (is_int($reqRecordId) && ($reqRecordId == 0)) ? $myDBaseObj->GetPricesList(null) :  $this->GetOnlineStoreProductDetails($reqRecordId);
 		}
 		
-		function GetOnlineStoreButtonID($result)
+		function GetOnlineStorePriceID($result)
 		{
-			if ($this->myDBaseObj->UseIntegratedTrolley())
 				return $result->stockID;
-			else
-				return $result->stockPayPalButtonID;
 		}
 			
 		function GetOnlineStoreStockID($result)
@@ -127,32 +135,16 @@ if (!class_exists('SalesPluginBaseClass'))
 			
 		function GetOnlineStoreHiddenTags()
 		{
-			$myDBaseObj = $this->myDBaseObj;
 			$hiddenTags  = "\n";
 
-			if (!$myDBaseObj->UseIntegratedTrolley())
-			{
-				$hiddenTags .= '<input type="hidden" name="cmd" value="_s-xclick"/>'."\n";
-				if (strlen($myDBaseObj->adminOptions['PayPalLogoImageFile']) > 0)
-				{
-					$hiddenTags .= '<input type="hidden" name="image_url" value="'.$myDBaseObj->getImageURL('PayPalLogoImageFile').'"/>'."\n";
-				}
-				if (strlen($myDBaseObj->adminOptions['PayPalHeaderImageFile']) > 0)
-				{
-					$hiddenTags .= '<input type="hidden" name="cpp_header_image" value="'.$myDBaseObj->getImageURL('PayPalHeaderImageFile').'"/>'."\n";
-				}
-
-				$hiddenTags .= '<input type="hidden" name="SiteURL" value="'.get_site_url().'"/>'."\n";				
-			}
-    
 			return $hiddenTags;
 		}
 		
 		function GetOnlineStoreRowHiddenTags($result)
 		{
-			$itemPayPalButtonID = $this->GetOnlineStoreButtonID($result);
+			$itemID = $this->GetOnlineStoreItemID($result);
 								
-			return '<input type="hidden" name="hosted_button_id" value="'.$itemPayPalButtonID.'"/>'."\n";
+			return '<input type="hidden" name="PriceId" value="'.$itemID.'"/>'."\n";
 		}
 		
 		function OutputContent_OnlineStoreTitle($result)
@@ -203,12 +195,12 @@ if (!class_exists('SalesPluginBaseClass'))
 				
 				switch ($result->stockType)
 				{
-					case SALESMAN_STATE_POST:
+					case STAGESHOWLIB_STATE_POST:
 						echo '
 								<select name="quantity">
 									<option value="1" selected="">1</option>
 						';
-						for ($no=2; $no<=SALESMAN_MAXSALECOUNT; $no++)
+						for ($no=2; $no<=STAGESHOWLIB_MAXSALECOUNT; $no++)
 							echo '<option value="'.$no.'">'.$no.'</option>'."\n";
 						echo '
 								</select>
@@ -216,7 +208,7 @@ if (!class_exists('SalesPluginBaseClass'))
 						';
 						break;
 						
-					case SALESMAN_STATE_DOWNLOAD:
+					case STAGESHOWLIB_STATE_DOWNLOAD:
 					default:
 						echo '<input type="hidden" name="quantity" value="1"/>1'."\n";
 						break;
@@ -226,8 +218,7 @@ if (!class_exists('SalesPluginBaseClass'))
 			
 			echo '
 						<td class="'.$this->cssBaseID.'-addcol">
-							<!-- <input type="submit" value="Add"  alt="'.$altTag.'"/> -->
-							<input type="image" value="Add" alt="'.$altTag.'" '.$buttonTag.' name="submit"/>
+							<input type="submit" value="'.__('Add', $this->myDomain).'" alt="'.$altTag.'" '.$buttonTag.' id="AddTicketSale" name="AddTicketSale"/>
 						</td>
 					</tr>
 				</table>
@@ -310,15 +301,9 @@ if (!class_exists('SalesPluginBaseClass'))
 				$rowClass = $this->cssBaseID . '-row ' . $this->cssBaseID . ($oddPage ? "-oddrow" : "-evenrow");
 				$oddPage = !$oddPage;
 					
-				if ($myDBaseObj->UseIntegratedTrolley())
 				{
 					$addSaleItemURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 					$addSaleItemParams = ' action="'.$addSaleItemURL.'"';
-				}
-				else
-				{
-					$addSaleItemURL = $myDBaseObj->PayPalURL;
-					$addSaleItemParams = ' action="'.$addSaleItemURL.'" target="paypal" ';
 				}
 					
 				echo '
@@ -400,7 +385,7 @@ if (!class_exists('SalesPluginBaseClass'))
 		function OnlineStore_HandleTrolley()
 		{
 			$myDBaseObj = $this->myDBaseObj;
-			if ($myDBaseObj->UseIntegratedTrolley())
+			
 			{
 				if (isset($this->checkoutError))
 				{
@@ -411,11 +396,6 @@ if (!class_exists('SalesPluginBaseClass'))
 			
 				$this->OnlineStore_HandleTrolleyButtons($cartContents);
 			}				
-			else if (isset($_POST['hosted_button_id']))
-			{
-				// Gets here if an attempt is made to add tickets when IPN Local Server debug option is selected
-				echo '<div id="message" class="'.$this->cssDomain.'-error">'.__('PayPal checkout inaccessible - Using Local IPN Server', $this->myDomain).'</div>';							
-			}
 				
 		}
 		
@@ -423,13 +403,13 @@ if (!class_exists('SalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
-			if (isset($_POST['hosted_button_id']))
+			if (isset($_POST['AddTicketSale']))
 			{
 				// Get the product ID from posted data
 				//$ticketType = $_POST['os0'];
 				$ticketQty = $_POST['quantity'];
 					
-				$itemID = $_POST['hosted_button_id'];
+				$itemID = $_POST['PriceId'];
 					
 				// Interogate the database to confirm that the item exists
 				$priceEntries = $this->GetOnlineStoreProductDetails($itemID);
@@ -482,7 +462,7 @@ if (!class_exists('SalesPluginBaseClass'))
 					$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
 					if (count($priceEntries) == 0)
 					{
-						echo "Shopping Cart Cleared<br>";
+						echo '<div id="message" class="'.$this->cssDomain.'-error">'.__("Shopping Trolley Cleared", $this->myDomain).'</div>';					
 						if (current_user_can('manage_options'))
 						{
 							echo "No entry for ItemID:$itemID<br>";
@@ -581,6 +561,8 @@ if (!class_exists('SalesPluginBaseClass'))
 					
 			// Check that request matches contents of cart
 			$passedParams = array();	// Dummy array used when checking passed params
+			
+			$rslt = new stdClass();
 			$rslt->paypalParams = array();
 			$ParamsOK = true;
 			

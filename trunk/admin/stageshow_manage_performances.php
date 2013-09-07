@@ -20,11 +20,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include STAGESHOW_INCLUDE_PATH . 'stageshow_admin.php';
+include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
 
 if (!class_exists('StageShowPerformancesAdminListClass'))
 {
-	class StageShowPerformancesAdminListClass extends StageShowAdminListClass // Define class
+	class StageShowPerformancesAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -159,6 +159,48 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 			return '';
 		}
 		
+		function SavePerformance(&$result)
+		{
+			$perfUpdated = false;
+			$myDBaseObj = $this->myDBaseObj;
+			
+			$newPerfDateTime = stripslashes($_POST['perfDateTime' . $result->perfID]);
+
+			// Reformat date & time to correct for for MySQL
+			$reformattedPerfDateTime = strftime('%Y-%m-%d %H:%M:%S', strtotime($newPerfDateTime));
+			//if ($newPerfDateTime !== $reformattedPerfDateTime)
+			//	echo "Reformatted $newPerfDateTime to $reformattedPerfDateTime <br>\n";
+			$newPerfDateTime         = $reformattedPerfDateTime;
+
+			// FUNCTIONALITY: Performances - Save Performance Date/Time, Ref and Max Seats
+			if ($newPerfDateTime != $result->perfDateTime)
+			{
+				$myDBaseObj->UpdatePerformanceTime($result->perfID, $newPerfDateTime);
+				$result->perfDateTime = $newPerfDateTime;
+				$perfUpdated = true;
+			}
+
+			$newPerfRef = stripslashes($_POST['perfRef' . $result->perfID]);
+			if ($newPerfRef != $result->perfRef)
+			{
+				$myDBaseObj->UpdatePerformanceRef($result->perfID, $newPerfRef);
+				$result->perfRef = $newPerfRef;
+				$perfUpdated = true;
+			}
+
+			$newPerfSeats = stripslashes($_POST['perfSeats' . $result->perfID]);
+			if (!is_numeric($newPerfSeats) || ($newPerfSeats < 0))
+				$newPerfSeats = -1;
+			if ($newPerfSeats != $result->perfSeats)
+			{
+				$myDBaseObj->UpdatePerformanceSeats($result->perfID, $newPerfSeats);
+				$result->perfSeats = $newPerfSeats;
+				$perfUpdated = true;
+			}
+			
+			return $perfUpdated;
+		}
+		
 		function ProcessActionButtons()
 		{
 			$myPluginObj = $this->myPluginObj;
@@ -195,8 +237,6 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				}
 				else
 				{
-					$perfsList = array();
-					
 					if (count($results) > 0)
 					{
 						$classId       = $this->GetAdminListClass();
@@ -208,51 +248,11 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 						
 						foreach ($results as $result)
 						{
-							$perfUpdated     = false;
-							$newPerfDateTime = stripslashes($_POST['perfDateTime' . $result->perfID]);
-							
-							// Reformat date & time to correct for for MySQL
-							$reformattedPerfDateTime = strftime('%Y-%m-%d %H:%M:%S', strtotime($newPerfDateTime));
-							//if ($newPerfDateTime !== $reformattedPerfDateTime)
-							//	echo "Reformatted $newPerfDateTime to $reformattedPerfDateTime <br>\n";
-							$newPerfDateTime         = $reformattedPerfDateTime;
-							
-							// FUNCTIONALITY: Performances - Save Performance Date/Time, Ref and Max Seats
-							if ($newPerfDateTime != $result->perfDateTime)
-							{
-								$myDBaseObj->UpdatePerformanceTime($result->perfID, $newPerfDateTime);
-								$result->perfDateTime = $newPerfDateTime;
-								$perfUpdated          = true;
-							}
-							
-							$newPerfRef = stripslashes($_POST['perfRef' . $result->perfID]);
-							if ($newPerfRef != $result->perfRef)
-							{
-								$myDBaseObj->UpdatePerformanceRef($result->perfID, $newPerfRef);
-								$result->perfRef = $newPerfRef;
-								$perfUpdated     = true;
-							}
-							
-							$newPerfSeats = stripslashes($_POST['perfSeats' . $result->perfID]);
-							if (!is_numeric($newPerfSeats) || ($newPerfSeats < 0))
-								$newPerfSeats = -1;
-							if ($newPerfSeats != $result->perfSeats)
-							{
-								$myDBaseObj->UpdatePerformanceSeats($result->perfID, $newPerfSeats);
-								$result->perfSeats = $newPerfSeats;
-								$perfUpdated       = true;
-							}
+							$perfUpdated = $this->SavePerformance($result);
 							
 							// Save option extensions
 							$this->UpdateHiddenRowValues($result, $result->perfID, $settings, $dbOpts);
-							
-							if ($perfUpdated)
-								$perfsList[count($perfsList)] = $result;
 						} // End of foreach($results as $result)
-						
-						// Add this entry to the list of entries to be updated
-						if (count($perfsList) > 0)
-							$myDBaseObj->UpdateCartButtons($perfsList);
 					}
 					echo '<div id="message" class="updated"><p>' . __('Settings have been saved', $this->myDomain) . '</p></div>';
 				}
@@ -381,12 +381,6 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 					// Get the performance entry
 					$results = $myDBaseObj->GetPerformancesListByPerfID($recordId);
 
-					if (!$myDBaseObj->UseIntegratedTrolley())					
-					{
-						// Delete any PayPal buttons ....
-						$myDBaseObj->payPalAPIObj->DeleteButton($results[0]->perfPayPalButtonID);
-					}
-					
 					// Delete a performance entry
 					$myDBaseObj->DeletePerformanceByPerfID($recordId);
 					$myDBaseObj->PurgeDB();

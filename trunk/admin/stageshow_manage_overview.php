@@ -20,11 +20,11 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include STAGESHOW_INCLUDE_PATH.'stageshow_admin.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_table.php';
 
 if (!class_exists('StageShowOverviewAdminListClass')) 
 {
-	class StageShowOverviewAdminListClass extends StageShowAdminListClass // Define class
+	class StageShowOverviewAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{		
 		function __construct($env) //constructor
 		{
@@ -120,7 +120,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 
 if (!class_exists('StageShowOverviewAdminDetailsListClass')) 
 {
-	class StageShowOverviewAdminDetailsListClass extends StageShowAdminListClass // Define class
+	class StageShowOverviewAdminDetailsListClass extends StageShowLibSalesAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{

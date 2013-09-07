@@ -114,7 +114,8 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 			}
 			else if ( isset( $_GET['downloadvalidator'] ) )
 			{
-				$this->filename = 'stageshowValidator.html';
+				$this->filename = 'stageshowValidator';
+				$this->fileExtn = 'html';
 				
 				$this->output_downloadHeader('text/html');
 				$this->output_htmlhead();
@@ -186,18 +187,18 @@ td.col_show
 		{
 			echo '
 <body>
-<h3>Validate Sale</h3>
+<h2>'.__('Validate Sale', $this->myDomain).'</h2>
 <table class="form-table">
 	<tr>
-		<th>Transaction ID</th>
+		<th>'.__('Transaction ID', $this->myDomain).'</th>
 		<td>
-			<input type="text" maxlength="20" size="20" name="TxnId" id="TxnId" value="" autocomplete="off" />
+			<input type="text" maxlength="20" size="20" name="TxnId" id="TxnId" value="" onkeypress="onKeyPress(event)" autocomplete="off" />
 		</td>
 	</tr>
 </table>
 <p>
 <p class="submit">
-<input class="button-secondary" type="button" name="validatesalebutton" onClick=onclickverify(this) value="Validate"/>
+<input class="button-secondary" type="button" name="validatesalebutton" onClick=onclickverify(this) value="'.__('Validate', $this->myDomain).'"/>
 <br>
 <div id="VerifyResult" name="VerifyResult"></div>
 </body>
@@ -224,10 +225,57 @@ td.col_show
 "");
 			
 var columnFields = new Array();
+var verifysList = new Array();
+
+window.onload = onPageLoad;
+
+function onPageLoad(obj) 
+{
+	// Set initial focus to TxnId edit box
+	var ourTxnIdObj = document.getElementById("TxnId");
+	ourTxnIdObj.focus();
+}
+	
+function onKeyPress(obj) 
+{
+	if (obj.keyCode == 13)
+	{
+		VerifyTxnId();
+	}
+}
 
 function onclickverify(obj) 
 {
-	var ourTxnId = document.getElementById("TxnId").value;
+	VerifyTxnId();
+}
+	
+function LogVerified(index) 
+{
+	var VerifiesList = "";
+	
+	try
+	{
+		var timeNow = new Date();		
+		if (typeof verifysList[index] === "undefined")	
+		{
+			verifysList[index] = "";
+		}
+			
+		VerifiesList = verifysList[index];
+		verifysList[index] += timeNow.toLocaleString() + "<br> ";	
+	}
+	catch (err)
+	{
+	}
+	
+	return VerifiesList;
+		
+}
+	
+function VerifyTxnId() 
+{
+	var ourTxnIdObj = document.getElementById("TxnId");
+	var ourTxnId = ourTxnIdObj.value.trim();
 	var matchedLines = 0;
 	var verifyResult = "";
 	
@@ -255,19 +303,29 @@ function onclickverify(obj)
 			
 			if (matchedLines == 1)
 			{
+				verifyHistory = LogVerified(ourTxnId);
+				if (verifyHistory !== "")
+				{
+					verifyResult += "<h3>'.__('History', $this->myDomain).':</h3>";		
+					verifyResult += verifyHistory;		
+					verifyResult += "<br>";		
+				}		
+			
+				verifyResult += "<h3>'.__('Sale Details', $this->myDomain).':</h3>";		
 				verifyResult += "<table>";
 				
-				verifyResult += "<tr><td>Name:</td><td>" + ticketDataArray[columnFields["saleName"]] + "</td></tr>\n"; 
-				verifyResult += "<tr><td>EMail:</td><td>" + ticketDataArray[columnFields["saleEMail"]] + "</td></tr>\n"; 
-				verifyResult += "<tr><td>Date & Time:</td><td>" + ticketDataArray[columnFields["saleDateTime"]] + "</td></tr>\n"; 
+				verifyResult += "<tr><td>'.__("TxnId", $this->myDomain).':</td><td>" + ourTxnId + "</td></tr>\n"; 
+				verifyResult += "<tr><td>'.__("Name", $this->myDomain).':</td><td>" + ticketDataArray[columnFields["saleName"]] + "</td></tr>\n"; 
+				verifyResult += "<tr><td>'.__("EMail", $this->myDomain).':</td><td>" + ticketDataArray[columnFields["saleEMail"]] + "</td></tr>\n"; 
+				verifyResult += "<tr><td>'.__("Date & Time", $this->myDomain).':</td><td>" + ticketDataArray[columnFields["saleDateTime"]] + "</td></tr>\n"; 
 				
 				verifyResult += "</table><br><table class=table_verify>\n"; 
 				
 				verifyResult += "<tr>"; 
-				verifyResult += "<th class=col_show>Show</th>"; 
-				verifyResult += "<th class=col_type>Type</th>"; 
-				verifyResult += "<th class=col_price>Price</th>"; 
-				verifyResult += "<th class=col_qty>Qty</th>"; 
+				verifyResult += "<th class=col_show>'.__("Show", $this->myDomain).'</th>"; 
+				verifyResult += "<th class=col_type>'.__("Type", $this->myDomain).'</th>"; 
+				verifyResult += "<th class=col_price>'.__("Price", $this->myDomain).'</th>"; 
+				verifyResult += "<th class=col_qty>'.__("Quantity", $this->myDomain).'</th>"; 
 				
 				verifyResult += "</tr>\n"; 
 			}
@@ -281,16 +339,21 @@ function onclickverify(obj)
 		}
 	}
 	
-	
 	if (matchedLines > 0)
+	{
+		ourTxnIdObj.value = "";
 		verifyResult += "<table>";
+	}
 	else
-		verifyResult += "'.__("No matching record found").'<br>";
+	{
+		ourTxnIdObj.select();
+		verifyResult += "'.__("No matching record found", $this->myDomain).'<br>";
+	}
 		
 	document.getElementById("VerifyResult").innerHTML = verifyResult;
 	
-	//alert("Verifying - TxnId:" + ourTxnId + " matched " + matchedLines + " Lines");
-	
+	// Set focus to TxnId edit box
+	ourTxnIdObj.focus();
 }
 ';			
 		}
