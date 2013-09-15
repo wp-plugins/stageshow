@@ -200,6 +200,9 @@ if (!class_exists('StageShowOverviewAdminClass'))
 		function Output_Overview()
 		{
 			$myDBaseObj = $this->myDBaseObj;
+			
+			$isConfigured = $myDBaseObj->CheckIsConfigured();
+						
 			$results = $myDBaseObj->GetAllShowsList();
 						
 ?>
@@ -210,7 +213,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			if(count($results) == 0)
 			{
 				// FUNCTIONALITY: Overview - Show Link to Settings page if PayPal settings required
-				if ($myDBaseObj->CheckIsConfigured())
+				if ($isConfigured)
 				{
 					// FUNCTIONALITY: Overview - Show message and "Create Sample" button if no shows configured
 					echo "<div class='noconfig'>".__('No Show Configured', $this->myDomain)."</div>\n";
@@ -249,7 +252,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			echo '<br><h2>'.__("Shopping Trolley and Shortcodes", $this->myDomain)."</h2>\n";
 			
 			$this->myDBaseObj->Output_TrolleyHelp();
-			
+
 			echo '<br>'.__('StageShow generates output to your Wordpress pages for the following shortcodes:', $this->myDomain)."<br><br>\n";
 	
 			$this->Output_ShortcodeHelp();
