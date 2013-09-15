@@ -218,6 +218,10 @@ if (!class_exists('StageShowSalesPluginClass'))
 				
 		function OutputContent_OnlineStoreRow($result)
 		{
+			$submitButton = __('Add', $this->myDomain);
+			$submitId     = 'AddTicketSale';
+			$showAllDates = defined('STAGESHOW_BOXOFFICE_ALLDATES');
+				
 			$myDBaseObj = $this->myDBaseObj;
 			
 			// Sales Summary from PerfID
@@ -243,10 +247,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', $this->myDomain);
 						
-				$perfPayPalButtonID = $result->priceID;
-					
 			$separator = '';
-			if (($this->lastPerfDateTime !== $result->perfDateTime) || defined('STAGESHOW_BOXOFFICE_ALLDATES'))
+			if (($this->lastPerfDateTime !== $result->perfDateTime) || $showAllDates)
 			{
 				$formattedPerfDateTime = $myDBaseObj->FormatDateForDisplay($result->perfDateTime);
 				if ($lastPerfID != 0) $separator = "\n".'<tr><td class="stageshow-boxoffice-separator">&nbsp;</td></tr>';
@@ -278,7 +280,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 					</select>
 					</td>
 					<td class="stageshow-boxoffice-add">
-					<input type="submit" value='.__("Add", $this->myDomain).' alt="'.$altTag.'"/>
+					<input type="submit" id="'.$submitId.'" name="'.$submitId.'" value="'.$submitButton.'" alt="'.$altTag.'"/>
 					</td>
 				';
 			}
