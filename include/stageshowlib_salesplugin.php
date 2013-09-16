@@ -300,12 +300,14 @@ if (!class_exists('SalesPluginBaseClass'))
 											
 				$rowClass = $this->cssBaseID . '-row ' . $this->cssBaseID . ($oddPage ? "-oddrow" : "-evenrow");
 				$oddPage = !$oddPage;
-					
+				
+				$addSaleItemParams = '';
+/*				
 				{
 					$addSaleItemURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 					$addSaleItemParams = ' action="'.$addSaleItemURL.'"';
 				}
-					
+*/
 				echo '
 					<tr class="'.$rowClass.'">
 					<td class="'.$this->cssBaseID.'-data">

@@ -703,9 +703,20 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			$paid *= $qty;
 			
-			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').', '.$this->DBField('orderDetail').')';
-			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'", "'.$detail.'")';
-			 
+			$orderDetailField = $this->DBField('orderDetail');
+			
+			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').')';
+			if ($orderDetailField != '')
+			{
+				$sql .= ', '.$orderDetailField;
+			}
+			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'"';
+			if ($orderDetailField != '')
+			{
+				$sql .= ', "'.$detail.'"';
+			}
+			$sql .= ')';
+			
 			$this->query($sql);
 			$orderID = mysql_insert_id();
 				
@@ -858,6 +869,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function FormatEMailField($tag, $field, $saleDetails)
 		{
+			if ($tag =='[saleName]')
+			{
+				return $this->GetSaleName($saleDetails);
+			}
+			
 			if (!property_exists($saleDetails, $field))
 			{
 				return "**** $field ".__("Undefined", $this->get_domain())." ****";
@@ -867,15 +883,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			{
 					$saleFieldValue = $this->FormatCurrency($saleDetails->$field, false);
 				}
-			else switch ($tag)
+			else 
 			{
-				case '[saleName]':
-					$saleFieldValue = $this->GetSaleName($saleDetails);
-					break;
-					
-				default:
 						$saleFieldValue = $saleDetails->$field;
-						break;
 			}
 			
 			return $saleFieldValue;
@@ -1198,7 +1208,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				
 				$qty  = $results['qty' . $itemNo];
 				$itemPaid  = $results['itemPaid' . $itemNo];
-
+				
 				if ($qty > 0)
 				{
 					// Log sale item to Database

@@ -1159,7 +1159,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			$editControl = '';
 			
 			$settingType = $settingOption[self::TABLEPARAM_TYPE];
-			$onChange = isset($settingOption[self::TABLEPARAM_ONCHANGE]) ? $settingOption[self::TABLEPARAM_ONCHANGE] : '';
+			$onChange = isset($settingOption[self::TABLEPARAM_ONCHANGE]) ? ' onchange="'.$settingOption[self::TABLEPARAM_ONCHANGE].'(this)" ' : '';
 			
 			if (!$editMode)
 			{
@@ -1192,11 +1192,11 @@ if (!class_exists('StageShowLibAdminListClass'))
 				case self::TABLEENTRY_TEXTBOX:
 					$editRows = $settingOption[self::TABLEPARAM_ROWS];
 					$editCols = $settingOption[self::TABLEPARAM_COLS];
-					$editControl = '<textarea rows="'.$editRows.'" cols="'.$editCols.'" '.$controlIdDef.' onchange="'.$onChange.'" >'.$controlValue."</textarea>\n";
+					$editControl = '<textarea rows="'.$editRows.'" cols="'.$editCols.'" '.$controlIdDef.$onChange.' >'.$controlValue."</textarea>\n";
 					break;
 
 				case self::TABLEENTRY_SELECT:
-					$editControl  = '<select '.$controlIdDef.' onchange="'.$onChange.'(this)">'."\n";
+					$editControl  = '<select '.$controlIdDef.$onChange.'>'."\n";
 					$selectOptsArray = self::GetSelectOptsArray($settingOption);
 					foreach ($selectOptsArray as $selectOptValue => $selectOptText)
 					{
@@ -1207,9 +1207,9 @@ if (!class_exists('StageShowLibAdminListClass'))
 					break;
 
 				case self::TABLEENTRY_CHECKBOX:
-					$checked = ($controlValue === true) ? 'checked="yes"' : '';
+					$checked = ($controlValue === true) ? ' checked="yes"' : '';
 					$cbText = __($settingOption[StageShowLibTableClass::TABLEPARAM_TEXT], $this->myDomain);
-					$editControl = '<input type="checkbox" '.$controlIdDef.' value="1" onchange="'.$onChange.'" '.$checked.' />&nbsp;'.$cbText."\n";
+					$editControl = '<input type="checkbox" '.$controlIdDef.' value="1"'.$onChange.$checked.' />&nbsp;'.$cbText."\n";
 					break;
 
 				case self::TABLEENTRY_READONLY:
