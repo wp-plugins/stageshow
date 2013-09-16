@@ -78,7 +78,6 @@ if (!class_exists('StageShowLibUtilsClass'))
 		
 		static function recurse_copy($src, $dst, $perm=0755)
 		{
-//echo "<strong>recurse_copy: Copy $src to $dst<br></strong><br>\n";
 			$dir = opendir($src);
 			@mkdir($dst, $perm, TRUE);
 			while(false !== ( $file = readdir($dir)) )
@@ -94,7 +93,17 @@ if (!class_exists('StageShowLibUtilsClass'))
 				{
 					$srcFile = $src . '/' . $file;
 					$dstFile = $dst . '/' . $file;
-//echo "recurse_copy: Copy $srcFile to $dstFile<br>\n";
+
+					if (file_exists($dstFile))
+					{
+						// Make sure that destination is not ReadOnly
+						$perms = fileperms($dstFile);
+						$newPerms = $perms | 0200;
+						if ($newPerms != $perms)
+						{
+							chmod($dstFile, $newPerms);
+						}
+					}
 					copy($srcFile, $dstFile);				
 				}
 			}

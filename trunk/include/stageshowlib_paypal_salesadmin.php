@@ -106,7 +106,8 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			$statusOptions = $this->GetStatusOptions();
 			
 			$ourOptions = array(
-				array(self::TABLEPARAM_LABEL => 'Name',	                     self::TABLEPARAM_ID => 'saleLastName', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, self::TABLEPARAM_DECODE => 'DecodeSaleName', ),
+				array(self::TABLEPARAM_LABEL => 'First Name',	             self::TABLEPARAM_ID => 'saleFirstName', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+				array(self::TABLEPARAM_LABEL => 'Last Name',	             self::TABLEPARAM_ID => 'saleLastName',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => 'EMail',	                 self::TABLEPARAM_ID => 'saleEMail',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEEMAIL_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => $address,	                 self::TABLEPARAM_ID => 'salePPStreet',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN,  self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTREET_EDITLEN, ),
 				array(self::TABLEPARAM_LABEL => $city,	                     self::TABLEPARAM_ID => 'salePPCity',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN,    self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCITY_EDITLEN, ),			
@@ -218,10 +219,10 @@ if (!class_exists('PayPalSalesDetailsAdminClass'))
 		{
 			// FUNCTIONALITY: Sales - List Item, Type, Price and Quantity
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Item',     self::TABLEPARAM_ID => 'saleShowName', self::TABLEPARAM_TYPE => self::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Type',     self::TABLEPARAM_ID => 'ticketType',   self::TABLEPARAM_TYPE => self::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Price',    self::TABLEPARAM_ID => 'price',        self::TABLEPARAM_TYPE => self::TABLEENTRY_VIEW, ),						
-				array(self::TABLEPARAM_LABEL => 'Quantity', self::TABLEPARAM_ID => 'quantity',     self::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT, ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Item',     StageShowLibTableClass::TABLEPARAM_ID => 'saleShowName', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Type',     StageShowLibTableClass::TABLEPARAM_ID => 'ticketType',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Price',    StageShowLibTableClass::TABLEPARAM_ID => 'price',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Quantity', StageShowLibTableClass::TABLEPARAM_ID => 'quantity',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, ),						
 			);
 		}		
 				
