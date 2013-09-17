@@ -177,6 +177,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * Version History for StageShow Plugin 
 
 = 2.2.2 (16/09/2013) =
+* Bug Fix: Sales not logged to Database
 * Bug Fix: JS onchange for some SELECT and INPUT HTML elements has function name omitted
 * Bug Fix: Templates not copies if destination file exists and is readonly
 * Bug Fix: Summary Email generated when Checkout selected
