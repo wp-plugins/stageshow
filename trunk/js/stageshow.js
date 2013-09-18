@@ -5,3 +5,4 @@ function confirm_delete()
   else
     return false;
 }
+
