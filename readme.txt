@@ -12,7 +12,7 @@ StageShow adds the facility for an online Box-Office for Small Theatres/Drama Gr
 
 StageShow provides a simple interface to define your Shows and then a single Wordpress shortcode adds a online BoxOffice to your website.
 
-StageShow uses either the PayPal Shopping Cart or its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments, which can be made using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
+StageShow uses its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments, which can be made using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
 
 Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and can be copied to the system administrator.
 
