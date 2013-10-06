@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.6.1
-Stable tag: 2.2.2
+Stable tag: 2.2.3
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -12,7 +12,7 @@ StageShow adds the facility for an online Box-Office for Small Theatres/Drama Gr
 
 StageShow provides a simple interface to define your Shows and then a single Wordpress shortcode adds a online BoxOffice to your website.
 
-StageShow uses its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments, which can be made using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
+StageShow uses either the PayPal Shopping Cart or its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments, which can be made using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
 
 Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and can be copied to the system administrator.
 
@@ -175,6 +175,17 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugin 
+
+= 2.2.3 (06/10/2013) =
+* Bug Fix: Test Email Destination not reported if not diverted
+* Bug Fix: PayPal IPN fields not converted to UTF-8 (Special Characters not displayed/stored)
+* Bug Fix: Email template not updated on upgrade from StageShow to StageShow+
+* Bug Fix: Checkout errors not reported
+* Bug Fix: Settings label not translated
+* Bug Fix: StageShow+ Updates not detected on some servers
+* Overview page Trolley Type output replaced by Plugin Type and Version
+* Timezone reported on Overview page - with error notification if it is not set
+* "Bcc EMails to WP Admin" setting renamed "Bcc EMails to Sales Email"
 
 = 2.2.2 (16/09/2013) =
 * Bug Fix: Sales not logged to Database
@@ -449,7 +460,6 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * First public release
 
 == Upgrade Notice ==
-
 = 2.2 =
 * Support for PayPal Checkout removed - MerchantID on PayPal Settings tab must be set
 

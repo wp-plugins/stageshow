@@ -64,9 +64,9 @@ if (!class_exists('StageShowPricesAdminListClass'))
 		{
 			// FUNCTIONALITY: Prices - Lists Performance, Type and Price
 			$ourOptions = array(
-				array(self::TABLEPARAM_LABEL => 'Performance',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW,   self::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
-				array(self::TABLEPARAM_LABEL => 'Ticket Type',  self::TABLEPARAM_ID => 'priceType',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
-				array(self::TABLEPARAM_LABEL => 'Price',        self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 9, self::TABLEPARAM_DECODE => 'DecodePrice'),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Performance',  StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW,   StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Ticket Type',  StageShowLibTableClass::TABLEPARAM_ID => 'priceType',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Price',        StageShowLibTableClass::TABLEPARAM_ID => 'priceValue',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => 9, StageShowLibTableClass::TABLEPARAM_DECODE => 'DecodePrice'),
 			);
 			
 			return $ourOptions;
@@ -138,7 +138,6 @@ if (!class_exists('StageShowPricesAdminClass'))
 			
 			$showID = 0;
 			
-			//echo '<div class="wrap">';
 			// FUNCTIONALITY: Prices - Save Changes
 			if (isset($_POST['savechanges']))
 			{

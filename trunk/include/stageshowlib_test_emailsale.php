@@ -55,6 +55,9 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 				}
 				else 
 				{
+					if (strlen($DivertEMailTo) == 0)
+						$DivertEMailTo = $saleResults[0]->saleEMail;
+						
 					if ($myDBaseObj->EMailSale($saleResults[0]->saleID, $DivertEMailTo) == 'OK')
 						echo '<div id="message" class="updated"><p>'.__('EMail Sent to', $myDBaseObj->get_domain()).' '.$DivertEMailTo.'</p></div>';
 				}	

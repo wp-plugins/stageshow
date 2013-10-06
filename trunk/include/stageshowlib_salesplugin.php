@@ -50,9 +50,12 @@ if (!class_exists('SalesPluginBaseClass'))
 			if (!isset($this->trolleyid)) 
 			{
 				if (defined('STAGESHOWLIB_TROLLEYID'))
-					$this->trolleyid = STAGESHOWLIB_TROLLEYID.'_cart_contents';
+					$this->trolleyid = STAGESHOWLIB_TROLLEYID.'_cart_obj';
 				else
-					$this->trolleyid = $this->myDomain.'_cart_contents';
+					$this->trolleyid = $this->myDomain.'_cart_obj';
+					
+				if ($this->myDBaseObj->getOption('Dev_RunAsDemo') == 1)
+					$this->trolleyid .= '_'.$this->myDBaseObj->loginID;
 			}
 			if (!isset($this->shortcode)) $this->shortcode = $this->myDomain.'-store';
 			
@@ -114,7 +117,7 @@ if (!class_exists('SalesPluginBaseClass'))
 			return -1;
 		}
 			
-		function GetOnlineStoreItemPrice($result)
+		function GetOnlineStoreItemPrice($result, $salesSummary)
 		{
 			return $result->stockPrice + $result->stockPostage;
 		}
@@ -172,7 +175,6 @@ if (!class_exists('SalesPluginBaseClass'))
 						</td>
 					</tr>
 				';
-			//echo '<tr><td class="'.$this->cssBaseID.'-headerspace">&nbsp;</td></tr>'."\n";
 		}		
 				
 		function OutputContent_OnlineStoreRow($result)
@@ -278,7 +280,6 @@ if (!class_exists('SalesPluginBaseClass'))
 			else
 				$notifyTag = '';
 				
-			$soldOut = false;
 			$oddPage = true;
 			
 			for ($recordIndex = 0; $recordIndex<count($results); $recordIndex++)
@@ -294,7 +295,6 @@ if (!class_exists('SalesPluginBaseClass'))
 				$stockID = $this->GetOnlineStoreStockID($result);
 				if ($this->lastItemID !== $stockID)
 				{
-					$soldOut = $this->IsOnlineStoreItemSoldOut($result);
 					$this->GetOnlineStoreItemNote($result, 'above');
 				}
 											
@@ -317,7 +317,7 @@ if (!class_exists('SalesPluginBaseClass'))
 				echo $hiddenTags;
 				echo $notifyTag;
 					
-				$this->OutputContent_OnlineStoreRow($result, $soldOut);
+				$this->OutputContent_OnlineStoreRow($result);
 
 				echo '
 					</form>
@@ -363,11 +363,13 @@ if (!class_exists('SalesPluginBaseClass'))
 			$this->trolleyHeaderCols = 5;	// Count of the number of columns in the header
 		}
 				
-		function OutputContent_OnlineTrolleyRow($priceEntry, $qty)
+		function OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry)
 		{
 			$itemName = $priceEntry->stockName;
 			$priceRef = $priceEntry->stockRef;
 						
+			$qty = $cartEntry->qty;
+			
 			$priceValue = $this->GetOnlineStoreItemPrice($priceEntry);
 			$total = $priceValue * $qty;
 								
@@ -384,6 +386,52 @@ if (!class_exists('SalesPluginBaseClass'))
 			echo '<input class="button-primary" type="submit" name="checkout" value="'.__('Checkout', $this->myDomain).'"/>'."\n";
 		}
 		
+		function GetTrolleyContents()
+		{
+			if (isset($_SESSION[$this->trolleyid]))
+			{
+				$cartContents = unserialize($_SESSION[$this->trolleyid]);
+			}
+			else
+			{
+				$cartContents = new stdClass;
+				$cartContents->nextIndex = 1;
+			}
+			
+			return $cartContents;
+		}
+		
+		function AddToTrolleyContents(&$cartContents, $newCartEntry)
+		{
+			if (isset($cartContents->rows))
+			{
+				foreach ($cartContents->rows as $index => $cartEntry)
+				{
+					if ($newCartEntry->sortBy < $cartEntry->sortBy)
+					{
+						$tmpCartEntry = $cartEntry;
+						$cartContents->rows[$index] = $newCartEntry;
+						$newCartEntry = $tmpCartEntry;
+					}
+				}				
+			}
+			
+			$index = $cartContents->nextIndex;
+			$cartContents->nextIndex++;
+			
+			$cartContents->rows[$index] = $newCartEntry;
+		}
+		
+		function SaveTrolleyContents($cartContents)
+		{
+			$_SESSION[$this->trolleyid] = serialize($cartContents);
+		}
+		
+		function ClearTrolleyContents()
+		{
+			unset($_SESSION[$this->trolleyid]);
+		}
+				
 		function OnlineStore_HandleTrolley()
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -394,7 +442,7 @@ if (!class_exists('SalesPluginBaseClass'))
 					echo '<div id="message" class="'.$this->cssDomain.'-error">'.$this->checkoutError.'</div>';					
 				}
 				
-				$cartContents = isset($_SESSION['$this->trolleyid']) ? $_SESSION['$this->trolleyid'] : array();
+				$cartContents = $this->GetTrolleyContents();
 			
 				$this->OnlineStore_HandleTrolleyButtons($cartContents);
 			}				
@@ -423,19 +471,41 @@ if (!class_exists('SalesPluginBaseClass'))
 				// Add the item to the shopping trolley
 				if (count($priceEntries) > 0)
 				{
-					if (isset($cartContents[$itemID]))
+					if (isset($cartContents->rows))
 					{
-						$cartContents[$itemID] += $ticketQty;
-					}
-					else
+						foreach ($cartContents->rows as $index => $cartEntry)
 					{
-						$cartContents[$itemID] = $ticketQty;
+							if ($cartEntry->itemID == $itemID)
+							{
+								$cartContents->rows[$index]->qty += $ticketQty;
+								$ticketQty = 0;
+								break;
+							}
+						}						
 					}
-					$_SESSION['$this->trolleyid'] = $cartContents;
+					
+					if ($ticketQty > 0)
+					{
+						$index = $cartContents->nextIndex;
+						$cartContents->nextIndex++;
+						
+						$cartEntry = new stdClass;
+						$cartEntry->itemID = $itemID;
+						$cartEntry->qty = $ticketQty;
+						
+						$cartEntry->sortBy = $priceEntries[0]->perfDateTime.'-'.$priceEntries[0]->priceType;
+						
+						$this->AddToTrolleyContents($cartContents, $cartEntry);
+					}
+					
+					$this->SaveTrolleyContents($cartContents);
 				}
 			}
 				
-			if (count($cartContents) > 0)
+			if (!isset($cartContents->rows))
+				return;
+				
+			if (count($cartContents->rows) > 0)
 			{
 				$hiddenTags  = "\n";
 			
@@ -449,17 +519,17 @@ if (!class_exists('SalesPluginBaseClass'))
 							if (!isset($_GET['id']))
 								break;
 							$itemID = $_GET['id'];
-							unset($cartContents[$itemID]);
-							$_SESSION['$this->trolleyid'] = $cartContents;
+							unset($cartContents->rows[$itemID]);
+							$this->SaveTrolleyContents($cartContents);
 							break;
 					}
 				}
 					
-				$cartIndex = 0;		
 				$runningTotal = 0;			
-				foreach ($cartContents as $itemID => $qty)
+				foreach ($cartContents->rows as $cartIndex => $cartEntry)
 				{
-					$cartIndex++;
+					$itemID = $cartEntry->itemID;
+					$qty = $cartEntry->qty;
 						
 					$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
 					if (count($priceEntries) == 0)
@@ -470,7 +540,7 @@ if (!class_exists('SalesPluginBaseClass'))
 							echo "No entry for ItemID:$itemID<br>";
 							StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
 						}
-						$_SESSION['$this->trolleyid'] = array();
+						$this->ClearTrolleyContents();
 						return;
 					}
 						
@@ -496,11 +566,11 @@ if (!class_exists('SalesPluginBaseClass'))
 						
 					echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";
 						
-					$runningTotal += $this->OutputContent_OnlineTrolleyRow($priceEntry, $qty);
+					$runningTotal += $this->OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry);
 						
 					$removeLineURL = get_permalink();
 					$removeLineURL  = add_query_arg('action', 'remove', $removeLineURL);
-					$removeLineURL  = add_query_arg('id', $itemID, $removeLineURL);
+					$removeLineURL  = add_query_arg('id', $cartIndex, $removeLineURL);
 					echo '<td class="'.$this->cssTrolleyBaseID.'-remove"><a href=' . $removeLineURL . '>'.__('Remove', $this->myDomain).'</a></td>'."\n";
 						
 					echo "</tr>\n";
@@ -518,7 +588,6 @@ if (!class_exists('SalesPluginBaseClass'))
 					echo '<td>&nbsp;</td>'."\n";
 					echo '<td>'.__('Total', $this->myDomain).'</td>'."\n";
 					echo '<td class="'.$this->cssTrolleyBaseID.'-total">'.$runningTotal.'</td>'."\n";
-					//echo '<td colspan="'.'">&nbsp;</td>'."\n"; // .$this->trolleyHeaderCols-3.'';
 					echo '<td colspan="'.($this->trolleyHeaderCols-3).'">&nbsp;</td>'."\n";
 					echo "</tr>\n";
 				
@@ -554,6 +623,14 @@ if (!class_exists('SalesPluginBaseClass'))
 			}
 		}
 
+		function GetOnlineStoreTrolleyDetails($cartIndex, $cartEntry)
+		{
+			$saleDetails['itemID' . $cartIndex] = $cartEntry->itemID;
+			$saleDetails['qty' . $cartIndex] = $cartEntry->qty;;
+			
+			return $saleDetails;
+		}
+
 		function OnlineStore_ScanCheckoutSales()
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -565,22 +642,32 @@ if (!class_exists('SalesPluginBaseClass'))
 			$passedParams = array();	// Dummy array used when checking passed params
 			
 			$rslt = new stdClass();
+			$rslt->saleDetails = array();
 			$rslt->paypalParams = array();
 			$ParamsOK = true;
 			
 			$rslt->totalDue = 0;
 								
-			$cartContents = isset($_SESSION['$this->trolleyid']) ? $_SESSION['$this->trolleyid'] : array();
+			$cartContents = $this->GetTrolleyContents();
 			if ($myDBaseObj->isOptionSet('Dev_ShowTrolley'))
 			{
 				StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
 			}
 				
-			// Build request parameters for redirect to PayPal checkout
-			$cartIndex = 0;					
-			foreach ($cartContents as $itemID => $qty)
+			if (!isset($cartContents->rows))
 			{
-				$cartIndex++;
+				$rslt->checkoutError  = __('Cannot Checkout', $this->myDomain).' - ';
+				$rslt->checkoutError .= __('Shopping Cart Empty', $this->myDomain);
+				return $rslt;
+			}
+			
+			// Build request parameters for redirect to PayPal checkout
+			$paramCount = 0;
+			foreach ($cartContents->rows as $cartIndex => $cartEntry)
+			{
+				$paramCount++;
+				$itemID = $cartEntry->itemID;
+				$qty = $cartEntry->qty;
 					
 				$priceEntries = $this->GetOnlineStoreProductDetails($itemID);
 				if (count($priceEntries) == 0)
@@ -594,8 +681,8 @@ if (!class_exists('SalesPluginBaseClass'))
 				// Save the maximum number of sales for this stock item to a class variable
 				$rslt->maxSales[$stockID] = $this->GetOnlineStoreMaxSales($priceEntry);
 				
-				$ParamsOK &= $this->CheckPayPalParam($passedParams, "id" , $itemID, $cartIndex);
-				$ParamsOK &= $this->CheckPayPalParam($passedParams, "qty" , $qty, $cartIndex);
+				$ParamsOK &= $this->CheckPayPalParam($passedParams, "id" , $cartEntry->itemID, $cartIndex);
+				$ParamsOK &= $this->CheckPayPalParam($passedParams, "qty" , $cartEntry->qty, $cartIndex);
 				if (!$ParamsOK)
 				{
 					$rslt->checkoutError  = __('Cannot Checkout', $this->myDomain).' - ';
@@ -606,14 +693,13 @@ if (!class_exists('SalesPluginBaseClass'))
 				$itemPrice = $this->GetOnlineStoreItemPrice($priceEntry);
 				$shipping = 0.0;
 						
-				$rslt->paypalParams['item_name_'.$cartIndex] = $this->GetOnlineStoreItemName($priceEntry);
-				$rslt->paypalParams['amount_'.$cartIndex] = $itemPrice;
-				$rslt->paypalParams['quantity_'.$cartIndex] = $qty;
-				$rslt->paypalParams['shipping_'.$cartIndex] = $shipping;
+				$rslt->paypalParams['item_name_'.$paramCount] = $this->GetOnlineStoreItemName($priceEntry);
+				$rslt->paypalParams['amount_'.$paramCount] = $itemPrice;
+				$rslt->paypalParams['quantity_'.$paramCount] = $qty;
+				$rslt->paypalParams['shipping_'.$paramCount] = $shipping;
 					
-				$rslt->saleDetails['itemID' . $cartIndex] = $itemID;
-				$rslt->saleDetails['qty' . $cartIndex] = $qty;
-				$rslt->saleDetails['itemPaid' . $cartIndex] = $itemPrice;
+				$rslt->saleDetails = array_merge($rslt->saleDetails, $this->GetOnlineStoreTrolleyDetails($paramCount, $cartEntry));
+				$rslt->saleDetails['itemPaid' . $paramCount] = $itemPrice;
 				
 				$rslt->totalDue += ($itemPrice * $qty);
 			}
@@ -641,7 +727,11 @@ if (!class_exists('SalesPluginBaseClass'))
 				$myDBaseObj = $this->myDBaseObj;
 				
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
-				if (isset($checkoutRslt->checkoutError)) return;
+				if (isset($checkoutRslt->checkoutError)) 
+				{
+					echo '<div id="message" class="error"><p>'.$rslt->checkoutError.'</p></div>';
+					return;
+				}
 				
 				if ($checkoutRslt->totalDue == 0)
 				{
@@ -689,7 +779,7 @@ if (!class_exists('SalesPluginBaseClass'))
 					
 				if ($ParamsOK)
   				{
-					$_SESSION['$this->trolleyid'] = array();	// Clear the shopping cart
+					$this->ClearTrolleyContents();
 				
 					if ($this->myDBaseObj->isOptionSet('Dev_IPNLocalServer'))
 					{

@@ -58,11 +58,11 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 		{
 			// FUNCTIONALITY: Performances - Lists Performance Date & Time, Reference, Max Seats, Tickets Sold Count and Activation State
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Date & Time',  self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => 28, self::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
-				array(self::TABLEPARAM_LABEL => 'Reference',    self::TABLEPARAM_ID => 'perfRef',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_LEN => STAGESHOW_PERFREF_TEXTLEN, ),
-				array(self::TABLEPARAM_LABEL => 'Max Seats',    self::TABLEPARAM_ID => 'perfSeats',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  self::TABLEPARAM_DECODE =>'GetPerfMaxSeats',  self::TABLEPARAM_LEN => 4, ),						
-				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'soldQty',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
-				array(self::TABLEPARAM_LABEL => 'State',        self::TABLEPARAM_ID => 'perfState',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, self::TABLEPARAM_DECODE =>'GetPerfState'),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Date & Time',  StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  StageShowLibTableClass::TABLEPARAM_LEN => 28, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Reference',    StageShowLibTableClass::TABLEPARAM_ID => 'perfRef',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_PERFREF_TEXTLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Max Seats',    StageShowLibTableClass::TABLEPARAM_ID => 'perfSeats',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  StageShowLibTableClass::TABLEPARAM_DECODE =>'GetPerfMaxSeats',  StageShowLibTableClass::TABLEPARAM_LEN => 4, ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Tickets Sold', StageShowLibTableClass::TABLEPARAM_ID => 'soldQty',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, StageShowLibTableClass::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'State',        StageShowLibTableClass::TABLEPARAM_ID => 'perfState',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, StageShowLibTableClass::TABLEPARAM_DECODE =>'GetPerfState'),						
 			);
 		}
 		

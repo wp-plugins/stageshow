@@ -32,7 +32,8 @@ if (!class_exists('IPNNotifyClass'))
 	{
 	    // Class variables:
 	    var		$notifyDBaseObj;			//  Database access Object
-    
+    	var		$charset = 'windows-1252';
+
 		function GetQueryString()
 		{
 			// If this was a POST call ... get the QUERY_STRING from the POST request
@@ -75,14 +76,14 @@ if (!class_exists('IPNNotifyClass'))
 			}
 		}
 
-		function QueryParam($paramId)
+		function QueryParam($paramId, $default = '')
 		{
 			if (isset($_GET[$paramId]))
 				$HTTPParam = $_GET[$paramId];	
 			elseif (isset($_POST[$paramId]))
 				$HTTPParam = $_POST[$paramId];	
 			else
-				return '';
+				return $default;
 				
 			return $HTTPParam;
 		}
@@ -93,7 +94,8 @@ if (!class_exists('IPNNotifyClass'))
 			if (strlen($HTTPParam) > 0)
 				$HTTPParam = urldecode($HTTPParam);
 			
-			return $HTTPParam;
+			// Convert from IPN Charset to UTF-8
+			return iconv($this->charset, "UTF-8", $HTTPParam);
 		}
 
 		function __construct($stageShowDBaseClass, $callerPath)
@@ -116,6 +118,8 @@ if (!class_exists('IPNNotifyClass'))
 			{
 				$this->AddToLog("IPN Request Called: " . NOTIFYURL_CALLER);
 			}
+
+			$this->charset = $this->QueryParam('charset', 'windows-1252');
 
 			// read post from PayPal server and add 'cmd'
 			$URLParamsArray = $this->GetQueryString();
@@ -167,7 +171,7 @@ if (!class_exists('IPNNotifyClass'))
 			else
 			{
 				$VerifyURL = $this->notifyDBaseObj->PayPalVerifyURL;
-				$payPalResponse = $this->notifyDBaseObj->HTTPAction($VerifyURL, $URLParamsArray);
+				$payPalResponse = $this->notifyDBaseObj->HTTPPost($VerifyURL, $URLParamsArray);
 			}
 
 			$this->AddToLog('IPN Verify URL: ' . $VerifyURL);

@@ -47,6 +47,14 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			$this->opts = $opts;
 			$this->getOptions();
+			
+			if ($this->getOption('Dev_RunAsDemo'))
+			{
+				global $current_user;
+      			get_currentuserinfo();
+
+				$this->loginID = $current_user->user_login;
+			}
 		}
 
 	    function uninstall()
@@ -192,10 +200,31 @@ if (!class_exists('StageShowLibDBaseClass'))
 			}
 		}
 		
+		function createDBTable($table_name, $tableIndex, $dropTable = false)
+		{
+			if ($dropTable)
+				$this->DropTable($table_name);
+
+			$sql  = "CREATE TABLE ".$table_name.' (';
+			$sql .= $tableIndex.' INT UNSIGNED NOT NULL AUTO_INCREMENT, ';
+			$sql .= $this->getTableDef($table_name);
+			$sql .= 'UNIQUE KEY '.$tableIndex.' ('.$tableIndex.')
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
+			
+			//excecute the query
+			$this->dbDelta($sql);	
+		}
+					
 		function getTableDef($tableName)
 		{
 			$sql = "";
 			
+			if (defined('STAGESHOWLIB_ALLOW_RUNASDEMO'))
+			{
+				$sql = '
+					loginID VARCHAR(50) NOT NULL DEFAULT "",';
+			}	
+						
 			return $sql;
 		}
 		
@@ -212,6 +241,11 @@ if (!class_exists('StageShowLibDBaseClass'))
 		function query($sql)
 		{
 			global $wpdb;
+			
+			if (defined('STAGESHOWLIB_ALLOW_RUNASDEMO'))
+			{
+				$sql = $this->SQLForDemo($sql);
+			}	
 			
 			$this->ShowSQL($sql);
 			return $wpdb->query($sql);			
@@ -265,6 +299,11 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			global $wpdb;
 			
+			if (defined('STAGESHOWLIB_ALLOW_RUNASDEMO'))
+			{
+				$sql = $this->SQLForDemo($sql);
+			}	
+			
 			$this->ShowSQL($sql);
 			$results = $wpdb->get_results($sql);
 			if ($debugOutAllowed) $this->show_results($results);
@@ -277,12 +316,100 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if ($this->getOption('Dev_ShowDBOutput') != 1)
 				return;
 				
-			if (!current_user_can('manage_options'))
-				return;
+			if (function_exists('wp_get_current_user'))
+			{
+				if (!current_user_can('manage_options'))
+					return;				
+			}
+
+			echo "<br>Database Results:<br>\n";
+			for ($i = 0; $i < count($results); $i++)
+				echo "Array[$i] = " . print_r($results[$i], true) . "<br>\n";
+		}
+		
+		function SQLForDemo($sql)
+		{
+			if ($this->getOption('Dev_RunAsDemo') != 1)
+				return $sql;
+			
+			if (strpos($sql, 'loginID') !== false)
+				return $sql;
 				
-				echo "<br>Database Results:<br>\n";
-				for ($i = 0; $i < count($results); $i++)
-					echo "Array[$i] = " . print_r($results[$i], true) . "<br>\n";
+			$sqlDemo = $sql;
+				
+			// First get the command type (first word) ...
+			if (preg_match('/(\w*)/', $sql, $matches) == 0) 
+			{
+				return $sql;
+			}
+			
+			$sqlCmd = $matches[0];
+			
+			switch ($sqlCmd)
+			{
+				case 'SELECT':
+				case 'DELETE':
+					// SELECT query .... add the loginID to the query
+					//$posnStart  = strrpos($sqlDemo, ' FROM ');
+					$posnStart = 0;
+					preg_match('/FROM\s*([a-zA-Z_]*)\s*([a-z_]*)/', $sqlDemo, $matches, 0, $posnStart);
+					//TODO - Remove - echo "<br>";print_r($matches);echo "<br>";
+					
+					if ( (count($matches) > 2) && (strlen(trim($matches[2])) > 0) )
+						$tableName = $matches[2];
+					else
+						$tableName = $matches[1];
+										
+					$where = ' WHERE '.$tableName.'.loginID = "'.$this->loginID.'" ';
+					
+					if (strpos($sqlDemo, 'WHERE') !== false)
+					{
+						$sqlDemo = str_replace("WHERE", "$where AND", $sqlDemo);
+					}
+					else if (strpos($sqlDemo, 'GROUP BY') !== false)
+					{
+						$sqlDemo = str_replace("GROUP BY", "$where GROUP BY", $sqlDemo);
+					}
+					else if (strpos($sqlDemo, 'ORDER BY') !== false)
+					{
+						$sqlDemo = str_replace("ORDER BY", "$where ORDER BY", $sqlDemo);
+					}
+					else
+					{
+						$sqlDemo .= $where;
+					}
+					break;
+				
+				case 'UPDATE':
+					// SELECT query .... add the loginID to the query
+					$where = ' WHERE loginID = "'.$this->loginID.'" ';
+					
+					if (strpos($sqlDemo, 'WHERE') !== false)
+					{
+						$sqlDemo = str_replace("WHERE", "$where AND", $sqlDemo);
+					}
+					break;
+				
+				case 'INSERT':
+					$sqlDemo = preg_replace('/\(/', '(loginID, ', $sqlDemo, 1);
+					$sqlDemo = str_replace('VALUES(', 'VALUES("'.$this->loginID.'", ', $sqlDemo);
+					break;
+				
+				case 'LOCK':
+				case 'UNLOCK':
+					return $sql;
+				
+				case 'SHOW':
+					return $sql;
+			}
+								
+			if ($sqlDemo === $sql)
+			{
+				echo "<br><strong>ERROR: SQL not processed for DEMO mode: </strong><br>SQL: $sql<br>\n";
+				die;				
+			}
+			
+			return $sqlDemo;
 		}
 		
 		//Returns an array of admin options
@@ -386,11 +513,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function createDB($dropTable = false)
 		{
-		}
-		
-		function GetOurButtonsList()
-		{
-			return array();
 		}
 		
 	}

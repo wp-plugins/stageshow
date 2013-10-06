@@ -34,7 +34,7 @@ if (!class_exists('StageShowDebugAdminClass'))
 			
 			$childOptions = parent::GetOptionsDefs();
 			
-			$ourOptions = array_merge($childOptions, $testOptionDefs);
+			$ourOptions = StageShowLibAdminListClass::MergeSettings($childOptions, $testOptionDefs);
 			
 			return $ourOptions;
 		}

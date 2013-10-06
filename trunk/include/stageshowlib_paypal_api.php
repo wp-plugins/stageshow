@@ -457,38 +457,6 @@ if (!class_exists('PayPalButtonsAPIClass'))
 			$this->AddAPIParam('BUTTONSTATUS', 'DELETE');
 		}
 		
-		function AddGetInventoryParams($hostedButtonID)
-		{
-			$this->AddAPIButtonParams('BMGetInventory', $hostedButtonID);
-		}
-		
-		function AddSearchButtonParams()
-		{
-			$this->InitAPICallParams('BMButtonSearch');
-			$this->AddAPIParam('STARTDATE', '2000-01-01T12:000:00Z');
-		}
-		
-		function AddSetInventoryParams($hostedButtonID, $quantity, $soldOutUrl = '', $reference = 'X')
-		{
-			$this->AddAPIButtonParams('BMSetInventory', $hostedButtonID);
-			if ($quantity < 0)
-			{
-				// TODO-IMPROVEMENT - Disable Inventory Fudged - PayPal would not disable both Inventory Control and PNL
-				// Disable Inventory Control ... enables PNL
-				$this->AddAPIParam('TRACKINV', '0');
-				$this->AddAPIParam('TRACKPNL', '1');
-				$this->AddAPIParam('ITEMNUMBER', $reference);
-				$this->AddAPIParam('ITEMCOST', '1.0');
-			}
-			else
-			{
-				$this->AddAPIParam('TRACKINV', '1');
-				$this->AddAPIParam('SOLDOUTURL', $soldOutUrl);
-				$this->AddAPIParam('TRACKPNL', '0');
-				$this->AddAPIParam('ITEMQTY', $quantity);
-			}
-		}
-		
 		function AddGetButtonDetailsParams($hostedButtonID)
 		{
 			$this->AddAPIButtonParams("BMGetButtonDetails", $hostedButtonID);
@@ -542,121 +510,6 @@ if (!class_exists('PayPalButtonsAPIClass'))
 			return $this->APIAction('Delete Button ' . $hostedButtonID);
 		}
 		
-		function SearchButtons()
-		{
-			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return;	// Cannot Search for Buttons - API Not Configured
-			// Search for "Hosted" buttons on PayPal
-			$this->Reset();
-			$this->AddSearchButtonParams();
-			return $this->APIAction('Buttons Search ');
-		}
-		
-		function GetButtonsList()
-		{
-			$results = array();
-			$status = $this->SearchButtons();
-			if ($status != 'OK')
-				return $results;
-			$buttonNo = 0;
-			while (true)
-			{
-				if (!isset($this->APIResponses['L_HOSTEDBUTTONID'.$buttonNo]))
-					break;
-				$results[$buttonNo] = new stdClass();
-				$results[$buttonNo]->ID = $buttonNo;
-				$results[$buttonNo]->hostedButtonID = $this->APIResponses['L_HOSTEDBUTTONID'.$buttonNo];
-				$results[$buttonNo]->buttonType = $this->APIResponses['L_BUTTONTYPE'.$buttonNo];				
-				$results[$buttonNo]->itemName = $this->APIResponses['L_ITEMNAME'.$buttonNo];
-				$results[$buttonNo]->modifyDate = $this->APIResponses['L_MODIFYDATE'.$buttonNo];
-				$buttonNo++;
-			}
-			if ($this->DebugMode)
-				StageShowLibUtilsClass::print_r($results, 'results');
-			return $results;
-		}
-		
-		function GetInventory($hostedButtonID, &$quantity)
-		{
-			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return 'ERROR';	// Cannot Get Button Details - API Not Configured 
-			if (strlen($hostedButtonID) == 0)
-				return 'ERROR';	// Cannot Get Button Details - Zero Length Button ID 
-			$APIStatus = $this->GetInventoryAction($hostedButtonID, $quantity);
-			return $APIStatus;
-		}
-		
-		function GetInventoryAction($hostedButtonID, &$quantity)
-		{
-			$this->Reset();
-			$this->AddGetInventoryParams($hostedButtonID);
-			$APIStatus = $this->APIAction('Get Inventory ' . $hostedButtonID);
-			if ($APIStatus === 'OK')
-			{
-				if (isset($this->APIResponses['TRACKINV']))
-				{
-					if (intval($this->APIResponses['TRACKINV']) === 0)
-					{
-						$quantity = PayPalButtonsAPIClass::PAYPAL_APILIB_INFINITE;
-					}
-					else
-					{
-						if (isset($this->APIResponses['ITEMQTY']))
-							$quantity = $this->APIResponses['ITEMQTY'];
-						else
-						$APIStatus === 'ITEMQTY Parameter Missing';
-					}
-				}
-				else
-				$APIStatus === 'TRACKINV Parameter Missing';
-			}
-			return $APIStatus;
-		}
-		
-		function UpdateInventory($hostedButtonID, $quantity, $soldOutUrl = '', $reference = 'X')
-		{
-			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return;	// Cannot Update Inventory - API Not Configured 
-			if (strlen($hostedButtonID) == 0)
-				return;	// Cannot Update Inventory - Zero Length Button ID 
-			return $this->UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl, $reference);
-		}
-		
-		function UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl = '', $reference = 'X')
-		{
-			$this->Reset();
-			// Inventory only works if SOLDOUTURL is set ...
-			if ($soldOutUrl == '') $soldOutUrl = get_option('siteurl');
-			if ($quantity < 0)
-			{
-				$this->AddSetInventoryParams($hostedButtonID, -100, $soldOutUrl, $reference);
-				return $this->APIAction('Inventory ' . $hostedButtonID);
-			}
-			$this->AddSetInventoryParams($hostedButtonID, $quantity, $soldOutUrl, $reference);
-			return $this->APIAction('Inventory ' . $hostedButtonID);
-		}
-		
-		function AdjustInventory($hostedButtonID, $qtyOffset, $soldOutUrl = '', $reference = 'X') // Function Unused
-		{
-			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return 'CONFIG-ERROR';	// Cannot Update Inventory - API Not Configured 
-			if (strlen($hostedButtonID) == 0)
-				return;	// Cannot Update Inventory - Zero Length Button ID 
-			$APIStatus = $this->GetInventoryAction($hostedButtonID, $quantity);
-			if ($APIStatus !== 'OK') return $APIStatus;
-			if (($qtyOffset == 0) && (isset($this->APIResponses['SOLDOUTURL'])))
-			{
-				if ($soldOutUrl == '') $soldOutUrl = get_option('siteurl');
-				if ($this->APIResponses['SOLDOUTURL'] === $soldOutUrl) return 'OK';
-			}
-			$quantity += $qtyOffset;
-			return $this->UpdateInventoryAction($hostedButtonID, $quantity, $soldOutUrl, $reference);
-		}
-		
 		function GetButton($hostedButtonID)
 		{
 			// Check that the PayPal login parameters have been set
@@ -668,24 +521,6 @@ if (!class_exists('PayPalButtonsAPIClass'))
 			$this->AddGetButtonDetailsParams($hostedButtonID);
 			$APIStatus = $this->APIAction('Button ' . $hostedButtonID);
 			return $APIStatus;
-		}
-		
-		function GetButtonParams($hostedButtonID)
-		{
-			if ($this->GetButton($hostedButtonID) !== 'OK')
-				return null;
-			$buttonParams = $this->APIResponses;
-			$unusedQty = 0;
-			if ($this->GetInventory($hostedButtonID, $unusedQty) === 'OK')
-			{
-				$inventoryParams = $this->APIResponses;
-				unset($inventoryParams['HOSTEDBUTTONID']);
-			}
-			else
-			$inventoryParams['INVENTORY'] = 'ERROR - Not Available';
-			$buttonParams = array_merge($buttonParams, $inventoryParams);
-			unset($buttonParams['WEBSITECODE']);
-			return $buttonParams;
 		}
 		
 		function UpdateButton($hostedButtonID, $description, $reference, $optPrices, $optIDs = '')
