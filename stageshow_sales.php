@@ -43,19 +43,18 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$this->shortcode = STAGESHOW_SHORTCODE_PREFIX."-boxoffice";
 			
 			parent::__construct();
-			
 		}
 		
 		function OutputContent_OnlineStoreMain($reqRecordId = '')
 		{
-			$myDBaseObj = $this->myDBaseObj;
-
 			if ($reqRecordId != '')
 			{
 				parent::OutputContent_OnlineStoreMain($reqRecordId);
 			}			
 		    else
 			{
+				$myDBaseObj = $this->myDBaseObj;
+				
 				// Get ID of "active" Shows in order of first performance
 				$shows = $myDBaseObj->GetActiveShowsList();
 	      
@@ -146,16 +145,10 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $result->priceValue;
 		}
 			
-		function IsOnlineStoreItemSoldOut($result)
+		function IsOnlineStoreItemSoldOut($result, $salesSummary)
 		{
-			$perfSaleQty  = $this->myDBaseObj->GetSalesQtyByPerfID($result->perfID);	
-			$seatsAvailable = $result->perfSeats;
-			if ( ($seatsAvailable > 0) && ($seatsAvailable <= $perfSaleQty) ) 
-			{
-				return true;
-			}
-			
-			return false;
+			$soldOut = ( ($result->perfSeats >=0) && ($salesSummary->totalQty >= $result->perfSeats) );
+			return $soldOut;
 		}
 			
 		function IsOnlineStoreItemAvailable($totalSales, $maxSales)
@@ -218,6 +211,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 				
 		function OutputContent_OnlineStoreRow($result)
 		{
+			static $salesSummary;
+			
 			$submitButton = __('Add', $this->myDomain);
 			$submitId     = 'AddTicketSale';
 			$showAllDates = defined('STAGESHOW_BOXOFFICE_ALLDATES');
@@ -225,7 +220,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			
 			// Sales Summary from PerfID
-			if (!isset($this->salesSummary))
+			if (!isset($salesSummary))
 			{
 				$lastShowID = 0;
 				$lastPerfID = 0;
@@ -233,17 +228,17 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}
 			else
 			{
-				$lastShowID = $this->salesSummary[0]->showID;
-				$lastPerfID = $this->salesSummary[0]->perfID;
+				$lastShowID = $salesSummary->showID;
+				$lastPerfID = $salesSummary->perfID;
 			}
 				
 			if ($result->perfID != $lastPerfID)
 			{
 				// New performance - Get sales figures
-				$this->salesSummary = $myDBaseObj->GetPerformancesListByPerfID($result->perfID);
+				$salesSummary = $myDBaseObj->GetPerformanceSummaryByPerfID($result->perfID);
 			}			
 			
-			$soldOut = ( ($result->perfSeats >=0) && ($this->salesSummary[0]->totalQty >= $result->perfSeats) );
+			$soldOut = $this->IsOnlineStoreItemSoldOut($result, $salesSummary);
 			
 			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', $this->myDomain);
 						
@@ -328,12 +323,19 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}
 		}
 		
-		function OutputContent_OnlineTrolleyRow($priceEntry, $qty)
+		function OutputContent_OnlineTrolleyDetailsCols($priceEntry, $cartEntry)
+		{
+			$qty = $cartEntry->qty;
+			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.$qty.'</td>'."\n";
+		}
+		
+		function OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry)
 		{
 			$showName = $priceEntry->showName;
 			$perfDateTime = $this->myDBaseObj->FormatDateForDisplay($priceEntry->perfDateTime);
 			$priceType = $priceEntry->priceType;
 			$priceValue = $this->GetOnlineStoreItemPrice($priceEntry);
+			$qty = $cartEntry->qty;
 			$total = $priceValue * $qty;
 			$formattedTotal = $this->myDBaseObj->FormatCurrency($total);
 			$shipping = 0.0;
@@ -341,7 +343,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.$showName.'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.$perfDateTime.'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-type">'.$priceType.'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.$qty.'</td>'."\n";
+			$this->OutputContent_OnlineTrolleyDetailsCols($priceEntry, $cartEntry);
 			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.$formattedTotal.'</td>'."\n";
 
 			return $total;
@@ -378,7 +380,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 					return;
 						
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
-				if (isset($checkoutRslt->checkoutError)) return;
+				if (isset($checkoutRslt->checkoutError)) 
+				{
+					echo '<div id="message" class="error"><p>'.$rslt->checkoutError.'</p></div>';
+					return;
+				}
 				
 				// Lock tables so we can commit the pending sale
 				$this->myDBaseObj->LockSalesTable();
@@ -424,7 +430,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails);
 					$emailStatus = $this->myDBaseObj->EMailSale($saleId);
 						
-					$_SESSION['$this->trolleyid'] = array();	// Clear the shopping cart
+					$this->ClearTrolleyContents();	// Clear the shopping cart
 					
 					$this->checkoutError = __('Tickets reserved - Confirmation EMail sent to ', $this->myDomain).$checkoutRslt->saleDetails['saleEMail'];					
 				}

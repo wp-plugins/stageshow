@@ -38,15 +38,15 @@ if (!class_exists('StageShowSalesAdminListClass'))
 		function GetMainRowsDefinition()
 		{
 			if ($this->editMode) return array(
-				array(self::TABLEPARAM_LABEL => 'Sale Editor',       self::TABLEPARAM_ID => 'edit', ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Sale Editor',       StageShowLibTableClass::TABLEPARAM_ID => 'edit', ),						
 			);
 							
 			$columnDefs = array(
-				array(self::TABLEPARAM_LABEL => 'Paid/Due', self::TABLEPARAM_ID => 'salePaid', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),		
-				array(self::TABLEPARAM_LABEL => 'Quantity', self::TABLEPARAM_ID => 'totalQty', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),		
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Paid/Due', StageShowLibTableClass::TABLEPARAM_ID => 'salePaid', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),		
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Quantity', StageShowLibTableClass::TABLEPARAM_ID => 'totalQty', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),		
 			);
 			
-			return array_merge(parent::GetMainRowsDefinition(), $columnDefs);
+			return self::MergeSettings(parent::GetMainRowsDefinition(), $columnDefs);
 		}		
 		
 		function GetDetailsRowsDefinition()
@@ -96,11 +96,11 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Show',        self::TABLEPARAM_ID => 'showName',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Performance', self::TABLEPARAM_ID => 'perfDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, self::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
-				array(self::TABLEPARAM_LABEL => 'Ticket Type', self::TABLEPARAM_ID => 'ticketType',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Price',       self::TABLEPARAM_ID => 'priceValue',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),						
-				array(self::TABLEPARAM_LABEL => 'Quantity',    self::TABLEPARAM_ID => 'ticketQty',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => 4, ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show',        StageShowLibTableClass::TABLEPARAM_ID => 'showName',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Performance', StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Ticket Type', StageShowLibTableClass::TABLEPARAM_ID => 'ticketType',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Price',       StageShowLibTableClass::TABLEPARAM_ID => 'priceValue',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Quantity',    StageShowLibTableClass::TABLEPARAM_ID => 'ticketQty',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => 4, ),						
 			);
 		}
 		

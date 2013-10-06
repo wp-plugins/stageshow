@@ -23,6 +23,9 @@ Copyright 2012 Malcolm Shergold
 if (!defined('STAGESHOW_DBASE_CLASS'))
 	define('STAGESHOW_DBASE_CLASS', 'StageShowDBaseClass');
 	
+if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
+	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
+
 include 'stageshowlib_sales_dbase_api.php';      
 
 if (!class_exists('StageShowDBaseClass')) 
@@ -48,7 +51,6 @@ if (!class_exists('StageShowDBaseClass'))
 	define('STAGESHOW_PERFREF_TEXTLEN', 16);
 	define('STAGESHOW_PRICETYPE_TEXTLEN', 10);
 	define('STAGESHOW_PRICEVISIBILITY_TEXTLEN', 10);	
-	define('STAGESHOW_PLANREF_TEXTLEN', 20);
 	define('STAGESHOW_TICKETNAME_TEXTLEN', 110);
 	define('STAGESHOW_TICKETTYPE_TEXTLEN', 32);
 	define('STAGESHOW_TICKETSEAT_TEXTLEN', 10);
@@ -381,6 +383,58 @@ if (!class_exists('StageShowDBaseClass'))
 			return 'stageshow';
 		}
 		
+		function getTableDef($tableName)
+		{
+			$sql = parent::getTableDef($tableName);
+			switch($tableName)
+			{
+				case STAGESHOW_SHOWS_TABLE:
+					$sql .= '
+						showName VARCHAR('.STAGESHOW_SHOWNAME_TEXTLEN.') NOT NULL,
+						showState VARCHAR('.STAGESHOW_ACTIVESTATE_TEXTLEN.'), 
+					';
+					break;
+					
+				case STAGESHOW_PERFORMANCES_TABLE:
+					$sql .= '
+						showID INT UNSIGNED NOT NULL,
+						perfState VARCHAR('.STAGESHOW_ACTIVESTATE_TEXTLEN.'),
+						perfDateTime DATETIME NOT NULL,
+						perfRef VARCHAR('.STAGESHOW_PERFREF_TEXTLEN.') NOT NULL,
+						perfSeats INT NOT NULL,
+						perfOpens DATETIME,
+						perfExpires DATETIME,				
+						perfNote TEXT,
+						perfNotePosn VARCHAR(6),
+					';
+					break;
+					
+				case STAGESHOW_PRICES_TABLE:		
+					$sql .= '
+						perfID INT UNSIGNED NOT NULL,
+						priceType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL,
+						priceValue DECIMAL(9,2) NOT NULL,
+						priceVisibility VARCHAR('.STAGESHOW_PRICEVISIBILITY_TEXTLEN.') NOT NULL DEFAULT "public",
+					';
+					break;
+					
+				case $this->opts['OrdersTableName']:
+					$ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
+					$sql .= '
+						saleID INT UNSIGNED NOT NULL,
+						priceID INT UNSIGNED NOT NULL,
+						ticketName VARCHAR('.$ticketNameLen.') NOT NULL DEFAULT "",
+						ticketType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL DEFAULT "",
+						ticketQty INT NOT NULL,
+						ticketPaid DECIMAL(9,2) NOT NULL DEFAULT 0.0,
+					';
+					break;
+					
+			}
+			
+			return $sql;
+		}
+		
 		function createDB($dropTable = false)
 		{
       		global $wpdb;
@@ -393,33 +447,13 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			parent::createDB($dropTable);
 
-			$ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
-
-			$table_name = $this->opts['OrdersTableName'];
-
-			if ($dropTable)
-				$this->DropTable($table_name);
-			
-			$sql = "CREATE TABLE ".$table_name.' ( 
-					ticketID INT UNSIGNED NOT NULL AUTO_INCREMENT,
-					saleID INT UNSIGNED NOT NULL,
-					priceID INT UNSIGNED NOT NULL,
-					ticketName VARCHAR('.$ticketNameLen.') NOT NULL DEFAULT "",
-					ticketType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL DEFAULT "",
-					ticketQty INT NOT NULL,
-					ticketSeat VARCHAR('.STAGESHOW_TICKETSEAT_TEXTLEN.'),
-					ticketPaid DECIMAL(9,2) NOT NULL DEFAULT 0.0,
-					UNIQUE KEY ticketID (ticketID)
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
-
-			//excecute the query
-			$this->dbDelta($sql);
+			$this->createDBTable($this->opts['OrdersTableName'], 'ticketID', $dropTable);
 
 			// ------------------- STAGESHOW_SHOWS_TABLE -------------------
-			$table_name = STAGESHOW_SHOWS_TABLE;
-
 			if ($dropTable)
-				$this->DropTable($table_name);
+			{
+				$addingShowsTable = false;			
+			}
 			else
 			{
 				if( mysql_num_rows( mysql_query("SHOW TABLES LIKE '".STAGESHOW_PERFORMANCES_TABLE."'")) > 0)
@@ -428,15 +462,7 @@ if (!class_exists('StageShowDBaseClass'))
 					$addingShowsTable = false;			
 			}
 				
-			$sql = "CREATE TABLE ".$table_name.' ( 
-				showID INT UNSIGNED NOT NULL AUTO_INCREMENT,
-				showName VARCHAR('.STAGESHOW_SHOWNAME_TEXTLEN.') NOT NULL,
-				showState VARCHAR('.STAGESHOW_ACTIVESTATE_TEXTLEN.'), 
-				UNIQUE KEY showID (showID)
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
-
-			//excecute the query
-			$this->dbDelta($sql);
+			$this->createDBTable(STAGESHOW_SHOWS_TABLE, 'showID', $dropTable);
 			
 			// StageShow to StageShow-Plus Update
 			if ($addingShowsTable && isset($this->adminOptions['showName']))
@@ -465,46 +491,8 @@ if (!class_exists('StageShowDBaseClass'))
 				}
 			}
 			
-			// ------------------- STAGESHOW_PERFORMANCES_TABLE -------------------
-			$table_name = STAGESHOW_PERFORMANCES_TABLE;
-			
-			if ($dropTable)
-				$this->DropTable($table_name);
-			
-			$sql = "CREATE TABLE ".$table_name.' ( 
-					perfID INT UNSIGNED NOT NULL AUTO_INCREMENT,
-					showID INT UNSIGNED NOT NULL,
-					perfState VARCHAR('.STAGESHOW_ACTIVESTATE_TEXTLEN.'),
-					perfDateTime DATETIME NOT NULL,
-					perfRef VARCHAR('.STAGESHOW_PERFREF_TEXTLEN.') NOT NULL,
-					perfSeats INT NOT NULL,
-					perfPayPalButtonID VARCHAR('.STAGESHOW_PPBUTTONID_TEXTLEN.'),
-					perfOpens DATETIME,
-					perfExpires DATETIME,				
-					perfNote TEXT,
-					perfNotePosn VARCHAR(6),
-					UNIQUE KEY perfID (perfID)
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
-
-			//excecute the query
-			$this->dbDelta($sql);
-
-			$table_name = STAGESHOW_PRICES_TABLE;
-
-			if ($dropTable)
-				$this->DropTable($table_name);
-			
-			$sql = "CREATE TABLE ".$table_name.' ( 
-					priceID INT UNSIGNED NOT NULL AUTO_INCREMENT,
-					perfID INT UNSIGNED NOT NULL,
-					priceType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL,
-					priceValue DECIMAL(9,2) NOT NULL,
-					priceVisibility VARCHAR('.STAGESHOW_PRICEVISIBILITY_TEXTLEN.') NOT NULL DEFAULT "public",
-					UNIQUE KEY priceID (priceID)
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;';
-
-			//excecute the query
-			$this->dbDelta($sql);
+			$this->createDBTable(STAGESHOW_PERFORMANCES_TABLE, 'perfID', $dropTable);
+			$this->createDBTable(STAGESHOW_PRICES_TABLE, 'priceID', $dropTable);
     	}
         
 		function DBField($fieldName)
@@ -514,17 +502,25 @@ if (!class_exists('StageShowDBaseClass'))
 				case 'stockID':	return 'priceID';
 				case 'orderQty':	return 'ticketQty';
 				case 'orderPaid':	return 'ticketPaid';
+				default:			return $fieldName;
 			}
+		}
+		
+		function InTestMode()
+		{
+			if (!$this->testModeEnabled) return false;
+			
+			if (!function_exists('wp_get_current_user')) return false;
+			
+			return current_user_can(STAGESHOW_CAPABILITY_DEVUSER);
 		}
 		
 		function CreateSample()
 		{
 			// FUNCTIONALITY: DBase - StageShow - Implement "Create Sample"
 			$showName1 = "The Wordpress Show";
-			if ( isset($this->testModeEnabled) ) 
-			{
-				$showName1 .= " (".StageShowLibUtilsClass::GetSiteID().")";
-			}
+			//if ($this->InTestMode()) $showName1 .= " (".StageShowLibUtilsClass::GetSiteID().")";
+
 			// Sample dates to reflect current date/time
 			$showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+28 days"))." 20:00";
 			$showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+29 days"))." 20:00";
@@ -616,13 +612,9 @@ if (!class_exists('StageShowDBaseClass'))
 			$shows = $this->GetShowsList($showID);
 			$showName = $shows[0]->showName;
 			
-			{
-				$hostedButtonID = 0;
-			}
-		
 			// PayPal button(s) created - Add performance to database					
 			// Give performance unique Ref - Check what default reference IDs already exist in database
-			$perfID = $this->AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats, $hostedButtonID);
+			$perfID = $this->AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats);
 			if ($perfID == 0)
 				$rtnMsg = __('Performance Reference is not unique', $this->get_domain());
 			else
@@ -815,8 +807,7 @@ if (!class_exists('StageShowDBaseClass'))
 				{
 					$showName = __('Unnamed Show', $this->get_domain());
 					if ($newNameNo > 1) $showName .= ' '.$newNameNo;
-					if ( isset($this->testModeEnabled) ) 
-						$showName .= " (".StageShowLibUtilsClass::GetSiteID().")";
+					//if ($this->InTestMode()) $showName .= " (".StageShowLibUtilsClass::GetSiteID().")";
 						
 					if ($this->IsShowNameUnique($showName))
 						break;
@@ -922,6 +913,14 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->GetPerformancesList($sqlFilters);
 		}
 				
+		function GetPerformanceSummaryByPerfID($perfID)
+		{
+			$results = $this->GetPerformancesListByPerfID($perfID);
+			if (count($results) == 0) return null;
+			
+			return $results[0];
+		}
+				
 		function GetPerformancesListByPerfID($perfID)
 		{
 			$sqlFilters['perfID'] = $perfID;
@@ -962,31 +961,6 @@ if (!class_exists('StageShowDBaseClass'))
 			return $perfsListArray;
 		}
 		
-		function GetOurButtonsList()
-		{
-			$sql = "SELECT perfPayPalButtonID FROM ".STAGESHOW_PERFORMANCES_TABLE;
-			
-			$results = $this->get_results($sql);
-
-			$buttonsListArray = array();			
-			for($index=0; $index<count($results); $index++)
-				$buttonsListArray[$index] = $results[$index]->perfPayPalButtonID;
-				
-			return $buttonsListArray;
-		}
-		
-		function GetPriceFromButtonId($perfPayPalButtonID, $priceType)
-		{
-			$sql = 'SELECT * FROM '.STAGESHOW_PERFORMANCES_TABLE;
-			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
-			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfPayPalButtonID ="'.$perfPayPalButtonID.'"';
-			$sql .= ' AND '.STAGESHOW_PRICES_TABLE.'.priceType 	="'.$priceType.'"';
-			
-			$results = $this->get_results($sql);
-			
-			return $results;
-		}
-
 		function CanDeletePerformance($perfsEntry)
 		{
 			$perfDateTime = $perfsEntry->perfDateTime;
@@ -1067,7 +1041,7 @@ if (!class_exists('StageShowDBaseClass'))
 			return array();
 		}
 		
-		function AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats, $perfPayPalButtonID)
+		function AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats)
 		{
 			if ($perfRef === '')
 			{
@@ -1087,8 +1061,8 @@ if (!class_exists('StageShowDBaseClass'))
 					return 0;	// Error - Performance Reference is not unique
 			}
 			
-			$sql  = 'INSERT INTO '.STAGESHOW_PERFORMANCES_TABLE.'(showID, perfState, perfDateTime, perfRef, perfSeats, perfPayPalButtonID)';
-			$sql .= ' VALUES('.$showID.', "'.$perfState.'", "'.$perfDateTime.'", "'.$perfRef.'", "'.$perfSeats.'", "'.$perfPayPalButtonID.'")';
+			$sql  = 'INSERT INTO '.STAGESHOW_PERFORMANCES_TABLE.'(showID, perfState, perfDateTime, perfRef, perfSeats)';
+			$sql .= ' VALUES('.$showID.', "'.$perfState.'", "'.$perfDateTime.'", "'.$perfRef.'", "'.$perfSeats.'")';
 			 
 			$this->query($sql);
 			
@@ -1643,11 +1617,16 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			$selectFields  = '*';
 			
-			$sqlWhere = ' WHERE '.STAGESHOW_TICKETS_TABLE.'.saleID = "'.$saleID.'"';
-			
+			$sqlWhere1 = ' WHERE '.STAGESHOW_TICKETS_TABLE.'.saleID = "'.$saleID.'"';
+			$sqlWhere2 = ' ';
+			if ($this->getOption('Dev_RunAsDemo'))
+			{
+				$sqlWhere1 .= ' AND '.STAGESHOW_TICKETS_TABLE.'.loginID = "'.$this->loginID.'"';
+				$sqlWhere2 .= ' WHERE '.STAGESHOW_PRICES_TABLE.'.loginID = "'.$this->loginID.'"';
+			}
 			$sql  = 'SELECT '.$selectFields;
-			$sql .= ' FROM ( SELECT * FROM '.STAGESHOW_TICKETS_TABLE.$sqlWhere.' ) AS sales';
-			$sql .= ' RIGHT JOIN ( SELECT * FROM '.STAGESHOW_PRICES_TABLE.' ) AS prices';
+			$sql .= ' FROM ( SELECT * FROM '.STAGESHOW_TICKETS_TABLE.$sqlWhere1.' ) AS sales';
+			$sql .= ' RIGHT JOIN ( SELECT * FROM '.STAGESHOW_PRICES_TABLE.$sqlWhere2.' ) AS prices';
 			$sql .= ' ON sales.priceID = prices.priceID';
 			$sql .= ' JOIN '.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID=prices.perfID';			
 			$sql .= ' JOIN '.STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
@@ -1808,7 +1787,7 @@ if (!class_exists('StageShowDBaseClass'))
 		function GetHTTPPage($reqURL)
 		{
 			$rtnVal = '';
-			$response = $this->HTTPAction($reqURL);
+			$response = $this->HTTPGet($reqURL);
 						
 			if ($response['APIStatus'] == 200)
 				$rtnVal = $response['APIResponseText'];

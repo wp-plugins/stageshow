@@ -80,9 +80,9 @@ if (!class_exists('PayPalSalesAdminListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Name',	            self::TABLEPARAM_ID => 'saleLastName', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, self::TABLEPARAM_DECODE => 'DecodeSaleName', ),
-				array(self::TABLEPARAM_LABEL => 'Transaction Date', self::TABLEPARAM_ID => 'saleDateTime', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(self::TABLEPARAM_LABEL => 'Status',           self::TABLEPARAM_ID => 'saleStatus',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Name',	            StageShowLibTableClass::TABLEPARAM_ID => 'saleLastName', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'DecodeSaleName', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Transaction Date', StageShowLibTableClass::TABLEPARAM_ID => 'saleDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Status',           StageShowLibTableClass::TABLEPARAM_ID => 'saleStatus',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 			);
 		}		
 		
@@ -106,23 +106,23 @@ if (!class_exists('PayPalSalesAdminListClass'))
 			$statusOptions = $this->GetStatusOptions();
 			
 			$ourOptions = array(
-				array(self::TABLEPARAM_LABEL => 'First Name',	             self::TABLEPARAM_ID => 'saleFirstName', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => 'Last Name',	             self::TABLEPARAM_ID => 'saleLastName',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => 'EMail',	                 self::TABLEPARAM_ID => 'saleEMail',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEEMAIL_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => $address,	                 self::TABLEPARAM_ID => 'salePPStreet',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN,  self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTREET_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => $city,	                     self::TABLEPARAM_ID => 'salePPCity',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN,    self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCITY_EDITLEN, ),			
-				array(self::TABLEPARAM_LABEL => $state,	                     self::TABLEPARAM_ID => 'salePPState',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN,   self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTATE_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => $zip,                        self::TABLEPARAM_ID => 'salePPZip',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN,     self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPZIP_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => $country,                    self::TABLEPARAM_ID => 'salePPCountry', self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN, self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCOUNTRY_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => $phone,                      self::TABLEPARAM_ID => 'salePPPhone',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, self::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN,   self::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPPHONE_EDITLEN, ),
-				array(self::TABLEPARAM_LABEL => 'Total Paid/Due',            self::TABLEPARAM_ID => 'salePaid',      self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
-				array(self::TABLEPARAM_LABEL => 'Fee',                       self::TABLEPARAM_ID => 'saleFee',       self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
-				array(self::TABLEPARAM_LABEL => 'Transaction Date & Time',   self::TABLEPARAM_ID => 'saleDateTime',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
-				array(self::TABLEPARAM_LABEL => 'Transaction ID',            self::TABLEPARAM_ID => 'saleTxnId',     self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),						
-				array(self::TABLEPARAM_LABEL => 'Status',                    self::TABLEPARAM_ID => 'saleStatus',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, self::TABLEPARAM_ITEMS => $statusOptions),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'First Name',	             StageShowLibTableClass::TABLEPARAM_ID => 'saleFirstName', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Last Name',	             StageShowLibTableClass::TABLEPARAM_ID => 'saleLastName',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'EMail',	                 StageShowLibTableClass::TABLEPARAM_ID => 'saleEMail',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN,     StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEEMAIL_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $address,	                 StageShowLibTableClass::TABLEPARAM_ID => 'salePPStreet',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN,  StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTREET_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $city,	                     StageShowLibTableClass::TABLEPARAM_ID => 'salePPCity',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN,    StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCITY_EDITLEN, ),			
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $state,	                     StageShowLibTableClass::TABLEPARAM_ID => 'salePPState',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN,   StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTATE_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $zip,                        StageShowLibTableClass::TABLEPARAM_ID => 'salePPZip',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN,     StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPZIP_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $country,                    StageShowLibTableClass::TABLEPARAM_ID => 'salePPCountry', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN, StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCOUNTRY_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $phone,                      StageShowLibTableClass::TABLEPARAM_ID => 'salePPPhone',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN,   StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPPHONE_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Total Paid/Due',            StageShowLibTableClass::TABLEPARAM_ID => 'salePaid',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Fee',                       StageShowLibTableClass::TABLEPARAM_ID => 'saleFee',       StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Transaction Date & Time',   StageShowLibTableClass::TABLEPARAM_ID => 'saleDateTime',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Transaction ID',            StageShowLibTableClass::TABLEPARAM_ID => 'saleTxnId',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Status',                    StageShowLibTableClass::TABLEPARAM_ID => 'saleStatus',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $statusOptions),						
 			);
 			
-			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
+			$ourOptions = self::MergeSettings(parent::GetDetailsRowsDefinition(), $ourOptions);
 			return $ourOptions;
 		}
 		
@@ -132,7 +132,7 @@ if (!class_exists('PayPalSalesAdminListClass'))
 				array(StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_FUNCTION, StageShowLibTableClass::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
 			);
 			
-			$ourOptions = array_merge(parent::GetDetailsRowsFooter(), $ourOptions);
+			$ourOptions = self::MergeSettings(parent::GetDetailsRowsFooter(), $ourOptions);
 			
 			return $ourOptions;
 		}
@@ -327,31 +327,34 @@ if (!class_exists('PayPalSalesAdminClass'))
 					new***** arrays are the new quantities requested by the user
 					curr**** arrays are the quantities currently in the database
 					
-					****StockQtys are the quantities for a particular stock item (i.e. a hosted button)
-					****PriceQtys are the quantities for a particular stock option
+					****stockQtys are the quantities for a particular stock item (i.e. a hosted button)
+					****priceQtys are the quantities for a particular stock option
 				*/
 				
 				if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($_POST, '_POST');
 				$this->editingRecord = true;
 				if (isset($_POST['saleID'])) $this->saleId = $_POST['saleID'];
 
-				// Get current qunatities from database
-				$this->GetCurrentSaleQtys();
-				
 				// Get requested quantities for each price option
-				$this->invalidInputId = $this->GetRequestedSaleQtys();
-					
+				$req = $this->GetRequestedSaleQtys();
+				$invalidInputId = $req->errorId;
+				
 				// Lock database before sale commit
 				$myDBaseObj->LockSalesTable();
 				
+				// Get current qunatities from database
+				$curr = $this->GetCurrentSaleQtys();
+				
 				// Check Stock Quantities
-				if ($this->invalidInputId == '')
-					$this->invalidInputId = $this->CheckStockQtys();
+				if ($invalidInputId == '')
+				{
+					$invalidInputId = $this->CheckStockQtys($curr, $req);
+				}
 					
 				$saleId = isset($this->saleId) ? $this->saleId : 0;
-				if ($this->invalidInputId == '')
+				if ($invalidInputId == '')
 				{
-					$this->invalidInputId = $this->AddOrEditSale();	// Note: Updates $this->saleId on new sale			
+					$invalidInputId = $this->AddOrEditSale($curr, $req);	// Note: Updates $this->saleId on new sale			
 					
 					$this->pricesList = $this->myDBaseObj->GetPricesListWithSales($this->saleId);
 					$this->editSaleEntry = $myDBaseObj->GetSaleBuyer($this->saleId);	// Get list of items for a single sale
@@ -505,9 +508,9 @@ if (!class_exists('PayPalSalesAdminClass'))
 			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetItemDesc');
 		}
 		
-		function GetButtonID($pricesEntry)
+		function GetStockID($pricesEntry)
 		{
-			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetButtonID');
+			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetStockID');
 		}
 		
 		function GetSaleQty($ticketsEntry)
@@ -520,10 +523,17 @@ if (!class_exists('PayPalSalesAdminClass'))
 			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'SetSaleQty');
 		}
 		
+		function GetStockInventory($stockID)
+		{
+			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetStockInventory');
+		}
+		
 		function GetCurrentSaleQtys()
 		{
-			$this->currStockQtys = array();
-			$this->currPriceQtys = array();
+			$curr = new stdClass();
+			
+			$curr->stockQtys = array();	// Unedited Quantity of item that is quantity limited  
+			$curr->priceQtys = array();	// Unedited Quantity of item at a certain price
 				
 			if (isset($_POST['saleID']))
 			{
@@ -533,39 +543,43 @@ if (!class_exists('PayPalSalesAdminClass'))
 
 				foreach($currSaleResults as $currSale)
 				{
-					// Calculate quantities for each stock item and price option
+					// TODO - Calculate quantities for each stock item and price option
 					$itemID = $this->GetItemID($currSale);
-					$buttonID = $this->GetButtonID($currSale);						
 					$qty = $this->GetSaleQty($currSale);
+					$curr->priceQtys[$itemID] = $qty;		// The current sale quantity for an item
 					
-					$this->currStockQtys[$buttonID] = isset($this->currStockQtys[$buttonID]) ? $this->currStockQtys[$buttonID] + $qty : $qty;
-					$this->currPriceQtys[$itemID] = $qty;
+					$stockID = $this->GetStockID($currSale);						
+					$curr->stockQtys[$stockID] = isset($curr->stockQtys[$stockID]) ? $curr->stockQtys[$stockID] + $qty : $qty;
 				}
 				
-				$this->saleId = $reqSaleID;
+				$curr->saleId = $reqSaleID;
 			}
 			else
 			{
 				$currSaleResults = array();
 			}
 						
-			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($this->currPriceQtys, 'currPriceQtys');
-			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($this->currStockQtys, 'currStockQtys');				
+			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($curr->priceQtys, 'currpriceQtys');
+			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($curr->stockQtys, 'currStockQtys');				
+			
+			return $curr;
 		}
 
 		function GetRequestedSaleQtys()				
 		{
-			$errorId = '';
+			$req = new stdClass();
+			
 			$newPrice = 0;
 
-			$this->newPriceQtys = array();
-			$this->newStockQtys = array();
+			$req->errorId = '';
+			$req->stockQtys = array();	// Edited Quantity of item that is quantity limited  
+			$req->priceQtys = array();	// Edited Quantity of item at a certain price
 
 			$this->results = $this->myDBaseObj->GetPricesList(null);
 			foreach($this->results as $key => $pricesEntry)
 			{
 				$itemID = $this->GetItemID($pricesEntry);
-				$buttonID = $this->GetButtonID($pricesEntry);
+				$stockID = $this->GetStockID($pricesEntry);
 					
 				$inputID = $this->saleQtyInputID.$itemID;
 					
@@ -577,13 +591,13 @@ if (!class_exists('PayPalSalesAdminClass'))
 					
 					$this->SetSaleQty($this->results[$key], $qty);	// Set requested quantity for display
 						
-					if ($errorId != '')
+					if ($req->errorId != '')
 						continue;
 						
 					if (!is_numeric($qty))
 					{
 						echo '<div id="message" class="error"><p>'.__('INVALID Quantity (Non-numeric)', $this->myDomain).' - '.$this->GetItemDesc($pricesEntry).'</p></div>';
-						$errorId = $inputID;
+						$req->errorId = $inputID;
 						continue;
 					}
 					else
@@ -591,12 +605,12 @@ if (!class_exists('PayPalSalesAdminClass'))
 						$qty = intval($qty);
 						if ($qty >= 0)
 						{
-							$this->newPriceQtys[$itemID] = $qty;
+							$req->priceQtys[$itemID] = $qty;
 						}
 						else
 						{
 							echo '<div id="message" class="error"><p>'.__('INVALID Quantity (Negative)', $this->myDomain).' - '.$this->GetItemDesc($pricesEntry).'</p></div>';
-							$errorId = $inputID;
+							$req->errorId = $inputID;
 							continue;
 						}
 					}
@@ -606,52 +620,52 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$newPrice += intval($_POST[$inputID]) * $this->GetItemPrice($pricesEntry);
 					
 				// Calculate quantities for each performance
-				$this->newStockQtys[$buttonID] = isset($this->newStockQtys[$buttonID]) ? $this->newStockQtys[$buttonID] + $qty : $qty;
+				$req->stockQtys[$stockID] = isset($req->stockQtys[$stockID]) ? $req->stockQtys[$stockID] + $qty : $qty;
 			}
 			
 			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) 
 			{
-				StageShowLibUtilsClass::print_r($this->newPriceQtys, 'this->newPriceQtys');
-				StageShowLibUtilsClass::print_r($this->newStockQtys, 'this->newStockQtys');
+				StageShowLibUtilsClass::print_r($req->priceQtys, 'this->priceQtys');
+				StageShowLibUtilsClass::print_r($req->stockQtys, 'this->stockQtys');
 			}
 			
 			$this->salePaid = $newPrice;
 			
-			return $errorId;
+			return $req;
 		}
 		
-		function CheckStockQtys()
+		function CheckStockQtys($curr, $req)
 		{
 			$errorId = '';
 			$totalQty = 0;
 			
-			foreach ($this->newStockQtys as $buttonID => $qty)
+			foreach ($req->stockQtys as $stockID => $qty)
 			{
 				$totalQty += $qty;
 
-				if (isset($this->currStockQtys[$buttonID])) $qty -= $this->currStockQtys[$buttonID];						
+				// Calculate the extra sales for each Stock item
+				if (isset($curr->stockQtys[$stockID])) 
+				{
+					$qty -= $curr->stockQtys[$stockID];						
+				}
 				if ($qty > 0)
 				{
-					if ($this->payPalAPIObj->GetInventory($buttonID, $stockQty) === 'OK')
+					$stockQty = $this->GetStockInventory($stockID);
+					
+					if ($stockQty < $qty)
 					{
-						if ($stockQty == PayPalButtonsAPIClass::PAYPAL_APILIB_INFINITE)
-							continue;
-							
-						if ($stockQty < $qty)
+						$errorItem = '';
+						$errorId = -1;		// Out of Stock could refer to more than one price line
+						foreach($this->results as $pricesEntry)
 						{
-							$errorItem = '';
-							$errorId = -1;		// Out of Stock could refer to more than one price line
-							foreach($this->results as $pricesEntry)
+							if ($this->GetStockID($pricesEntry) === $stockID)
 							{
-								if ($this->GetButtonID($pricesEntry) === $buttonID)
-								{
-									$errorItem = ' - '.$this->GetItemDesc($pricesEntry, false);
-									break;
-								}
+								$errorItem = ' - '.$this->GetItemDesc($pricesEntry, false);
+								break;
 							}
-							echo '<div id="message" class="error"><p>'.__('Out of Stock', $this->myDomain).$errorItem.'</p></div>';
-							break;
 						}
+						echo '<div id="message" class="error"><p>'.__('Out of Stock', $this->myDomain).$errorItem.'</p></div>';
+						break;
 					}
 				}
 			}
@@ -664,8 +678,8 @@ if (!class_exists('PayPalSalesAdminClass'))
 						
 			return $errorId;
 		}
-				
-		function AddOrEditSale($salesVals = array())
+			
+		function AddOrEditSale($curr, $req, $salesVals = array())
 		{	
 			$myDBaseObj = $this->myDBaseObj;
 			
@@ -715,8 +729,8 @@ if (!class_exists('PayPalSalesAdminClass'))
 			foreach($this->results as $pricesEntry)
 			{
 				$itemID = $this->GetItemID($pricesEntry);						
-				$newQty = isset($this->newPriceQtys[$itemID]) ? $this->newPriceQtys[$itemID] : 0;
-				$origQty = isset($this->currPriceQtys[$itemID]) ? $this->currPriceQtys[$itemID] : 0;
+				$newQty = isset($req->priceQtys[$itemID]) ? $req->priceQtys[$itemID] : 0;
+				$origQty = isset($curr->priceQtys[$itemID]) ? $curr->priceQtys[$itemID] : 0;
 						
 				if (($newQty > 0) && ($origQty == 0))
 				{

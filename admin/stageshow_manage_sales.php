@@ -48,9 +48,9 @@ if (!class_exists('StageShowSalesAdminClass'))
 			return StageShowDBaseClass::FormatDateForDisplay($pricesEntry->perfDateTime).' - '.$pricesEntry->priceType;
 		}
 		
-		function GetButtonID($pricesEntry)
+		function GetStockID($pricesEntry)
 		{
-			return $pricesEntry->perfPayPalButtonID;
+			return $pricesEntry->perfID;
 		}
 		
 		function GetSaleQty($ticketsEntry)
@@ -61,6 +61,15 @@ if (!class_exists('StageShowSalesAdminClass'))
 		function SetSaleQty(&$ticketsEntry, $qty)
 		{
 			$ticketsEntry->ticketQty = $qty;
+		}
+		
+		function GetStockInventory($stockID)
+		{
+			$results = $this->myDBaseObj->GetPerformancesListByPerfID($stockID);
+			if (count($results) == 0)
+				return 0;
+				
+			return $results[0]->perfSeats - $results[0]->totalQty;
 		}
 		
 		function NoStockMessage()

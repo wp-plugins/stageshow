@@ -73,7 +73,6 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'ticketID'           => __('Ticket ID', $this->myDomain),
 				'ticketName'         => __('Ticket Name', $this->myDomain),
 				'ticketQty'          => __('Ticket Qty', $this->myDomain),
-				'ticketSeat'         => __('Ticket Seat', $this->myDomain),
 				'ticketType'         => __('Ticket Type', $this->myDomain),
 				'verifyDateTime'     => __('Verify Date & Time', $this->myDomain),
 				'verifyID'           => __('Verify ID', $this->myDomain),

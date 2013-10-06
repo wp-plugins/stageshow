@@ -37,8 +37,7 @@ if (!class_exists('StageShowPluginClass'))
 		{
 			$myDBaseObj = $this->CreateDBClass($caller);
 			
-			$this->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
-			$myDBaseObj->testModeEnabled = $this->testModeEnabled;
+			$myDBaseObj->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
 			$this->myDBaseObj = $myDBaseObj;
 					
 			parent::__construct();
@@ -139,7 +138,7 @@ if (!class_exists('StageShowPluginClass'))
 
 	  		// FUNCTIONALITY: Activate - Set EMail template to file name ONLY
 			// EMail Template defaults to templates folder - remove folders from path
-			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath');
+			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath', STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH);
 			
       		$this->saveStageshowOptions();
       
@@ -259,13 +258,6 @@ if (!class_exists('StageShowPluginClass'))
 					new $classId($this->env);
 					break;
 					
-				case STAGESHOW_MENUPAGE_BUTTONS :
-					global $salesManDBaseObj;
-					$salesManDBaseObj = $this->myDBaseObj;
-					include STAGESHOW_TEST_PATH.'paypal_manage_buttons.php';      
-					new PayPalButtonsAdminClass($this->env, $salesManDBaseObj->GetOurButtonsList());
-					break;
-					
 				case STAGESHOW_MENUPAGE_SETTINGS :
 					include 'admin/'.$this->adminClassFilePrefix.'_manage_settings.php';
 					$classId = $this->adminClassPrefix.'SettingsAdminClass';
@@ -362,7 +354,7 @@ if (!class_exists('StageShowPluginClass'))
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', $this->myDomain),     __('Settings', $this->myDomain),    STAGESHOW_CAPABILITY_SETUPUSER,   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
 
 				// Show test menu if stageshow_testsettings.php is present
-				if ( $this->testModeEnabled )
+				if ($myDBaseObj->InTestMode())
 				{
 					add_submenu_page( 'options-general.php', 'StageShow Test', 'StageShow Test', STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TESTSETTINGS, array(&$this, 'printAdminPage'));
 				}

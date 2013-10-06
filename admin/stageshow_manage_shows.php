@@ -55,9 +55,9 @@ if (!class_exists('StageShowShowsAdminListClass'))
 		{
 			// FUNCTIONALITY: Shows - Lists Show Names, Tickets Sold (with link to Show Sales page) and Show "State""
 			return array(
-				array(self::TABLEPARAM_LABEL => 'Show Name',    self::TABLEPARAM_ID => 'showName',   self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_LEN => STAGESHOW_SHOWNAME_TEXTLEN, ),
-				array(self::TABLEPARAM_LABEL => 'Tickets Sold', self::TABLEPARAM_ID => 'soldQty',    self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
-				array(self::TABLEPARAM_LABEL => 'State',        self::TABLEPARAM_ID => 'showState',  self::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE,  self::TABLEPARAM_DECODE =>'GetShowState', ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Name',    StageShowLibTableClass::TABLEPARAM_ID => 'showName',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_SHOWNAME_TEXTLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Tickets Sold', StageShowLibTableClass::TABLEPARAM_ID => 'soldQty',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE,  StageShowLibTableClass::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=show&id=', ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'State',        StageShowLibTableClass::TABLEPARAM_ID => 'showState',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE,  StageShowLibTableClass::TABLEPARAM_DECODE =>'GetShowState', ),						
 			);
 		}
 		
