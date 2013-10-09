@@ -44,8 +44,8 @@ if (!class_exists('StageShowPluginClass'))
 			
 			//Actions
 			register_activation_hook( $caller, array(&$this, 'activate') );
-			register_deactivation_hook( $caller, array(&$this, 'deactivate') );	
-	
+			register_deactivation_hook( $caller, array(&$this, 'deactivate') );
+				
 			add_action('wp_print_styles', array(&$this, 'load_user_styles') );
 			add_action('wp_print_scripts', array(&$this, 'load_user_scripts') );
 			
@@ -271,9 +271,10 @@ if (!class_exists('StageShowPluginClass'))
 					break;
 							
 				case STAGESHOW_MENUPAGE_TESTSETTINGS:
-					include STAGESHOW_TEST_PATH.'stageshow_testsettings.php';   
-					new StageShowTestSettingsAdminClass($this->env);
-					break;		
+					include 'test/'.$this->adminClassFilePrefix.'_testsettings.php';
+					$classId = $this->adminClassPrefix.'TestSettingsAdminClass';
+					new $classId($this->env);							 
+					break;	
 					
 				case STAGESHOW_MENUPAGE_DEVTEST:
 					include STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php';   

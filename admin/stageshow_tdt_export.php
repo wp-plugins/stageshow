@@ -30,54 +30,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 		{
 			parent::__construct($myDBaseObj);
 			
-			$this->fieldNames = array(
-				'perfDateTime'       => __('Performance Date & Time', $this->myDomain),
-				'perfExpires'        => __('Performance Expires', $this->myDomain),
-				'perfID'             => __('Performance ID', $this->myDomain),
-				'perfNote'           => __('Performance Note', $this->myDomain),
-				'perfNotePosn'       => __('Performance Note Position', $this->myDomain),
-				'perfOpens'          => __('Performance Opens', $this->myDomain),
-				'perfRef'            => __('Performance Ref', $this->myDomain),
-				'perfSeats'          => __('Performance Seats', $this->myDomain),
-				'perfState'          => __('Performance State', $this->myDomain),
-				'planID'             => __('Plan ID', $this->myDomain),
-				'planRef'            => __('Plan Ref', $this->myDomain),
-				'presetID'           => __('Preset ID', $this->myDomain),
-				'priceID'            => __('Price ID', $this->myDomain),
-				'priceType'          => __('Price Type', $this->myDomain),
-				'priceValue'         => __('Price', $this->myDomain),
-				'saleCheckoutTime'   => __('Checkout Time', $this->myDomain),
-				'saleDateTime'       => __('Date & Time', $this->myDomain),
-				'saleEMail'          => __('Sale EMail', $this->myDomain),
-				'saleFee'            => __('Fee', $this->myDomain),
-				'saleID'             => __('Sale ID', $this->myDomain),
-				'saleFirstName'      => __('First Name', $this->myDomain),
-				'saleLastName'       => __('Last Name', $this->myDomain),
-				'salePaid'           => __('Paid', $this->myDomain),
-				'salePPCity'         => __('City', $this->myDomain),
-				'salePPCountry'      => __('Country', $this->myDomain),
-				'salePPName'         => __('Name', $this->myDomain),
-				'salePPPhone'        => __('Phone', $this->myDomain),
-				'salePPState'        => __('County', $this->myDomain),
-				'salePPStreet'       => __('Street', $this->myDomain),
-				'salePPZip'          => __('Postcode', $this->myDomain),
-				'saleStatus'         => __('Sale Status', $this->myDomain),
-				'saleTxnId'          => __('Transaction ID', $this->myDomain),
-				'showEMail'          => __('Show EMail', $this->myDomain),
-				'showExpires'        => __('Show Expires', $this->myDomain),
-				'showID'             => __('Show ID', $this->myDomain),
-				'showName'           => __('Show Name', $this->myDomain),
-				'showNote'           => __('Show Note', $this->myDomain),
-				'showOpens'          => __('Show Opens', $this->myDomain),
-				'showState'          => __('Show State', $this->myDomain),
-				'ticketID'           => __('Ticket ID', $this->myDomain),
-				'ticketName'         => __('Ticket Name', $this->myDomain),
-				'ticketQty'          => __('Ticket Qty', $this->myDomain),
-				'ticketType'         => __('Ticket Type', $this->myDomain),
-				'verifyDateTime'     => __('Verify Date & Time', $this->myDomain),
-				'verifyID'           => __('Verify ID', $this->myDomain),
-				'verifyLocation'     => __('Verify Location', $this->myDomain),
-			);
+			$this->fieldNames = GetFields();
 	
 	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
 			if ( isset( $_GET['downloadexport'] ) )
@@ -126,6 +79,56 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				die;
 		}
 
+		function GetFields()
+		{
+			$fieldNames = array(
+				'perfDateTime'       => __('Performance Date & Time', $this->myDomain),
+				'perfID'             => __('Performance ID', $this->myDomain),
+				'perfRef'            => __('Performance Ref', $this->myDomain),
+				'perfSeats'          => __('Performance Seats', $this->myDomain),
+				'perfState'          => __('Performance State', $this->myDomain),
+				'planID'             => __('Plan ID', $this->myDomain),
+				'planRef'            => __('Plan Ref', $this->myDomain),
+				'presetID'           => __('Preset ID', $this->myDomain),
+				'priceID'            => __('Price ID', $this->myDomain),
+				'priceType'          => __('Price Type', $this->myDomain),
+				'priceValue'         => __('Price', $this->myDomain),
+				'saleCheckoutTime'   => __('Checkout Time', $this->myDomain),
+				'saleDateTime'       => __('Date & Time', $this->myDomain),
+				'saleEMail'          => __('Sale EMail', $this->myDomain),
+				'saleFee'            => __('Fee', $this->myDomain),
+				'saleID'             => __('Sale ID', $this->myDomain),
+				'saleFirstName'      => __('First Name', $this->myDomain),
+				'saleLastName'       => __('Last Name', $this->myDomain),
+				'salePaid'           => __('Paid', $this->myDomain),
+				'salePPCity'         => __('City', $this->myDomain),
+				'salePPCountry'      => __('Country', $this->myDomain),
+				'salePPName'         => __('Name', $this->myDomain),
+				'salePPPhone'        => __('Phone', $this->myDomain),
+				'salePPState'        => __('County', $this->myDomain),
+				'salePPStreet'       => __('Street', $this->myDomain),
+				'salePPZip'          => __('Postcode', $this->myDomain),
+				'saleStatus'         => __('Sale Status', $this->myDomain),
+				'saleTxnId'          => __('Transaction ID', $this->myDomain),
+				'showEMail'          => __('Show EMail', $this->myDomain),
+				'showExpires'        => __('Show Expires', $this->myDomain),
+				'showID'             => __('Show ID', $this->myDomain),
+				'showName'           => __('Show Name', $this->myDomain),
+				'showNote'           => __('Show Note', $this->myDomain),
+				'showOpens'          => __('Show Opens', $this->myDomain),
+				'showState'          => __('Show State', $this->myDomain),
+				'ticketID'           => __('Ticket ID', $this->myDomain),
+				'ticketName'         => __('Ticket Name', $this->myDomain),
+				'ticketQty'          => __('Ticket Qty', $this->myDomain),
+				'ticketType'         => __('Ticket Type', $this->myDomain),
+				'verifyDateTime'     => __('Verify Date & Time', $this->myDomain),
+				'verifyID'           => __('Verify ID', $this->myDomain),
+				'verifyLocation'     => __('Verify Location', $this->myDomain),
+			);
+			
+			return array_merge(parent::GetFields(), $fieldNames);
+		}
+			
 		function output_htmlhead()
 		{
 			echo '<html>

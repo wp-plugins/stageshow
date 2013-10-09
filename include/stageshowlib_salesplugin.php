@@ -134,6 +134,7 @@ if (!class_exists('SalesPluginBaseClass'))
 			
 		function GetOnlineStoreItemNote($result, $posn)
 		{
+			return '';
 		}
 			
 		function GetOnlineStoreHiddenTags()
