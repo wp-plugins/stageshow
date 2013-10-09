@@ -402,10 +402,6 @@ if (!class_exists('StageShowDBaseClass'))
 						perfDateTime DATETIME NOT NULL,
 						perfRef VARCHAR('.STAGESHOW_PERFREF_TEXTLEN.') NOT NULL,
 						perfSeats INT NOT NULL,
-						perfOpens DATETIME,
-						perfExpires DATETIME,				
-						perfNote TEXT,
-						perfNotePosn VARCHAR(6),
 					';
 					break;
 					
@@ -414,7 +410,6 @@ if (!class_exists('StageShowDBaseClass'))
 						perfID INT UNSIGNED NOT NULL,
 						priceType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL,
 						priceValue DECIMAL(9,2) NOT NULL,
-						priceVisibility VARCHAR('.STAGESHOW_PRICEVISIBILITY_TEXTLEN.') NOT NULL DEFAULT "public",
 					';
 					break;
 					
@@ -506,6 +501,20 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 		}
 		
+		function AddSamplePerformance(&$rtnMsg, $showID, $perfDateTime, $perfRef = '', $perfSeats = -1)
+		{
+			$perfID = $this->CreateNewPerformance($rtnMsg, $showID, $perfDateTime, $perfRef, $perfSeats);
+			
+			return $perfID;
+		}
+		
+		function AddSamplePrice($perfID, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $visibility = STAGESHOW_VISIBILITY_PUBLIC)
+		{
+			$priceID = $this->AddPrice($perfID, $priceType, $priceValue, $visibility);
+			
+			return $priceID;
+		}
+		
 		function InTestMode()
 		{
 			if (!$this->testModeEnabled) return false;
@@ -533,22 +542,23 @@ if (!class_exists('StageShowDBaseClass'))
 			$perfCount = 4;
 			if (defined('STAGESHOW_SAMPLE_PERFORMANCES_COUNT'))
 				$perfCount = STAGESHOW_SAMPLE_PERFORMANCES_COUNT;
-			$perfID1 = $perfCount >= 1 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime1, "Day1Eve", 80) : -1;
-			$perfID2 = $perfCount >= 2 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime2, "Day2Eve", 60) : -1;
-			$perfID3 = $perfCount >= 3 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime3, "Day3Mat", 80) : -1;
-			$perfID4 = $perfCount >= 4 ? $this->CreateNewPerformance($statusMsg, $showID1, $showTime4, "Day3Eve", 60) : -1;
+			$perfID1 = $perfCount >= 1 ? $this->AddSamplePerformance($statusMsg, $showID1, $showTime1, "Day1Eve", 80) : -1;
+			$perfID2 = $perfCount >= 2 ? $this->AddSamplePerformance($statusMsg, $showID1, $showTime2, "Day2Eve", 60) : -1;
+			$perfID3 = $perfCount >= 3 ? $this->AddSamplePerformance($statusMsg, $showID1, $showTime3, "Day3Mat", 80) : -1;
+			$perfID4 = $perfCount >= 4 ? $this->AddSamplePerformance($statusMsg, $showID1, $showTime4, "Day3Eve", 60) : -1;
 			if (($perfID1 == 0) ||($perfID2 == 0) || ($perfID3 == 0) || ($perfID4 == 0))
 			{
 				echo '<div id="message" class="error"><p>'.__('Cannot Add Performances', $this->get_domain()).' - '.$statusMsg.'</p></div>';
 				return;
 			}
 			// Populate prices table
-			$priceID1_A1 = $this->AddPrice($perfID1, 'All',   PRICEID1_A1);
-			$priceID1_A2 = $this->AddPrice($perfID2, 'Adult', PRICEID1_A2);
-			$priceID1_A3 = $this->AddPrice($perfID3, 'Adult', PRICEID1_A3);
-			$priceID1_A4 = $this->AddPrice($perfID4, 'All',   PRICEID1_A4);
-			$priceID1_C2 = $this->AddPrice($perfID2, 'Child', PRICEID1_C2);
-			$priceID1_C3 = $this->AddPrice($perfID3, 'Child', PRICEID1_C3);
+			$priceID1_A1 = $this->AddSamplePrice($perfID1, 'All',   PRICEID1_A1);
+			$priceID1_A2 = $this->AddSamplePrice($perfID2, 'Adult', PRICEID1_A2);
+			$priceID1_A3 = $this->AddSamplePrice($perfID3, 'Adult', PRICEID1_A3);
+			$priceID1_A4 = $this->AddSamplePrice($perfID4, 'All',   PRICEID1_A4);
+			$priceID1_C2 = $this->AddSamplePrice($perfID2, 'Child', PRICEID1_C2);
+			$priceID1_C3 = $this->AddSamplePrice($perfID3, 'Child', PRICEID1_C3);
+			$this->firstSamplePricesID = $priceID1_A1;
 			
 			if (!$this->isOptionSet('Dev_NoSampleSales'))
 			{
@@ -567,7 +577,7 @@ if (!class_exists('StageShowDBaseClass'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, 24.00, 1.01, '87654321qa', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
-				$this->AddSaleItem($saleID, $priceID1_A4, 4, PRICEID1_A4);
+				$this->AddSaleItem($saleID, $priceID1_A1, 4, PRICEID1_A1);
 				$timeStamp = current_time('timestamp');
 				if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
 				{
@@ -691,6 +701,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$sqlFilters['showState'] = STAGESHOW_STATE_ACTIVE;
 			$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
 			
+			$this->showJoined = true;
 			$this->perfJoined = true;
 
 			$sql  = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
@@ -1194,7 +1205,7 @@ if (!class_exists('StageShowDBaseClass'))
 			return ($pricesEntries[0]->MatchCount > 0) ? false : true;
 		}
 		
-		function AddPrice($perfID, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $priceVisibility = STAGESHOW_VISIBILITY_PUBLIC)
+		function AddPrice($perfID, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $visibility = STAGESHOW_VISIBILITY_PUBLIC)
 		{
      		if ($perfID <= 0) return 0;
       
@@ -1216,9 +1227,8 @@ if (!class_exists('StageShowDBaseClass'))
 					return 0;	// Error - Performance Reference is not unique
 			}
 			
-			$sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceValue, priceVisibility)';
-			$sql .= ' VALUES('.$perfID.', "'.$priceType.'", "'.$priceValue.'", "'.$priceVisibility.'")';
-			 
+			$sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceValue)';
+			$sql .= ' VALUES('.$perfID.', "'.$priceType.'", "'.$priceValue.'")';
 			
 			$this->query($sql);
 			
@@ -1240,12 +1250,6 @@ if (!class_exists('StageShowDBaseClass'))
 		function UpdatePriceValue($priceID, $newPriceValue)
 		{
 			$sqlSET = 'priceValue="'.$newPriceValue.'"';
-			return $this->UpdatePriceEntry($priceID, $sqlSET);
-		}								
-				
-		function UpdatePriceVisibility($priceID, $newPriceVisibility)
-		{
-			$sqlSET = 'priceVisibility="'.$newPriceVisibility.'"';
 			return $this->UpdatePriceEntry($priceID, $sqlSET);
 		}								
 				

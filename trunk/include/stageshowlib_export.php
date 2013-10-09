@@ -39,6 +39,11 @@ if (!class_exists('StageShowLibExportAdminClass'))
 			$this->filename = $this->myDomain;
 		}
 			
+		function GetFields()
+		{
+			return array();
+		}
+			
 		function header($content)
 		{
 			if ( $this->myDBaseObj->isOptionSet('Dev_ShowSQL')

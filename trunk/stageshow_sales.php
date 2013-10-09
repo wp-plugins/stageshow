@@ -170,14 +170,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $ParamsOK;
 		}
 			
-		function GetOnlineStoreItemNote($result, $posn)
-		{
-			if ((strlen($result->perfNote) > 0) && ($result->perfNotePosn === $posn))
-			{
-				echo '<tr><td class="stageshow-boxoffice-perfnote">'.$result->perfNote . "<td><tr>\n"; 
-			}					
-		}
-			
 		function GetOnlineStoreHiddenTags()
 		{
 			$myDBaseObj = $this->myDBaseObj;

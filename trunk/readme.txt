@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.6.1
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -175,6 +175,12 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugin 
+
+= 2.2.4 (08/10/2013) =
+* Bug Fix: Performance Expiry Date/Time does not track performance Date/Time Changes (since v2.1.5) (StageShow+ only)
+* Bug Fix: Performance Expiry Date/Time includes seconds (StageShow+ only)
+* StageShowPlus/StageShowGold Specific DB Fields moved to Version Specific Classes
+* AddSample********* functions added
 
 = 2.2.3 (06/10/2013) =
 * Bug Fix: Test Email Destination not reported if not diverted
@@ -460,6 +466,9 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * First public release
 
 == Upgrade Notice ==
+= 2.2.4 =
+* Performances with dates changed by StageShow versions 2.1.5 to 2.2.3 may have incorrect performance Expiry Date/Time  (StageShow+ only)
+
 = 2.2 =
 * Support for PayPal Checkout removed - MerchantID on PayPal Settings tab must be set
 
