@@ -30,7 +30,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 		{
 			parent::__construct($myDBaseObj);
 			
-			$this->fieldNames = GetFields();
+			$this->fieldNames = $this->GetFields();
 	
 	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
 			if ( isset( $_GET['downloadexport'] ) )
