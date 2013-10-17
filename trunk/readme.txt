@@ -176,6 +176,11 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugin 
 
+= 2.2.5 (17/10/2013) =
+* Bug Fix: DB error generating Box Office output  (since v2.2.4) (StageShow only)
+* Bug Fix: Tools-Export does not generate output (since v2.2.4)
+* Bug Fix: stageshowplus_tdt_export.php missing in Distribution (since v2.2.4) (StageShow+ only)
+
 = 2.2.4 (08/10/2013) =
 * Bug Fix: Performance Expiry Date/Time does not track performance Date/Time Changes (since v2.1.5) (StageShow+ only)
 * Bug Fix: Performance Expiry Date/Time includes seconds (StageShow+ only)
