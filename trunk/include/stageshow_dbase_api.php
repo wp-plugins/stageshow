@@ -1439,12 +1439,6 @@ if (!class_exists('StageShowDBaseClass'))
 				$sqlCmd = ' AND ';
 			}
 						
-			if (isset($sqlFilters['publicPrices']))
-			{
-				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceVisibility="'.STAGESHOW_VISIBILITY_PUBLIC.'"';
-				$sqlCmd = ' AND ';
-			}
-			
 			if (isset($sqlFilters['activePrices']))
 			{
 				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceValue>="0"';
