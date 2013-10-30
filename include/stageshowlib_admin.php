@@ -20,7 +20,7 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include "stageshowlib_utils.php";
+require_once "stageshowlib_utils.php";
 
 if (!class_exists('StageShowLibAdminBaseClass')) 
 {
@@ -48,19 +48,19 @@ if (!class_exists('StageShowLibAdminBaseClass'))
 			return $env;
 		}
 		
-		function CheckAdminReferer()	 // check nonce created by wp_nonce_field()
+		function WPNonceField()
 		{
-			$referer = plugin_basename($this->caller);
-			
-			if ($this->myDBaseObj->getOption('Dev_ShowWPOnce'))
-			{
-				echo "<!-- check_admin_referer($referer) -->\n";
-				if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
-					echo "<br><strong>check_admin_referer FAILED - verifyResult: $verifyResult - Referer: $referer </strong></br>\n";
-				return;
-			}
-			
-			check_admin_referer($referer);
+			$this->myDBaseObj->WPNonceField();
+		}
+		
+		function AddParamAdminReferer($caller, $theLink)
+		{
+			return StageShowLibDBaseClass::AddParamAdminReferer($caller, $theLink);
+		}
+		
+		function CheckAdminReferer($referer = '')
+		{
+			return $this->myDBaseObj->CheckAdminReferer($referer);
 		}
 
 		// Bespoke translation functions added to remove these translations from .po file
@@ -84,7 +84,6 @@ if (!class_exists('StageShowLibAdminClass'))
 		var $env;
 		
 		var $currentPage;		
-		var $salesPerPage;
 		var $adminOptions;
 
 		var $editingRecord;
@@ -129,7 +128,7 @@ if (!class_exists('StageShowLibAdminClass'))
  			if (($bulkAction !== '') && isset($_POST['rowSelect']))
  			{
 				// Bulk Action Apply button actions
-				check_admin_referer(plugin_basename($this->caller)); // check nonce created by wp_nonce_field()
+				$this->CheckAdminReferer();
 				
 				$actionError = false;
 				foreach($_POST['rowSelect'] as $recordId)
@@ -233,19 +232,6 @@ function HideElement(obj)
 			return false;
 		}
 		
-		function WPNonceField()	 // output nonce as hidden value tag
-		{
-			$referer = plugin_basename($this->caller);
-			
-			if ( function_exists('wp_nonce_field') ) 
-			{
-				if ($this->myDBaseObj->getOption('Dev_ShowWPOnce'))
-					echo "<!-- wp_nonce_field($referer) -->\n";
-				wp_nonce_field($referer);
-				echo "\n";
-			}
-		}
-		
 		function UpdateHiddenRowValues($result, $index, $settings, $dbOpts)
 		{
 			// Save option extensions
@@ -288,14 +274,17 @@ function HideElement(obj)
 				
 			$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
 			if ($elementId !== 0) $editLink .= '&id='.$elementId;
-			$editLink = ( function_exists('add_query_arg') ) ? add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($caller) ), $editLink ) : $editLink;
+			$editLink = StageShowLibDBaseClass::AddParamAdminReferer($caller, $editLink);
 			$editControl = '<div class='.$buttonClass.'><a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a></div>'."\n";  
 			return $editControl;    
 		}
 		
 		function GetAdminListClass()
 		{
-			return '';			
+			$className = get_class($this);
+			$derivedClassName = str_replace('AdminClass', 'AdminListClass', $className);
+			
+			return $derivedClassName;
 		}
 		
 		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
@@ -338,8 +327,8 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 		{
 			$this->pageTitle = 'Settings';
 			
-			$classId = $this->GetAdminListClass();
-			$this->adminListObj = new $classId($env);			
+			$classId = $this->GetAdminListClass($this);
+			$this->adminListObj = new $classId($env, true);			
 			
 			// Call base constructor
 			parent::__construct($env);	

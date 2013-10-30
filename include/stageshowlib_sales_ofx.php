@@ -87,8 +87,8 @@ if (!class_exists('StageShowLibOFXExportAdminClass'))
 			for (;$indentLength > 0; $indentLength--)
 				$line = INDENTMARK . $line;
 			
-			if ( $this->myDBaseObj->isOptionSet('Dev_ShowSQL')
-				|| $this->myDBaseObj->isOptionSet('Dev_ShowDBOutput') )
+			if ( $this->myDBaseObj->isDbgOptionSet('Dev_ShowSQL')
+				|| $this->myDBaseObj->isDbgOptionSet('Dev_ShowDBOutput') )
 			{
 				$line = htmlspecialchars($line);	
 				$line = str_replace(INDENTMARK, "&nbsp;", $line);					

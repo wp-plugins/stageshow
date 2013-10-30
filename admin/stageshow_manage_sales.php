@@ -21,7 +21,6 @@ Copyright 2012 Malcolm Shergold
 */
 
 include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
-include STAGESHOW_INCLUDE_PATH.'stageshowlib_paypal_salesadmin.php';      
 
 if (!class_exists('StageShowSalesAdminClass')) 
 {

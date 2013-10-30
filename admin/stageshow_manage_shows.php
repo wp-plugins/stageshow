@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
-include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
 if (!class_exists('StageShowShowsAdminListClass'))
 {
@@ -168,11 +168,6 @@ if (!class_exists('StageShowShowsAdminClass'))
 					echo '<div id="message" class="updated"><p>' . __('Default entry added - Edit and Save to update it.', $this->myDomain) . '</p></div>';
 			}
 			
-		}
-		
-		function GetAdminListClass()
-		{
-			return 'StageShowShowsAdminListClass';			
 		}
 		
 		function Output_MainPage($updateFailed)

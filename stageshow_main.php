@@ -160,6 +160,8 @@ if (!class_exists('StageShowPluginClass'))
 					$adminRole->add_cap(STAGESHOW_CAPABILITY_ADMINUSER);
 				if (!$adminRole->has_cap(STAGESHOW_CAPABILITY_SETUPUSER))
 					$adminRole->add_cap(STAGESHOW_CAPABILITY_SETUPUSER);
+				if (!$adminRole->has_cap(STAGESHOW_CAPABILITY_VIEWSETTINGS))
+					$adminRole->add_cap(STAGESHOW_CAPABILITY_VIEWSETTINGS);
 			}				
 			
       		$myDBaseObj->upgradeDB();
@@ -212,7 +214,8 @@ if (!class_exists('StageShowPluginClass'))
 			$myDBaseObj->CreateSample();
 		}
 		
-		function printAdminPage() {
+		function printAdminPage() 
+		{
 			//Outputs an admin page
       			
 			$myDBaseObj = $this->myDBaseObj;					
@@ -243,12 +246,6 @@ if (!class_exists('StageShowPluginClass'))
 				case STAGESHOW_MENUPAGE_PRICES :
 					include 'admin/'.$this->adminClassFilePrefix.'_manage_prices.php';      
 					$classId = $this->adminClassPrefix.'PricesAdminClass';
-					new $classId($this->env);
-					break;
-					
-				case STAGESHOW_MENUPAGE_PRICEPLANS :
-					include 'admin/'.$this->adminClassFilePrefix.'_manage_priceplans.php';      
-					$classId = $this->adminClassPrefix.'PricePlansAdminClass';
 					new $classId($this->env);
 					break;
 					
@@ -320,6 +317,7 @@ if (!class_exists('StageShowPluginClass'))
 				STAGESHOW_CAPABILITY_ADMINUSER,
 				STAGESHOW_CAPABILITY_SALESUSER,
 				STAGESHOW_CAPABILITY_VALIDATEUSER,
+				STAGESHOW_CAPABILITY_VIEWSETTINGS,
 			);
 			
 			foreach ($stageShow_caps as $stageShow_cap)
@@ -331,36 +329,50 @@ if (!class_exists('StageShowPluginClass'))
 				}
 			}
 			
+			if (current_user_can(STAGESHOW_CAPABILITY_SETUPUSER))
+			{
+				$viewSettingsCap = STAGESHOW_CAPABILITY_SETUPUSER;
+			}
+			else
+			{
+				$viewSettingsCap = STAGESHOW_CAPABILITY_VIEWSETTINGS;
+			}
+			
 			if (isset($adminCap) && function_exists('add_menu_page')) 
 			{
 				$ourPluginName = $myDBaseObj->get_name();
 				
 				$icon_url = STAGESHOW_ADMIN_IMAGES_URL.'stageshow16grey.png';
 				add_menu_page($ourPluginName, $ourPluginName, $adminCap, STAGESHOW_MENUPAGE_ADMINMENU, array(&$this, 'printAdminPage'), $icon_url);
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('StageShow Overview', $this->myDomain),__('Overview', $this->myDomain),    $adminCap,                        STAGESHOW_MENUPAGE_ADMINMENU,    array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Show Editor', $this->myDomain),       __('Shows', $this->myDomain),        STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_SHOWS,        array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('StageShow Overview', $this->myDomain),__('Overview', $this->myDomain),     $adminCap,                         STAGESHOW_MENUPAGE_ADMINMENU,    array(&$this, 'printAdminPage'));
+				if (isset($this->useAllocatedSeats) && $this->useAllocatedSeats)
+				{
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Seating Editor', $this->myDomain), __('Seating Plans', $this->myDomain),      STAGESHOW_CAPABILITY_ADMINUSER,    STAGESHOW_MENUPAGE_SEATING,      array(&$this, 'printAdminPage'));					
+				}
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Show Editor', $this->myDomain), __('Shows', $this->myDomain),        STAGESHOW_CAPABILITY_ADMINUSER,    STAGESHOW_MENUPAGE_SHOWS,        array(&$this, 'printAdminPage'));
 				if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshowplus_manage_priceplans.php') ) 
-					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Plan Editor', $this->myDomain),  __('Price Plans', $this->myDomain),STAGESHOW_CAPABILITY_ADMINUSER, STAGESHOW_MENUPAGE_PRICEPLANS,   array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', $this->myDomain),__('Performances', $this->myDomain), STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', $this->myDomain),        __('Prices', $this->myDomain),       STAGESHOW_CAPABILITY_ADMINUSER,   STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Plan Editor', $this->myDomain), __('Price Plans', $this->myDomain),STAGESHOW_CAPABILITY_ADMINUSER, STAGESHOW_MENUPAGE_PRICEPLANS,   array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Performance Editor', $this->myDomain),__('Performances', $this->myDomain), STAGESHOW_CAPABILITY_ADMINUSER,    STAGESHOW_MENUPAGE_PERFORMANCES, array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Price Edit', $this->myDomain), __('Prices', $this->myDomain),       STAGESHOW_CAPABILITY_ADMINUSER,    STAGESHOW_MENUPAGE_PRICES,       array(&$this, 'printAdminPage'));
 
 				if ( current_user_can(STAGESHOW_CAPABILITY_VALIDATEUSER)
 				  || current_user_can(STAGESHOW_CAPABILITY_SALESUSER))
-					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Sales Admin', $this->myDomain),       __('Sales', $this->myDomain),     $adminCap,                        STAGESHOW_MENUPAGE_SALES,        array(&$this, 'printAdminPage'));
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Sales Admin', $this->myDomain), __('Sales', $this->myDomain),     $adminCap,                        STAGESHOW_MENUPAGE_SALES,        array(&$this, 'printAdminPage'));
 				
 				if ( current_user_can(STAGESHOW_CAPABILITY_VALIDATEUSER)
 				  || current_user_can(STAGESHOW_CAPABILITY_ADMINUSER))
-					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Admin Tools', $this->myDomain),       __('Tools', $this->myDomain),     $adminCap,                        STAGESHOW_MENUPAGE_TOOLS,        array(&$this, 'printAdminPage'));
+					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Admin Tools', $this->myDomain), __('Tools', $this->myDomain),     $adminCap,                        STAGESHOW_MENUPAGE_TOOLS,        array(&$this, 'printAdminPage'));
 
-				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', $this->myDomain),     __('Settings', $this->myDomain),    STAGESHOW_CAPABILITY_SETUPUSER,   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
+				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Edit Settings', $this->myDomain), __('Settings', $this->myDomain),    $viewSettingsCap,                   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
 
 				// Show test menu if stageshow_testsettings.php is present
-				if ($myDBaseObj->InTestMode())
+				if ($myDBaseObj->InTestMode() && current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
 				{
-					add_submenu_page( 'options-general.php', 'StageShow Test', 'StageShow Test', STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TESTSETTINGS, array(&$this, 'printAdminPage'));
+					add_submenu_page( 'options-general.php', $ourPluginName.' Test', $ourPluginName.' Test', STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TESTSETTINGS, array(&$this, 'printAdminPage'));
 				}
 				
-				if (!$myDBaseObj->getOption('Dev_DisableTestMenus'))
+				if (!$myDBaseObj->getDbgOption('Dev_DisableTestMenus') 
+				  && current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN) )
 				{
 					if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php') ) 
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));

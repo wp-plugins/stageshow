@@ -46,8 +46,8 @@ if (!class_exists('StageShowLibExportAdminClass'))
 			
 		function header($content)
 		{
-			if ( $this->myDBaseObj->isOptionSet('Dev_ShowSQL')
-				|| $this->myDBaseObj->isOptionSet('Dev_ShowDBOutput') )
+			if ( $this->myDBaseObj->isDbgOptionSet('Dev_ShowSQL')
+				|| $this->myDBaseObj->isDbgOptionSet('Dev_ShowDBOutput') )
 				echo $content."<br>\n";
 			else
 				header($content);				

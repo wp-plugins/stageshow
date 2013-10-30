@@ -20,10 +20,46 @@ Copyright 2012 Malcolm Shergold
 
 */
 
+require_once ABSPATH . WPINC . '/class-phpmailer.php';
+require_once ABSPATH . WPINC . '/class-smtp.php';
+		
 if (!class_exists('StageShowLibEMailAPIClass')) 
 {
-  class StageShowLibEMailAPIClass // Define class
-  {	
+	class StageShowLibMailer extends PHPMailer
+	{
+		function PreSend()
+		{
+			$status = parent::PreSend();
+			
+			if ($this->SMTPDebug)
+			{
+				echo "Called PHPMailer::PreSend() - Return status=$status<br>\n";
+			}
+			
+			return $status;
+		}
+		
+		public function PostSend()
+		{
+			if ($this->SMTPDebug)
+			{
+				echo "Mailer: ".$this->Mailer."<br>\n";
+			}
+			
+			$status = parent::PostSend();
+			
+			if ($this->SMTPDebug)
+			{
+				echo "Called PHPMailer::PostSend() - Return status=$status<br>\n";
+			}
+			
+			return $status;
+		}
+		
+	}
+
+	class StageShowLibEMailAPIClass // Define class
+	{	
 		var $parentObj;
 		
 		function __construct($ourParentObj)	
@@ -31,8 +67,18 @@ if (!class_exists('StageShowLibEMailAPIClass'))
 			$this->parentObj = $ourParentObj;			
 		}
 		
+		function createPHPMailerObj($SMTPDebug)
+		{
+			global $phpmailer;
+			$phpmailer = new StageShowLibMailer( true );		
+			$phpmailer->SMTPDebug = $SMTPDebug;
+		}
+		
 		function sendMail($to, $from, $subject, $content, $content2 = '', $headers = '')
 		{
+			$SMTPDebug = $this->parentObj->getDbgOption('Dev_ShowEMailMsgs');
+			$this->createPHPMailerObj($SMTPDebug);
+			
 			$BccEMail = '';
 			
 			// FUNCTIONALITY: General - EMail copy of any outgoing email to AdminEMail
@@ -48,7 +94,7 @@ if (!class_exists('StageShowLibEMailAPIClass'))
 			if (strlen($BccEMail) > 0) $headers .= "\r\nbcc: $BccEMail";
 			$headers .= "\r\nReply-To: $replyTo";	
 				
-			if ($this->parentObj->getOption('Dev_ShowEMailMsgs'))
+			if ($SMTPDebug)
 			{
 				// FUNCTIONALITY: General - Echo EMail when Dev_ShowEMailMsgs selected - Body Encoded with htmlspecialchars
 				echo "To:<br>\n";

@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.6.1
-Stable tag: 2.2.5
+Tested up to: 3.7
+Stable tag: 2.3
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -19,6 +19,8 @@ Each sale is fully recorded, with contact and payment details, tickets purchased
 EMails are in text only format, and the PayPal transaction number if included for validation purposes.  StageShow includes the facility on the admin pages to verify the transaction number for use at show time 
 
 StageShow includes the facility to export sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
+
+An online demo for all StageShow Variants is available <a href=http://corondeck.co.uk/demo/>here</a>.
 
 StageShow Features Summary
 
@@ -175,6 +177,20 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugin 
+
+= 2.3 (28/10/2013) =
+* Bug Fix: Checkout Complete URL and Checkout Cancelled URL not passed to PayPal Checkout
+* Bug Fix: <head> and <body> tags missing in email templates
+* Bug Fix: Changed include to requires_once - Fix for "Zend Error" bug in PHP APC
+* Bug Fix: Email Logo Image corrupts emails displayed by hotmail 
+* Added styles for allocated seating (StageShowGold)
+* First Release of StageShowGold - Includes Allocated Seating
+* Added code for Demo Mode
+* Added STAGESHOW_CAPABILITY_VIEWSETTINGS
+* BARCODE_ defines can be set externally
+* Checkboxes in mjslib_table display Yes/No when ReadOnly
+* Tested with WP 3.7
+* Added Seating Plans editor (StageShowGold only)
 
 = 2.2.5 (17/10/2013) =
 * Bug Fix: DB error generating Box Office output  (since v2.2.4) (StageShow only)
@@ -471,6 +487,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * First public release
 
 == Upgrade Notice ==
+
 = 2.2.4 =
 * Performances with dates changed by StageShow versions 2.1.5 to 2.2.3 may have incorrect performance Expiry Date/Time  (StageShow+ only)
 

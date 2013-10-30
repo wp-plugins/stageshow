@@ -20,14 +20,14 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-if (!class_exists('SalesPluginBaseClass')) 
+if (!class_exists('StageShowLibSalesPluginBaseClass')) 
 {
 	define('STAGESHOWLIB_STATE_DOWNLOAD',  'Download');
 	define('STAGESHOWLIB_STATE_POST',      'Post');
 	define('STAGESHOWLIB_STATE_DELETED',   'deleted');
 	define('STAGESHOWLIB_STATE_DISCARDED', 'discarded');
 			
-	class SalesPluginBaseClass
+	class StageShowLibSalesPluginBaseClass
 	{
 		var $lastItemID = '';
 		
@@ -54,7 +54,7 @@ if (!class_exists('SalesPluginBaseClass'))
 				else
 					$this->trolleyid = $this->myDomain.'_cart_obj';
 					
-				if ($this->myDBaseObj->getOption('Dev_RunAsDemo') == 1)
+				if (defined('STAGESHOWLIB_RUNASDEMO'))
 					$this->trolleyid .= '_'.$this->myDBaseObj->loginID;
 			}
 			if (!isset($this->shortcode)) $this->shortcode = $this->myDomain.'-store';
@@ -64,6 +64,10 @@ if (!class_exists('SalesPluginBaseClass'))
 
 			// FUNCTIONALITY: Main - Add ShortCode for client "front end"
 			add_shortcode($this->shortcode, array(&$this, 'OutputContent_OnlineStore'));
+		}
+		
+		function CheckAdminReferer($referer = '')
+		{
 		}
 		
 		function OutputContent_OnlineStoreMain($reqRecordId)
@@ -117,7 +121,7 @@ if (!class_exists('SalesPluginBaseClass'))
 			return -1;
 		}
 			
-		function GetOnlineStoreItemPrice($result, $salesSummary)
+		function GetOnlineStoreItemPrice($result)
 		{
 			return $result->stockPrice + $result->stockPostage;
 		}
@@ -301,7 +305,7 @@ if (!class_exists('SalesPluginBaseClass'))
 											
 				$rowClass = $this->cssBaseID . '-row ' . $this->cssBaseID . ($oddPage ? "-oddrow" : "-evenrow");
 				$oddPage = !$oddPage;
-				
+					
 				$addSaleItemParams = '';
 /*				
 				{
@@ -382,9 +386,20 @@ if (!class_exists('SalesPluginBaseClass'))
 			return $total;
 		}
 		
+		function GetButtonID($buttonID)
+		{
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			{
+				$pluginID = $this->myDBaseObj->get_name();
+				$buttonID .= '_'.$pluginID;
+			}
+			
+			return $buttonID;
+		}
+				
 		function OutputContent_OnlineCheckoutButton()
 		{
-			echo '<input class="button-primary" type="submit" name="checkout" value="'.__('Checkout', $this->myDomain).'"/>'."\n";
+			echo '<input class="button-primary" type="submit" name="'.$this->GetButtonID('checkout').'" value="'.__('Checkout', $this->myDomain).'"/>'."\n";
 		}
 		
 		function GetTrolleyContents()
@@ -437,17 +452,14 @@ if (!class_exists('SalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
+			if (isset($this->checkoutError))
 			{
-				if (isset($this->checkoutError))
-				{
-					echo '<div id="message" class="'.$this->cssDomain.'-error">'.$this->checkoutError.'</div>';					
-				}
+				echo '<div id="message" class="'.$this->cssDomain.'-error">'.$this->checkoutError.'</div>';					
+			}
 				
-				$cartContents = $this->GetTrolleyContents();
+			$cartContents = $this->GetTrolleyContents();
 			
-				$this->OnlineStore_HandleTrolleyButtons($cartContents);
-			}				
-				
+			$this->OnlineStore_HandleTrolleyButtons($cartContents);
 		}
 		
 		function OnlineStore_HandleTrolleyButtons($cartContents)
@@ -475,7 +487,7 @@ if (!class_exists('SalesPluginBaseClass'))
 					if (isset($cartContents->rows))
 					{
 						foreach ($cartContents->rows as $index => $cartEntry)
-					{
+						{
 							if ($cartEntry->itemID == $itemID)
 							{
 								$cartContents->rows[$index]->qty += $ticketQty;
@@ -528,15 +540,15 @@ if (!class_exists('SalesPluginBaseClass'))
 					
 				$runningTotal = 0;			
 				foreach ($cartContents->rows as $cartIndex => $cartEntry)
-				{
+				{				
 					$itemID = $cartEntry->itemID;
 					$qty = $cartEntry->qty;
-						
+					
 					$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
 					if (count($priceEntries) == 0)
 					{
 						echo '<div id="message" class="'.$this->cssDomain.'-error">'.__("Shopping Trolley Cleared", $this->myDomain).'</div>';					
-						if (current_user_can('manage_options'))
+						if (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
 						{
 							echo "No entry for ItemID:$itemID<br>";
 							StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
@@ -650,7 +662,7 @@ if (!class_exists('SalesPluginBaseClass'))
 			$rslt->totalDue = 0;
 								
 			$cartContents = $this->GetTrolleyContents();
-			if ($myDBaseObj->isOptionSet('Dev_ShowTrolley'))
+			if ($myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
 			{
 				StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
 			}
@@ -665,7 +677,7 @@ if (!class_exists('SalesPluginBaseClass'))
 			// Build request parameters for redirect to PayPal checkout
 			$paramCount = 0;
 			foreach ($cartContents->rows as $cartIndex => $cartEntry)
-			{
+			{				
 				$paramCount++;
 				$itemID = $cartEntry->itemID;
 				$qty = $cartEntry->qty;
@@ -692,8 +704,8 @@ if (!class_exists('SalesPluginBaseClass'))
 				}
 					
 				$itemPrice = $this->GetOnlineStoreItemPrice($priceEntry);
-				$shipping = 0.0;
-						
+				$shipping = 0.0;						
+				
 				$rslt->paypalParams['item_name_'.$paramCount] = $this->GetOnlineStoreItemName($priceEntry);
 				$rslt->paypalParams['amount_'.$paramCount] = $itemPrice;
 				$rslt->paypalParams['quantity_'.$paramCount] = $qty;
@@ -723,17 +735,18 @@ if (!class_exists('SalesPluginBaseClass'))
 		{
 			// Process checkout request for Integrated Trolley
 			// This function must be called before any output as it redirects to PayPal if successful
-			if (isset($_POST['checkout']))
+			$buttonID  = $this->GetButtonID('checkout');
+			if (isset($_POST[$buttonID]))
 			{
 				$myDBaseObj = $this->myDBaseObj;
 				
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
 				if (isset($checkoutRslt->checkoutError)) 
 				{
-					echo '<div id="message" class="error"><p>'.$rslt->checkoutError.'</p></div>';
+					echo '<div id="message" class="error"><p>'.$checkoutRslt->checkoutError.'</p></div>';
 					return;
 				}
-				
+							
 				if ($checkoutRslt->totalDue == 0)
 				{
 					$this->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
@@ -748,8 +761,18 @@ if (!class_exists('SalesPluginBaseClass'))
 				$checkoutRslt->paypalParams['currency_code'] = $myDBaseObj->adminOptions['PayPalCurrency'];
 				$checkoutRslt->paypalParams['cmd'] = '_cart';
 				$checkoutRslt->paypalParams['upload'] = '1';
-				//$checkoutRslt->paypalParams['rm'] = '2';
-				//$checkoutRslt->paypalParams['return'] = 'http://tigs/TestBed';
+				
+				if ($myDBaseObj->adminOptions['CheckoutCompleteURL'] != '')
+				{
+					$checkoutRslt->paypalParams['rm'] = '2';
+					$checkoutRslt->paypalParams['return'] = $myDBaseObj->adminOptions['CheckoutCompleteURL'];
+				}
+				
+				if ($myDBaseObj->adminOptions['CheckoutCancelledURL'] != '')
+				{
+					$checkoutRslt->paypalParams['cancel_return'] = $myDBaseObj->adminOptions['CheckoutCancelledURL'];
+				}
+					
 				$checkoutRslt->paypalParams['notify_url'] = $myDBaseObj->PayPalNotifyURL;
 			
 				$paypalURL = 'http://www.paypal.com/cgi-bin/webscr';
@@ -782,7 +805,11 @@ if (!class_exists('SalesPluginBaseClass'))
   				{
 					$this->ClearTrolleyContents();
 				
-					if ($this->myDBaseObj->isOptionSet('Dev_IPNLocalServer'))
+					if (defined('STAGESHOWLIB_RUNASDEMO'))
+					{
+						$this->demosale = $saleId;
+					}
+					elseif ($this->myDBaseObj->isDbgOptionSet('Dev_IPNLocalServer'))
 					{
 						$this->checkoutError .= __('Using Local IPN Server - PayPal Checkout call skipped', $this->myDomain);
 					}

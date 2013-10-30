@@ -20,8 +20,6 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include 'stageshowlib_admin.php';
- 
 if (!class_exists('StageShowLibTableClass')) 
 {
 	if (!defined('STAGESHOWLIB_EVENTS_PER_PAGE'))
@@ -49,6 +47,8 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEPARAM_DEFAULT = 'Default';
 		const TABLEPARAM_NEXTINLINE = 'Next-Inline';
 		const TABLEPARAM_ONCHANGE = 'OnChange';
+		const TABLEPARAM_READONLY = 'ReadOnly';
+		const TABLEPARAM_NOTFORDEMO = 'NotForDemo';
 		
 		const TABLEPARAM_NAME = 'Name';
 		const TABLEPARAM_OPTION = 'Option';
@@ -287,11 +287,14 @@ if (!class_exists('StageShowLibTableClass'))
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
-		function AddInputToTable($result, $inputName, $maxlength, $value, $col=0, $newRow = false)
+		function AddInputToTable($result, $inputName, $maxlength, $value, $col=0, $newRow = false, $size = 0)
 		{
 			$inputName .= $this->GetRecordID($result);
 
-			$size = $maxlength+1;
+			if ($size <= 0)
+			{
+				$size = $maxlength+1;
+			}
 			
 			$params  = "name=$inputName ";
 			$params .= "id=$inputName ";
@@ -686,7 +689,7 @@ function getCheckboxesCount(elem)
 		function GetCurrentURL() 
 		{			
 			$currentURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-			$currentURL = ( function_exists('add_query_arg') ) ? add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($this->caller) ), $currentURL ) : $currentURL;
+			$currentURL = $this->myDBaseObj->AddParamAdminReferer($this->caller, $currentURL);
 			return $currentURL;
 		}
 		
@@ -953,7 +956,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 				$this->SetRowsPerPage(STAGESHOWLIB_EVENTS_PER_PAGE);
 				
 			$this->useTHTags = true;
-			$this->showDBIds = $this->myDBaseObj->getOption('Dev_ShowDBIds');					
+			$this->showDBIds = $this->myDBaseObj->getDbgOption('Dev_ShowDBIds');					
 			$this->lastCBId = '';
 			
 			$this->defaultFilterIndex = 0;	
@@ -1151,6 +1154,13 @@ if (!class_exists('StageShowLibAdminListClass'))
 			return $controlValue;
 		}
 		
+		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
+		{
+			$buttonText = __($buttonText, $this->myDomain);
+			
+			return "<input class=\"$buttonClass\" type=\"submit\" name=\"$buttonId\" value=\"$buttonText\" />\n";
+		}
+		
 		function GetHTMLTag($settingOption, $controlValue, $editMode = true)
 		{
 			$autocompleteTag = ' autocomplete="off"';
@@ -1161,7 +1171,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			$settingType = $settingOption[self::TABLEPARAM_TYPE];
 			$onChange = isset($settingOption[self::TABLEPARAM_ONCHANGE]) ? ' onchange="'.$settingOption[self::TABLEPARAM_ONCHANGE].'(this)" ' : '';
 			
-			if (!$editMode)
+			if ( (!$editMode) || isset($settingOption[self::TABLEPARAM_READONLY]) )
 			{
 				switch ($settingType)
 				{
@@ -1170,9 +1180,13 @@ if (!class_exists('StageShowLibAdminListClass'))
 						$settingType = self::TABLEENTRY_VIEW;
 						break;						
 					
+					case self::TABLEENTRY_CHECKBOX:
+						$controlValue = $controlValue ? __('Yes', $this->myDomain) : __('No', $this->myDomain);
+						$settingType = self::TABLEENTRY_VIEW;
+						break;		
+										
 					case self::TABLEENTRY_TEXT:
 					case self::TABLEENTRY_TEXTBOX:
-					case self::TABLEENTRY_CHECKBOX:
 					case self::TABLEENTRY_COOKIE:
 						$settingType = self::TABLEENTRY_VIEW;
 						break;						
@@ -1259,11 +1273,12 @@ if (!class_exists('StageShowLibAdminListClass'))
 					case self::TABLEENTRY_VIEW:
 					case self::TABLEENTRY_READONLY:
 					case self::TABLEENTRY_COOKIE:
+					case self::TABLEENTRY_FUNCTION:
 						break;
 						
 					default:
 						$canDisplayTable = false;
-echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id:".$columnDef[self::TABLEPARAM_ID]." Column Type:".$columnDef[self::TABLEPARAM_TYPE]."<br>\n";						
+						echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id:".$columnDef[self::TABLEPARAM_ID]." Column Type:".$columnDef[self::TABLEPARAM_TYPE]."<br>\n";						
 						break 2;
 				}
 			}
@@ -1276,19 +1291,24 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 				
 				foreach ($this->columnDefs as $columnDef)
 				{
-					$columnId = $columnDef[self::TABLEPARAM_ID];
-					$recId = $this->GetRecordID($result);
-					
-					if ($this->updateFailed && isset($_POST[$columnId.$recId]))
+					if (isset($columnDef[self::TABLEPARAM_ID]))
 					{
-						// Error updating values - Get value(s) from form controls
-						$currVal = stripslashes($_POST[$columnId.$recId]);
+						$columnId = $columnDef[self::TABLEPARAM_ID];
+						$recId = $this->GetRecordID($result);
+						
+						if ($this->updateFailed && isset($_POST[$columnId.$recId]))
+						{
+							// Error updating values - Get value(s) from form controls
+							$currVal = stripslashes($_POST[$columnId.$recId]);
+						}
+						else
+						{
+							// Get value(s) from database
+							$currVal = $result->$columnId;
+						}						
 					}
 					else
-					{
-						// Get value(s) from database
-						$currVal = $result->$columnId;
-					}
+						$currVal = '';
 
 					if (isset($columnDef[StageShowLibTableClass::TABLEPARAM_DECODE]))
 					{
@@ -1297,10 +1317,11 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 						$currVal = $this->$funcName($result->$optionId, $result);
 					}
 					
-					if ($this->editMode)
-						$columnType = $columnDef[self::TABLEPARAM_TYPE];
-					else
+					$columnType = $columnDef[self::TABLEPARAM_TYPE];
+					if ((!$this->editMode) && ($columnType != self::TABLEENTRY_FUNCTION))
+					{
 						$columnType = self::TABLEENTRY_VIEW;
+					}
 						
 					switch ($columnType)
 					{
@@ -1336,7 +1357,8 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 								StageShowLibUtilsClass::print_r($columnDef, 'columnDef');
 							}
 							
-							$this->AddInputToTable($result, $columnId, $columnDef[self::TABLEPARAM_LEN], $currVal);
+							$size = isset($columnDef[self::TABLEPARAM_SIZE]) ? $columnDef[self::TABLEPARAM_SIZE] : 0;
+							$this->AddInputToTable($result, $columnId, $columnDef[self::TABLEPARAM_LEN], $currVal, 0, false, $size);
 							break;
 
 						case self::TABLEENTRY_VALUE:
@@ -1356,12 +1378,18 @@ echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id
 								else
 								{
 									$currValLink .= $recId;
-									$currValLink = ( function_exists('add_query_arg') ) ? add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($this->caller) ), $currValLink ) : $currValLink;
+									$currValLink = $this->myDBaseObj->AddParamAdminReferer($this->caller, $currValLink);
 									$target = '';
 								}
 								$currVal = '<a href="'.$currValLink.'" '.$target.'>'.$currVal.'</a>';
 							}
 							$this->AddToTable($result, $currVal.$hiddenTag);
+							break;
+							
+						case self::TABLEENTRY_FUNCTION:
+							$functionId = $columnDef[self::TABLEPARAM_FUNC];
+							$content = $this->$functionId($result);
+							$this->AddToTable($result, $content);
 							break;
 							
 						default:
@@ -1692,20 +1720,6 @@ if (!class_exists('Template_For_ClassDerivedFrom_StageShowLibAdminListClass'))
 
 		function ShowRow($result, $rowFilter)
 		{
-		}
-		
-	}
-}
-
-if (!class_exists('StageShowLibSalesAdminListClass')) 
-{
-	class StageShowLibSalesAdminListClass extends StageShowLibAdminListClass // Define class
-	{		
-	
-		static function FormatDateForAdminDisplay($dateInDB)
-		{
-			// Get Time & Date formatted for display to user
-			return StageShowLibSalesDBaseClass::FormatDateForAdminDisplay($dateInDB);
 		}
 		
 	}
