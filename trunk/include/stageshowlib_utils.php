@@ -141,16 +141,6 @@ if (!class_exists('StageShowLibUtilsClass'))
 			return false;
 		}
 		
-		static function check_admin_referer($action = -1, $query_arg = '_wpnonce')
-		{
-			if (!wp_verify_nonce($_REQUEST[$query_arg], $action))
-			{
-				echo "NOnce check failed - Call Stack Follows:<br>\n";
-				StageShowLibUtilsClass::ShowCallStack();
-			}
-			return check_admin_referer($action, $query_arg);
-		}
-		
 		static function Output_Javascript_SetFocus($elementId, $inScript = false)
 		{
 			if (!$inScript)

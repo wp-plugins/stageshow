@@ -20,6 +20,7 @@ Copyright 2012 Malcolm Shergold
 
 */
 
+include dirname(dirname(__FILE__)).'/include/stageshowlib_admin.php';
 include dirname(dirname(__FILE__)).'/include/stageshowlib_table.php';
 
 if (!class_exists('StageShowLibDebugSettingsClass')) 
@@ -60,11 +61,26 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			$testOptionDefs = array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show SQL',          StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowSQL',          StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowSQL', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Output',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBOutput',     StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowDBOutput', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show EMail Msgs',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowEMailMsgs',    StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowEMailMsgs', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show EMail Msgs',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowEMailMsgs',    StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowEMailMsgs', ),				
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log IPN Requests',  StageShowLibTableClass::TABLEPARAM_NAME => 'cbLogIPNRequests',   StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_IPNLogRequests', ),
 			);
 			
 			return $testOptionDefs;
+		}
+		
+		function GetOptionsDescription($optionName)
+		{
+			switch ($optionName)
+			{
+				case 'Show SQL':		return 'Show SQL Query Strings';
+				case 'Show DB Output':	return 'Show SQL Query Output';
+				case 'Show EMail Msgs':
+				case 'Log IPN Requests':
+					return 'TBD';
+				
+				default:	
+					return "No Description Available for $optionName";					
+			}
 		}
 		
 		function Test_DebugSettings() 
@@ -83,13 +99,34 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 					
 					$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
 					$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_OPTION];
+					$settingValue = trim(StageShowLibUtilsClass::GetHTTPElement($_POST,$ctrlId));
 					
-					$myDBaseObj->adminOptions[$settingId] = trim(StageShowLibUtilsClass::GetHTTPElement($_POST,$ctrlId));
+					if (isset($optDef[StageShowLibTableClass::TABLEPARAM_FUNC]))
+					{
+						$functionId = $optDef[StageShowLibTableClass::TABLEPARAM_FUNC];
+						$content = $this->$functionId($settingValue, $myDBaseObj->dbgOptions[$settingId]);
+					}
+					
+					$myDBaseObj->dbgOptions[$settingId] = $settingValue;
 				}
 					
 				$myDBaseObj->saveOptions();
 				
 				echo '<div id="message" class="updated"><p>Debug options updated</p></div>';
+			}
+			
+			if (isset($_POST['testbutton_DescribeDebugSettings'])) 
+			{
+				$optDefs = $this->GetOptionsDefs();
+				echo "<table>\n";
+				foreach ($optDefs as $optDef)
+				{
+					$label = $optDef[StageShowLibTableClass::TABLEPARAM_LABEL];
+					$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
+					$ctrlDesc = $this->GetOptionsDescription($label);
+					echo "<tr><td><strong>$label</strong></td><td>$ctrlDesc</td></tr>\n";
+				}
+				echo "</table>\n";
 			}
 ?>
 		<h3>Debug Settings</h3>
@@ -107,8 +144,17 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			{
 				$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
 				$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_OPTION];
-				$optIsChecked = StageShowLibUtilsClass::GetArrayElement($myDBaseObj->adminOptions,$settingId) == 1 ? 'checked="yes" ' : '';
-				echo '<td align="left" width="25%">'.$label.'&nbsp;<input name="'.$ctrlId.'" type="checkbox" value="1" '.$optIsChecked.' /></td>'."\n";
+				$optIsChecked = StageShowLibUtilsClass::GetArrayElement($myDBaseObj->dbgOptions, $settingId) == 1 ? 'checked="yes" ' : '';
+				if (isset($optDef[StageShowLibTableClass::TABLEPARAM_TYPE]))
+				{
+					$optText = $optIsChecked ? __('Enabled') : __('Disabled');
+					$optEntry = $label. '&nbsp;('.$optText.')';
+				}
+				else
+				{
+					$optEntry = $label.'&nbsp;<input name="'.$ctrlId.'" type="checkbox" value="1" '.$optIsChecked.' />';
+				}
+				echo '<td align="left" width="25%">'.$optEntry.'</td>'."\n";
 			}
 			else
 				echo '<td align="left">&nbsp;</td>'."\n";
@@ -123,10 +169,15 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 ?>			
 			<tr valign="top" colspan="4">
 				<td>
-					<input class="button-primary" type="submit" name="testbutton_SaveDebugSettings" value="Save Debug Settings"/>
+				</td>
+				<td>&nbsp;</td>
+				<td>
 				</td>
 			</tr>
 		</table>
+		
+		<input class="button-primary" type="submit" name="testbutton_SaveDebugSettings" value="Save Debug Settings"/>
+		<input class="button-secondary" type="submit" name="testbutton_DescribeDebugSettings" value="Describe Debug Settings"/>
 	<br>
 <?php
 		}

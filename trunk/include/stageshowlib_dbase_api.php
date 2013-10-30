@@ -20,13 +20,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include "stageshowlib_utils.php";
+require_once "stageshowlib_utils.php";
 
 if (!class_exists('StageShowLibDBaseClass'))
 {
 	if (!defined('STAGESHOWLIB_EVENTS_PER_PAGE'))
 		define('STAGESHOWLIB_EVENTS_PER_PAGE', 20);
 	
+	define('STAGESHOWLIB_CAPABILITY_SYSADMIN', 'manage_options');
+
 	class StageShowLibDBaseClass // Define class
 	{
 		const MYSQL_DATE_FORMAT = 'Y-m-d';
@@ -36,10 +38,14 @@ if (!class_exists('StageShowLibDBaseClass'))
 		const ForWriting = 2;
 		const ForAppending = 8;
 		
+		const ADMIN_SETTING = 1;
+		const DEBUG_SETTING = 2;
+		
 		var $ordersDBTableID;
 		var $optionsID;
 		
 		var $adminOptions;
+		var $dbgOptions;
 		var $pluginInfo;
 		var $opts;
 		
@@ -48,17 +54,81 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$this->opts = $opts;
 			$this->getOptions();
 			
-			if ($this->getOption('Dev_RunAsDemo'))
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
 			{
-				global $current_user;
-      			get_currentuserinfo();
-
-				$this->loginID = $current_user->user_login;
+				$this->GetLoginID();
 			}
 		}
 
 	    function uninstall()
 	    {
+		}
+		
+		function WPNonceField($referer = '')
+		{
+			if ($referer == '')
+			{
+				$caller = $this->opts['Caller'];
+				$referer = plugin_basename($caller);
+			}
+			
+			if ( function_exists('wp_nonce_field') ) 
+			{
+				if ($this->getDbgOption('Dev_ShowWPOnce'))
+					echo "<!-- wp_nonce_field($referer) -->\n";
+				wp_nonce_field($referer);
+				echo "\n";
+			}
+		}
+		
+		static function AddParamAdminReferer($caller, $theLink)
+		{
+			if (function_exists('add_query_arg'))
+			{
+				$theLink = add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($caller) ), $theLink );
+			}
+			return $theLink;
+		}
+		
+		function CheckAdminReferer($referer = '')
+		{
+			if ($referer == '')
+			{
+				$caller = $this->opts['Caller'];
+				$referer = plugin_basename($caller);
+			}
+			
+			if ($this->getDbgOption('Dev_ShowWPOnce'))
+			{
+				echo "<!-- check_admin_referer($referer) -->\n";
+				if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
+					echo "<br><strong>check_admin_referer FAILED - verifyResult: $verifyResult - Referer: $referer </strong></br>\n";
+				return;
+			}
+			
+			check_admin_referer($referer);
+		}
+
+		function HasSettings()
+		{
+			return false;
+		}
+		
+		function GetLoginID()
+		{
+			if (isset($this->loginID))
+				return $this->loginID;
+				
+			if (!function_exists('get_currentuserinfo'))
+			{
+				require_once( ABSPATH . WPINC . '/pluggable.php' );
+			}
+			global $current_user;
+				
+      		get_currentuserinfo();
+
+			$this->loginID = $current_user->user_login;
+			return $this->loginID;
 		}
 		
 		function DeleteCapability($capID)
@@ -174,21 +244,21 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function ShowCallStack()
 		{
-			StageShowLibUtilsClass::ShowCallStack(true, $this->getOption('Dev_CallStackParams'));
+			StageShowLibUtilsClass::ShowCallStack(true, $this->getDbgOption('Dev_CallStackParams'));
 		}
 		
 		function ShowSQL($sql, $values = null)
 		{			
-			if ($this->getOption('Dev_ShowSQL') <= 0)
+			if ($this->getDbgOption('Dev_ShowSQL') <= 0)
 				return;
 			
 			if (function_exists('wp_get_current_user')) 
 			{
-				if (!current_user_can('manage_options'))
+				if (!current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
 				return;
 			}
 				
-			if ($this->getOption('Dev_ShowCallStack'))
+			if ($this->getDbgOption('Dev_ShowCallStack'))
 				$this->ShowCallStack();
 			
 			$sql = str_replace("\n", "<br>\n", $sql);
@@ -219,7 +289,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			$sql = "";
 			
-			if (defined('STAGESHOWLIB_ALLOW_RUNASDEMO'))
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
 			{
 				$sql = '
 					loginID VARCHAR(50) NOT NULL DEFAULT "",';
@@ -242,7 +312,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			global $wpdb;
 			
-			if (defined('STAGESHOWLIB_ALLOW_RUNASDEMO'))
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
 			{
 				$sql = $this->SQLForDemo($sql);
 			}	
@@ -299,7 +369,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			global $wpdb;
 			
-			if (defined('STAGESHOWLIB_ALLOW_RUNASDEMO'))
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
 			{
 				$sql = $this->SQLForDemo($sql);
 			}	
@@ -313,15 +383,15 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function show_results($results)
 		{
-			if ($this->getOption('Dev_ShowDBOutput') != 1)
+			if ($this->getDbgOption('Dev_ShowDBOutput') != 1)
 				return;
 				
 			if (function_exists('wp_get_current_user'))
 			{
-				if (!current_user_can('manage_options'))
+				if (!current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
 					return;				
 			}
-
+				
 			echo "<br>Database Results:<br>\n";
 			for ($i = 0; $i < count($results); $i++)
 				echo "Array[$i] = " . print_r($results[$i], true) . "<br>\n";
@@ -329,7 +399,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function SQLForDemo($sql)
 		{
-			if ($this->getOption('Dev_RunAsDemo') != 1)
+			if (!defined('STAGESHOWLIB_RUNASDEMO'))
 				return $sql;
 			
 			if (strpos($sql, 'loginID') !== false)
@@ -421,6 +491,12 @@ if (!class_exists('StageShowLibDBaseClass'))
 				exit;
 			}
 			
+			if (!isset($this->opts['DbgOptionsID']))
+			{
+				echo 'DbgOptionsID must be defined<br>';
+				exit;
+			}
+			
 			// Initialise settings array with default values
 			
 			$ourOptions = array(
@@ -439,14 +515,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 				'LogsFolderPath' => '../logs',
 				'PageLength' => STAGESHOWLIB_EVENTS_PER_PAGE,
 				
-				'Dev_ShowWPOnce' => false,
-				'Dev_ShowSQL' => false,
-				'Dev_ShowDBOutput' => false,
-				'Dev_ShowCallStack' => false,
-				'Dev_ShowPayPalIO' => false,
-				'Dev_ShowEMailMsgs' => false,
-				'Dev_ShowDBIds' => false,
-				
 				'Unused_EndOfList' => ''
 			);
 			
@@ -455,12 +523,21 @@ if (!class_exists('StageShowLibDBaseClass'))
 			
 			// Get current values from MySQL
 			$currOptions = get_option($this->opts['CfgOptionsID']);
+			$this->dbgOptions = get_option($this->opts['DbgOptionsID']);
 			
 			// Now update defaults with values from DB
 			if (!empty($currOptions))
 			{
 				foreach ($currOptions as $key => $option)
 					$this->adminOptions[$key] = $option;
+			}
+			
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			{				
+				global $current_user;
+				get_currentuserinfo();
+				$this->adminOptions['AdminID'] = $current_user->display_name;
+				$this->adminOptions['AdminEMail'] = $current_user->user_email;
 			}
 			
 			$this->saveOptions();
@@ -484,18 +561,66 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $settingsList;
 		}
 		
-		function getOption($optionID)
+		function getDbgOption($optionID)
 		{
-			if (!isset($this->adminOptions[$optionID]))
+			return $this->getOption($optionID, StageShowLibDBaseClass::DEBUG_SETTING);
+		}
+		
+		function setDbgOption($optionID, $optionValue)
+		{
+			return $this->setOption($optionID, $optionValue, StageShowLibDBaseClass::DEBUG_SETTING);
+		}
+		
+		function getOption($optionID, $optionClass = StageShowLibDBaseClass::ADMIN_SETTING)
+		{
+			switch ($optionClass)
+			{
+				case StageShowLibDBaseClass::ADMIN_SETTING: 
+					$options = $this->adminOptions;
+					break;
+
+				case StageShowLibDBaseClass::DEBUG_SETTING: 
+					$options = $this->dbgOptions;
+					break;
+				
+				default:
+					return;					
+			}
+			
+			if (!isset($options[$optionID]))
 				return '';
 			
-			$optionVal = $this->adminOptions[$optionID];
+			$optionVal = $options[$optionID];
 			return $optionVal;
 		}
 		
-		function isOptionSet($optionID)
+		function setOption($optionID, $optionValue, $optionClass = StageShowLibDBaseClass::ADMIN_SETTING)
 		{
-			$value = $this->getOption($optionID);
+			switch ($optionClass)
+			{
+				case StageShowLibDBaseClass::ADMIN_SETTING: 
+					$this->adminOptions[$optionID] = $optionValue;
+					break;
+
+				case StageShowLibDBaseClass::DEBUG_SETTING: 
+					$this->dbgOptions[$optionID] = $optionValue;
+					break;
+				
+				default:
+					return;					
+			}
+			
+			return $optionVal;
+		}
+		
+		function isDbgOptionSet($optionID)
+		{
+			return $this->isOptionSet($optionID, StageShowLibDBaseClass::DEBUG_SETTING);
+		}
+		
+		function isOptionSet($optionID, $optionClass = StageShowLibDBaseClass::ADMIN_SETTING)
+		{
+			$value = $this->getOption($optionID, $optionClass);
 			if ($value == '')
 				return false;
 			
@@ -505,10 +630,12 @@ if (!class_exists('StageShowLibDBaseClass'))
 		// Saves the admin options to the options data table
 		function saveOptions($newOptions = null)
 		{
+			// Update admin Options first?
 			if ($newOptions != null)
 				$this->adminOptions = $newOptions;
 			
 			update_option($this->opts['CfgOptionsID'], $this->adminOptions);
+			update_option($this->opts['DbgOptionsID'], $this->dbgOptions);
 		}
 		
 		function createDB($dropTable = false)

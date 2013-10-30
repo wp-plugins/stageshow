@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
 if (!class_exists('StageShowPricesAdminListClass'))
 {
@@ -131,6 +131,16 @@ if (!class_exists('StageShowPricesAdminClass'))
 			return $pricesUpdated;
 		}
 		
+		function GetNewPriceReference($result)
+		{
+			$newPerfID     = $result->perfID;
+			$newPriceType  = stripslashes($_POST['priceType' . $result->priceID]);
+			
+			$priceEntry = $newPerfID . '-' . $newPriceType;
+			
+			return $priceEntry;
+		}
+		
 		function ProcessActionButtons()
 		{
 			$myPluginObj = $this->myPluginObj;
@@ -151,12 +161,11 @@ if (!class_exists('StageShowPricesAdminClass'))
 				{
 					foreach ($results as $result)
 					{
-						$newPerfID     = $result->perfID;
 						$newPriceType  = stripslashes($_POST['priceType' . $result->priceID]);
 						$newPriceValue = stripslashes($_POST['priceValue' . $result->priceID]);
 						
 						// Generate an entry that consists of the PerformanceID and the Price Type
-						$priceEntry = $newPerfID . '-' . $newPriceType;
+						$priceEntry = $this->GetNewPriceReference($result);
 						// FUNCTIONALITY: Prices - Reject Duplicate Price Refs
 						if (isset($entriesList[$priceEntry]))
 						{
@@ -186,7 +195,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 					{
 						foreach ($results as $result)
 						{
-							$pricesUpdated = $this->SavePriceEntry($result);
+							$pricesUpdated = $this->SavePriceEntry($result);							
 						} // End foreach
 					}
 					echo '<div id="message" class="updated"><p>' . __('Settings have been saved', $this->myDomain) . '</p></div>';
@@ -204,11 +213,6 @@ if (!class_exists('StageShowPricesAdminClass'))
 				
 				echo '<div id="message" class="updated"><p>' . __('Settings have been saved', $this->myDomain) . '</p></div>';
 			}
-		}
-		
-		function GetAdminListClass()
-		{
-			return 'StageShowPricesAdminListClass';			
 		}
 		
 		function Output_MainPage($updateFailed)

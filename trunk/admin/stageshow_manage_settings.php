@@ -34,8 +34,20 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{	
+			if (!current_user_can(STAGESHOW_CAPABILITY_SETUPUSER))
+			{
+				$editMode = false;
+			}
+			
 			// Call base constructor
 			parent::__construct($env, $editMode);
+			
+			if (!$editMode)
+			{
+				$this->hiddenRowStyle = '';
+				$this->hiddenRowsButtonId = '';
+				$this->moreText = '';
+			}
 			
 			$this->defaultTabId = 'stageshow-settings-tab';
 		}
@@ -98,11 +110,6 @@ if (!class_exists('StageShowSettingsAdminClass'))
 		{
 			// Call base constructor
 			parent::__construct($env);
-		}
-		
-		function GetAdminListClass()
-		{
-			return 'StageShowSettingsAdminListClass';			
 		}
 		
 	}

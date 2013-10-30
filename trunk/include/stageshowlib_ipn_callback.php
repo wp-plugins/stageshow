@@ -63,13 +63,13 @@ if (!class_exists('IPNNotifyClass'))
 
 		function AddToLog($LogLine)
 		{
-			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNDisplay'))
+			if ($this->displayIPNs)
 			{
 	  			// FUNCTIONALITY: IPN Notify - Log IPN Messages to Screen if Dev_IPNDisplay set
 				echo "$LogLine<br>\n";
 			}
 		  
-			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNLogRequests'))
+			if ($this->notifyDBaseObj->isDbgOptionSet('Dev_IPNLogRequests'))
 			{
 	  			// FUNCTIONALITY: IPN Notify - Log IPN Messages to file if Dev_IPNLogRequests set
 				$this->LogMessage .= $LogLine . "\n";
@@ -114,6 +114,17 @@ if (!class_exists('IPNNotifyClass'))
 				
 			$this->LogMessage = '';
 
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			{
+				$this->displayIPNs = true;
+				$this->skipIPNServer = true;
+			}
+			else
+			{
+				$this->displayIPNs   = $this->notifyDBaseObj->isDbgOptionSet('Dev_IPNDisplay');
+				$this->skipIPNServer = $this->notifyDBaseObj->isDbgOptionSet('Dev_IPNSkipServer');
+			}
+			
 			if (defined('NOTIFYURL_CALLER'))
 			{
 				$this->AddToLog("IPN Request Called: " . NOTIFYURL_CALLER);
@@ -141,7 +152,7 @@ if (!class_exists('IPNNotifyClass'))
 			}
 			$PayPalNotifyEMail = trim($ourOptions['PayPalAPIEMail']);
 
-			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNLogRequests'))
+			if ($this->notifyDBaseObj->isDbgOptionSet('Dev_IPNLogRequests'))
 			{
 				$decodedParams = '';
 				foreach ($URLParamsArray as $key => $param)
@@ -153,16 +164,16 @@ if (!class_exists('IPNNotifyClass'))
 				$this->LogDebugToFile('LastIPNCall.txt', $LogIPNContent);
 			}
 
-			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNDisplay'))
+			if ($this->displayIPNs)
 			{
 				echo "Display IPNs option set - Dumping URLParamsArray:<br>\n";
 				foreach ($URLParamsArray as $key => $param)
 					echo "$key=$param<br>\n";
 				echo "<br>\n";
 			}
-
+			
 			// Get URL to send verify message to PayPal
-			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNSkipServer'))
+			if ($this->skipIPNServer)
 			{
 				$VerifyURL = '{Skipped}';
 				$payPalResponse['APIStatus'] = 200;
@@ -326,8 +337,11 @@ if (!class_exists('IPNNotifyClass'))
 				$this->AddToLog("IPN Response: Unknown Response (len=" . strlen($payPalResponse['APIResponseText']) . ")" . substr($payPalResponse['APIResponseText'], 0, 80));
 			}
 			$this->AddToLog("---------------------------------------------------------------------");
-			if ($this->notifyDBaseObj->isOptionSet('Dev_IPNLogRequests'))
+			if ($this->notifyDBaseObj->isDbgOptionSet('Dev_IPNLogRequests'))
+			{
+				//$this->LogMessage = print_r($_POST, true)."\n".$this->LogMessage;
 				$this->LogDebugToFile('IPNNotify.txt', $this->LogMessage);
+			}
 		}
 	}
 }

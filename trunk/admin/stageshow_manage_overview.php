@@ -20,7 +20,7 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include STAGESHOW_INCLUDE_PATH.'stageshowlib_table.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
 if (!class_exists('StageShowOverviewAdminListClass')) 
 {
@@ -181,11 +181,6 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			}
 		}
 		
-		function GetAdminListClass()
-		{
-			return 'StageShowOverviewAdminListClass';			
-		}
-		
 		function Output_MainPage($updateFailed)
 		{
 			// Stage Show Overview HTML Output - Start 
@@ -244,7 +239,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			$pluginID  = basename(dirname(dirname(__FILE__)));		
 			$help_url .= '/wp-content/plugins/'.$pluginID.'/docs/StageShowHelp.pdf';
 			
-			echo __('User Guide is Available', $this->myDomain).' <a href="'.$help_url.'">'.__('here', $this->myDomain).'</a> (PDF)<br>';
+			echo __('User Guide is Available', $this->myDomain).' <a href="'.$help_url.'">'.__('Here', $this->myDomain).'</a> (PDF)<br>';
 		}
 		
 		function Output_TrolleyAndShortcodesHelp()
@@ -252,13 +247,14 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			echo '<br><h2>'.__("Shopping Trolley and Shortcodes", $this->myDomain)."</h2>\n";
 			
 			$this->myDBaseObj->Output_PluginHelp();
-
+			
 			echo '<br>'.__('StageShow generates output to your Wordpress pages for the following shortcodes:', $this->myDomain)."<br><br>\n";
 	
-			$this->Output_ShortcodeHelp();
+			$shortcode = $this->env['PluginObj']->shortcode;
+			$this->Output_ShortcodeHelp($shortcode);
 		}
 		
-		function Output_ShortcodeHelp()
+		function Output_ShortcodeHelp($shortcode)
 		{
 			// FUNCTIONALITY: Overview - Show Help for Shortcode(s))
 ?>
@@ -271,7 +267,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 				</thead>
 				<tbody>
 					<tr>
-						<td>[sshow-boxoffice]</td>
+						<td>[<?php echo $shortcode; ?>]</td>
 						<td><?php _e('Add Box Office for all performances', $this->myDomain); ?></td>
 					</tr>
 				</tbody>

@@ -38,7 +38,8 @@ $myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
 $myDBaseObj->uninstall();
 
 // FUNCTIONALITY: Uninstall - Delete StageShow entries from Wordpress options 
-delete_option(STAGESHOW_OPTIONS_NAME);
+delete_option($myDBaseObj->StageshowOptionsName);
+delete_option($myDBaseObj->StageshowDbgoptionsName);
 
 // Output debug message
 //$debugMsg .= "Uninstall complete!\r\n";

@@ -26,25 +26,73 @@ include 'include/stageshowlib_salesplugin.php';
 	
 if (!class_exists('StageShowSalesPluginClass')) 
 {
-	class StageShowSalesPluginClass  extends SalesPluginBaseClass 
+	class StageShowSalesPluginClass  extends StageShowLibSalesPluginBaseClass 
 	{
 		function __construct()
 		{
 			$this->cssBaseID = "stageshow-boxoffice";
-			
+		
 			// nameColID and refColID are defined here
 			// Note: The same text strings must be used on admin pages for translations to work
 			$this->nameColID = 'Date & Time';
 			$this->cssNameColID = "datetime";
-
+			
 			$this->refColID = 'Ticket Type';
 			$this->cssRefColID = "type";
-			
-			$this->shortcode = STAGESHOW_SHORTCODE_PREFIX."-boxoffice";
+
+			if (defined('STAGESHOW_SHORTCODE'))
+			{
+				$this->shortcode = STAGESHOW_SHORTCODE;
+			}
+			elseif (defined('STAGESHOWLIB_RUNASDEMO'))
+			{
+				$this->shortcode = str_replace('stage', 's', STAGESHOW_DIR_NAME).'-boxoffice';
+			}
+			else
+			{
+				$this->shortcode = STAGESHOW_SHORTCODE_PREFIX."-boxoffice";
+			}
 			
 			parent::__construct();
 		}
-		
+	
+		function OutputContent_OnlineStore($atts)
+		{
+			if (isset($this->demosale))
+			{
+				include 'include/stageshow_paypalsimulator.php';
+				
+				ob_start();
+				new StageShowPayPalSimulator($this->demosale);
+				$simulatorOutput = ob_get_contents();
+				ob_end_clean();
+
+				return $simulatorOutput;
+			}
+			
+			if (isset($_POST['SUBMIT_simulatePayPal']))
+			{
+				// Save Form values for next time
+				$paramIDs = $_POST['paramIDs'];
+				$paramsList = explode(',', $paramIDs);
+				foreach ($paramsList as $tagName)
+				{
+					$paramVal = $_POST[$tagName];					
+					$this->myDBaseObj->setDbgOption('PayPalVal_'.$tagName, $paramVal);
+				}
+				$this->myDBaseObj->saveOptions();
+				
+				ob_start();		// "Soak up" any output
+				include 'stageshow_ipn_callback.php';
+				$simulatorOutput = ob_get_contents();
+				ob_end_clean();
+				$saleStatus = 'DEMO MODE: Sale Completed';
+				echo '<div id="message" class="stageshow-ok">'.$saleStatus.'</div>';
+			}
+			
+			return parent::OutputContent_OnlineStore($atts);
+		}
+	
 		function OutputContent_OnlineStoreMain($reqRecordId = '')
 		{
 			if ($reqRecordId != '')
@@ -111,7 +159,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 		
 		function GetOnlineStorePriceID($result)
 		{
-				return $result->priceID;
+			return $result->priceID;
 		}
 			
 		function GetOnlineStoreStockID($result)
@@ -196,6 +244,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}
 		}
 			
+		function SelectPerfMode($result)
+		{
+			return false;
+		}
+			
 		function OutputContent_OnlineStoreHeader($result)
 		{
 			parent::OutputContent_OnlineStoreHeader($result);
@@ -205,10 +258,27 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			static $salesSummary;
 			
-			$submitButton = __('Add', $this->myDomain);
-			$submitId     = 'AddTicketSale';
-			$showAllDates = defined('STAGESHOW_BOXOFFICE_ALLDATES');
+			$showSelectPerfs = $this->SelectPerfMode($result);
+			
+			if (!$showSelectPerfs)
+			{
+				// TODO - Allocated Seating - Move this code to stageshowplus_main.php
+				$submitButton = __('Add', $this->myDomain);
+				$submitId     = 'AddTicketSale';
+				$showAllDates = defined('STAGESHOW_BOXOFFICE_ALLDATES');
 				
+				if (isset($_POST['SelectPerf']))
+				{
+					echo '<input type="hidden" name="SelectPerf" value="'.$result->perfID.'"/>'."\n";
+				}	
+			}
+			else
+			{
+				$submitButton = __('Select', $this->myDomain);
+				$submitId     = 'SelectPerf';
+				$showAllDates = false;
+			}
+			
 			$myDBaseObj = $this->myDBaseObj;
 			
 			// Sales Summary from PerfID
@@ -241,31 +311,47 @@ if (!class_exists('StageShowSalesPluginClass'))
 				if ($lastPerfID != 0) $separator = "\n".'<tr><td class="stageshow-boxoffice-separator">&nbsp;</td></tr>';
 				$this->lastPerfDateTime = $result->perfDateTime;
 			}
+			else if ($showSelectPerfs)
+			{
+				return;	// Only output one row per performance
+			}
 			else
 			{
 				$formattedPerfDateTime = '&nbsp;';
 			}
-						
+			
 			echo '
 				<table width="100%" cellspacing="0">'.$separator.'
 				<tr>
 				<td class="stageshow-boxoffice-datetime">'.$formattedPerfDateTime.'</td>
+				';
+				
+			if (!$showSelectPerfs) 
+			{
+				echo '
 				<td class="stageshow-boxoffice-type">'.$result->priceType.'</td>
 				<td class="stageshow-boxoffice-price">'.$myDBaseObj->FormatCurrency($result->priceValue).'</td>
 				';
 																
+				if (!$soldOut)
+				{
+					echo '
+						<td class="stageshow-boxoffice-qty">
+						<select name="quantity">
+						<option value="1" selected="">1</option>
+						';
+					for ($no=2; $no<=$myDBaseObj->adminOptions['MaxTicketQty']; $no++)
+						echo '<option value="'.$no.'">'.$no.'</option>'."\n";
+					echo '
+						</select>
+						</td>
+					';
+				}
+			}
+															
 			if (!$soldOut)
 			{
 				echo '
-					<td class="stageshow-boxoffice-qty">
-					<select name="quantity">
-					<option value="1" selected="">1</option>
-					';
-				for ($no=2; $no<=$myDBaseObj->adminOptions['MaxTicketQty']; $no++)
-					echo '<option value="'.$no.'">'.$no.'</option>'."\n";
-				echo '
-					</select>
-					</td>
 					<td class="stageshow-boxoffice-add">
 					<input type="submit" id="'.$submitId.'" name="'.$submitId.'" value="'.$submitButton.'" alt="'.$altTag.'"/>
 					</td>
@@ -285,18 +371,25 @@ if (!class_exists('StageShowSalesPluginClass'))
 				
 		}
 		
+		function OutputContent_OnlineTrolleyDetailsHeaders()
+		{
+			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.__('Quantity', $this->myDomain).'</td>'."\n";
+			return 1;
+		}
+		
 		function OutputContent_OnlineTrolleyHeader($result)
 		{
+			$this->trolleyHeaderCols = 6;	// Count of the number of columns in the header
+			
 			echo '<tr class="'.$this->cssTrolleyBaseID.'-titles">'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.__('Show', $this->myDomain).'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.__('Date & Time', $this->myDomain).'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-type">'.__('Ticket Type', $this->myDomain).'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.__('Quantity', $this->myDomain).'</td>'."\n";
+			$this->trolleyHeaderCols += $this->OutputContent_OnlineTrolleyDetailsHeaders();
 			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.__('Price', $this->myDomain).'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
 			echo "</tr>\n";
 			
-			$this->trolleyHeaderCols = 6;	// Count of the number of columns in the header
 		}
 				
 		function OutputContent_OnlineCheckoutButton()
@@ -304,7 +397,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			{
 				if ($this->myDBaseObj->getOption('EnableReservations') && current_user_can(STAGESHOW_CAPABILITY_RESERVEUSER))
 				{
-					echo '<input class="button-primary" type="submit" name="reserve" value="'.__('Reserve', $this->myDomain).'"/>';
+					echo '<input class="button-primary" type="submit" name="'.$this->GetButtonID('reserve').'" value="'.__('Reserve', $this->myDomain).'"/>';
 					echo '&nbsp;&nbsp;&nbsp;&nbsp;';
 				}				
 			}
@@ -366,7 +459,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 				
-			if (isset($_POST['reserve']))	// 'checkout' without online payment
+			$buttonID = $this->GetButtonID('reserve');
+			if (isset($_POST[$buttonID]))	// 'checkout' without online payment
 			{
 				if (!current_user_can(STAGESHOW_CAPABILITY_RESERVEUSER))
 					return;
@@ -374,7 +468,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
 				if (isset($checkoutRslt->checkoutError)) 
 				{
-					echo '<div id="message" class="error"><p>'.$rslt->checkoutError.'</p></div>';
+					echo '<div id="message" class="error"><p>'.$checkoutRslt->checkoutError.'</p></div>';
 					return;
 				}
 				

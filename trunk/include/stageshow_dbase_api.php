@@ -33,7 +33,17 @@ if (!class_exists('StageShowDBaseClass'))
 	// Set the DB tables names
 	global $wpdb;
 	
-	define('STAGESHOW_TABLE_PREFIX', $wpdb->prefix.'sshow_');
+	$dbPrefix = $wpdb->prefix;
+	if (defined('STAGESHOWLIB_RUNASDEMO'))
+	{
+		$dbPrefix .= str_replace('stageshow', 'demo_ss', STAGESHOW_DIR_NAME).'_';
+	}
+	else
+	{
+		$dbPrefix .= 'sshow_';		
+	}
+	define('STAGESHOW_TABLE_PREFIX', $dbPrefix);
+	
 	define('STAGESHOW_SHOWS_TABLE', STAGESHOW_TABLE_PREFIX.'shows');
 	define('STAGESHOW_PERFORMANCES_TABLE', STAGESHOW_TABLE_PREFIX.'perfs');
 	define('STAGESHOW_PRICES_TABLE', STAGESHOW_TABLE_PREFIX.'prices');
@@ -76,34 +86,57 @@ if (!class_exists('StageShowDBaseClass'))
 
 	define('STAGESHOW_SALESTATUS_RESERVED', 'Reserved');
 
-	define('PRICEID1_A1', '12.50');
-	define('PRICEID1_A2', '5.50');
-	define('PRICEID1_A3', '4.00');
-	define('PRICEID1_A4', '6.00');
-	define('PRICEID1_C2', '3.00');
-	define('PRICEID1_C3', '2.00');
+	define('STAGESHOW_PRICEID1_A1', '12.50');
+	define('STAGESHOW_PRICEID1_A2', '5.50');
+	define('STAGESHOW_PRICEID1_A3', '4.00');
+	define('STAGESHOW_PRICEID1_A4', '6.00');
+	define('STAGESHOW_PRICEID1_C2', '3.00');
+	define('STAGESHOW_PRICEID1_C3', '2.00');
 	
 	class StageShowDBaseClass extends StageShowLibSalesDBaseClass // Define class
   	{
 		const STAGESHOW_DATE_FORMAT = 'Y-m-d';
 		
 		var $perfJoined = false;
+		var $StageshowOptionsName;
+		var $StageshowDbgoptionsName;
 		
 		function __construct($caller) //constructor	
 		{
+			$StageshowDbgoptionsName = STAGESHOW_DIR_NAME.'dbgsettings';
+			
+			// Options DB Field - In DEMO Mode make unique for each user, and Plugin type
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			{
+				$this->GetLoginID();
+				$StageshowOptionsName  = STAGESHOW_DIR_NAME.'settings_';
+				$StageshowOptionsName .= $this->loginID;
+			}
+			else
+			{
+				$StageshowOptionsName = 'stageshowsettings';
+			}
+			
 			$opts = array (
 				'Caller'             => $caller,
 				'PluginFolder'       => dirname(plugin_basename(dirname(__FILE__))),
 				'DownloadFilePath'   => '/wp-content/plugins/stageshow/stageshow_download.php',
 				'SalesTableName'     => STAGESHOW_SALES_TABLE,
 				'OrdersTableName'    => STAGESHOW_TICKETS_TABLE,
-				'CfgOptionsID'       => STAGESHOW_OPTIONS_NAME,
+				'CfgOptionsID'       => $StageshowOptionsName,
+				'DbgOptionsID'       => $StageshowDbgoptionsName,
 			);			
 			
 			// Call base constructor
 			parent::__construct($opts);
 			
 			$this->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);			
+		}
+		
+		function HasSettings()
+		{
+			$results = $this->GetAllShowsList();
+			return (count($results) > 0);
 		}
 		
 		function upgradeDB()
@@ -125,6 +158,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$adminRole->add_cap(STAGESHOW_CAPABILITY_SALESUSER);
 				$adminRole->add_cap(STAGESHOW_CAPABILITY_ADMINUSER);
 				$adminRole->add_cap(STAGESHOW_CAPABILITY_SETUPUSER);
+				$adminRole->add_cap(STAGESHOW_CAPABILITY_VIEWSETTINGS);				
 				$adminRole->add_cap(STAGESHOW_CAPABILITY_DEVUSER);
 			}
 			
@@ -166,7 +200,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$sql .= $sqlOpts.$dbField[0].' ';
 			}
 			
-			if ($this->getOption('Dev_ShowDBOutput'))
+			if ($this->getDbgOption('Dev_ShowDBOutput'))
 			{
 				$this->get_results('SELECT * '.$sql);
 			}
@@ -212,7 +246,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$sql .= 'AND '.$condition.' ';
 			}
 			
-			if ($this->getOption('Dev_ShowDBOutput'))
+			if ($this->getDbgOption('Dev_ShowDBOutput'))
 			{
 				$this->get_results('SELECT * '.$sql);
 			}
@@ -304,6 +338,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_SALESUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_ADMINUSER);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_SETUPUSER);
+			$this->DeleteCapability(STAGESHOW_CAPABILITY_VIEWSETTINGS);
 			$this->DeleteCapability(STAGESHOW_CAPABILITY_DEVUSER);
 		}
 		
@@ -353,8 +388,8 @@ if (!class_exists('StageShowDBaseClass'))
 					$currOptions['PayPalAPIPwd'] = $currOptions['PayPalAPILivePwd'];
 					$currOptions['PayPalAPIEMail'] = $currOptions['PayPalAPILiveEMail'];
 				}
-					
-					$this->deleteColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalTESTButtonID');					
+				
+				$this->deleteColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalTESTButtonID');
 				$this->deleteColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalLIVEButtonID');
 
 				unset($currOptions['PayPalAPILiveUser']);
@@ -494,7 +529,7 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			switch($fieldName)
 			{
-				case 'stockID':	return 'priceID';
+				case 'stockID':	    return 'priceID';
 				case 'orderQty':	return 'ticketQty';
 				case 'orderPaid':	return 'ticketPaid';
 				default:			return $fieldName;
@@ -552,15 +587,15 @@ if (!class_exists('StageShowDBaseClass'))
 				return;
 			}
 			// Populate prices table
-			$priceID1_A1 = $this->AddSamplePrice($perfID1, 'All',   PRICEID1_A1);
-			$priceID1_A2 = $this->AddSamplePrice($perfID2, 'Adult', PRICEID1_A2);
-			$priceID1_A3 = $this->AddSamplePrice($perfID3, 'Adult', PRICEID1_A3);
-			$priceID1_A4 = $this->AddSamplePrice($perfID4, 'All',   PRICEID1_A4);
-			$priceID1_C2 = $this->AddSamplePrice($perfID2, 'Child', PRICEID1_C2);
-			$priceID1_C3 = $this->AddSamplePrice($perfID3, 'Child', PRICEID1_C3);
+			$priceID1_A1 = $this->AddSamplePrice($perfID1, 'All',   STAGESHOW_PRICEID1_A1);
+			$priceID1_A2 = $this->AddSamplePrice($perfID2, 'Adult', STAGESHOW_PRICEID1_A2);
+			$priceID1_A3 = $this->AddSamplePrice($perfID3, 'Adult', STAGESHOW_PRICEID1_A3);
+			$priceID1_A4 = $this->AddSamplePrice($perfID4, 'All',   STAGESHOW_PRICEID1_A4);
+			$priceID1_C2 = $this->AddSamplePrice($perfID2, 'Child', STAGESHOW_PRICEID1_C2);
+			$priceID1_C3 = $this->AddSamplePrice($perfID3, 'Child', STAGESHOW_PRICEID1_C3);
 			$this->firstSamplePricesID = $priceID1_A1;
 			
-			if (!$this->isOptionSet('Dev_NoSampleSales'))
+			if (!$this->isDbgOptionSet('Dev_NoSampleSales'))
 			{
 				// Add some ticket sales
 				$saleTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47";
@@ -570,14 +605,14 @@ if (!class_exists('StageShowDBaseClass'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 0.60, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
-				$this->AddSaleItem($saleID, $priceID1_C3, 4, PRICEID1_C3);
-				$this->AddSaleItem($saleID, $priceID1_A3, 1, PRICEID1_A3);
+				$this->AddSaleItem($saleID, $priceID1_C3, 4, STAGESHOW_PRICEID1_C3);
+				$this->AddSaleItem($saleID, $priceID1_A3, 1, STAGESHOW_PRICEID1_A3);
 				$saleEMail = 'mybrother@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, 24.00, 1.01, '87654321qa', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
-				$this->AddSaleItem($saleID, $priceID1_A1, 4, PRICEID1_A1);
+				$this->AddSaleItem($saleID, $priceID1_A1, 4, STAGESHOW_PRICEID1_A1);
 				$timeStamp = current_time('timestamp');
 				if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
 				{
@@ -590,7 +625,7 @@ if (!class_exists('StageShowDBaseClass'))
 						$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
 						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 0.62, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
 						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
-						$this->AddSaleItem($saleID, $priceID1_A3, 3, PRICEID1_A3);
+						$this->AddSaleItem($saleID, $priceID1_A3, 3, STAGESHOW_PRICEID1_A3);
 						$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
 					}
 				}
@@ -621,7 +656,7 @@ if (!class_exists('StageShowDBaseClass'))
 			// Get the show name
 			$shows = $this->GetShowsList($showID);
 			$showName = $shows[0]->showName;
-			
+		
 			// PayPal button(s) created - Add performance to database					
 			// Give performance unique Ref - Check what default reference IDs already exist in database
 			$perfID = $this->AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats);
@@ -874,7 +909,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$showSales = $showEntry->totalQty;
 			$canDelete |= ($showSales == 0);		
 			
-			if ($this->getOption('Dev_ShowMiscDebug') == 1) 
+			if ($this->getDbgOption('Dev_ShowMiscDebug') == 1) 
 			{
 				echo "CanDeleteShow(".$showEntry->showID.") returns $canDelete <br>\n";
 			}
@@ -938,13 +973,21 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->GetPerformancesList($sqlFilters);
 		}
 				
-		private function GetPerformancesList($sqlFilters = null)
+		function GetPerformanceJoins($sqlFilters = null)
+		{
+			return '';
+		}
+				
+		protected function GetPerformancesList($sqlFilters = null)
 		{
 			$selectFields  = '*';
 			$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$selectFields .= ','.STAGESHOW_PRICES_TABLE.'.priceID';
 			
-			$sqlFilters['groupBy'] = 'perfID';
+			if (!isset($sqlFilters['groupBy']))	
+			{			
+				$sqlFilters['groupBy'] = 'perfID';
+			}
 			
 			if (isset($sqlFilters['groupBy']))	
 			{			
@@ -960,6 +1003,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$sql .= " LEFT JOIN ".STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.priceID='.STAGESHOW_PRICES_TABLE.'.priceID';
 			$sql .= " LEFT JOIN ".STAGESHOW_SALES_TABLE.' ON '.STAGESHOW_SALES_TABLE.'.saleID='.STAGESHOW_TICKETS_TABLE.'.saleID';
+			$sql .= $this->GetPerformanceJoins($sqlFilters);
 
 			// Add SQL filter(s)
 			$sql .= $this->GetWhereSQL($sqlFilters);
@@ -1147,6 +1191,18 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->GetPricesList($sqlFilters);
 		}
 				
+		function GetPricesJoins($sqlFilters)
+		{
+			return '';
+		}
+				
+		function GetPricesOrder($sqlFilters)
+		{
+			$sql = ' , '.STAGESHOW_PRICES_TABLE.'.priceType';
+			
+			return $sql;
+		}
+				
 		function GetPricesList($sqlFilters)
 		{
 			$selectFields  = '*';
@@ -1163,11 +1219,12 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql  = 'SELECT '.$selectFields.' FROM '.STAGESHOW_PRICES_TABLE;
       		$sql .= ' '.$joinCmd.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
       		$sql .= ' '.$joinCmd.STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
+			$sql .= $this->GetPricesJoins($sqlFilters);
 			$sql .= $this->GetWhereSQL($sqlFilters);
-			
+
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID';
 			$sql .= ' , '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';			
-			$sql .= ' , '.STAGESHOW_PRICES_TABLE.'.priceType';
+			$sql .= $this->GetPricesOrder($sqlFilters);
 			
 			return $this->get_results($sql);
 		}
@@ -1229,7 +1286,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			$sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceValue)';
 			$sql .= ' VALUES('.$perfID.', "'.$priceType.'", "'.$priceValue.'")';
-			
+			 			
 			$this->query($sql);
 			
      	return mysql_insert_id();
@@ -1606,7 +1663,7 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			for ($i=0; $i<count($salesListArray); $i++)
 			{
-				$salesListArray[$i]->ticketName = $salesListArray[$i]->showName.' - '.StageShowDBaseClass::FormatDateForDisplay($salesListArray[$i]->perfDateTime);
+				$salesListArray[$i]->ticketName = $salesListArray[$i]->showName.' - '.StageShowLibSalesDBaseClass::FormatDateForDisplay($salesListArray[$i]->perfDateTime);
 				$salesListArray[$i]->ticketType = $salesListArray[$i]->priceType;
 			}			
 		}
@@ -1617,7 +1674,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			$sqlWhere1 = ' WHERE '.STAGESHOW_TICKETS_TABLE.'.saleID = "'.$saleID.'"';
 			$sqlWhere2 = ' ';
-			if ($this->getOption('Dev_RunAsDemo'))
+			if (defined('STAGESHOWLIB_RUNASDEMO'))
 			{
 				$sqlWhere1 .= ' AND '.STAGESHOW_TICKETS_TABLE.'.loginID = "'.$this->loginID.'"';
 				$sqlWhere2 .= ' WHERE '.STAGESHOW_PRICES_TABLE.'.loginID = "'.$this->loginID.'"';
@@ -1633,13 +1690,13 @@ if (!class_exists('StageShowDBaseClass'))
 
 			$this->ShowSQL($sql); 
 			
-			$showOutput = $this->getOption('Dev_ShowDBOutput'); 
-			$this->adminOptions['Dev_ShowDBOutput'] = '';
+			$showOutput = $this->getDbgOption('Dev_ShowDBOutput'); 
+			$this->dbgOptions['Dev_ShowDBOutput'] = '';
 			
 			$salesListArray = $this->get_results($sql);			
 			$this->AddSaleFields($salesListArray);
 			
-			$this->adminOptions['Dev_ShowDBOutput'] = $showOutput;
+			$this->dbgOptions['Dev_ShowDBOutput'] = $showOutput;
 			$this->show_results($salesListArray);
 								
 			return $salesListArray;

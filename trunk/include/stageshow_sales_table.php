@@ -25,7 +25,7 @@ include 'stageshowlib_paypal_salesadmin.php';
 
 if (!class_exists('StageShowSalesAdminListClass')) 
 {
-	class StageShowSalesAdminListClass extends PayPalSalesAdminListClass // Define class
+	class StageShowSalesAdminListClass extends StageShowLibPayPalSalesAdminListClass // Define class
 	{		
 		var	$salesList;
 		

@@ -20,12 +20,12 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include 'stageshowlib_admin.php';      
-include 'stageshowlib_table.php';      
+require_once 'stageshowlib_salesadmin.php';      
+require_once 'stageshowlib_admin.php';      
 
-if (!class_exists('PayPalSalesAdminListClass')) 
+if (!class_exists('StageShowLibPayPalSalesAdminListClass')) 
 {
-	class PayPalSalesAdminListClass extends StageShowLibSalesAdminListClass // Define class
+	class StageShowLibPayPalSalesAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{	
 		function __construct($env, $editMode /* = false */) //constructor
 		{
@@ -331,7 +331,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 					****priceQtys are the quantities for a particular stock option
 				*/
 				
-				if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($_POST, '_POST');
+				if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($_POST, '_POST');
 				$this->editingRecord = true;
 				if (isset($_POST['saleID'])) $this->saleId = $_POST['saleID'];
 
@@ -424,7 +424,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$salesList = new $classId($this->env, StageShowLibAdminListClass::EDITMODE);	// xxxxxxxxSalesAdminListClass etc.
 				$salesList->errorInputId = $this->invalidInputId; // TODO-IMPROVEMENT Highlight error line ...
 				
-				if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($this->editSaleEntry, 'Call OutputList-editSaleEntry');
+				if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($this->editSaleEntry, 'Call OutputList-editSaleEntry');
 				$salesList->OutputEditSale($this->editSaleEntry, $this->pricesList);
 			}
 			else if(count($this->results) == 0)
@@ -559,8 +559,8 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$currSaleResults = array();
 			}
 						
-			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($curr->priceQtys, 'currpriceQtys');
-			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($curr->stockQtys, 'currStockQtys');				
+			if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($curr->priceQtys, 'currpriceQtys');
+			if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($curr->stockQtys, 'currStockQtys');				
 			
 			return $curr;
 		}
@@ -623,7 +623,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$req->stockQtys[$stockID] = isset($req->stockQtys[$stockID]) ? $req->stockQtys[$stockID] + $qty : $qty;
 			}
 			
-			if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) 
+			if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) 
 			{
 				StageShowLibUtilsClass::print_r($req->priceQtys, 'this->priceQtys');
 				StageShowLibUtilsClass::print_r($req->stockQtys, 'this->stockQtys');
@@ -734,18 +734,18 @@ if (!class_exists('PayPalSalesAdminClass'))
 						
 				if (($newQty > 0) && ($origQty == 0))
 				{
-					if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) echo "ADDING Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
+					if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) echo "ADDING Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
 					// TODO Add Edit of Ticket Sale Price
 					$myDBaseObj->AddSaleItem($this->saleId, $itemID, $newQty, $this->GetItemPrice($pricesEntry));
 				}
 				else if (($newQty == 0) && ($origQty > 0))
 				{
-					if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) echo "DELETE Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
+					if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) echo "DELETE Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
 					$myDBaseObj->DeleteSaleItem($this->saleId, $itemID);
 				}
 				else if ($newQty != $origQty)
 				{
-					if ($this->myDBaseObj->getOption('Dev_ShowMiscDebug')) echo "UPDATE Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
+					if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) echo "UPDATE Sale Item: ItemID=$itemID  Curr=$origQty  New=$newQty  <br>\n";
 					$myDBaseObj->UpdateSaleItem($this->saleId, $itemID, $newQty, $this->GetItemPrice($pricesEntry));
 				}
 			}

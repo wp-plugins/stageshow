@@ -1,13 +1,8 @@
 <?php
 /* 
-Plugin Name: StageShow
-Plugin URI: http://www.corondeck.co.uk/StageShow/Pro
-Version: 2.3
-Author: Malcolm Shergold
-Author URI: http://www.corondeck.co.uk
-Description: A Wordpress Plugin to sell theatre tickets online
+Description: Code for Table Management Class
  
-Copyright 2013 Malcolm Shergold
+Copyright 2012 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,24 +13,27 @@ Copyright 2013 Malcolm Shergold
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-if (defined('IPN_CALLBACK'))
+require_once "stageshowlib_table.php";
+
+if (!class_exists('StageShowLibSalesAdminListClass')) 
 {
-	if (IPN_CALLBACK != 'STAGESHOW_VARIANT')
-		return;
+	class StageShowLibSalesAdminListClass extends StageShowLibAdminListClass // Define class
+	{		
+	
+		static function FormatDateForAdminDisplay($dateInDB)
+		{
+			// Get Time & Date formatted for display to user
+			return StageShowLibSalesDBaseClass::FormatDateForAdminDisplay($dateInDB);
+		}
+		
+	}
 }
 
-define('STAGESHOW_CODE_PREFIX', 'stageshow');
-
-include 'stageshow_defs.php';
-include 'stageshow_main.php';
-
-new StageShowPluginClass(__FILE__);
-		
 ?>

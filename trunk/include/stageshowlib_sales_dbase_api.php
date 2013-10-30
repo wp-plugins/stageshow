@@ -164,7 +164,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function getImageURL($optionId)
 		{			
-			return isset($this->adminOptions[$optionId]) ? $this->getImagesURL().$this->adminOptions[$optionId] : '';
+			$imageURL = isset($this->adminOptions[$optionId]) ? $this->getImagesURL().$this->adminOptions[$optionId] : '';
+			return $imageURL;
 		}
 		
 		//Returns an array of admin options
@@ -174,11 +175,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'PayPalEnv' => 'live',
 				'PayPalCurrency' => PAYPAL_APILIB_DEFAULT_CURRENCY,
 				        
+				'PayPalMerchantID' => '',
 				'PayPalAPIUser' => '',
 				'PayPalAPISig' => '',
 				'PayPalAPIPwd' => '',
 				'PayPalAPIEMail' => '',
 				        
+				'CheckoutCompleteURL' => '',        
+				'CheckoutCancelledURL' => '',
+				          
 				'PayPalLogoImageFile' => PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE,
 				'PayPalHeaderImageFile' => PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE,
 				        
@@ -228,7 +233,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		// Saves the admin options to the PayPal object(s)
 		function setPayPalCredentials($OurIPNListener) 
 		{
-			$useLocalIPNServer = $this->isOptionSet('Dev_IPNLocalServer');
+			$useLocalIPNServer = $this->isDbgOptionSet('Dev_IPNLocalServer');
 			$payPalTestMode = ($this->adminOptions['PayPalEnv'] == 'sandbox');
 			
 			$this->PayPalNotifyURL = $OurIPNListener;							
@@ -366,23 +371,24 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $currencyText;
 		}
 		
-		function PayPalConfigured()
+		function PayPalConfigured($APIOptional = false)
 		{
+			if (!defined('STAGESHOWLIB_RUNASDEMO'))
 			{
 				if (!isset($this->adminOptions['PayPalMerchantID']))
 					return false;
-				
+					
 				if (!isset($this->adminOptions['PayPalAPIEMail']))
 					return false;
-				
+					
 				if (strlen($this->adminOptions['PayPalMerchantID']) == 0)
 					return false;
-				
+					
 				if (strlen($this->adminOptions['PayPalAPIEMail']) == 0)
-					return false;
-				
-				return true;				
+					return false;				
 			}
+				
+			return true;				
 		}
 		
 		function SettingsConfigured()
@@ -399,8 +405,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$statusMsg = __('Timezone not set - Set it', $this->get_domain())." <a href=$settingsPageURL>".__('Here', $this->get_domain()).'</a>';
 				echo '<div id="message" class="error"><p>'.$statusMsg.'</p></div>';
 			}
-		    
-			$mode = ($this->getOption('Dev_RunAsDemo')) ? ' (Demo Mode)' : '';
+			
+			$mode = (defined('STAGESHOWLIB_RUNASDEMO')) ? ' (Demo Mode)' : ''; 
 			echo  '<strong>'.__('Plugin', $this->get_domain()).':</strong> '.$this->get_name()."$mode<br>\n";			
 			echo  '<strong>'.__('Version', $this->get_domain()).':</strong> '.$this->get_version()."<br>\n";			
 			echo  '<strong>'.__('Timezone', $this->get_domain()).':</strong> '.$timezone."<br>\n";			
@@ -428,21 +434,24 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if ($newOptions == null)
 				$newOptions = $this->adminOptions;
 				
-			$currency = $newOptions['PayPalCurrency'];			
-			$currencyDef = StageShowLibSalesDBaseClass::GetCurrencyDef($currency);
-			
-			if (isset($currencyDef['Symbol']))
+			if (isset($newOptions['PayPalCurrency']))
 			{
-				$newOptions['CurrencySymbol'] = $currencyDef['Symbol'];
-				$newOptions['CurrencyText']   = ($currencyDef['Char'] != '') ? $currencyDef['Char'] : $currency.'';
-				$newOptions['CurrencyFormat'] = $currencyDef['Format'];
+				$currency = $newOptions['PayPalCurrency'];			
+				$currencyDef = StageShowLibSalesDBaseClass::GetCurrencyDef($currency);
+				
+				if (isset($currencyDef['Symbol']))
+				{
+					$newOptions['CurrencySymbol'] = $currencyDef['Symbol'];
+					$newOptions['CurrencyText']   = ($currencyDef['Char'] != '') ? $currencyDef['Char'] : $currency.'';
+					$newOptions['CurrencyFormat'] = $currencyDef['Format'];
+				}
+				else
+				{
+					$newOptions['CurrencySymbol'] = $currency.'';
+					$newOptions['CurrencyText']   = $currency.'';
+					$newOptions['CurrencyFormat'] = '%01.2f';
+				}							
 			}
-			else
-			{
-				$newOptions['CurrencySymbol'] = $currency.'';
-				$newOptions['CurrencyText']   = $currency.'';
-				$newOptions['CurrencyFormat'] = '%01.2f';
-			}			
 			
 			parent::saveOptions($newOptions);
 		}
@@ -663,7 +672,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleID='.$saleID;;
 			 
 			$rtnVal = $this->query($sql);	
-			if ($this->getOption('Dev_ShowSQL'))
+			if ($this->getDbgOption('Dev_ShowSQL'))
 			{
 				echo "<br>UpdateSale Returned: $rtnVal<br>\n";
 			}
@@ -673,7 +682,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			return $saleID;
 		}
-		
+			
 		function PurgePendingSales($timeout = '')
 		{
 			if ($timeout == '')
@@ -700,7 +709,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').')';
 			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'")';
-			
+			 
 			$this->query($sql);
 			$orderID = mysql_insert_id();
 				
@@ -865,11 +874,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			if ($this->IsCurrencyField($tag))
 			{
-					$saleFieldValue = $this->FormatCurrency($saleDetails->$field, false);
-				}
+				$saleFieldValue = $this->FormatCurrency($saleDetails->$field, false);
+			}
 			else 
 			{
-						$saleFieldValue = $saleDetails->$field;
+					$saleFieldValue = $saleDetails->$field;
 			}
 			
 			return $saleFieldValue;
@@ -881,7 +890,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$EMailTemplate = $this->AddGenericFields($EMailTemplate);
 			
-			if ($this->isOptionSet('Dev_ShowMiscDebug'))
+			if ($this->isDbgOptionSet('Dev_ShowMiscDebug'))
 				StageShowLibUtilsClass::print_r($this->adminOptions, 'adminOptions');
 			
 			$emailFields = array(
@@ -972,6 +981,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function GetEmailTemplatePath($templateID, $sale = array())
 		{
 			return $this->GetTemplatePath($templateID, 'emails');
+		}
+
+		function GetTemplatesFolder($folder)
+		{
+			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
+			$templateFolder = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/'.$folder.'/';
+
+			return $templateFolder;
 		}
 
 		function GetTemplatePath($templateID, $folder)
@@ -1090,10 +1107,17 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 			if (strlen($EMailTo) == 0) $EMailTo = $emailContent[0]->saleEMail;
 
-			if (isset($this->emailObj))
-				$this->emailObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
+			$this->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
 
 			return 'OK';
+		}
+		
+		function sendMail($to, $from, $subject, $content1, $content2 = '', $headers = '', $imageobjs = array())
+		{
+			if (isset($this->emailObj))
+			{
+				$this->emailObj->sendMail($to, $from, $subject, $content1, $content2, $headers, $imageobjs);				
+			}
 		}
 		
 		function GetTxnStatus($Txnid)
@@ -1205,7 +1229,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				
 				$qty  = $results['qty' . $itemNo];
 				$itemPaid  = $results['itemPaid' . $itemNo];
-				
+
 				if ($qty > 0)
 				{
 					// Log sale item to Database
@@ -1282,7 +1306,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 			
 			$HTTPResponse = PayPalAPIClass::HTTPAction($url, $urlParams, $method, $redirect);
-			if ($this->getOption('Dev_ShowMiscDebug') == 1)
+			if ($this->getDbgOption('Dev_ShowMiscDebug') == 1)
 			{
 				echo "HTTPRequest Called<br>";
 				echo "URL: $url<br>";

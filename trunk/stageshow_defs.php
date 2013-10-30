@@ -27,8 +27,6 @@ define('STAGESHOW_LANG_RELPATH', STAGESHOW_FOLDER . '/lang/');
 if (!defined('STAGESHOW_SHORTCODE_PREFIX'))
 	define('STAGESHOW_SHORTCODE_PREFIX', 'sshow');
 
-define('STAGESHOW_OPTIONS_NAME', 'stageshowsettings');
-
 define('STAGESHOW_DEFAULT_SETUPUSER', 'administrator');
 
 define('STAGESHOW_CAPABILITY_RESERVEUSER', 'StageShow_Reservations');	// A user that can reserve seats without paying online
@@ -36,6 +34,7 @@ define('STAGESHOW_CAPABILITY_VALIDATEUSER', 'StageShow_Validate');
 define('STAGESHOW_CAPABILITY_SALESUSER', 'StageShow_Sales');			// A user that can view and edit sales
 define('STAGESHOW_CAPABILITY_ADMINUSER', 'StageShow_Admin');			// A user that can edit shows, performances
 define('STAGESHOW_CAPABILITY_SETUPUSER', 'StageShow_Setup');			// A user that can edit stageshow settings
+define('STAGESHOW_CAPABILITY_VIEWSETTINGS', 'StageShow_ViewSettings');	// A user that can view stageshow settings
 define('STAGESHOW_CAPABILITY_DEVUSER', 'StageShow_Testing');			// A user that can use test pages
 
 if (!defined('STAGESHOW_CODE_PREFIX'))
@@ -43,6 +42,7 @@ if (!defined('STAGESHOW_CODE_PREFIX'))
 
 define('STAGESHOW_MENUPAGE_ADMINMENU', STAGESHOW_CODE_PREFIX.'_adminmenu');
 define('STAGESHOW_MENUPAGE_OVERVIEW', STAGESHOW_CODE_PREFIX.'_overview');
+define('STAGESHOW_MENUPAGE_SEATING', STAGESHOW_CODE_PREFIX.'_seating');
 define('STAGESHOW_MENUPAGE_SHOWS', STAGESHOW_CODE_PREFIX.'_shows');
 define('STAGESHOW_MENUPAGE_PERFORMANCES', STAGESHOW_CODE_PREFIX.'_performances');
 define('STAGESHOW_MENUPAGE_PRICES', STAGESHOW_CODE_PREFIX.'_prices');

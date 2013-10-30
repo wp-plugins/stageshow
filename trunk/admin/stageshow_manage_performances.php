@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-include STAGESHOW_INCLUDE_PATH . 'stageshowlib_table.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
 if (!class_exists('StageShowPerformancesAdminListClass'))
 {
@@ -270,11 +270,6 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				$statusMsgClass = ($newPerfID > 0) ? 'updated' : 'error';
 				echo '<div id="message" class="' . $statusMsgClass . '"><p>' . $statusMsg . '</p></div>';
 			}
-		}
-		
-		function GetAdminListClass()
-		{
-			return 'StageShowPerformancesAdminListClass';
 		}
 		
 		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
