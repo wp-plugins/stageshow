@@ -20,7 +20,7 @@ EMails are in text only format, and the PayPal transaction number if included fo
 
 StageShow includes the facility to export sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
 
-An <a href=http://corondeck.co.uk/demo/>online demo</a> for all StageShow Variants is available <a href=http://corondeck.co.uk/demo/>here</a>.
+An <a href="http://corondeck.co.uk/demo">online demo</a> for all StageShow Variants is available <a href="http://corondeck.co.uk/demo">here</a>.
 
 StageShow Features Summary
 
@@ -37,7 +37,7 @@ StageShow Features Summary
 * Access to StageShow Admin pages/features controlled by custom capabilities
 * Extensive Help (in PDF format) file shipped with plugin
 
-Additional Features in StageShow+ (available <a href=http://corondeck.co.uk/StageShow/Plus>here</a>)
+Additional Features in StageShow+ (available <a href="http://corondeck.co.uk/StageShow/Plus">here</a>)
 
 * No limit on number of Shows or Performances
 * Unlimited number of User defined "Price Plans" to set prices when adding a performance
