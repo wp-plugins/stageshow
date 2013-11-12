@@ -114,7 +114,7 @@ if (!class_exists('IPNNotifyClass'))
 				
 			$this->LogMessage = '';
 
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{
 				$this->displayIPNs = true;
 				$this->skipIPNServer = true;

@@ -34,7 +34,7 @@ if (!class_exists('StageShowDBaseClass'))
 	global $wpdb;
 	
 	$dbPrefix = $wpdb->prefix;
-	if (defined('STAGESHOWLIB_RUNASDEMO'))
+	if (defined('RUNSTAGESHOWDEMO'))
 	{
 		$dbPrefix .= str_replace('stageshow', 'demo_ss', STAGESHOW_DIR_NAME).'_';
 	}
@@ -98,19 +98,17 @@ if (!class_exists('StageShowDBaseClass'))
 		const STAGESHOW_DATE_FORMAT = 'Y-m-d';
 		
 		var $perfJoined = false;
-		var $StageshowOptionsName;
-		var $StageshowDbgoptionsName;
 		
 		function __construct($caller) //constructor	
 		{
 			$StageshowDbgoptionsName = STAGESHOW_DIR_NAME.'dbgsettings';
 			
 			// Options DB Field - In DEMO Mode make unique for each user, and Plugin type
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{
 				$this->GetLoginID();
 				$StageshowOptionsName  = STAGESHOW_DIR_NAME.'settings_';
-				$StageshowOptionsName .= $this->loginID;
+				//$StageshowOptionsName .= $this->loginID;
 			}
 			else
 			{
@@ -121,8 +119,6 @@ if (!class_exists('StageShowDBaseClass'))
 				'Caller'             => $caller,
 				'PluginFolder'       => dirname(plugin_basename(dirname(__FILE__))),
 				'DownloadFilePath'   => '/wp-content/plugins/stageshow/stageshow_download.php',
-				'SalesTableName'     => STAGESHOW_SALES_TABLE,
-				'OrdersTableName'    => STAGESHOW_TICKETS_TABLE,
 				'CfgOptionsID'       => $StageshowOptionsName,
 				'DbgOptionsID'       => $StageshowDbgoptionsName,
 			);			
@@ -133,6 +129,20 @@ if (!class_exists('StageShowDBaseClass'))
 			$this->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);			
 		}
 		
+		function getTablePrefix()
+		{
+			return STAGESHOW_TABLE_PREFIX;
+		}
+		
+		function getTableNames($dbPrefix)
+		{
+			$DBTables = parent::getTableNames($dbPrefix);
+			
+			$DBTables->Orders = $dbPrefix.'tickets';
+			
+			return $DBTables;
+		}
+					
 		function HasSettings()
 		{
 			$results = $this->GetAllShowsList();
@@ -343,14 +353,13 @@ if (!class_exists('StageShowDBaseClass'))
 		}
 		
 		//Returns an array of admin options
-		function getOptions($childOptions = array())
+		function getOptions($childOptions = array(), $saveToDB = true)
 		{
 			// Initialise settings array with default values
 			$ourOptions = array(        
 		        'loaded' => true,
 		        
 				'SetupUserRole' => STAGESHOW_DEFAULT_SETUPUSER,
-		        'AuthTxnEMail' => '',                
 		        
 		        'SLen' => 0,                
 		        'PLen' => 4,
@@ -366,7 +375,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$ourOptions = array_merge($ourOptions, $childOptions);
 			
 			// Get current values from MySQL
-			$currOptions = parent::getOptions($ourOptions);
+			$currOptions = parent::getOptions($ourOptions, false);
 			
 			// Check for Upgrading from separate settings for Live and Test API Settings 
 			if (isset($currOptions['PayPalAPITestUser']))
@@ -406,7 +415,10 @@ if (!class_exists('StageShowDBaseClass'))
 			if ($currOptions['SetupUserRole'] == '') 
 				$currOptions['SetupUserRole'] = STAGESHOW_DEFAULT_SETUPUSER;
 				
-			$this->saveOptions($currOptions);
+			$this->adminOptions = $currOptions;
+			
+			if ($saveToDB)
+				$this->saveOptions();
 			
 			return $currOptions;
 		}
@@ -448,7 +460,7 @@ if (!class_exists('StageShowDBaseClass'))
 					';
 					break;
 					
-				case $this->opts['OrdersTableName']:
+				case $this->DBTables->Orders:
 					$ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
 					$sql .= '
 						saleID INT UNSIGNED NOT NULL,
@@ -477,7 +489,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			parent::createDB($dropTable);
 
-			$this->createDBTable($this->opts['OrdersTableName'], 'ticketID', $dropTable);
+			$this->createDBTable($this->DBTables->Orders, 'ticketID', $dropTable);
 
 			// ------------------- STAGESHOW_SHOWS_TABLE -------------------
 			if ($dropTable)
@@ -603,14 +615,14 @@ if (!class_exists('StageShowDBaseClass'))
 				$saleEMail = 'other@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 0.60, 'ABCD1234XX', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 0.60, 'SQP4KMTNIEXGS5ZBU', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
 				$this->AddSaleItem($saleID, $priceID1_C3, 4, STAGESHOW_PRICEID1_C3);
 				$this->AddSaleItem($saleID, $priceID1_A3, 1, STAGESHOW_PRICEID1_A3);
 				$saleEMail = 'mybrother@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, 24.00, 1.01, '87654321qa', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, 24.00, 1.01, '1S34QJHTK9AAQGGVG', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 				'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
 				$this->AddSaleItem($saleID, $priceID1_A1, 4, STAGESHOW_PRICEID1_A1);
 				$timeStamp = current_time('timestamp');
@@ -948,6 +960,27 @@ if (!class_exists('StageShowDBaseClass'))
 			return (count($results) == 0);			
 		}
 		
+		function GetActivePerformancesList()
+		{
+			$selectFields  = '*';
+			$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
+			
+			$sqlFilters['activePerfs'] = true;
+			
+			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
+			$sql .= " LEFT JOIN ".STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
+			
+			// Add SQL filter(s)
+			$sql .= $this->GetWhereSQL($sqlFilters);
+			$sql .= $this->GetOptsSQL($sqlFilters);
+			
+			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+			
+			$perfsListArray = $this->get_results($sql);
+
+			return $perfsListArray;
+		}
+				
 		function GetAllPerformancesList()
 		{
 			return $this->GetPerformancesList();
@@ -1209,7 +1242,7 @@ if (!class_exists('StageShowDBaseClass'))
 			if (isset($sqlFilters['saleID']))
 			{
 				// Explicitly add joined fields from "base" tables (otherwise values will be NULL if there is no matching JOIN)
-				$selectFields .= ', '.$this->opts['SalesTableName'].'.saleID';
+				$selectFields .= ', '.$this->DBTables->Sales.'.saleID';
 
 				$joinCmd = ' LEFT JOIN ';
 			}
@@ -1454,6 +1487,13 @@ if (!class_exists('StageShowDBaseClass'))
 				$sqlCmd = ' AND ';
 			}
 			
+			if (isset($sqlFilters['activePerfs']))
+			{
+				$timeNow = current_time('mysql');
+				$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime>"'.$timeNow.'" ';
+				$sqlCmd = ' AND ';
+			}
+			
 			if (isset($sqlFilters['perfID']) && ($sqlFilters['perfID'] > 0))
 			{
 				// Select a specified Performance Record
@@ -1635,7 +1675,7 @@ if (!class_exists('StageShowDBaseClass'))
 		function GetAllSalesList($sqlFilters = null)
 		{
 			$sqlFilters['groupBy'] = 'saleID';
-			$sqlFilters['orderBy'] = $this->opts['SalesTableName'].'.saleID DESC';
+			$sqlFilters['orderBy'] = $this->DBTables->Sales.'.saleID DESC';
 			return $this->GetSalesList($sqlFilters);
 		}
 
@@ -1674,7 +1714,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			$sqlWhere1 = ' WHERE '.STAGESHOW_TICKETS_TABLE.'.saleID = "'.$saleID.'"';
 			$sqlWhere2 = ' ';
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{
 				$sqlWhere1 .= ' AND '.STAGESHOW_TICKETS_TABLE.'.loginID = "'.$this->loginID.'"';
 				$sqlWhere2 .= ' WHERE '.STAGESHOW_PRICES_TABLE.'.loginID = "'.$this->loginID.'"';
@@ -1725,8 +1765,8 @@ if (!class_exists('StageShowDBaseClass'))
 			parent::DeleteSale($saleID);
 
 			// Delete a show entry
-			$sql  = 'DELETE FROM '.$this->opts['OrdersTableName'];
-			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID".$this->GetWhereParam('saleID', $saleID);
+			$sql  = 'DELETE FROM '.$this->DBTables->Orders;
+			$sql .= ' WHERE '.$this->DBTables->Orders.".saleID".$this->GetWhereParam('saleID', $saleID);
 		 
 			$this->query($sql);
 		}			
@@ -1823,9 +1863,15 @@ if (!class_exists('StageShowDBaseClass'))
 			$filename = $pagename.'.php';
 			
 			if (defined('STAGESHOW_INFO_SERVER_URL'))
-				$updateCheckURL = STAGESHOW_INFO_SERVER_URL;
-			else
+			{
 				$updateCheckURL = $this->get_pluginURI().'/';
+				$pageURLPosn = strrpos($updateCheckURL, '/StageShow');
+				$updateCheckURL = STAGESHOW_INFO_SERVER_URL.substr($updateCheckURL, $pageURLPosn+1, strlen($updateCheckURL));
+			}
+			else
+			{
+				$updateCheckURL = $this->get_pluginURI().'/';				
+			}
 			$updateCheckURL .= $filename;
 
 			$updateCheckURL = str_replace('\\', '/', $updateCheckURL);

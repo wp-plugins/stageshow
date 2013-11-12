@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.7
-Stable tag: 2.3
+Tested up to: 3.7.1
+Stable tag: 2.3.2
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -12,7 +12,7 @@ StageShow adds the facility for an online Box-Office for Small Theatres/Drama Gr
 
 StageShow provides a simple interface to define your Shows and then a single Wordpress shortcode adds a online BoxOffice to your website.
 
-StageShow uses either the PayPal Shopping Cart or its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments, which can be made using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
+StageShow uses its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments, which can be made using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
 
 Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and can be copied to the system administrator.
 
@@ -20,17 +20,17 @@ EMails are in text only format, and the PayPal transaction number if included fo
 
 StageShow includes the facility to export sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
 
-An online demo for all StageShow Variants is available <a href=http://corondeck.co.uk/demo/>here</a>.
+An <a href=http://corondeck.co.uk/demo/>online demo</a> for all StageShow Variants is available <a href=http://corondeck.co.uk/demo/>here</a>.
 
 StageShow Features Summary
 
 * Adds a online BoxOffice for a Single Show
 * Up to 4 Performances with Specified start Date/Time and Maximum Number of Tickets
 * Unlimited number of Ticket Types for each performance with individually defined prices
-* Choice of Integrated Shopping Cart or PayPal Shopping Cart
+* Integrated Shopping Trolley
 * Integrated PayPal Payment Collection
 * Payments accepted using Credit/Debit cards or from PayPal account
-* EMail confirmation of Booking to Client and Administrator
+* EMail confirmation of Booking to Client and (optionally) to Administrator
 * Manual entry of ticket sales for telephone sales etc.
 * Online and Offline Sale Transaction ID validation
 * Export of Ticket Sales and Settings as "TAB Separated Text" format file
@@ -178,7 +178,20 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugin 
 
-= 2.3 (28/10/2013) =
+= 2.3.2 (12/11/2013) =
+* Bug Fix: Incorrect PluginURI blocks Plugin Upgrade ... server also patched to allow updates
+* Bug Fix: T_PAAMAYIM_NEKUDOTAYIM expected error with PHP 5.2
+* Added Performance selector to Transaction Validator
+* Added custom Styles for Transaction Validator results
+* Sample Sale TxnIds changed to 17 characters
+* Added PayPal Simulator (for DEMO mode)
+* Allocated Seating defaults to enabled (StageShowGold)
+* Added HTTP Diagnostics to Plugin Updater (StageShowPlus/Gold)
+
+= 2.3.1 (03/11/2013) =
+* Bug Fix: Price Plans admin page generates Class not found error (StageShowGold)
+
+= 2.3 (30/10/2013) =
 * Bug Fix: Checkout Complete URL and Checkout Cancelled URL not passed to PayPal Checkout
 * Bug Fix: <head> and <body> tags missing in email templates
 * Bug Fix: Changed include to requires_once - Fix for "Zend Error" bug in PHP APC
@@ -486,7 +499,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 = 0.9 =
 * First public release
 
-== Upgrade Notice ==
+== Upgrade_Notice ==
 
 = 2.2.4 =
 * Performances with dates changed by StageShow versions 2.1.5 to 2.2.3 may have incorrect performance Expiry Date/Time  (StageShow+ only)

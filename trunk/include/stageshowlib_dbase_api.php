@@ -54,14 +54,38 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$this->opts = $opts;
 			$this->getOptions();
 			
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{
 				$this->GetLoginID();
 			}
+			
+			$dbPrefix = $this->getTablePrefix();
+			$this->DBTables = $this->getTableNames($dbPrefix);
 		}
 
 	    function uninstall()
 	    {
+		}
+		
+		function getTablePrefix()
+		{
+			global $wpdb;
+			return $wpdb->prefix;
+		}
+		
+		function getTableNames($dbPrefix)
+		{
+			$DBTables = new stdClass();
+			
+			return $DBTables;
+		}
+	
+		function AddGenericFields($EMailTemplate)
+		{
+			$EMailTemplate = str_replace('[organisation]', $this->adminOptions['OrganisationID'], $EMailTemplate);			
+			$EMailTemplate = str_replace('[url]', get_option('siteurl'), $EMailTemplate);
+			
+			return $EMailTemplate;
 		}
 		
 		function WPNonceField($referer = '')
@@ -224,7 +248,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function get_name()
 		{
-			return str_replace('Plus', '+', $this->get_pluginInfo('Name'));
+			return $this->get_pluginInfo('Name');
 		}
 		
 		function get_version()
@@ -289,7 +313,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			$sql = "";
 			
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{
 				$sql = '
 					loginID VARCHAR(50) NOT NULL DEFAULT "",';
@@ -308,11 +332,20 @@ if (!class_exists('StageShowLibDBaseClass'))
 			dbDelta($sql);
 		}
 		
+		function queryWithPrepare($sql, $values)
+		{
+			global $wpdb;
+			
+			$sql = $wpdb->prepare($sql, $values);
+			
+			return $this->query($sql);
+		}
+		
 		function query($sql)
 		{
 			global $wpdb;
 			
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{
 				$sql = $this->SQLForDemo($sql);
 			}	
@@ -369,7 +402,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			global $wpdb;
 			
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{
 				$sql = $this->SQLForDemo($sql);
 			}	
@@ -399,7 +432,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function SQLForDemo($sql)
 		{
-			if (!defined('STAGESHOWLIB_RUNASDEMO'))
+			if (!defined('RUNSTAGESHOWDEMO'))
 				return $sql;
 			
 			if (strpos($sql, 'loginID') !== false)
@@ -483,7 +516,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		}
 		
 		//Returns an array of admin options
-		function getOptions($childOptions = array())
+		function getOptions($childOptions = array(), $saveToDB = true)
 		{
 			if (!isset($this->opts['CfgOptionsID']))
 			{
@@ -518,8 +551,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 				'Unused_EndOfList' => ''
 			);
 			
-			$ourOptions         = array_merge($ourOptions, $childOptions);
-			$this->adminOptions = $ourOptions;
+			$ourOptions = array_merge($ourOptions, $childOptions);
 			
 			// Get current values from MySQL
 			$currOptions = get_option($this->opts['CfgOptionsID']);
@@ -529,19 +561,23 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if (!empty($currOptions))
 			{
 				foreach ($currOptions as $key => $option)
-					$this->adminOptions[$key] = $option;
+					$ourOptions[$key] = $option;
 			}
 			
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{				
 				global $current_user;
 				get_currentuserinfo();
-				$this->adminOptions['AdminID'] = $current_user->display_name;
-				$this->adminOptions['AdminEMail'] = $current_user->user_email;
+				$ourOptions['AdminID'] = $current_user->display_name;
+				$ourOptions['AdminEMail'] = $current_user->user_email;
 			}
 			
-			$this->saveOptions();
-			return $this->adminOptions;
+			$this->adminOptions = $ourOptions;
+			
+			if ($saveToDB)
+				$this->saveOptions();
+				
+			return $ourOptions;
 		}
 		
 		function GetAllSettingsList()
@@ -607,10 +643,10 @@ if (!class_exists('StageShowLibDBaseClass'))
 					break;
 				
 				default:
-					return;					
+					return '';					
 			}
 			
-			return $optionVal;
+			return $optionValue;
 		}
 		
 		function isDbgOptionSet($optionID)

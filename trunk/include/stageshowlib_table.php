@@ -1237,7 +1237,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					break;
 					
 				case self::TABLEENTRY_VIEW:
-					$editControl = $controlValue;
+					$editControl = $controlValue.'&nbsp;';
 					break;
 
 				case self::TABLEENTRY_VALUE:
@@ -1383,7 +1383,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 								}
 								$currVal = '<a href="'.$currValLink.'" '.$target.'>'.$currVal.'</a>';
 							}
-							$this->AddToTable($result, $currVal.$hiddenTag);
+							$this->AddToTable($result, $currVal.$hiddenTag.'&nbsp;');
 							break;
 							
 						case self::TABLEENTRY_FUNCTION:

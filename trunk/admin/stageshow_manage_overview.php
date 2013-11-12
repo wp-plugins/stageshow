@@ -244,7 +244,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 		
 		function Output_TrolleyAndShortcodesHelp()
 		{
-			echo '<br><h2>'.__("Shopping Trolley and Shortcodes", $this->myDomain)."</h2>\n";
+			echo '<br><h2>'.__("Plugin Info & Shortcodes", $this->myDomain)."</h2>\n";
 			
 			$this->myDBaseObj->Output_PluginHelp();
 			

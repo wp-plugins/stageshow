@@ -2,7 +2,7 @@
 
 define('IPN_CALLBACK', 'STAGESHOW_VARIANT');
 
-if (!defined('STAGESHOW_DBASE_CLASS'))
+if (!defined('DB_NAME'))
 {
 	// Include wp-config.php - This will include wp settings and plugins ...
 	include '../../../wp-config.php';	

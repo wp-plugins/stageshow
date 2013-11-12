@@ -78,6 +78,46 @@ div.stageshow-searchsales
 	padding: 6px 10px;
 }
 
+/* ----------------------------------------------------------------------------------------------------------------
+	Styles for Transaction Validation (on Tools Page)
+---------------------------------------------------------------------------------------------------------------- */
+
+div.stageshow-validate-ok
+{
+	background-color: #C7FEB4;
+	border-color: #08A008;
+}
+
+div.stageshow-validate-reserved
+{
+	background-color: #ffffe0;
+	border-color: #800080;
+}
+
+div.stageshow-validate-notfound
+{
+	background-color: #ffebe8;
+	border-color: #CC0000;
+}
+
+div.stageshow-validate-duplicated
+{
+	background-color: #ffebe8;
+	border-color: #CC0000;
+}
+
+div.stageshow-validate-wrongperf
+{
+	background-color: #FBC795;
+	border-color: #EF8B1F;
+}
+
+div.stageshow-validate-unknown
+{
+	background-color: #ffebe8;
+	border-color: #CC0000;
+}
+
 /* --------------------------------------------------------------------------- */
 /*                                                                             */
 /*                       StageShow Layout Styles                               */

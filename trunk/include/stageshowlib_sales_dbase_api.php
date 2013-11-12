@@ -54,8 +54,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		const STAGESHOWLIB_TROLLEYTYPE_INTEGRATED = 'Integrated';
 		const STAGESHOWLIB_TROLLEYTYPE_PAYPAL = 'PayPal';
 		
-		var	$emailObj;
-		
 		var		$PayPalURL;			//  URL for PayPal Payment Requests
 		var		$PayPalVerifyURL;	//  URL for PayPal Verify IPN Requests
 		
@@ -63,29 +61,29 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			parent::__construct($opts);
 						
-			if (!isset($this->emailObj))
-				$this->emailObj = new StageShowLibEMailAPIClass($this);
+			if (!isset($this->emailObjClass))
+				$this->emailObjClass = 'StageShowLibEMailAPIClass';
 		}
 
 		function SplitSaleNameField()
 		{
-			if (!$this->IfColumnExists($this->opts['SalesTableName'], 'saleName'))
+			if (!$this->IfColumnExists($this->DBTables->Sales, 'saleName'))
 				return false;
 				
 			// Split saleName field into two parts 			
-			$sql  = 'UPDATE '.$this->opts['SalesTableName'].' SET ';
+			$sql  = 'UPDATE '.$this->DBTables->Sales.' SET ';
 			$sql .= 'saleName = CONCAT(" ", REPLACE(saleName, ".", " "))';
 			$this->query($sql);	
 
-			$sql  = 'UPDATE '.$this->opts['SalesTableName'].' SET ';
+			$sql  = 'UPDATE '.$this->DBTables->Sales.' SET ';
 			$sql .= 'saleFirstName = TRIM(SUBSTR(saleName, 1, LENGTH(saleName) - LOCATE(" ", REVERSE(saleName))))';
 			$this->query($sql);	
 
-			$sql  = 'UPDATE '.$this->opts['SalesTableName'].' SET ';
+			$sql  = 'UPDATE '.$this->DBTables->Sales.' SET ';
 			$sql .= 'saleLastName = TRIM(SUBSTR(saleName, 1 + (LENGTH(saleName) - LOCATE(" ", REVERSE(saleName)))))';
 			$this->query($sql);	
 
-			$this->deleteColumn($this->opts['SalesTableName'], 'saleName');
+			$this->deleteColumn($this->DBTables->Sales, 'saleName');
 					
 			return true;
 		}
@@ -121,7 +119,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function uninstall()
 		{
-			$this->DropTable($this->opts['SalesTableName']);
+			$this->DropTable($this->DBTables->Sales);
 			
 			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
 			$salesTemplatesPath = WP_CONTENT_DIR . '/uploads/'.$pluginID;
@@ -169,7 +167,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		//Returns an array of admin options
-		function getOptions($childOptions = array()) 
+		function getOptions($childOptions = array(), $saveToDB = true) 
 		{
 			$ourOptions = array(
 				'PayPalEnv' => 'live',
@@ -200,7 +198,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$ourOptions = array_merge($ourOptions, $childOptions);
 			
-			$currOptions = parent::getOptions($ourOptions);
+			$currOptions = parent::getOptions($ourOptions, false);
 			
 			if ($currOptions['PayPalCurrency'] == '')
 				$currOptions['PayPalCurrency'] = PAYPAL_APILIB_DEFAULT_CURRENCY;
@@ -227,6 +225,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$this->payPalAPIObj = new PayPalButtonsAPIClass(__FILE__);
 			}
 
+			if ($saveToDB)
+				$this->saveOptions();
+				
 			return $currOptions;
 		}
 		
@@ -373,7 +374,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function PayPalConfigured($APIOptional = false)
 		{
-			if (!defined('STAGESHOWLIB_RUNASDEMO'))
+			if (!defined('RUNSTAGESHOWDEMO'))
 			{
 				if (!isset($this->adminOptions['PayPalMerchantID']))
 					return false;
@@ -406,7 +407,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				echo '<div id="message" class="error"><p>'.$statusMsg.'</p></div>';
 			}
 			
-			$mode = (defined('STAGESHOWLIB_RUNASDEMO')) ? ' (Demo Mode)' : ''; 
+			$mode = (defined('RUNSTAGESHOWDEMO')) ? ' (Demo Mode)' : ''; 
 			echo  '<strong>'.__('Plugin', $this->get_domain()).':</strong> '.$this->get_name()."$mode<br>\n";			
 			echo  '<strong>'.__('Version', $this->get_domain()).':</strong> '.$this->get_version()."<br>\n";			
 			echo  '<strong>'.__('Timezone', $this->get_domain()).':</strong> '.$timezone."<br>\n";			
@@ -456,13 +457,23 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			parent::saveOptions($newOptions);
 		}
 		
+		function getTableNames($dbPrefix)
+		{
+			$DBTables = parent::getTableNames($dbPrefix);
+			
+			$DBTables->Sales = $dbPrefix.'sales';
+			$DBTables->Orders = $dbPrefix.'orders';
+			
+			return $DBTables;
+		}
+		
 		function getTableDef($tableName)
 		{
 			$sql = parent::getTableDef($tableName);
 			
 			switch($tableName)
 			{
-				case $this->opts['SalesTableName']:
+				case $this->DBTables->Sales:
 					$sql .= '
 						saleCheckoutTime DATETIME,
 						saleDateTime DATETIME NOT NULL,
@@ -491,7 +502,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			parent::createDB($dropTable);
 
-			$this->createDBTable($this->opts['SalesTableName'], 'saleID', $dropTable);
+			$this->createDBTable($this->DBTables->Sales, 'saleID', $dropTable);
 		}
 		
 		function GetSaleStockID($itemRef, $itemOption)
@@ -523,13 +534,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			if (isset($sqlFilters['saleID']) && ($sqlFilters['saleID'] > 0))
 			{
-				$sqlWhere .= $sqlCmd.$this->opts['SalesTableName'].'.saleID="'.$sqlFilters['saleID'].'"';
+				$sqlWhere .= $sqlCmd.$this->DBTables->Sales.'.saleID="'.$sqlFilters['saleID'].'"';
 				$sqlCmd = ' AND ';
 			}
 			
 			if (isset($sqlFilters['saleTxnId']) && (strlen($sqlFilters['saleTxnId']) > 0))
 			{
-				$sqlWhere .= $sqlCmd.$this->opts['SalesTableName'].'.saleTxnId="'.$sqlFilters['saleTxnId'].'"';
+				$sqlWhere .= $sqlCmd.$this->DBTables->Sales.'.saleTxnId="'.$sqlFilters['saleTxnId'].'"';
 				$sqlCmd = ' AND ';
 			}
 			
@@ -589,7 +600,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function AddSale($saleDateTime = '', $salesVals = array())
 		{
-			$sqlFields = 'INSERT INTO '.$this->opts['SalesTableName'].'(saleDateTime';
+			$sqlFields = 'INSERT INTO '.$this->DBTables->Sales.'(saleDateTime';
 			$sqlValues = ' VALUES("'.$saleDateTime.'"';
 			
 			foreach ($salesVals as $fieldID => $fieldVal)
@@ -614,7 +625,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		// Edit Sale
 		function EditSale($saleID, $salesVals = array())
 		{
-			$sql  = 'UPDATE '.$this->opts['SalesTableName'];
+			$sql  = 'UPDATE '.$this->DBTables->Sales;
 			
 			$comma = ' SET ';
 			
@@ -623,7 +634,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$sql .= $comma.$fieldID.'="'.$fieldVal.'"';
 				$comma = ', ';			
 			}
-			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleID='.$saleID;;		 
+			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleID='.$saleID;;		 
 
 			$this->query($sql);	
 		}			
@@ -657,7 +668,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$fieldsList = $this->GetSalesFields();
 			
-			$fieldSep = 'UPDATE '.$this->opts['SalesTableName'].' SET ';
+			$fieldSep = 'UPDATE '.$this->DBTables->Sales.' SET ';
 			
 			$sql = '';
 			foreach ($fieldsList as $fieldName)
@@ -669,7 +680,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$fieldSep = ' , ';
 			}
 			
-			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleID='.$saleID;;
+			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleID='.$saleID;;
 			 
 			$rtnVal = $this->query($sql);	
 			if ($this->getDbgOption('Dev_ShowSQL'))
@@ -690,14 +701,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				
 			$limitDateTime = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT, current_time( 'timestamp' ) - $timeout);
 			
-			$sql  = 'DELETE FROM '.$this->opts['SalesTableName'];
-			$sql .= ' WHERE '.$this->opts['SalesTableName'].'.saleStatus="'.PAYPAL_APILIB_SALESTATUS_CHECKOUT.'"';
-			$sql .= ' AND   '.$this->opts['SalesTableName'].'.saleCheckoutTime < "'.$limitDateTime.'"';
+			$sql  = 'DELETE FROM '.$this->DBTables->Sales;
+			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleStatus="'.PAYPAL_APILIB_SALESTATUS_CHECKOUT.'"';
+			$sql .= ' AND   '.$this->DBTables->Sales.'.saleCheckoutTime < "'.$limitDateTime.'"';
 			 
 			$this->query($sql);
 			
-			$sql  = 'DELETE o FROM '.$this->opts['OrdersTableName'].' o ';
-			$sql .= 'LEFT OUTER JOIN '.$this->opts['SalesTableName'].' s ON o.saleID = s.saleID ';
+			$sql  = 'DELETE o FROM '.$this->DBTables->Orders.' o ';
+			$sql .= 'LEFT OUTER JOIN '.$this->DBTables->Sales.' s ON o.saleID = s.saleID ';
 			$sql .= 'WHERE s.saleStatus IS NULL';
 			 
 			$this->query($sql);
@@ -707,7 +718,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			$paid *= $qty;
 			
-			$sql  = 'INSERT INTO '.$this->opts['OrdersTableName'].'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').')';
+			$sql  = 'INSERT INTO '.$this->DBTables->Orders.'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').')';
 			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'")';
 			 
 			$this->query($sql);
@@ -721,11 +732,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$paid *= $qty;
 			
 			// Delete a show entry
-			$sql  = 'UPDATE '.$this->opts['OrdersTableName'];
+			$sql  = 'UPDATE '.$this->DBTables->Orders;
 			$sql .= ' SET '.$this->DBField('orderQty').'="'.$qty.'"';
 			$sql .= ' ,   '.$this->DBField('orderPaid').'="'.$paid.'"';
-			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
-			$sql .= ' AND   '.$this->opts['OrdersTableName'].".".$this->DBField('stockID')."=$stockID";
+			$sql .= ' WHERE '.$this->DBTables->Orders.".saleID=$saleID";
+			$sql .= ' AND   '.$this->DBTables->Orders.".".$this->DBField('stockID')."=$stockID";
 
 			$this->query($sql);
 		}
@@ -733,16 +744,16 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function DeleteSaleItem($saleID, $stockID)
 		{
 			// Delete a show entry
-			$sql  = 'DELETE FROM '.$this->opts['OrdersTableName'];
-			$sql .= ' WHERE '.$this->opts['OrdersTableName'].".saleID=$saleID";
-			$sql .= ' AND   '.$this->opts['OrdersTableName'].".".$this->DBField('stockID')."=$stockID";
+			$sql  = 'DELETE FROM '.$this->DBTables->Orders;
+			$sql .= ' WHERE '.$this->DBTables->Orders.".saleID=$saleID";
+			$sql .= ' AND   '.$this->DBTables->Orders.".".$this->DBField('stockID')."=$stockID";
 			 
 			$this->query($sql);
 		}
 		
 		function GetSalesQty($sqlFilters)
 		{
-			$sql  = 'SELECT '.$this->TotalSalesField($sqlFilters).' FROM '.$this->opts['SalesTableName'];	
+			$sql  = 'SELECT '.$this->TotalSalesField($sqlFilters).' FROM '.$this->DBTables->Sales;	
 			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
 			$sql .= $this->GetWhereSQL($sqlFilters);
 					
@@ -761,7 +772,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function DeleteSale($saleID)
 		{
 			// Delete a show entry
-			$sql  = 'DELETE FROM '.$this->opts['SalesTableName'];
+			$sql  = 'DELETE FROM '.$this->DBTables->Sales;
 			if (is_array($saleID))
 			{
 				$salesList = '';
@@ -770,10 +781,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					if ($salesList != '') $salesList .= ',';
 					$salesList .= $saleItemID->saleID;
 				}
-				$sql .= ' WHERE '.$this->opts['SalesTableName'].".saleID IN ($salesList)";
+				$sql .= ' WHERE '.$this->DBTables->Sales.".saleID IN ($salesList)";
 			}
 			else
-				$sql .= ' WHERE '.$this->opts['SalesTableName'].".saleID=$saleID";
+				$sql .= ' WHERE '.$this->DBTables->Sales.".saleID=$saleID";
 				
 			$this->query($sql);
 		}			
@@ -781,7 +792,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function GetSaleBuyer($saleID)
 		{
 			$sqlFilters['saleID'] = $saleID;
-			$sql  = 'SELECT * FROM '.$this->opts['SalesTableName'];	
+			$sql  = 'SELECT * FROM '.$this->DBTables->Sales;	
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			
 			$salesListArray = $this->get_results($sql);
@@ -799,7 +810,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if (isset($sqlFilters['saleID']) || isset($sqlFilters['priceID']))
 			{
 				// Explicitly add joined fields from "base" tables (otherwise values will be NULL if there is no matching JOIN)
-				$selectFields .= ', '.$this->opts['SalesTableName'].'.saleID';
+				$selectFields .= ', '.$this->DBTables->Sales.'.saleID';
 
 				$joinCmd = ' LEFT JOIN ';
 			}
@@ -813,7 +824,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					$selectFields .= ','.$totalSalesField;
 			}
 
-			$sql  = 'SELECT '.$selectFields.' FROM '.$this->opts['SalesTableName'];
+			$sql  = 'SELECT '.$selectFields.' FROM '.$this->DBTables->Sales;
 			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
 			
 			$sql .= $this->GetWhereSQL($sqlFilters);
@@ -840,10 +851,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 	
 		function AddGenericFields($EMailTemplate)
 		{
-			$EMailTemplate = str_replace('[organisation]', $this->adminOptions['OrganisationID'], $EMailTemplate);
-			
+			$EMailTemplate = parent::AddGenericFields($EMailTemplate);			
 			$EMailTemplate = str_replace('[salesEMail]', $this->GetSalesEMail(), $EMailTemplate);
-			$EMailTemplate = str_replace('[url]', get_option('siteurl'), $EMailTemplate);
 			
 			return $EMailTemplate;
 		}
@@ -1057,6 +1066,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if (strlen($mailTemplate) == 0)
 				return "EMail Template Not Found ($templatePath)";
 				
+			$this->emailObj = new $this->emailObjClass($this);
+			
 			$saleConfirmation = '';
 			
 			// Find the line with the open php entry then find the end of the line
@@ -1068,7 +1079,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$EMailSubject = $this->AddEMailFields(substr($mailTemplate, $posnPHP, $posnEOL-$posnPHP), $emailContent[0]);
 				$mailTemplate = substr($mailTemplate, $posnEOL);
 			}
-			
+						
 			// Find the line with the close php entry then find the start of the line
 			$posnPHP = stripos($mailTemplate, '?>');
 			if ($posnPHP !== false) $posnPHP = strrpos(substr($mailTemplate, 0, $posnPHP), "\n");
@@ -1107,22 +1118,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 			if (strlen($EMailTo) == 0) $EMailTo = $emailContent[0]->saleEMail;
 
-			$this->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
+			$this->emailObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
 
 			return 'OK';
 		}
 		
-		function sendMail($to, $from, $subject, $content1, $content2 = '', $headers = '', $imageobjs = array())
-		{
-			if (isset($this->emailObj))
-			{
-				$this->emailObj->sendMail($to, $from, $subject, $content1, $content2, $headers, $imageobjs);				
-			}
-		}
-		
 		function GetTxnStatus($Txnid)
 		{
-			$sql = 'SELECT saleStatus FROM '.$this->opts['SalesTableName'].' WHERE saleTxnId="'.$Txnid.'"';
+			$sql = 'SELECT saleStatus FROM '.$this->DBTables->Sales.' WHERE saleTxnId="'.$Txnid.'"';
 			 
 			$txnEntries = $this->get_results($sql);
 			
@@ -1139,7 +1142,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function UpdateSaleIDStatus($SaleId, $Payment_status)
 		{
-			$sql  = 'UPDATE '.$this->opts['SalesTableName'];
+			$sql  = 'UPDATE '.$this->DBTables->Sales;
 			$sql .= ' SET saleStatus="'.$Payment_status.'"';		
 			$sql .= ' WHERE saleId="'.$SaleId.'"';							
 			 
@@ -1148,7 +1151,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function UpdateSaleStatus($Txn_id, $Payment_status)
 		{
-			$sql  = 'UPDATE '.$this->opts['SalesTableName'];
+			$sql  = 'UPDATE '.$this->DBTables->Sales;
 			$sql .= ' SET saleStatus="'.$Payment_status.'"';		
 			$sql .= ' WHERE saleTxnId="'.$Txn_id.'"';							
 			 
@@ -1245,8 +1248,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 		function AddTableLocks($sql)
 		{
-			$sql .= $this->opts['SalesTableName'].' WRITE, ';
-			$sql .= $this->opts['OrdersTableName'].' WRITE ';
+			$sql .= $this->DBTables->Sales.' WRITE, ';
+			$sql .= $this->DBTables->Orders.' WRITE ';
 			
 			return $sql;
 		}

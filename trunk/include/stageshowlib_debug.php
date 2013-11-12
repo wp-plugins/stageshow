@@ -59,6 +59,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 		function GetOptionsDefs()
 		{
 			$testOptionDefs = array(
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Ids',       StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBIds',        StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowDBIds', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show SQL',          StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowSQL',          StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowSQL', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Output',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBOutput',     StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowDBOutput', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show EMail Msgs',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowEMailMsgs',    StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowEMailMsgs', ),				

@@ -24,7 +24,7 @@ include 'stageshow_sales.php';
 	
 if (!class_exists('StageShowPluginClass')) 
 {
-	class StageShowPluginClass  extends StageShowSalesPluginClass 
+	class StageShowPluginClass extends StageShowSalesPluginClass 
 	{
 		var $ourPluginName;
 		var $myDBaseObj;
@@ -55,6 +55,7 @@ if (!class_exists('StageShowPluginClass'))
 			// Add a reference to the header
 			add_action('wp_head', array(&$this, 'OutputMetaTag'));
 			
+			$this->myDBaseObj->pluginSlug = 'stageshow';
 			$this->adminClassFilePrefix = 'stageshow';
 			$this->adminClassPrefix = 'StageShow';
 			
