@@ -57,6 +57,46 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php
 		}
 
+		function GetValidatePerformanceSelect($perfID = 0)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			if ($perfID > 0)
+			{
+				$perfsList = $myDBaseObj->GetPerformancesListByPerfID($perfID);
+				$perfRecord = $perfsList[0];
+				$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
+				$perfName = $perfRecord->showName.' - '.$perfDateTime;
+				$html .= $perfName."\n";
+			}
+			else
+			{
+				// Get performances list for all shows
+				$perfsList = $myDBaseObj->GetActivePerformancesList();
+			
+				$selected = ' selected="" ';
+				
+				$html = '<select name="perfID" id="perfID">'."\n";
+				
+				foreach ($perfsList as $perfRecord)
+				{
+					$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
+					$perfName = $perfRecord->showName.' - '.$perfDateTime;
+					//$selected = ($perfID == $perfRecord->perfID) ? ' selected=""' : '';
+					$html .= '<option value="'.$perfRecord->perfID.'"'.$selected.' >'.$perfName.'</option>'."\n";
+					$selected = '';
+				}
+				
+				$perfName = __("All Performances", $myDBaseObj->get_domain() );
+				//$selected = ($perfID == 0) ? ' selected=""' : '';
+				$html .= '<option value="0"'.$selected.' >'.$perfName.'</option>'."\n";
+				
+				$html .= '</select>'."\n";
+			}
+						
+			return $html;			
+		}
+		
 		function Tools_Validate()
 		{
 												
@@ -66,7 +106,9 @@ if (!class_exists('StageShowToolsAdminClass'))
 			$TxnId = '';
 				
 			StageShowLibUtilsClass::Output_Javascript_SetFocus("TxnId");
-							
+				
+			$perfID = isset($_POST['perfID']) ? $_POST['perfID'] : 0;
+	
 ?>
 <script type="text/javascript">
 	function onSelectDownload(obj)
@@ -90,12 +132,17 @@ if (!class_exists('StageShowToolsAdminClass'))
 			if ($myDBaseObj->GetLocation() !== '')
 			{
 				$TerminalLocation = $myDBaseObj->GetLocation();
-				echo "<tr>
-			<td>".__('Location / Computer ID', $myDBaseObj->get_domain())."</td>
-			<td>$TerminalLocation</td>
-		</tr>
-		";
-		}
+				echo "
+					<tr>
+						<td>".__('Location / Computer ID', $myDBaseObj->get_domain())."</td>
+						<td>$TerminalLocation</td>
+					</tr>
+					<tr>
+						<td>".__('Performance', $myDBaseObj->get_domain())."</td>
+						<td>".$this->GetValidatePerformanceSelect($perfID)."</td>
+					</tr>
+					";				
+			}
 ?>
 			<tr>
 		<th><label for="export_type"><?php _e('Transaction ID', $this->myDomain); ?></label></th>
@@ -107,7 +154,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 			if(isset($_POST['validatesalebutton']))
 			{
 				$env = StageShowLibAdminBaseClass::getEnv($this);					
-				$this->ValidateSale($env);
+				$this->ValidateSale($env, $perfID);
 			}
 ?>
 		</table>
@@ -118,7 +165,12 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php
 		}
 
-		function ValidateSale($env)
+		function LogValidation($env, $saleID, $perfID = 0)
+		{
+			return true;
+		}
+
+		function ValidateSale($env, $perfID)
 		{
 			$saleID = 0;
 				 
@@ -130,61 +182,106 @@ if (!class_exists('StageShowToolsAdminClass'))
 			
 			$validateMsg = 'Sale Validation (Transaction ID: '.$TxnId.') - ';
 			
-			if (strlen($TxnId) > 0)
+			if (strlen($TxnId) == 0) return 0;
+			
+			$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
+				
+			$entryCount = count($results);
+			if ($entryCount == 0)
 			{
-				$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
-						
-				if (count($results) > 0)
-				{					
-					$salerecord = $results[0];
-					
-					$validateMsg .= __('Matching record found', $this->myDomain);
-					switch($salerecord->saleStatus)
+				$validateMsg .= __('No matching record', $this->myDomain);
+				echo '<tr><td colspan="2"><div id="message" class="error stageshow-validate-notfound"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+				return 0;
+			}
+				
+			$saleID = $results[0]->saleID;
+		 
+			// Check that it is for selected performance
+			if ($perfID != 0)
+			{
+				$matchingSales = 0;
+				for ($index = 0; $index<$entryCount; $index++)	
+				{
+					if ($results[$index]->perfID != $perfID)
 					{
-						case PAYPAL_APILIB_SALESTATUS_COMPLETED:
-							$msgClass = 'updated ok';
-							break;
-							
-						case STAGESHOW_SALESTATUS_RESERVED:
-							$msgClass = 'error alert';
-							$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
-							break;
-							
-						default:
-							$msgClass = 'error';
-							$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
-							break;
-							
-							
-					}
-					
-					echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-					
-					echo '<tr><td>'.__('Sale Status', $this->myDomain).':</td><td>'.__($salerecord->saleStatus, $this->myDomain).'</td></tr>'."\n";
-					if ($salerecord->saleStatus == STAGESHOW_SALESTATUS_RESERVED)
-					{
-						echo '<tr><td>'.__('Total Due', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+						unset($results[$index]);
 					}
 					else
 					{
-						echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+						$matchingSales++;
+						if ($matchingSales == 1)
+						{
+							$salerecord = $results[$index];							
+						}								
 					}
-				
-					$salesList = new StageShowSalesAdminDetailsListClass($env);		
-							
-					echo '<tr><td colspan="2">'."\n";
-					$salesList->OutputList($results);	
-					echo "</td></tr>\n";
-							 
-					$saleID = $salerecord->saleID;
-				}
-				else
-				{
-					$validateMsg .= __('No matching record', $this->myDomain);
-					echo '<tr><td colspan="2"><div id="message" class="error"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-				}
+				}						
 			}
-			 
+			else
+			{
+				$matchingSales = $entryCount;								
+				$salerecord = $results[0];
+			}
+			
+			if ($matchingSales == 0)
+			{
+				$validateMsg .= __('Wrong Performance', $this->myDomain);
+				$msgClass = 'stageshow-validate-wrongperf error alert';
+				echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+				
+				$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
+				$salesList = new StageShowSalesAdminDetailsListClass($env);		
+							
+				echo '<tr><td colspan="2">'."\n";
+				$salesList->OutputList($results);	
+				echo "</td></tr>\n";
+						 
+				return 0;	
+			}		
+				
+			if (!$this->LogValidation($env, $saleID, $perfID))
+			{
+				$validateMsg .= __('Already Verified', $this->myDomain);
+				echo '<tr><td colspan="2"><div id="message" class="error stageshow-validate-duplicated"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+				return 0;	
+			}
+			
+			$validateMsg .= __('Matching record found', $this->myDomain);
+			switch($salerecord->saleStatus)
+			{
+				case PAYPAL_APILIB_SALESTATUS_COMPLETED:
+					$msgClass = 'stageshow-validate-ok updated ok';
+					break;
+						
+				case STAGESHOW_SALESTATUS_RESERVED:
+					$msgClass = 'stageshow-validate-reserved error alert';
+					$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
+					break;
+						
+				default:
+					$msgClass = 'stageshow-validate-unknown error';
+					$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
+					break;
+						
+			}
+				
+			echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+				
+			echo '<tr><td>'.__('Sale Status', $this->myDomain).':</td><td>'.__($salerecord->saleStatus, $this->myDomain).'</td></tr>'."\n";
+			if ($salerecord->saleStatus == STAGESHOW_SALESTATUS_RESERVED)
+			{
+				echo '<tr><td>'.__('Total Due', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+			}
+			else
+			{
+				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+			}
+			
+			$salesList = new StageShowSalesAdminDetailsListClass($env);		
+						
+			echo '<tr><td colspan="2">'."\n";
+			$salesList->OutputList($results);	
+			echo "</td></tr>\n";
+						 
 			return $saleID;
 		}
 		

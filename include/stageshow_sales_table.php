@@ -129,6 +129,8 @@ if (!class_exists('StageShowSalesAdminVerifyListClass'))
 		{
 			// Call base constructor
 			parent::__construct($env, $editMode);
+			
+			$this->HeadersPosn = StageShowLibTableClass::HEADERPOSN_TOP;
 		}
 		
 		function GetTableID($result)
@@ -144,8 +146,10 @@ if (!class_exists('StageShowSalesAdminVerifyListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Location',          StageShowLibTableClass::TABLEPARAM_ID => 'verifyLocation',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Date and Time',     StageShowLibTableClass::TABLEPARAM_ID => 'verifyDateTime',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Location',      StageShowLibTableClass::TABLEPARAM_ID => 'verifyLocation',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Date and Time', StageShowLibTableClass::TABLEPARAM_ID => 'verifyDateTime',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show',          StageShowLibTableClass::TABLEPARAM_ID => 'showName',         StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Performance',   StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 			);
 		}		
 				

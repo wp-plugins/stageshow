@@ -4,51 +4,11 @@ include 'stageshowlib_paypalsimulator.php';
 
 if (!class_exists('StageShowPayPalSimulator')) 
 {
-	class StageShowPayPalSimulator extends StageShowLibPayPalSimulator
+	class StageShowPayPalSimulator extends PayPalSimulator
 	{
-		function __construct($saleId = 0) 
+		function __construct($notifyDBaseClass, $saleId = 0) 
 		{
-			parent::__construct();
-			
-			$notifyDBaseClass = STAGESHOW_DBASE_CLASS;
-			$this->myDBaseObj = new $notifyDBaseClass(__FILE__);
-			$this->totalSale = 0.00;
-
-			$formHTML = '';
-			
-			$formHTML .= $this->OutputHeader();
-
-			$devMode = true;
-			if (isset($_GET['id']))
-			{
-				$saleId = $_GET['id'];
-				$devMode = false;
-			}
-			elseif (isset($_POST['id']))
-			{
-				$saleId = $_POST['id'];
-			}
-				
-			if ($saleId > 0)
-			{
-				$notifyURL = $this->GetNotifyURL();
-				$actionHTML = ($notifyURL != '') ? 'action="'.$notifyURL.'" ' : '';
-				$formHTML .=  '<form name="ipntest" '.$actionHTML.' method="post">';			
-				$formHTML .=  $this->OutputSaleForm($saleId);
-			}
-			else
-			{
-				$formHTML .=  '<form name="ipntest" method="post">';			
-				$formHTML .=  $this->OutputSaleSelect(); 
-			}
-			$formHTML .=  '</form>';			
-			
-			echo $formHTML;
-	    }
-
-		function GetNotifyURL() 
-		{
-			return '';
+			parent::__construct($notifyDBaseClass, $saleId);
 	    }
 
 		function OutputHeader() 

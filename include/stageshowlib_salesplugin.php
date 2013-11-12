@@ -54,8 +54,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				else
 					$this->trolleyid = $this->myDomain.'_cart_obj';
 					
-				if (defined('STAGESHOWLIB_RUNASDEMO'))
+				if (defined('RUNSTAGESHOWDEMO'))
+				{
+					$this->trolleyid = $this->myDBaseObj->get_name().'_cart_obj';
 					$this->trolleyid .= '_'.$this->myDBaseObj->loginID;
+				}
 			}
 			if (!isset($this->shortcode)) $this->shortcode = $this->myDomain.'-store';
 			
@@ -388,7 +391,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function GetButtonID($buttonID)
 		{
-			if (defined('STAGESHOWLIB_RUNASDEMO'))
+			if (defined('RUNSTAGESHOWDEMO'))
 			{
 				$pluginID = $this->myDBaseObj->get_name();
 				$buttonID .= '_'.$pluginID;
@@ -412,6 +415,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				$cartContents = new stdClass;
 				$cartContents->nextIndex = 1;
+			}
+			
+			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
+			{
+				StageShowLibUtilsClass::print_r($cartContents, 'Get cartContents ('.$this->trolleyid.')');
 			}
 			
 			return $cartContents;
@@ -440,11 +448,21 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function SaveTrolleyContents($cartContents)
 		{
+			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
+			{
+				StageShowLibUtilsClass::print_r($cartContents, 'Save cartContents ('.$this->trolleyid.')');
+			}
+			
 			$_SESSION[$this->trolleyid] = serialize($cartContents);
 		}
 		
 		function ClearTrolleyContents()
 		{
+			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
+			{
+				echo 'CLEAR cartContents ('.$this->trolleyid.") <br>\n";
+			}
+			
 			unset($_SESSION[$this->trolleyid]);
 		}
 				
@@ -460,6 +478,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$cartContents = $this->GetTrolleyContents();
 			
 			$this->OnlineStore_HandleTrolleyButtons($cartContents);
+		}
+		
+		function OnlineStore_GetSortField($result)
+		{
+			return 0;
 		}
 		
 		function OnlineStore_HandleTrolleyButtons($cartContents)
@@ -506,7 +529,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						$cartEntry->itemID = $itemID;
 						$cartEntry->qty = $ticketQty;
 						
-						$cartEntry->sortBy = $priceEntries[0]->perfDateTime.'-'.$priceEntries[0]->priceType;
+						$cartEntry->sortBy = $this->OnlineStore_GetSortField($priceEntries[0]);
 						
 						$this->AddToTrolleyContents($cartContents, $cartEntry);
 					}
@@ -670,7 +693,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			if (!isset($cartContents->rows))
 			{
 				$rslt->checkoutError  = __('Cannot Checkout', $this->myDomain).' - ';
-				$rslt->checkoutError .= __('Shopping Cart Empty', $this->myDomain);
+				$rslt->checkoutError .= __('Shopping Trolley Empty', $this->myDomain);
 				return $rslt;
 			}
 			
@@ -699,7 +722,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				if (!$ParamsOK)
 				{
 					$rslt->checkoutError  = __('Cannot Checkout', $this->myDomain).' - ';
-					$rslt->checkoutError .= __('Shopping Cart Contents have changed', $this->myDomain);
+					$rslt->checkoutError .= __('Shopping Trolley Contents have changed', $this->myDomain);
 					return $rslt;
 				}
 					
@@ -717,14 +740,14 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$rslt->totalDue += ($itemPrice * $qty);
 			}
 				
-			// Shopping Cart contents have changed if there are "extra" passed parameters 
+			// Shopping Trolley contents have changed if there are "extra" passed parameters 
 			$cartIndex++;
 			$ParamsOK &= !isset($_POST['id'.$cartIndex]);
 			$ParamsOK &= !isset($_POST['qty'.$cartIndex]);
 			if (!$ParamsOK)
 			{
 				$rslt->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
-				$rslt->checkoutError .= __('Item(s) removed from Shopping Cart', $this->myDomain);
+				$rslt->checkoutError .= __('Item(s) removed from Shopping Trolley', $this->myDomain);
 				return $rslt;
 			}
 			
@@ -805,7 +828,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
   				{
 					$this->ClearTrolleyContents();
 				
-					if (defined('STAGESHOWLIB_RUNASDEMO'))
+					if (defined('RUNSTAGESHOWDEMO'))
 					{
 						$this->demosale = $saleId;
 					}

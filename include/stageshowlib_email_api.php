@@ -74,6 +74,11 @@ if (!class_exists('StageShowLibEMailAPIClass'))
 			$phpmailer->SMTPDebug = $SMTPDebug;
 		}
 		
+		function AddImage($imageObj)
+		{
+			return false;
+		}
+		
 		function sendMail($to, $from, $subject, $content, $content2 = '', $headers = '')
 		{
 			$SMTPDebug = $this->parentObj->getDbgOption('Dev_ShowEMailMsgs');

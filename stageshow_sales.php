@@ -26,7 +26,7 @@ include 'include/stageshowlib_salesplugin.php';
 	
 if (!class_exists('StageShowSalesPluginClass')) 
 {
-	class StageShowSalesPluginClass  extends StageShowLibSalesPluginBaseClass 
+	class StageShowSalesPluginClass extends StageShowLibSalesPluginBaseClass 
 	{
 		function __construct()
 		{
@@ -44,7 +44,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			{
 				$this->shortcode = STAGESHOW_SHORTCODE;
 			}
-			elseif (defined('STAGESHOWLIB_RUNASDEMO'))
+			elseif (defined('RUNSTAGESHOWDEMO'))
 			{
 				$this->shortcode = str_replace('stage', 's', STAGESHOW_DIR_NAME).'-boxoffice';
 			}
@@ -63,7 +63,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				include 'include/stageshow_paypalsimulator.php';
 				
 				ob_start();
-				new StageShowPayPalSimulator($this->demosale);
+				new StageShowPayPalSimulator(STAGESHOW_DBASE_CLASS, $this->demosale);
 				$simulatorOutput = ob_get_contents();
 				ob_end_clean();
 
@@ -78,7 +78,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 				foreach ($paramsList as $tagName)
 				{
 					$paramVal = $_POST[$tagName];					
-					$this->myDBaseObj->setDbgOption('PayPalVal_'.$tagName, $paramVal);
+					$sessionVar = 'StageShowSim_'.$tagName;
+					$_SESSION[$sessionVar] = $paramVal;
 				}
 				$this->myDBaseObj->saveOptions();
 				
@@ -453,6 +454,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 			$userInfoVal = 	$user_metaInfo[$metaField][0];
 			return $fieldSep.$userInfoVal;
+		}
+		
+		function OnlineStore_GetSortField($result)
+		{
+			return $result->perfDateTime.'-'.$result->priceType;
 		}
 		
 		function OnlineStore_ProcessCheckout()
