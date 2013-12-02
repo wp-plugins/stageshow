@@ -97,7 +97,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 		function OutputContent_OnlineStoreMain($reqRecordId = '')
 		{
 			if ($reqRecordId != '')
-			{
+			{			
 				parent::OutputContent_OnlineStoreMain($reqRecordId);
 			}			
 		    else
@@ -126,6 +126,14 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 		}
 		
+		function OutputContent_OnlineStoreFooter()
+		{
+			$url = $this->myDBaseObj ->get_pluginURI();
+			$name = $this->myDBaseObj ->get_name();
+			$weblink = __('Driven by').' <a target="_blank" href="'.$url.'">'.$name.'</a>';
+			echo '<div class="stageshow-boxoffice-weblink">'.$weblink.'</div>'."\n";
+		}
+		
 		function IsOnlineStoreItemEnabled($result)
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -142,9 +150,9 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 
-			if ($showID == 0)
+			if ($showID === 0)
 			{
-				return $myDBaseObj->GetPricesList(null);
+				return $myDBaseObj->GetPricesList(null, true);
 			}
 			
 			// Get the prices list for a single show
@@ -364,7 +372,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 					<td class="stageshow-boxoffice-soldout" colspan=2>'.__('Sold Out', $this->myDomain).'</td>
 					';
 			}
-					
+				
 			echo '
 				</tr>
 				</table>
@@ -380,7 +388,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 		
 		function OutputContent_OnlineTrolleyHeader($result)
 		{
-			$this->trolleyHeaderCols = 6;	// Count of the number of columns in the header
+			$this->trolleyHeaderCols = 5;	// Count of the number of columns in the header
 			
 			echo '<tr class="'.$this->cssTrolleyBaseID.'-titles">'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.__('Show', $this->myDomain).'</td>'."\n";
@@ -426,13 +434,43 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$formattedTotal = $this->myDBaseObj->FormatCurrency($total);
 			$shipping = 0.0;
 						
-			echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.$showName.'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.$perfDateTime.'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-type">'.$priceType.'</td>'."\n";
+			if ($showName != '')
+			{
+				echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.$showName.'</td>'."\n";
+				echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.$perfDateTime.'</td>'."\n";
+				$span = '';
+			}
+			else
+			{
+				$span = 'colspan="3"';				
+			}
+			echo '<td '.$span.' class="'.$this->cssTrolleyBaseID.'-type">'.$priceType.'</td>'."\n";
 			$this->OutputContent_OnlineTrolleyDetailsCols($priceEntry, $cartEntry);
 			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.$formattedTotal.'</td>'."\n";
 
 			return $total;
+		}
+		
+		function OutputContent_OnlineTrolleyFee($cartContents)
+		{
+			if ($cartContents->fee > 0)
+			{				
+				$priceEntry = new stdClass;
+				$cartEntry = new stdClass;
+				
+				$priceEntry->showName = '';						
+				$priceEntry->perfDateTime = '';						
+				$priceEntry->priceType = __('Booking Fee', $this->myDomain);
+				$priceEntry->priceValue = $cartContents->fee;
+				$cartEntry->qty = 1;
+				
+				echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";					
+				$this->OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry);
+				echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";					
+				echo "</tr>\n";
+			}
+			
+			return $cartContents->fee;				
 		}
 				
 		function GetUserInfo($user_metaInfo, $fieldId, $fieldSep = '')
@@ -459,6 +497,28 @@ if (!class_exists('StageShowSalesPluginClass'))
 		function OnlineStore_GetSortField($result)
 		{
 			return $result->perfDateTime.'-'.$result->priceType;
+		}
+		
+		function OnlineStore_AddTransactionFee(&$rslt, &$paramCount)
+		{
+			if (($rslt->totalDue > 0) && ($rslt->fee > 0))
+			{
+				$fee = $rslt->fee;
+				$rslt->totalDue += $fee;
+				
+				$paramCount++;
+				
+				$rslt->paypalParams['item_name_'.$paramCount] = __('Booking Fee', $this->myDomain);
+				$rslt->paypalParams['amount_'.$paramCount] = $fee;
+				$rslt->paypalParams['quantity_'.$paramCount] = 1;
+				$rslt->paypalParams['shipping_'.$paramCount] = 0;	
+				
+				$rslt->saleDetails['transactionfee'] = $fee;			
+			}
+			else
+			{
+				$rslt->saleDetails['transactionfee'] = 0;				
+			}	
 		}
 		
 		function OnlineStore_ProcessCheckout()

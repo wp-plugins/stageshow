@@ -67,7 +67,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 				$perfRecord = $perfsList[0];
 				$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
 				$perfName = $perfRecord->showName.' - '.$perfDateTime;
-				$html .= $perfName."\n";
+				$html = $perfName."\n";
 			}
 			else
 			{
@@ -273,6 +273,10 @@ if (!class_exists('StageShowToolsAdminClass'))
 			}
 			else
 			{
+				if ($salerecord->saleTransactionFee > 0)
+				{
+					echo '<tr><td>'.__('Booking Fee', $this->myDomain).':</td><td>'.$salerecord->saleTransactionFee.'</td></tr>'."\n";
+				}
 				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
 			}
 			

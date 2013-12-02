@@ -27,6 +27,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 	define('STAGESHOWLIB_STATE_DELETED',   'deleted');
 	define('STAGESHOWLIB_STATE_DISCARDED', 'discarded');
 			
+	if (!defined('STAGESHOWLIB_MAXSALECOUNT'))
+	{
+		define('STAGESHOWLIB_MAXSALECOUNT', 4);
+	}
+	
 	class StageShowLibSalesPluginBaseClass
 	{
 		var $lastItemID = '';
@@ -94,7 +99,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
-			return (is_int($reqRecordId) && ($reqRecordId == 0)) ? $myDBaseObj->GetPricesList(null) :  $this->GetOnlineStoreProductDetails($reqRecordId);
+			if ($reqRecordId === 0)
+			{
+				$reqRecordId = '';
+			}
+			
+			return ($reqRecordId == '') ? $myDBaseObj->GetPricesList(null) :  $this->GetOnlineStoreProductDetails($reqRecordId);
 		}
 		
 		function GetOnlineStorePriceID($result)
@@ -194,6 +204,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 
 			$itemPrice = $myDBaseObj->FormatCurrency($this->GetOnlineStoreItemPrice($result));
 			
+			$stockDetails = isset($result->stockDetails) ? $result->stockDetails : '';
+			$addColSpan = ($stockDetails != '') ? ' rowspan="2" ' : '';
+			
 			echo '
 				<table cellspacing="0">
 					<tr>
@@ -227,12 +240,23 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$buttonTag = ($buttonURL != '') ? ' src="'.$buttonURL.'"' : '';
 			
 			echo '
-						<td class="'.$this->cssBaseID.'-addcol">
+						<td '.$addColSpan.'class="'.$this->cssBaseID.'-add">
 							<input type="submit" value="'.__('Add', $this->myDomain).'" alt="'.$altTag.'" '.$buttonTag.' id="AddTicketSale" name="AddTicketSale"/>
 						</td>
-					</tr>
-				</table>
+					</tr>				
 				';
+				
+			if ($stockDetails != '') echo '
+					<tr>
+						<td colspan="4" class="'.$this->cssBaseID.'-details">'.$result->stockDetails.'</td>
+					</tr>				
+				';
+				
+			echo "</table>\n";
+		}
+		
+		function OutputContent_OnlineStoreFooter()
+		{
 		}
 		
 		function OutputContent_OnlineStore( $atts )
@@ -246,7 +270,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$pluginURI = $myDBaseObj->get_pluginURI();
 			echo "\n<!-- $pluginID Plugin $pluginVer for Wordpress by $pluginAuthor - $pluginURI -->\n";			
 			
-			$this->OnlineStore_HandleTrolley();
+			$hasActiveTrolley = $this->OnlineStore_HandleTrolley();
 			
 			$atts = shortcode_atts(array(
 				'id'    => '',
@@ -258,9 +282,16 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			
 			$reqRecordId = $atts['id'];
 			$this->OutputContent_OnlineStoreMain($reqRecordId);
+			$this->OutputContent_OnlineStoreFooter();
 			
 			$outputContent = ob_get_contents();
 			ob_end_clean();
+			
+			if ($hasActiveTrolley && $myDBaseObj->getOption('ProductsAfterTrolley'))
+			{
+				echo $outputContent;
+				$outputContent = '';
+			}
 			
 			return $outputContent;						
 		}
@@ -373,9 +404,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 		function OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry)
 		{
-			$itemName = $priceEntry->stockName;
-			$priceRef = $priceEntry->stockRef;
-						
 			$qty = $cartEntry->qty;
 			
 			$priceValue = $this->GetOnlineStoreItemPrice($priceEntry);
@@ -389,6 +417,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $total;
 		}
 		
+		function OutputContent_OnlineTrolleyFee($cartContents)
+		{
+			return 0;
+		}
+				
 		function GetButtonID($buttonID)
 		{
 			if (defined('RUNSTAGESHOWDEMO'))
@@ -440,6 +473,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				}				
 			}
 			
+			$cartContents->fee = $this->myDBaseObj->GetTransactionFee();
+			
 			$index = $cartContents->nextIndex;
 			$cartContents->nextIndex++;
 			
@@ -477,7 +512,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 			$cartContents = $this->GetTrolleyContents();
 			
-			$this->OnlineStore_HandleTrolleyButtons($cartContents);
+			return $this->OnlineStore_HandleTrolleyButtons($cartContents);
 		}
 		
 		function OnlineStore_GetSortField($result)
@@ -539,124 +574,129 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			}
 				
 			if (!isset($cartContents->rows))
-				return;
+				return false;
 				
-			if (count($cartContents->rows) > 0)
-			{
-				$hiddenTags  = "\n";
-			
-				$doneHeader = false;
+			if (count($cartContents->rows) == 0)
+				return false;
+				
+			$hiddenTags  = "\n";
+		
+			$doneHeader = false;
 
-				if (isset($_GET['action']))
+			if (isset($_GET['action']))
+			{
+				switch($_GET['action'])
 				{
-					switch($_GET['action'])
-					{
-						case 'remove':
-							if (!isset($_GET['id']))
-								break;
-							$itemID = $_GET['id'];
-							unset($cartContents->rows[$itemID]);
-							$this->SaveTrolleyContents($cartContents);
+					case 'remove':
+						if (!isset($_GET['id']))
 							break;
+						$itemID = $_GET['id'];
+						unset($cartContents->rows[$itemID]);
+						$this->SaveTrolleyContents($cartContents);
+						break;
+				}
+			}
+				
+			$runningTotal = 0;			
+			foreach ($cartContents->rows as $cartIndex => $cartEntry)
+			{				
+				$itemID = $cartEntry->itemID;
+				$qty = $cartEntry->qty;
+				
+				$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
+				if (count($priceEntries) == 0)
+				{
+					echo '<div id="message" class="'.$this->cssDomain.'-error">'.__("Shopping Trolley Cleared", $this->myDomain).'</div>';					
+					if (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
+					{
+						echo "No entry for ItemID:$itemID<br>";
+						StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
 					}
+					$this->ClearTrolleyContents();
+					return false;
 				}
 					
-				$runningTotal = 0;			
-				foreach ($cartContents->rows as $cartIndex => $cartEntry)
-				{				
-					$itemID = $cartEntry->itemID;
-					$qty = $cartEntry->qty;
-					
-					$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
-					if (count($priceEntries) == 0)
-					{
-						echo '<div id="message" class="'.$this->cssDomain.'-error">'.__("Shopping Trolley Cleared", $this->myDomain).'</div>';					
-						if (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
-						{
-							echo "No entry for ItemID:$itemID<br>";
-							StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
-						}
-						$this->ClearTrolleyContents();
-						return;
-					}
-						
-					$priceEntry = $priceEntries[0];
-					if (!$doneHeader)
-					{
-						echo '<div class="'.$this->cssTrolleyBaseID.'-header"><h2>'.__('Your Shopping Trolley', $this->myDomain).'</h2></div>'."\n";
-						if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'header') && ($myDBaseObj->getOption('CheckoutNote') != '') )
-						{
-							echo $myDBaseObj->getOption('CheckoutNote');
-						}
-						echo '<div class="'.$this->cssTrolleyBaseID.'">'."\n";
-						echo '<form method="post">'."\n";
-						echo "<table>\n";
-						if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'titles') && ($myDBaseObj->getOption('CheckoutNote') != '') )
-						{
-							echo $myDBaseObj->getOption('CheckoutNote');
-						}
-						$this->OutputContent_OnlineTrolleyHeader($priceEntry);
-							
-						$doneHeader = true;
-					}
-						
-					echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";
-						
-					$runningTotal += $this->OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry);
-						
-					$removeLineURL = get_permalink();
-					$removeLineURL  = add_query_arg('action', 'remove', $removeLineURL);
-					$removeLineURL  = add_query_arg('id', $cartIndex, $removeLineURL);
-					echo '<td class="'.$this->cssTrolleyBaseID.'-remove"><a href=' . $removeLineURL . '>'.__('Remove', $this->myDomain).'</a></td>'."\n";
-						
-					echo "</tr>\n";
-						
-					$hiddenTags .= '<input type="hidden" name="id'.$cartIndex.'" value="'.$itemID.'"/>'."\n";
-					$hiddenTags .= '<input type="hidden" name="qty'.$cartIndex.'" value="'.$qty.'"/>'."\n";
-				}
-					
-				if ($doneHeader)
-				{	
-					// Add totals row and checkout button
-					$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);
-				
-					echo '<tr class="'.$this->cssTrolleyBaseID.'-totalrow">'."\n";
-					echo '<td>&nbsp;</td>'."\n";
-					echo '<td>'.__('Total', $this->myDomain).'</td>'."\n";
-					echo '<td class="'.$this->cssTrolleyBaseID.'-total">'.$runningTotal.'</td>'."\n";
-					echo '<td colspan="'.($this->trolleyHeaderCols-3).'">&nbsp;</td>'."\n";
-					echo "</tr>\n";
-				
-					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'above') && ($myDBaseObj->getOption('CheckoutNote') != '') )
-					{
-						echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
-					}
-						
-					echo '<tr>'."\n";
-					echo '<td align="right" colspan="'.$this->trolleyHeaderCols.'" class="'.$this->cssTrolleyBaseID.'-checkout">'."\n";
-					
-					$this->OutputContent_OnlineCheckoutButton();
-						
-					echo '</td>'."\n";
-					echo "</tr>\n";
-					
-					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'below') && ($myDBaseObj->getOption('CheckoutNote') != '') )
-					{
-						echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
-					}
-						
-					echo "</table>\n";
-					echo $hiddenTags;						
-					echo '</form>'."\n";					
-					echo '</div>'."\n";
-					
-					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'bottom') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+				$priceEntry = $priceEntries[0];
+				if (!$doneHeader)
+				{
+					echo '<div class="'.$this->cssTrolleyBaseID.'-header"><h2>'.__('Your Shopping Trolley', $this->myDomain).'</h2></div>'."\n";
+					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'header') && ($myDBaseObj->getOption('CheckoutNote') != '') )
 					{
 						echo $myDBaseObj->getOption('CheckoutNote');
 					}
+					echo '<div class="'.$this->cssTrolleyBaseID.'">'."\n";
+					echo '<form method="post">'."\n";
+					echo "<table>\n";
+					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'titles') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+					{
+						echo $myDBaseObj->getOption('CheckoutNote');
+					}
+					$this->OutputContent_OnlineTrolleyHeader($priceEntry);
+						
+					$doneHeader = true;
+				}
 					
-				}					
+				echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";
+					
+				$runningTotal += $this->OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry);
+					
+				$removeLineURL = get_permalink();
+				$removeLineURL  = add_query_arg('action', 'remove', $removeLineURL);
+				$removeLineURL  = add_query_arg('id', $cartIndex, $removeLineURL);
+				echo '<td class="'.$this->cssTrolleyBaseID.'-remove"><a href=' . $removeLineURL . '>'.__('Remove', $this->myDomain).'</a></td>'."\n";
+					
+				echo "</tr>\n";
+					
+				$hiddenTags .= '<input type="hidden" name="id'.$cartIndex.'" value="'.$itemID.'"/>'."\n";
+				$hiddenTags .= '<input type="hidden" name="qty'.$cartIndex.'" value="'.$qty.'"/>'."\n";
 			}
+			
+			$runningTotal += $this->OutputContent_OnlineTrolleyFee($cartContents);
+				
+			if ($doneHeader)
+			{	
+				// Add totals row and checkout button
+				$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);
+			
+				echo '<tr class="'.$this->cssTrolleyBaseID.'-totalrow">'."\n";
+				echo '<td>&nbsp;</td>'."\n";
+				echo '<td>'.__('Total', $this->myDomain).'</td>'."\n";
+				echo '<td colspan="'.($this->trolleyHeaderCols-4).'">&nbsp;</td>'."\n";
+				echo '<td class="'.$this->cssTrolleyBaseID.'-total">'.$runningTotal.'</td>'."\n";
+				echo '<td>&nbsp;</td>'."\n";
+				echo "</tr>\n";
+			
+				if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'above') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+				{
+					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
+				}
+					
+				echo '<tr>'."\n";
+				echo '<td align="right" colspan="'.$this->trolleyHeaderCols.'" class="'.$this->cssTrolleyBaseID.'-checkout">'."\n";
+				
+				$this->OutputContent_OnlineCheckoutButton();
+					
+				echo '</td>'."\n";
+				echo "</tr>\n";
+				
+				if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'below') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+				{
+					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
+				}
+					
+				echo "</table>\n";
+				echo $hiddenTags;						
+				echo '</form>'."\n";					
+				echo '</div>'."\n";
+				
+				if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'bottom') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+				{
+					echo $myDBaseObj->getOption('CheckoutNote');
+				}
+				
+			}		
+			
+			return $doneHeader;			
 		}
 
 		function GetOnlineStoreTrolleyDetails($cartIndex, $cartEntry)
@@ -739,7 +779,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 				$rslt->totalDue += ($itemPrice * $qty);
 			}
-				
+			
+			$rslt->fee = $cartContents->fee;
+			$this->OnlineStore_AddTransactionFee($rslt, $paramCount);
+											
 			// Shopping Trolley contents have changed if there are "extra" passed parameters 
 			$cartIndex++;
 			$ParamsOK &= !isset($_POST['id'.$cartIndex]);
@@ -754,6 +797,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $rslt;
 		}		
 
+		function OnlineStore_AddTransactionFee()
+		{
+		}
+		
 		function OnlineStore_ProcessCheckout()
 		{
 			// Process checkout request for Integrated Trolley
@@ -798,7 +845,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					
 				$checkoutRslt->paypalParams['notify_url'] = $myDBaseObj->PayPalNotifyURL;
 			
-				$paypalURL = 'http://www.paypal.com/cgi-bin/webscr';
+				$paypalURL = PayPalAPIClass::GetPayPalURL($myDBaseObj->adminOptions['PayPalEnv'] == 'sandbox');
+				//$paypalURL = 'http://www.paypal.com/cgi-bin/webscr';
 				
 				$paypalMethod = 'GET';				
 				if ($paypalMethod == 'GET')

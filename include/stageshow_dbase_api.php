@@ -457,6 +457,7 @@ if (!class_exists('StageShowDBaseClass'))
 						perfID INT UNSIGNED NOT NULL,
 						priceType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL,
 						priceValue DECIMAL(9,2) NOT NULL,
+						priceHeadCount INT UNSIGNED NOT NULL DEFAULT 1,
 					';
 					break;
 					
@@ -1201,27 +1202,20 @@ if (!class_exists('StageShowDBaseClass'))
 					return array();
 			}
 			
-			if ($activeOnly)
-			{
-				$sqlFilters['publicPrices'] = true;
-				$sqlFilters['activePrices'] = true;
-				$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
-			}
-				 
 			$sqlFilters['showID'] = $showID;
-			return $this->GetPricesList($sqlFilters);
+			return $this->GetPricesList($sqlFilters, $activeOnly);
 		}
 				
-		function GetPricesListByPerfID($perfID)
+		function GetPricesListByPerfID($perfID, $activeOnly = false)
 		{
 			$sqlFilters['perfID'] = $perfID;
-			return $this->GetPricesList($sqlFilters);
+			return $this->GetPricesList($sqlFilters, $activeOnly);
 		}
 				
-		function GetPricesListByPriceID($priceID)
+		function GetPricesListByPriceID($priceID, $activeOnly = false)
 		{
 			$sqlFilters['priceID'] = $priceID;
-			return $this->GetPricesList($sqlFilters);
+			return $this->GetPricesList($sqlFilters, $activeOnly);
 		}
 				
 		function GetPricesJoins($sqlFilters)
@@ -1236,8 +1230,15 @@ if (!class_exists('StageShowDBaseClass'))
 			return $sql;
 		}
 				
-		function GetPricesList($sqlFilters)
+		function GetPricesList($sqlFilters, $activeOnly = false)
 		{
+			if ($activeOnly)
+			{
+				$sqlFilters['publicPrices'] = true;
+				$sqlFilters['activePrices'] = true;
+				$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
+			}
+				 
 			$selectFields  = '*';
 			if (isset($sqlFilters['saleID']))
 			{
@@ -1770,6 +1771,12 @@ if (!class_exists('StageShowDBaseClass'))
 		 
 			$this->query($sql);
 		}			
+		
+				
+		function GetTransactionFee()
+		{
+			return 0;
+		}
 		
 // ----------------------------------------------------------------------
 //

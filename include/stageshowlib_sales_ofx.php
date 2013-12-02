@@ -47,7 +47,7 @@ if (!class_exists('StageShowLibOFXExportAdminClass'))
 	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
 			if ( isset( $_GET['downloadexport'] ) )
 			{
-				$this->filename = 'stageshow.ofx';	
+				$this->fileName = 'stageshow.ofx';	
 							
 				if ( isset( $_GET['download'] ) ) 
 				{
@@ -55,14 +55,19 @@ if (!class_exists('StageShowLibOFXExportAdminClass'))
 					{          
 						default :
 							$this->fileExtn = 'ofx';
-							$this->output_downloadHeader('application/x-ofx', 'utf-8');
-							$this->ofx_content();
+							$this->Export('application/x-ofx');
 							break;
 					}
 				}			       
 			}
 			else
 				die;
+		}
+
+		function Export($application, $charset = 'utf-8')
+		{
+			parent::Export($application);
+			$this->ofx_content();
 		}
 
 		function ofx_output($line = '', $isPair = true)

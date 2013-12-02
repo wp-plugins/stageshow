@@ -19,47 +19,8 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-/* --------------------------------------------------------------------------- */
-/*                                                                             */
-/*                    StageShow Seat Layout Styles                             */
-/*                                                                             */
-/* --------------------------------------------------------------------------- */
-
-div.stageshow-boxoffice table
-{
-	border: 0;
-	padding: 0;
-	margin: 0;
-	border-collapse:separate;
-	border-spacing:5px 5px;
-}
-
-td.stageshow-boxoffice-seat
-{
-	border: 3px solid;
-	padding: 0;
-	border-radius: 4px;
-	border-style: solid;
-	margin: 3px;
-	
-	text-align: center;
-}
-
-td.stageshow-boxoffice-seat-available
-{
-    background-color: #80FF80;
-}
-
-td.stageshow-boxoffice-seat-requested
-{
-    background-color: #FFFF80;
-}
-
-td.stageshow-boxoffice-seat-unavailable,
-td.stageshow-boxoffice-seat-unknown
-{
-    background-color: #FF0000;
-}
+@import url(admin.css);
+@import url(stageshow-seats.css);
 
 /* --------------------------------------------------------------------------- */
 /*                                                                             */
@@ -73,10 +34,10 @@ td.stageshow-boxoffice-perfnote
 	align: left;
 }
 
-div.stageshow-boxoffice table,
-div.stageshow-boxoffice tr,
-div.stageshow-boxoffice td,
-div.stageshow-boxoffice select
+div.stageshow-boxoffice-layout table,
+div.stageshow-boxoffice-layout tr,
+div.stageshow-boxoffice-layout td,
+div.stageshow-boxoffice-layout select
 {
 	padding: 0 0 0 0;
 	margin: 0 0 0 0;
@@ -111,15 +72,21 @@ div.stageshow-boxoffice select
 	/* display:none; */
 }
 
-div.stageshow-boxoffice input
+div.stageshow-boxoffice-layout input
 {
 	margin: 0 0 0 0;
 	text-align: left;
 }
 
-div.stageshow-boxoffice td
+div.stageshow-boxoffice-layout td
 {
 	text-align: center;
+}
+
+div.stageshow-boxoffice-weblink
+{
+	text-align: right;
+	/* display:none; */
 }
 
 /* --------------------------------------------------------------------------- */

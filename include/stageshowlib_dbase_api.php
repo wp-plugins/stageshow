@@ -41,7 +41,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 		const ADMIN_SETTING = 1;
 		const DEBUG_SETTING = 2;
 		
-		var $ordersDBTableID;
 		var $optionsID;
 		
 		var $adminOptions;

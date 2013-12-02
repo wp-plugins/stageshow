@@ -49,7 +49,7 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 				$this->moreText = '';
 			}
 			
-			$this->defaultTabId = 'stageshow-settings-tab';
+			$this->defaultTabId = 'general-settings-tab';
 		}
 		
 		function GetTableID($result)
@@ -62,8 +62,8 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 			$this->isTabbedOutput = true;
 			
 			$rowDefs = array(			
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'General',    StageShowLibTableClass::TABLEPARAM_ID => 'stageshow-settings-tab', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Advanced',      StageShowLibTableClass::TABLEPARAM_ID => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_AFTER => 'stageshow-settings-tab',  ),				
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'General',    StageShowLibTableClass::TABLEPARAM_ID => 'general-settings-tab', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Advanced',      StageShowLibTableClass::TABLEPARAM_ID => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_AFTER => 'general-settings-tab',  ),				
 			);
 			
 			$rowDefs = $this->MergeSettings(parent::GetMainRowsDefinition(), $rowDefs);
@@ -84,16 +84,17 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 			);
 			
 			$rowDefs = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Organisation ID',                 StageShowLibTableClass::TABLEPARAM_TAB => 'stageshow-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'OrganisationID',		   StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_ORGANISATIONID_TEXTLEN, StageShowLibTableClass::TABLEPARAM_SIZE => STAGESHOW_ORGANISATIONID_EDITLEN, ),				
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Sale EMail Template',             StageShowLibTableClass::TABLEPARAM_TAB => 'stageshow-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'EMailTemplatePath',       StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT,   StageShowLibTableClass::TABLEPARAM_DIR => $templatePath, StageShowLibTableClass::TABLEPARAM_EXTN => 'php', StageShowLibTableClass::TABLEPARAM_BEFORE => 'AdminEMail', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'StageShow Sales EMail',           StageShowLibTableClass::TABLEPARAM_TAB => 'stageshow-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'AdminEMail',			   StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_MAIL_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => STAGESHOW_MAIL_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Bcc EMails to Sales EMail',       StageShowLibTableClass::TABLEPARAM_TAB => 'stageshow-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'BccEMailsToAdmin',	       StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Send EMail confirmation to Administrator' ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Currency Symbol',		           StageShowLibTableClass::TABLEPARAM_TAB => 'stageshow-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'UseCurrencySymbol',       StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Include in Box Office Output' ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Items per Page',                  StageShowLibTableClass::TABLEPARAM_TAB => 'stageshow-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PageLength',			   StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     StageShowLibTableClass::TABLEPARAM_LEN => 3, StageShowLibTableClass::TABLEPARAM_DEFAULT => STAGESHOWLIB_EVENTS_PER_PAGE),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Max Ticket Qty',                  StageShowLibTableClass::TABLEPARAM_TAB => 'stageshow-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'MaxTicketQty',            StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     StageShowLibTableClass::TABLEPARAM_LEN => 2, StageShowLibTableClass::TABLEPARAM_DEFAULT => STAGESHOW_MAXTICKETCOUNT),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Organisation ID',                 StageShowLibTableClass::TABLEPARAM_TAB => 'general-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'OrganisationID',		 StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_ORGANISATIONID_TEXTLEN, StageShowLibTableClass::TABLEPARAM_SIZE => STAGESHOW_ORGANISATIONID_EDITLEN, ),				
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Sale EMail Template',             StageShowLibTableClass::TABLEPARAM_TAB => 'general-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'EMailTemplatePath',     StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT,   StageShowLibTableClass::TABLEPARAM_DIR => $templatePath, StageShowLibTableClass::TABLEPARAM_EXTN => 'php', StageShowLibTableClass::TABLEPARAM_BEFORE => 'AdminEMail', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'StageShow Sales EMail',           StageShowLibTableClass::TABLEPARAM_TAB => 'general-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'AdminEMail',			 StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_MAIL_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => STAGESHOW_MAIL_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Bcc EMails to Sales EMail',       StageShowLibTableClass::TABLEPARAM_TAB => 'general-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'BccEMailsToAdmin',	     StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Send EMail confirmation to Administrator' ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Currency Symbol',		           StageShowLibTableClass::TABLEPARAM_TAB => 'general-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'UseCurrencySymbol',     StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Include in Box Office Output' ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Box Office Below Trolley',        StageShowLibTableClass::TABLEPARAM_TAB => 'general-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'ProductsAfterTrolley',  StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Move Box Office below Active Trolley', StageShowLibTableClass::TABLEPARAM_DEFAULT => false ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Items per Page',                  StageShowLibTableClass::TABLEPARAM_TAB => 'general-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'PageLength',			 StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     StageShowLibTableClass::TABLEPARAM_LEN => 3, StageShowLibTableClass::TABLEPARAM_DEFAULT => STAGESHOWLIB_EVENTS_PER_PAGE),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Max Ticket Qty',                  StageShowLibTableClass::TABLEPARAM_TAB => 'general-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'MaxTicketQty',          StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXT,     StageShowLibTableClass::TABLEPARAM_LEN => 2, StageShowLibTableClass::TABLEPARAM_DEFAULT => STAGESHOW_MAXTICKETCOUNT),
 
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Note Position',          StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutNotePosn',        StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT,   StageShowLibTableClass::TABLEPARAM_ITEMS => $checkoutNoteOptions, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Note',                   StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutNote',            StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXTBOX,  StageShowLibTableClass::TABLEPARAM_ROWS  => 4, StageShowLibTableClass::TABLEPARAM_COLS => 60, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Note Position',          StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutNotePosn',      StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT,   StageShowLibTableClass::TABLEPARAM_ITEMS => $checkoutNoteOptions, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Note',                   StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutNote',          StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXTBOX,  StageShowLibTableClass::TABLEPARAM_ROWS  => 4, StageShowLibTableClass::TABLEPARAM_COLS => 60, ),
 			);
 			
 			$rowDefs = $this->MergeSettings(parent::GetDetailsRowsDefinition(), $rowDefs);

@@ -266,7 +266,7 @@ function HideElement(obj)
 			echo "GetBulkActionMsg() function not defined in ".get_class()."<br>\n";
 		}
 		
-		static function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass, $elementId = 0)
+		static function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass = '', $elementId = 0)
 		{
 			$buttonAction = strtolower(str_replace(" ", "", $buttonText));
 			$buttonText = __($buttonText, $domainId);
@@ -275,7 +275,11 @@ function HideElement(obj)
 			$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
 			if ($elementId !== 0) $editLink .= '&id='.$elementId;
 			$editLink = StageShowLibDBaseClass::AddParamAdminReferer($caller, $editLink);
-			$editControl = '<div class='.$buttonClass.'><a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a></div>'."\n";  
+			$editControl = '<a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a>'."\n";  
+			if ($buttonClass != '')
+			{
+				$editControl = '<div class='.$buttonClass.'>'.$editControl.'</div>'."\n";  
+			}
 			return $editControl;    
 		}
 		
@@ -403,7 +407,12 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 			
 			// Save admin settings to database
 			foreach ($settingOpts as $settingOption)
-				{		
+				{	
+					if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_READONLY]))
+					{
+						continue;
+					}
+					
 					switch ($settingOption[StageShowLibTableClass::TABLEPARAM_TYPE])
 					{
 						case StageShowLibTableClass::TABLEENTRY_READONLY:
