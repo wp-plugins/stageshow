@@ -9,17 +9,17 @@ function clickSeat(obj, zoneID, zoneDef)
 {
 	var seatId, hiddenSeatsElem, hiddenZonesElem, hiddenDefsElem;
 	
-	seatId = obj.id;
-	seatId = obj.id.replace("stageshow-boxoffice-results-", "");
+	seatIdParts = obj.id.split("-");
+	seatId = seatIdParts[seatIdParts.length-1];
 	
 	if (!seatAvailable(seatId))
 	{
 		return;
 	}
 	
-	hiddenSeatsElem = document.getElementById("stageshow-boxoffice-results-seats");
-	hiddenZonesElem = document.getElementById("stageshow-boxoffice-results-zones");
-	hiddenDefsElem = document.getElementById("stageshow-boxoffice-results-zonedefs");
+	hiddenSeatsElem = document.getElementById("stageshow-boxoffice-layout-seats");
+	hiddenZonesElem = document.getElementById("stageshow-boxoffice-layout-zones");
+	hiddenDefsElem = document.getElementById("stageshow-boxoffice-layout-zonedefs");
 	
 	/* Add a space either side of the name */
 	/* This prevents a match with part of any longer Ids */
@@ -61,7 +61,7 @@ function onSeatsLoad()
 		for (col=1; col<=maxCols; col++)
 		{
 			var seatId = row + '_' + col;
-			var seatObj = document.getElementById('stageshow-boxoffice-results-' + seatId);
+			var seatObj = document.getElementById('stageshow-boxoffice-layout-seat-' + seatId);
 			
 			if (seatObj != null)
 			{

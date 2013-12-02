@@ -101,7 +101,9 @@ if (!class_exists('StageShowLibTableClass'))
 		var $moreText;
 		var $lessText;
 		var $hiddenRowsButtonId;
-		var $hiddenRowStyle = 'style="display: none;"';
+		var $showOptionsID = 0;
+		var $hiddenRowStyle  = 'style="display: none;"';
+		var $visibleRowStyle = 'style="display: "';
 		
 		var $currRow;
 		var $currCol;
@@ -177,9 +179,9 @@ if (!class_exists('StageShowLibTableClass'))
 			$this->firstRowShown = 1 + (($this->currentPage - 1) * $this->rowsPerPage);
 		}
 
-		function AddHiddenRows($result, $hiddenRowsID, $hiddenRows)
+		function AddHiddenRows($result, $hiddenRowsID, $hiddenRows, $style)
 		{
-			$this->NewRow($result, 'id="'.$hiddenRowsID.'" '.$this->hiddenRowStyle.' class="hiddenRow"');
+			$this->NewRow($result, 'id="'.$hiddenRowsID.'" '.$style.' class="hiddenRow"');
 			$this->AddToTable($result, $hiddenRows);
 
 			$this->maxCol = max($this->maxCol, $this->HeaderCols);
@@ -289,7 +291,7 @@ if (!class_exists('StageShowLibTableClass'))
 
 		function AddInputToTable($result, $inputName, $maxlength, $value, $col=0, $newRow = false, $size = 0)
 		{
-			$inputName .= $this->GetRecordID($result);
+			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
 
 			if ($size <= 0)
 			{
@@ -320,7 +322,7 @@ if (!class_exists('StageShowLibTableClass'))
 
 		function AddSelectToTable($result, $inputName, $options, $value='', $col=0, $newRow = false)
 		{
-			$inputName .= $this->GetRecordID($result);
+			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);
 			
 			$content = "<select name=$inputName>"."\n";
 			foreach ($options as $index => $option)
@@ -1028,6 +1030,11 @@ if (!class_exists('StageShowLibAdminListClass'))
 			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetRecordID');
 		}
 		
+		function GetDetailID($result)
+		{
+			return '';
+		}
+		
 		function GetRowClass($result)
 		{
 			return '';
@@ -1294,7 +1301,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					if (isset($columnDef[self::TABLEPARAM_ID]))
 					{
 						$columnId = $columnDef[self::TABLEPARAM_ID];
-						$recId = $this->GetRecordID($result);
+						$recId = $this->GetRecordID($result).$this->GetDetailID($result);
 						
 						if ($this->updateFailed && isset($_POST[$columnId.$recId]))
 						{
@@ -1309,7 +1316,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					}
 					else
 						$currVal = '';
-
+				
 					if (isset($columnDef[StageShowLibTableClass::TABLEPARAM_DECODE]))
 					{
 						$optionId = $columnDef[StageShowLibTableClass::TABLEPARAM_ID];
@@ -1364,7 +1371,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 						case self::TABLEENTRY_VALUE:
 						case self::TABLEENTRY_VIEW:
 						case self::TABLEENTRY_READONLY:
-							$recId = $this->GetRecordID($result);
+							$recId = $this->GetRecordID($result).$this->GetDetailID($result);
 							$hiddenTag = '<input type="hidden" name="'.$columnId.$recId.'" id="'.$columnId.$recId.'" value="'.$currVal.'"/>';
 							if (isset($columnDef[StageShowLibTableClass::TABLEPARAM_LINK]))
 							{
@@ -1403,7 +1410,10 @@ if (!class_exists('StageShowLibAdminListClass'))
 		
 		function AddOptions($result, $optionDetails = array())
 		{
-			$hiddenRowsID = 'record'.$this->GetRecordID($result).'options';
+			$optionsRecordID = $this->GetRecordID($result);
+			$showOptions = ($this->showOptionsID == $optionsRecordID);
+			
+			$hiddenRowsID = 'record'.$optionsRecordID.'options';
 			
 			if (count($this->detailsRowsDef) > 0)
 			{
@@ -1413,7 +1423,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 				
 				if ($this->moreText != '')
 				{
-					$this->AddShowOrHideButtonToTable($result, $this->tableName, $hiddenRowsID, $this->moreText);
+					$buttonText = $showOptions ? $this->lessText : $this->moreText;				
+					$this->AddShowOrHideButtonToTable($result, $this->tableName, $hiddenRowsID, $buttonText);
 					$colClassList .= 'optionsCol';					
 				}
 				else if ($this->maxCol > 0)
@@ -1526,8 +1537,9 @@ if (!class_exists('StageShowLibAdminListClass'))
 				}
 				$hiddenRows .= "</table>\n";
 				
+				$style = $showOptions ? $this->visibleRowStyle : $this->hiddenRowStyle;				
 				$this->spanEmptyCells = true;
-				$this->AddHiddenRows($result, $hiddenRowsID, $hiddenRows);					
+				$this->AddHiddenRows($result, $hiddenRowsID, $hiddenRows, $style);					
 			}			
 		}
 				

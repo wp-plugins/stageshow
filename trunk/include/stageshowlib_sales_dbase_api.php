@@ -488,6 +488,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						salePPCountry VARCHAR('.PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN.'),
 						salePPPhone VARCHAR('.PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN.'),
 						salePaid DECIMAL(9,2) NOT NULL,
+						saleTransactionFee DECIMAL(9,2) NOT NULL DEFAULT 0,
 						saleFee DECIMAL(9,2) NOT NULL,
 						saleTxnId VARCHAR('.PAYPAL_APILIB_PPSALETXNID_TEXTLEN.') NOT NULL,
 						saleStatus VARCHAR('.PAYPAL_APILIB_PPSALESTATUS_TEXTLEN.'),
@@ -652,6 +653,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				
 				'saleEMail', 
 				'salePaid', 
+				'saleTransactionFee', 
 				'saleFee', 
 				'salePPStreet', 
 				'salePPCity', 
@@ -862,6 +864,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			switch ($tag)
 			{
 				case '[saleFee]':
+				case '[saleTransactionFee]':
 				case '[salePaid]':
 					return true;
 			}
@@ -908,6 +911,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'[saleFirstName]' => 'saleFirstName',
 				'[saleLastName]' => 'saleLastName',
 				'[saleEMail]' => 'saleEMail',
+				'[saleTransactionFee]' => 'saleTransactionFee',
 				'[salePaid]' => 'salePaid',
 				'[saleTxnId]' => 'saleTxnId',
 				'[saleStatus]' => 'saleStatus',
@@ -1180,6 +1184,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 				$saleVals['salePaid'] = '0.0';
 				$saleVals['saleFee'] = '0.0';
+				if (isset($results['transactionfee']))
+				{
+					$saleVals['saleTransactionFee'] = $results['transactionfee'];
+				}
 								
 				$saleID = $this->AddSale($saleDateTime, $saleVals);
 			}

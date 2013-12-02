@@ -20,6 +20,7 @@ Copyright 2012 Malcolm Shergold
 */
 
 @import url(admin.css);
+@import url(../../css/stageshow-seats.css);
 
 #adminmenu #toplevel_page_sshow_adminmenu div.wp-menu-image,
 #oam_toplevel_page_sshow_adminmenu div.wp-menu-image {
@@ -72,7 +73,7 @@ div.stageshow-searchsales
 	Styles for Settings Page
 ---------------------------------------------------------------------------------------------------------------- */
 
-.stageshow-settings-table td 
+.general-settings-table td 
 {
 	line-height: 14px;
 	padding: 6px 10px;
@@ -117,35 +118,3 @@ div.stageshow-validate-unknown
 	background-color: #ffebe8;
 	border-color: #CC0000;
 }
-
-/* --------------------------------------------------------------------------- */
-/*                                                                             */
-/*                       StageShow Layout Styles                               */
-/*                                                                             */
-/* --------------------------------------------------------------------------- */
-
-div.stageshow-boxoffice table
-{
-	border: 0;
-	padding: 0;
-	margin: 0;
-	border-collapse:separate;
-	border-spacing:5px 5px;
-}
-
-.stageshow-boxoffice-seat-unknown
-{
-	border: 3px solid;
-	padding: 0;
-	border-radius: 4px;
-	border-style: solid;
-	margin: 3px;
-	
-	text-align: center;
-}
-
-.stageshow-boxoffice-space
-{
-	border: 2px none;
-}
-

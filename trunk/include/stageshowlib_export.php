@@ -28,7 +28,7 @@ if (!class_exists('StageShowLibExportAdminClass'))
 		var $myDBaseObj;
 		var $fieldNames;
 		
-		var $filename;
+		var $fileName;
 		var $fileExtn = 'txt';
 		
 		function __construct($myDBaseObj) //constructor	
@@ -36,7 +36,13 @@ if (!class_exists('StageShowLibExportAdminClass'))
 			$this->myDBaseObj = $myDBaseObj;
 			$this->myDomain = $this->myDBaseObj->get_domain();
 			
-			$this->filename = $this->myDomain;
+			$this->fileName = $this->myDomain;
+		}
+			
+		function Export($application, $charset = 'utf-8', $content = '')
+		{
+			$this->output_downloadHeader($application, $charset);
+			echo $content;
 		}
 			
 		function GetFields()
@@ -56,7 +62,7 @@ if (!class_exists('StageShowLibExportAdminClass'))
 		function output_downloadHeader($application, $charset = 'utf-8')
 		{
 			$this->header( 'Content-Description: File Transfer' );
-			$this->header( 'Content-Disposition: attachment; filename=' . $this->filename.'.'. $this->fileExtn );
+			$this->header( 'Content-Disposition: attachment; filename=' . $this->fileName.'.'. $this->fileExtn );
 			$this->header( "Content-Type: $application; charset=$charset" );	
 		}
 

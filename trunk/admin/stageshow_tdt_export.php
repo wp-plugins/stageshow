@@ -53,20 +53,13 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 						case 'summary':
 								$this->output_downloadHeader('text/tab-separated-values');
 								$this->export_summary();
-								break;
-								
-						case 'all':
-						default :
-								$this->output_downloadHeader('text/tab-separated-values');
-								$this->export_shows();
-								$this->export_tickets();
-								break;
+								break;								
 					}
 				}			       
 			}
 			else if ( isset( $_GET['downloadvalidator'] ) )
 			{
-				$this->filename = 'stageshowValidator';
+				$this->fileName = 'stageshowValidator';
 				$this->fileExtn = 'html';
 				
 				$this->output_downloadHeader('text/html');
@@ -96,7 +89,8 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'saleCheckoutTime'   => __('Checkout Time', $this->myDomain),
 				'saleDateTime'       => __('Date & Time', $this->myDomain),
 				'saleEMail'          => __('Sale EMail', $this->myDomain),
-				'saleFee'            => __('Fee', $this->myDomain),
+				'saleTransactionFee' => __('Booking Fee', $this->myDomain),
+				'saleFee'            => __('PayPal Fees', $this->myDomain),
 				'saleID'             => __('Sale ID', $this->myDomain),
 				'saleFirstName'      => __('First Name', $this->myDomain),
 				'saleLastName'       => __('Last Name', $this->myDomain),
@@ -397,7 +391,8 @@ function VerifyTxnId()
 						else
 						{
 							$saleRec = new stdClass();
-							$saleRec->saleName = $thisSale->saleName;
+							$saleRec->saleFirstName = $thisSale->saleFirstName;
+							$saleRec->saleLastName = $thisSale->saleLastName;
 							$saleRec->ticketQty = $thisSale->ticketQty;
 							
 							foreach ($typesList as $typeRec)
@@ -406,7 +401,7 @@ function VerifyTxnId()
 								$saleRec->$typeName = 0;
 							}
 							
-							$fieldsList = array('ticketName', 'saleEMail', 'saleDateTime', 'saleTxnId', 'salePaid', 'saleFee');
+							$fieldsList = array('ticketName', 'saleEMail', 'saleDateTime', 'saleTxnId', 'salePaid', 'saleFee', 'saleTransactionFee');
 							foreach ($fieldsList as $fieldId)
 								$saleRec->$fieldId = $thisSale->$fieldId;
 								
