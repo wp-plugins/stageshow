@@ -58,7 +58,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 	
 		function OutputContent_OnlineStore($atts)
 		{
-			if (isset($this->demosale))
+			if ($this->pageMode == self::PAGEMODE_DEMOSALE)
 			{
 				include 'include/stageshow_paypalsimulator.php';
 				
@@ -269,6 +269,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 			$showSelectPerfs = $this->SelectPerfMode($result);
 			
+			$storeRowHTML = '';
+			
 			if (!$showSelectPerfs)
 			{
 				// TODO - Allocated Seating - Move this code to stageshowplus_main.php
@@ -278,7 +280,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				
 				if (isset($_POST['SelectPerf']))
 				{
-					echo '<input type="hidden" name="SelectPerf" value="'.$result->perfID.'"/>'."\n";
+					$storeRowHTML .= '<input type="hidden" name="SelectPerf" value="'.$result->perfID.'"/>'."\n";
 				}	
 			}
 			else
@@ -322,14 +324,14 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}
 			else if ($showSelectPerfs)
 			{
-				return;	// Only output one row per performance
+				return '';	// Only output one row per performance
 			}
 			else
 			{
 				$formattedPerfDateTime = '&nbsp;';
 			}
 			
-			echo '
+			$storeRowHTML .= '
 				<table width="100%" cellspacing="0">'.$separator.'
 				<tr>
 				<td class="stageshow-boxoffice-datetime">'.$formattedPerfDateTime.'</td>
@@ -337,21 +339,21 @@ if (!class_exists('StageShowSalesPluginClass'))
 				
 			if (!$showSelectPerfs) 
 			{
-				echo '
+				$storeRowHTML .= '
 				<td class="stageshow-boxoffice-type">'.$result->priceType.'</td>
 				<td class="stageshow-boxoffice-price">'.$myDBaseObj->FormatCurrency($result->priceValue).'</td>
 				';
 																
 				if (!$soldOut)
 				{
-					echo '
+					$storeRowHTML .= '
 						<td class="stageshow-boxoffice-qty">
 						<select name="quantity">
 						<option value="1" selected="">1</option>
 						';
 					for ($no=2; $no<=$myDBaseObj->adminOptions['MaxTicketQty']; $no++)
-						echo '<option value="'.$no.'">'.$no.'</option>'."\n";
-					echo '
+						$storeRowHTML .= '<option value="'.$no.'">'.$no.'</option>'."\n";
+					$storeRowHTML .= '
 						</select>
 						</td>
 					';
@@ -360,7 +362,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 															
 			if (!$soldOut)
 			{
-				echo '
+				$storeRowHTML .= '
 					<td class="stageshow-boxoffice-add">
 					<input type="submit" id="'.$submitId.'" name="'.$submitId.'" value="'.$submitButton.'" alt="'.$altTag.'"/>
 					</td>
@@ -368,16 +370,53 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}
 			else
 			{
-				echo '
+				$storeRowHTML .= '
 					<td class="stageshow-boxoffice-soldout" colspan=2>'.__('Sold Out', $this->myDomain).'</td>
 					';
 			}
 				
-			echo '
+			$storeRowHTML .= '
 				</tr>
+				';
+
+			if ($myDBaseObj->getOption('ShowSeatsAvailable'))
+			{
+				if (!isset($result->joinNext))
+				{
+					if (!$showSelectPerfs && !$soldOut && ($result->perfSeats >=0))
+					{
+						$seatsAvailable = $result->perfSeats - $salesSummary->totalQty;
+						$storeRowHTML .= '
+							<tr>
+							<td colspan="4" class="stageshow-boxoffice-available">'.$seatsAvailable.' '.__('Seats Available', $this->myDomain).'</td>
+							</tr>
+							';
+					}				
+				}				
+			}
+		
+			$storeRowHTML .= '
 				</table>
 				';
 				
+			return $storeRowHTML;
+		}
+		
+		function OutputContent_OnlineStoreSection( $results )
+		{
+			if (count($results) > 0)
+			{
+		  		$lastIndex = count($results);
+		  		for ($index=0; $index<count($results)-1;$index++)
+				{
+					if ($results[$index]->perfID == $results[$index+1]->perfID)
+					{
+						$results[$index]->joinNext = true;
+					}
+				}
+			}
+			
+			return parent::OutputContent_OnlineStoreSection( $results );
 		}
 		
 		function OutputContent_OnlineTrolleyDetailsHeaders()

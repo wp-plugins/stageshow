@@ -147,7 +147,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 			<tr>
 		<th><label for="export_type"><?php _e('Transaction ID', $this->myDomain); ?></label></th>
 				<td>
-			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
+			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
 						</td>
 			</tr>
 			<?php
@@ -178,7 +178,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 				 
 			$this->CheckAdminReferer();
 
-			$TxnId = stripslashes($_POST['TxnId']);
+			$TxnId = trim(stripslashes($_POST['TxnId']));
 			
 			$validateMsg = 'Sale Validation (Transaction ID: '.$TxnId.') - ';
 			
