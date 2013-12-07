@@ -34,7 +34,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 	
 	class StageShowLibSalesPluginBaseClass
 	{
+		const PAGEMODE_NORMAL = 'normal';
+		const PAGEMODE_DEMOSALE = 'demosale';
+		
 		var $lastItemID = '';
+		var $pageMode = self::PAGEMODE_NORMAL;
 		
 		function __construct()
 		{
@@ -83,6 +87,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
       		// Get all database entries for this item ... ordered by date/time then ticket type
 	      	$results = $this->GetOnlineStoreProducts($reqRecordId);
 			$this->OutputContent_OnlineStoreSection($results);
+			$this->OutputContent_OnlineStoreFooter();
 		}
 			
 		function IsOnlineStoreItemEnabled($result)
@@ -282,7 +287,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			
 			$reqRecordId = $atts['id'];
 			$this->OutputContent_OnlineStoreMain($reqRecordId);
-			$this->OutputContent_OnlineStoreFooter();
 			
 			$outputContent = ob_get_contents();
 			ob_end_clean();
@@ -328,6 +332,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				if (!$this->IsOnlineStoreItemEnabled($result))
 					continue;
 					
+				$storeRowHTML = $this->OutputContent_OnlineStoreRow($result);
+				if ($storeRowHTML == '')
+					continue;
+				
 				$rowCount++;
 				if ($rowCount == 1) $this->OutputContent_OnlineStoreHeader($result);				
 					
@@ -355,9 +363,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				echo $this->GetOnlineStoreRowHiddenTags($result);
 				echo $hiddenTags;
 				echo $notifyTag;
-					
-				$this->OutputContent_OnlineStoreRow($result);
-
+				echo $storeRowHTML;
+				
 				echo '
 					</form>
 					</td>
@@ -503,6 +510,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 		function OnlineStore_HandleTrolley()
 		{
+			// Only Allow One Shopping Trolley (If there are multiple StageShow shortcodes on one page)
+			if (isset($this->DoneSalesTrolley))
+				return;
+			$this->DoneSalesTrolley = true;
+				
 			$myDBaseObj = $this->myDBaseObj;
 			
 			if (isset($this->checkoutError))
@@ -879,6 +891,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					if (defined('RUNSTAGESHOWDEMO'))
 					{
 						$this->demosale = $saleId;
+						$this->pageMode = self::PAGEMODE_DEMOSALE;
 					}
 					elseif ($this->myDBaseObj->isDbgOptionSet('Dev_IPNLocalServer'))
 					{

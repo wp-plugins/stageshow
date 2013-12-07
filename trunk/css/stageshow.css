@@ -34,15 +34,20 @@ td.stageshow-boxoffice-perfnote
 	align: left;
 }
 
-div.stageshow-boxoffice-layout table,
-div.stageshow-boxoffice-layout tr,
-div.stageshow-boxoffice-layout td,
-div.stageshow-boxoffice-layout select
+div.stageshow-boxoffice table,
+div.stageshow-boxoffice tr,
+div.stageshow-boxoffice td,
+div.stageshow-boxoffice select
 {
 	padding: 0 0 0 0;
 	margin: 0 0 0 0;
 	border: 0 none;
 	text-align: left;
+}
+
+div.stageshow-boxoffice td
+{
+    padding: 0px 0px 6px 0px;
 }
 
 .stageshow-boxoffice-datetime
@@ -70,6 +75,12 @@ div.stageshow-boxoffice-layout select
 .stageshow-boxoffice-add
 {
 	/* display:none; */
+}
+
+td.stageshow-boxoffice-available
+{
+	text-align: right !important;
+	Xdisplay:none;
 }
 
 div.stageshow-boxoffice-layout input

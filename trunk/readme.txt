@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.7.1
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -176,7 +176,14 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 == Changelog ==
 
-* Version History for StageShow Plugin 
+* Version History for StageShow Plugins 
+
+= 2.3.4 (07/12/2013) =
+* Bug Fix: Multiple Checkout output on pages with multiple shortcodes
+* Bug Fix: Oversize Barcode in HTML Emails (StageShow+)
+* Added "Seats Available" output
+* Added <div> tag with border to HTML Emails to define page size (StageShow+)
+* Added borderless HTML Email template (StageShow+)
 
 = 2.3.3 (02/12/2013) =
 * Bug Fix: id={ShowName} in shortcode not recognised
@@ -213,7 +220,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * BARCODE_ defines can be set externally
 * Checkboxes in mjslib_table display Yes/No when ReadOnly
 * Tested with WP 3.7
-* Added Seating Plans editor (StageShowGold only)
+* Added Seating Plans editor (StageShowGold)
 
 = 2.2.5 (17/10/2013) =
 * Bug Fix: DB error generating Box Office output  (since v2.2.4) (StageShow only)

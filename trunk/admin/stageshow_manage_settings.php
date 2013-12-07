@@ -95,6 +95,8 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Note Position',          StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutNotePosn',      StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT,   StageShowLibTableClass::TABLEPARAM_ITEMS => $checkoutNoteOptions, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Note',                   StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutNote',          StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_TEXTBOX,  StageShowLibTableClass::TABLEPARAM_ROWS  => 4, StageShowLibTableClass::TABLEPARAM_COLS => 60, ),
+
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Seats Available',                 StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',   StageShowLibTableClass::TABLEPARAM_ID => 'ShowSeatsAvailable',       StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Show Seats Available on Box Office',  StageShowLibTableClass::TABLEPARAM_DEFAULT => false ),
 			);
 			
 			$rowDefs = $this->MergeSettings(parent::GetDetailsRowsDefinition(), $rowDefs);
