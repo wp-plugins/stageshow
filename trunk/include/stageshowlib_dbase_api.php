@@ -87,8 +87,10 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $EMailTemplate;
 		}
 		
-		function WPNonceField($referer = '')
+		function WPNonceField($referer = '', $name = '_wpnonce', $echo = true)
 		{
+			$nonceField = '';
+			
 			if ($referer == '')
 			{
 				$caller = $this->opts['Caller'];
@@ -98,18 +100,22 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if ( function_exists('wp_nonce_field') ) 
 			{
 				if ($this->getDbgOption('Dev_ShowWPOnce'))
-					echo "<!-- wp_nonce_field($referer) -->\n";
-				wp_nonce_field($referer);
-				echo "\n";
+					$nonceField .= "<!-- wp_nonce_field($referer) -->\n";
+				$nonceField .= wp_nonce_field($referer, $name, false);
+				$nonceField .=  "\n";
 			}
+			
+			if ($echo) echo $nonceField;
+			return $nonceField;
 		}
 		
 		static function AddParamAdminReferer($caller, $theLink)
 		{
-			if (function_exists('add_query_arg'))
-			{
-				$theLink = add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($caller) ), $theLink );
-			}
+			if (!function_exists('add_query_arg'))
+				return $theLink;
+			
+			$theLink = add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($caller) ), $theLink );
+			
 			return $theLink;
 		}
 		
@@ -125,7 +131,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			{
 				echo "<!-- check_admin_referer($referer) -->\n";
 				if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
-					echo "<br><strong>check_admin_referer FAILED - verifyResult: $verifyResult - Referer: $referer </strong></br>\n";
+					echo "<br><strong>check_admin_referer FAILED - Referer: $referer </strong></br>\n";
 				return;
 			}
 			

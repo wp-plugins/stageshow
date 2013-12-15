@@ -184,7 +184,7 @@ td.col_show
 			echo '
 <body>
 <h2>'.__('Validate Sale', $this->myDomain).'</h2>
-<table class="form-table">
+<table class="stageshow-form-table">
 	<tr>
 		<th>'.__('Transaction ID', $this->myDomain).'</th>
 		<td>

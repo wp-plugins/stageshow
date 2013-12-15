@@ -48,9 +48,9 @@ if (!class_exists('StageShowLibAdminBaseClass'))
 			return $env;
 		}
 		
-		function WPNonceField()
+		function WPNonceField($referer = '', $name = '_wpnonce', $echo = true)
 		{
-			$this->myDBaseObj->WPNonceField();
+			$this->myDBaseObj->WPNonceField($referer, $name, $echo);
 		}
 		
 		function AddParamAdminReferer($caller, $theLink)
@@ -161,7 +161,8 @@ if (!class_exists('StageShowLibAdminClass'))
 				
  			}
  			
-			echo '<div class="wrap">';
+			$tableClass = $this->myDBaseObj->get_domain().'-admin';			
+			echo '<div class="wrap '.$tableClass.'">';
 
 			$this->ProcessActionButtons();
 			

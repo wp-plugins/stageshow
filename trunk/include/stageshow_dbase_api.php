@@ -1296,7 +1296,7 @@ if (!class_exists('StageShowDBaseClass'))
 			return ($pricesEntries[0]->MatchCount > 0) ? false : true;
 		}
 		
-		function AddPrice($perfID, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $visibility = STAGESHOW_VISIBILITY_PUBLIC)
+		function AddPrice($perfID, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $visibility = STAGESHOW_VISIBILITY_PUBLIC, $noOfSeats = 1)
 		{
      		if ($perfID <= 0) return 0;
       
@@ -1641,14 +1641,12 @@ if (!class_exists('StageShowDBaseClass'))
 			// totalQty may not include Pending sales (i.e. saleStatus=Checkout)) - add it here!
 			$sql  = '  SUM(ticketQty) AS totalQty ';
 			
-			{
-				$statusOptions  = '(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'")';
-				$statusOptions .= ' OR ';
-				$statusOptions .= '(saleStatus="'.STAGESHOW_SALESTATUS_RESERVED.'")';
-				$sql .= ', SUM(IF('.$statusOptions.', priceValue * ticketQty, 0)) AS soldValue ';
-				$sql .= ', SUM(IF('.$statusOptions.', ticketQty, 0)) AS soldQty ';				
-			}
-
+			$statusOptions  = '(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'")';
+			$statusOptions .= ' OR ';
+			$statusOptions .= '(saleStatus="'.STAGESHOW_SALESTATUS_RESERVED.'")';
+			$sql .= ', SUM(IF('.$statusOptions.', priceValue * ticketQty, 0)) AS soldValue ';
+			$sql .= ', SUM(IF('.$statusOptions.', ticketQty, 0)) AS soldQty ';				
+			
 			return $sql;
 		}
 		

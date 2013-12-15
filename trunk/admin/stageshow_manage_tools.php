@@ -67,7 +67,8 @@ if (!class_exists('StageShowToolsAdminClass'))
 				$perfRecord = $perfsList[0];
 				$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
 				$perfName = $perfRecord->showName.' - '.$perfDateTime;
-				$html = $perfName."\n";
+				$hiddenTags  = '<input type="hidden" name="perfID" id="perfID" value="'.$perfID.'"/>'."\n";
+				$html = $perfName.$hiddenTags."\n";
 			}
 			else
 			{
@@ -123,11 +124,19 @@ if (!class_exists('StageShowToolsAdminClass'))
 	else
 	downloadButton.style.visibility = 'hidden';
 	}
+
+	function TxnIdValid()
+	{
+		/* Block Validation requests if TxnId is blank */
+		txnidElem = document.getElementById("TxnId");
+		txnid = txnidElem.value;
+		return (txnid.length > 0);
+	}
 </script>
 <h3><?php _e('Validate Sale', $this->myDomain); ?></h3>
 <form method="post">
 		<?php $this->WPNonceField(); ?>
-		<table class="form-table">
+		<table class="stageshow-form-table">
 			<?php
 			if ($myDBaseObj->GetLocation() !== '')
 			{
@@ -145,7 +154,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 			}
 ?>
 			<tr>
-		<th><label for="export_type"><?php _e('Transaction ID', $this->myDomain); ?></label></th>
+		<td><?php _e('Transaction ID', $this->myDomain); ?></td>
 				<td>
 			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
 						</td>
@@ -160,7 +169,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 		</table>
 		<p>
 			<p class="submit">
-<input class="button-secondary" type="submit" name="validatesalebutton" value="<?php _e('Validate', $this->myDomain) ?>"/>
+<input class="button-secondary" onclick="return TxnIdValid()" type="submit" name="validatesalebutton" value="<?php _e('Validate', $this->myDomain) ?>"/>
 					</form>
 <?php
 		}
@@ -306,7 +315,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 <p><?php _e('This format can be imported to many applications including spreadsheets and databases.', $this->myDomain); ?></p>
 <form action="<?php echo $actionURL; ?>" method="get">
 <?php $this->WPNonceField(); ?>
-<table class="form-table">
+<table class="stageshow-form-table">
 <tr>
 <th><?php _e('Format', $this->myDomain); ?></th>
 <td>

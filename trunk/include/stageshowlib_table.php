@@ -348,7 +348,7 @@ if (!class_exists('StageShowLibTableClass'))
 			$recordID = $this->GetRecordID($result);
 			$moreName = 'more'.$recordID;
 			
-			$content = '<a id="'.$moreName.'" class="button-secondary Xmore-button" onClick="HideOrShowRows(\''.$moreName.'\', \''.$rowId.'\')">'.$content.'</a>';
+			$content = '<a id="'.$moreName.'" class="button-secondary" onClick="HideOrShowRows(\''.$moreName.'\', \''.$rowId.'\')">'.$content.'</a>';
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
@@ -950,7 +950,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 			$callerFolders = explode("/", plugin_basename($this->caller));
 			$this->pluginName = $callerFolders[0];
 
-			$this->tableTags = 'class="widefat" cellspacing="0"';
+			$tableClass = $this->myDBaseObj->get_domain().'-widefat';			
+			$this->tableTags = 'class="'.$tableClass.' widefat" cellspacing="0"';
 			
 			if (isset($this->myDBaseObj->adminOptions['PageLength']))
 				$this->SetRowsPerPage($this->myDBaseObj->adminOptions['PageLength']);

@@ -540,7 +540,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				// Get the product ID from posted data
 				//$ticketType = $_POST['os0'];
-				$ticketQty = $_POST['quantity'];
+				$reqQty = $_POST['quantity'];
 					
 				$itemID = $_POST['PriceId'];
 					
@@ -560,21 +560,21 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						{
 							if ($cartEntry->itemID == $itemID)
 							{
-								$cartContents->rows[$index]->qty += $ticketQty;
-								$ticketQty = 0;
+								$cartContents->rows[$index]->qty += $reqQty;
+								$reqQty = 0;
 								break;
 							}
 						}						
 					}
 					
-					if ($ticketQty > 0)
+					if ($reqQty > 0)
 					{
 						$index = $cartContents->nextIndex;
 						$cartContents->nextIndex++;
 						
 						$cartEntry = new stdClass;
 						$cartEntry->itemID = $itemID;
-						$cartEntry->qty = $ticketQty;
+						$cartEntry->qty = $reqQty;
 						
 						$cartEntry->sortBy = $this->OnlineStore_GetSortField($priceEntries[0]);
 						
@@ -671,9 +671,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);
 			
 				echo '<tr class="'.$this->cssTrolleyBaseID.'-totalrow">'."\n";
-				echo '<td>&nbsp;</td>'."\n";
-				echo '<td>'.__('Total', $this->myDomain).'</td>'."\n";
 				echo '<td colspan="'.($this->trolleyHeaderCols-4).'">&nbsp;</td>'."\n";
+				echo '<td>'.__('Total', $this->myDomain).'</td>'."\n";
+				echo '<td>&nbsp;</td>'."\n";
 				echo '<td class="'.$this->cssTrolleyBaseID.'-total">'.$runningTotal.'</td>'."\n";
 				echo '<td>&nbsp;</td>'."\n";
 				echo "</tr>\n";

@@ -342,7 +342,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 				// Lock database before sale commit
 				$myDBaseObj->LockSalesTable();
 				
-				// Get current qunatities from database
+				// Get current quantities from database
 				$curr = $this->GetCurrentSaleQtys();
 				
 				// Check Stock Quantities
@@ -359,7 +359,12 @@ if (!class_exists('PayPalSalesAdminClass'))
 					$this->pricesList = $this->myDBaseObj->GetPricesListWithSales($this->saleId);
 					$this->editSaleEntry = $myDBaseObj->GetSaleBuyer($this->saleId);	// Get list of items for a single sale
 					
-					echo '<div id="message" class="updated"><p>'.__('Sale Details have been saved', $this->myDomain).'</p></div>';
+					echo '
+					<div id="message" class="updated">
+					<p>'.__('Sale Details have been saved', $this->myDomain);
+					$myDBaseObj->OutputViewTicketButton($this->saleId);
+					echo '
+					</div>';
 				}
 				else
 				{

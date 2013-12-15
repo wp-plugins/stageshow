@@ -477,13 +477,12 @@ if (!class_exists('StageShowSalesPluginClass'))
 			{
 				echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.$showName.'</td>'."\n";
 				echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.$perfDateTime.'</td>'."\n";
-				$span = '';
 			}
 			else
 			{
-				$span = 'colspan="3"';				
+				echo '<td colspan="2">&nbsp;</td>'."\n";
 			}
-			echo '<td '.$span.' class="'.$this->cssTrolleyBaseID.'-type">'.$priceType.'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-type">'.$priceType.'</td>'."\n";
 			$this->OutputContent_OnlineTrolleyDetailsCols($priceEntry, $cartEntry);
 			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.$formattedTotal.'</td>'."\n";
 
