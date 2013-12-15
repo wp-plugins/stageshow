@@ -131,7 +131,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			}
 ?>
 		<h3>Debug Settings</h3>
-		<table class="form-table">
+		<table class="stageshow-form-table">
 <?php	
 		$optDefs = $this->GetOptionsDefs();
 		$count = 0;

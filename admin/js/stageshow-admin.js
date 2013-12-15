@@ -156,4 +156,21 @@ function ShowOrHideTab(tabID, selectedTabID)
 	}	
 }
 
+function OnTicketButtonClick(showEMailURL)
+{
+	var saleSelectObj = document.getElementById('TestSaleID');
+	saleId = saleSelectObj.value;
+	OpenTicketView(saleId, showEMailURL);
+}
+
+function OpenTicketView(saleId, showEMailURL)
+{
+	var wpnonceObj = document.getElementById('ShowEMailNOnce');
+	
+	saleParam = 'id=' + saleId;
+	wpnonceParam = '_wpnonce=' + wpnonceObj.value;
+	url = showEMailURL + '?' + saleParam + '&' + wpnonceParam;
+	
+	window.open(url);
+}
 

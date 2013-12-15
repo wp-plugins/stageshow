@@ -43,7 +43,7 @@ if (!class_exists('StageShowSalesAdminListClass'))
 							
 			$columnDefs = array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Paid/Due', StageShowLibTableClass::TABLEPARAM_ID => 'salePaid', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),		
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Quantity', StageShowLibTableClass::TABLEPARAM_ID => 'totalQty', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),		
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Seats', StageShowLibTableClass::TABLEPARAM_ID => 'totalQty', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),		
 			);
 			
 			return self::MergeSettings(parent::GetMainRowsDefinition(), $columnDefs);

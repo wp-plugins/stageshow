@@ -64,20 +64,20 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 			}
 			
 			if (!$inForm) echo '<form method="post">'."\n";
-				
+			
 ?>
 	<?php $caller->WPNonceField(); ?>
-	<table class="form-table">			
+	<table class="stageshow-form-table">			
 		<tr valign="top">
       <td><?php _e('Divert EMail To', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
-				<input name="DivertEMailTo" type="text" maxlength="110" size="50" value="<?php echo $DivertEMailTo; ?>" />
+				<input name="DivertEMailTo" id="DivertEMailTo" type="text" maxlength="110" size="50" value="<?php echo $DivertEMailTo; ?>" />
 			</td>
 		</tr>
 		<tr valign="top">
       <td><?php _e('Selected Sale', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
-				<select name="TestSaleID">
+				<select name="TestSaleID" id="TestSaleID">
 <?php		
 foreach($results as $result) {
 			echo '<option value="',$result->saleID.'">'.$result->saleTxnId.' - '.$result->saleEMail.' - '.$result->saleDateTime.'&nbsp;&nbsp;</option>'."\n";
@@ -90,7 +90,9 @@ foreach($results as $result) {
 			<td>
 				<input class="button-primary" type="submit" name="testbutton_EMailSale" value="<?php _e('EMail Sale', $myDBaseObj->get_domain()); ?>"/>
 			</td>
-			<td>&nbsp;</td>
+			<td>
+				<?php $myDBaseObj->OutputViewTicketButton(); ?>
+			</td>
 		</tr>
 	</table>
 

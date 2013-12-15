@@ -1065,13 +1065,32 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		function SendEMailFromTemplate($emailContent, $templatePath, $EMailTo = '')
+		{		
+			$EMailSubject = '';
+			$saleConfirmation = '';
+			
+			$this->emailObj = new $this->emailObjClass($this);
+			
+			$rtnStatus = $this->GetEMailFromTemplate($emailContent, $templatePath, $EMailSubject, $saleConfirmation);	
+			if ($rtnStatus != 'OK')
+				return $rtnStatus;
+				
+			// Get email address and organisation name from settings
+			$EMailFrom = $this->GetEmail($this->adminOptions, 'Sales');
+
+			if (strlen($EMailTo) == 0) $EMailTo = $emailContent[0]->saleEMail;
+
+			$this->emailObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
+
+			return 'OK';		
+		}
+		
+		function GetEMailFromTemplate($emailContent, $templatePath, &$EMailSubject, &$saleConfirmation)	
 		{				
 			$mailTemplate = $this->ReadTemplateFile($templatePath);
 			if (strlen($mailTemplate) == 0)
 				return "EMail Template Not Found ($templatePath)";
 				
-			$this->emailObj = new $this->emailObjClass($this);
-			
 			$saleConfirmation = '';
 			
 			// Find the line with the open php entry then find the end of the line
@@ -1117,14 +1136,17 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			// Process the rest of the mail template
 			$saleConfirmation .= $this->AddEMailFields($mailTemplate, $emailContent[0]);
 			
-			// Get email address and organisation name from settings
-			$EMailFrom = $this->GetEmail($this->adminOptions, 'Sales');
-
-			if (strlen($EMailTo) == 0) $EMailTo = $emailContent[0]->saleEMail;
-
-			$this->emailObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
-
-			return 'OK';
+			return 'OK';		
+		}
+		
+		function OutputViewTicketButton($saleId = 0)
+		{
+			$text = __('View Ticket', $this->get_domain());
+			echo $this->GetViewTicketLink($text, 'button-secondary', $saleId);
+		}
+		
+		function GetViewTicketLink($text='', $class = '', $saleId = 0)
+		{
 		}
 		
 		function GetTxnStatus($Txnid)

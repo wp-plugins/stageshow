@@ -56,7 +56,7 @@ if (!class_exists('StageShowPayPalSimulator'))
 			';
 			
 			
-			$this->totalSale += ($result->priceValue * $result->ticketQty);
+			$this->totalSale += ($result->priceValue * $result->ticketQty * $result->priceNoOfSeats);
 			$html .= $result->ticketQty;
 			$customVal = $result->saleID;
 				

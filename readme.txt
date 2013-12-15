@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.7.1
-Stable tag: 2.3.4
+Tested up to: 3.8
+Stable tag: 2.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -167,7 +167,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 4. Screenshot 4: Ticket Types and Prices Setup 
 5. Screenshot 5: Sales Log Summary 
 6. Screenshot 6: Sales Log Summary (Showing Details) 
-7. Screenshot 7: Admin Tools Page 
+7. Screenshot 7: Admin Tools Page (Showing Sale Verification) 
 8. Screenshot 8: PayPal Settings Page 
 9. Screenshot 9: General Settings Page 
 10. Screenshot 10: Advanced Settings Page 
@@ -177,6 +177,14 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 2.4 (15/12/2013) =
+* Bug Fix: Verification Performance ID incorrect when performance select drop-down is not shown
+* Verification blocked if TxnID is blank
+* Added view ticket to Sales Editor and Tools page (opens in separate window)
+* Added "Number of Seats" option to Prices (StageShow+ only)
+* Added Updates for WP3.8
+* Booking Fee and Total rows realigned in Shopping Trolley output
 
 = 2.3.4 (07/12/2013) =
 * Bug Fix: Multiple Checkout output on pages with multiple shortcodes

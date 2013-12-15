@@ -39,6 +39,61 @@ Copyright 2012 Malcolm Shergold
 }
 
 /* ----------------------------------------------------------------------------------------------------------------
+	Admin Tables style adjustments for WP3.8
+---------------------------------------------------------------------------------------------------------------- */
+
+div.stageshow-admin
+{
+	font-size: 12px;
+	font-family: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+}
+
+.stageshow-admin h2 
+{
+    font-size: 23px;
+    line-height: 29px;
+}
+
+.stageshow-widefat thead th,
+.stageshow-widefat tfoot th
+{
+    font-size: 14px;
+    line-height: 1.3em;
+    padding: 7px 7px 8px;
+    text-align: left;
+}
+
+.stageshow-admin-form select 
+{
+    height: 2em;
+    padding: 2px;
+}
+
+.stageshow-admin-form td, 
+.stageshow-admin-form textarea, 
+.stageshow-admin-form input, 
+.stageshow-admin-form select, 
+.stageshow-admin-form button
+{
+	font-size: 14px;
+}
+
+.stageshow-admin-form .button, 
+.stageshow-admin-form .button-primary, 
+.stageshow-admin-form .button-secondary 
+{
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    height: 24px;
+    line-height: 23px;
+    margin: 0;
+    padding: 0 10px 1px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------------------------------------------------------
 	Styles for Admin Tables
 ---------------------------------------------------------------------------------------------------------------- */
 
@@ -82,6 +137,21 @@ div.stageshow-searchsales
 /* ----------------------------------------------------------------------------------------------------------------
 	Styles for Transaction Validation (on Tools Page)
 ---------------------------------------------------------------------------------------------------------------- */
+
+div.stageshow-validate-notfound,
+div.stageshow-validate-wrongperf,
+div.stageshow-validate-ok,
+div.stageshow-validate-reserved,
+div.stageshow-validate-duplicated,
+div.stageshow-validate-unknown
+{
+    border-radius: 4px;              /* Sets the radius of the corners of the mesage box */
+    border-width: 2px;               /* Sets the width of the mesage box border */
+    border-style: solid;
+	padding: 0 0.6em;                /* Sets blank area around the text ... values are top,right,bottom and left */
+	margin: 5px 0 15px;
+    font-size: 12px;                 /* Sets the size of the text */
+}
 
 div.stageshow-validate-ok
 {
