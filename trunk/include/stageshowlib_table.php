@@ -121,6 +121,8 @@ if (!class_exists('StageShowLibTableClass'))
 		
 		var $tableType;
 		
+		var $dateTimeMode = 'dateseconds';
+			
 		function __construct($newTableType = self::TABLETYPE_HTML) //constructor
 		{
 			if (!isset($this->myDomain) || ($this->myDomain == ''))
@@ -289,33 +291,33 @@ if (!class_exists('StageShowLibTableClass'))
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
-		function AddInputToTable($result, $inputName, $maxlength, $value, $col=0, $newRow = false, $size = 0)
+		function AddInputToTable($result, $inputName, $maxlength, $value, $col=0, $newRow = false, $extraParams = '')
 		{
 			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
 
-			if ($size <= 0)
+			$params  = " name=$inputName";
+			$params .= " id=$inputName";
+			$params .= " maxlength=\"$maxlength\"";
+			$params .= " value=\"$value\"";
+			
+			if ($params != '')
 			{
-				$size = $maxlength+1;
+				$params .= ' '.$extraParams;
 			}
 			
-			$params  = "name=$inputName ";
-			$params .= "id=$inputName ";
-			$params .= "maxlength=\"$maxlength\" ";
-			$params .= "size=\"$size\" ";
-			$params .= "value=\"$value\" ";
 			
 			if ($this->noAutoComplete)
-				$params .= "autocomplete=\"off\" "; 
+				$params .= " autocomplete=\"off\""; 
 			
-			$content = "<input type=text $params />";
+			$content = "<input type=\"text\" $params />";
 			
 			$inputName = 'curr'.$inputName;
 			
-			$params  = "name=$inputName ";
-			$params .= "id=$inputName ";
-			$params .= "value=\"$value\" ";
+			$params  = " name=$inputName";
+			$params .= " id=$inputName";
+			$params .= " value=\"$value\"";
 			
-			$content .= "<input type=hidden $params />";
+			$content .= "<input type=\"hidden\" $params />";
 			
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
@@ -911,6 +913,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 		const BULKACTION_TOGGLE = 'toggleactive';
 		const BULKACTION_DELETE = 'delete';
 		
+		const TABLEENTRY_DATETIME = 'datetime';
+		
 		var $env;
 		var $caller;
 		var $results;
@@ -928,6 +932,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 		var $editMode;
 		
 		var $updateFailed;
+		
+		var $hasDateTimeEntry = false;
 		
 		function __construct($env, $editMode /* = false */, $newTableType = self::TABLETYPE_HTML) //constructor
 		{
@@ -1194,6 +1200,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 						break;		
 										
 					case self::TABLEENTRY_TEXT:
+					case self::TABLEENTRY_DATETIME:
 					case self::TABLEENTRY_TEXTBOX:
 					case self::TABLEENTRY_COOKIE:
 						$settingType = self::TABLEENTRY_VIEW;
@@ -1203,6 +1210,16 @@ if (!class_exists('StageShowLibAdminListClass'))
 				
 			switch ($settingType)
 			{
+				case self::TABLEENTRY_DATETIME:
+					$editSize = 28;
+					$inputClass = $this->myDBaseObj->get_domain().'-dateinput';
+					$eventHandler = " class=\"".$inputClass."\" readonly=true onclick=\"javascript:ShowDateTimeCalendar(this,'".$this->dateTimeMode."')\" ";
+					$editControl  = '<input type="text"'.$eventHandler.' size="'.$editSize.'" '.$controlIdDef.' value="'.$controlValue.'" />'."\n";
+					$editControl .= '<input type="hidden" '.str_replace('="', '="curr', $controlIdDef).' value="'.$controlValue.'" />'."\n";					
+					$this->hasDateTimeEntry = true;
+					break;
+
+				
 				case self::TABLEENTRY_TEXT:
 				case self::TABLEENTRY_COOKIE:
 					$editLen = $settingOption[self::TABLEPARAM_LEN];
@@ -1275,6 +1292,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 				{
 					//case self::TABLEENTRY_CHECKBOX:
 					case self::TABLEENTRY_TEXT:
+					case self::TABLEENTRY_DATETIME:
 					//case self::TABLEENTRY_TEXTBOX:
 					case self::TABLEENTRY_SELECT:
 					case self::TABLEENTRY_VALUE:
@@ -1366,7 +1384,16 @@ if (!class_exists('StageShowLibAdminListClass'))
 							}
 							
 							$size = isset($columnDef[self::TABLEPARAM_SIZE]) ? $columnDef[self::TABLEPARAM_SIZE] : 0;
-							$this->AddInputToTable($result, $columnId, $columnDef[self::TABLEPARAM_LEN], $currVal, 0, false, $size);
+							$extraParams = 'size="'.$size.'"';
+							$this->AddInputToTable($result, $columnId, $columnDef[self::TABLEPARAM_LEN], $currVal, 0, false, $extraParams);
+							break;
+
+						case self::TABLEENTRY_DATETIME:
+							$size = 28;
+							$inputClass = $this->myDBaseObj->get_domain().'-dateinput';
+							$extraParams = "class=\"".$inputClass."\" readonly=true onclick=\"javascript:ShowDateTimeCalendar(this,'".$this->dateTimeMode."')\" ";
+							$this->AddInputToTable($result, $columnId, $size, $currVal, 0, false, $extraParams);
+							$this->hasDateTimeEntry = true;
 							break;
 
 						case self::TABLEENTRY_VALUE:
@@ -1587,6 +1614,37 @@ if (!class_exists('StageShowLibAdminListClass'))
 			return array();
 		}
 		
+		function OutputJSDateConstants()
+		{
+			if (!$this->hasDateTimeEntry)
+				return;
+			
+			$scriptOutput  = "<script>\n";
+			
+			// Use a date for a Monday (23/12/2013)			
+			$scriptOutput .= "var WeekDayName2 = [";
+			for ($dayNo = 23; $dayNo <= 29; $dayNo++)
+			{
+				$day = date("D",strtotime('2013-12-'.$dayNo));
+				if ($dayNo > 23) $scriptOutput .= ', ';
+				$scriptOutput .= '"'.$day.'"';
+			}
+			$scriptOutput .= "];\n";
+			
+			$scriptOutput .= "var MonthName = [";
+			for ($monthNo = 1; $monthNo <= 12; $monthNo++)
+			{
+				$month = date("F",strtotime('2000-'.$monthNo.'-20'));
+				if ($monthNo > 1) $scriptOutput .= ', ';
+				$scriptOutput .= '"'.$month.'"';
+			}
+			$scriptOutput .= "];\n";
+						
+			$scriptOutput .= "</script>\n";
+			
+			echo $scriptOutput;
+		}
+		
 		function OutputJavascript($selectedTabIndex = 0)
 		{
 			if (!$this->isTabbedOutput)
@@ -1680,6 +1738,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 			}
 			
 			$this->Display();
+			
+			$this->OutputJSDateConstants();			
 		}
 		
 		function JS_Top()

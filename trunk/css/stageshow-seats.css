@@ -61,7 +61,7 @@ div.stageshow-boxoffice-seat-requested
     background-color: #FFFF80;
 }
 
-div.stageshow-boxoffice-seat-unavailable,
+div.stageshow-boxoffice-seat-reserved,
 div.stageshow-boxoffice-seat-unknown
 {
     background-color: #FF0000;

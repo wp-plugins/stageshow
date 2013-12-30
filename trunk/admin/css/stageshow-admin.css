@@ -21,6 +21,7 @@ Copyright 2012 Malcolm Shergold
 
 @import url(admin.css);
 @import url(../../css/stageshow-seats.css);
+@import url(datepicker.css);
 
 #adminmenu #toplevel_page_sshow_adminmenu div.wp-menu-image,
 #oam_toplevel_page_sshow_adminmenu div.wp-menu-image {
@@ -122,6 +123,11 @@ div.stageshow-sales-summary h3
 div.stageshow-searchsales
 {
 	float: right;
+}
+
+input.stageshow-dateinput
+{
+	background-color: #ffffff;
 }
 
 /* ----------------------------------------------------------------------------------------------------------------
