@@ -1,49 +1,19 @@
-function onSalesInterfaceClick(obj)
-{
-	var selectedInterface = obj.id;
-	
-	SetSalesInterfaceControls(obj);
-}
 
-function InitialiseSalesInterfaceControls()
+function addWindowsLoadHandler(newHandler)
 {
-	trolleyTypeObj = document.getElementById('TrolleyType');
-	SetSalesInterfaceControls(trolleyTypeObj);	
-}
-
-function SetSalesInterfaceControls(selectObj)
-{	
-	var isIntegratedCheckout = (selectObj.value == 'Integrated');
-	
-	/* Control visible for Integrated Checkout */
-	ShowOrHideControl('PayPalMerchantID', isIntegratedCheckout);
-	ShowOrHideControl('CheckoutTimeout',  isIntegratedCheckout);
-	
-	/* Control visible for PayPal Checkout */
-	ShowOrHideControl('PayPalAPIUser',   !isIntegratedCheckout);
-	ShowOrHideControl('PayPalAPIPwd',    !isIntegratedCheckout);
-	ShowOrHideControl('PayPalAPISig',    !isIntegratedCheckout);
-}
-
-function ShowOrHideControl(elemID, elementVisible)
-{
-	rowElem = document.getElementById(elemID);
-	if (rowElem == null) 
-		return;
-	
-	rowElem = rowElem.parentNode;
-	rowElem = rowElem.parentNode;
-			
-	if (elementVisible)
+	var oldonload = window.onload;
+	if (typeof window.onload != "function") 
 	{
-		// Show the control
-		rowElem.style.display = '';
+		window.onload = newHandler;
+	} 
+	else 
+	{
+		window.onload = function() 
+		{
+          oldonload();
+          newHandler();
+        }
 	}
-	else
-	{
-		// Hide the control
-		rowElem.style.display = 'none';
-	}	
 }
 
 function onSettingsLoad()
@@ -172,5 +142,78 @@ function OpenTicketView(saleId, showEMailURL)
 	url = showEMailURL + '?' + saleParam + '&' + wpnonceParam;
 	
 	window.open(url);
+}
+
+function clickSeat(obj, zoneID, zoneDef)
+{
+	var seatId, hiddenSeatsElem, hiddenZonesElem, hiddenDefsElem;
+	
+	seatIdParts = obj.id.split("-");
+	seatId = seatIdParts[seatIdParts.length-1];
+		
+	seatsElem = document.getElementById("stageshow-boxoffice-layout-seatdef");
+
+	var className = obj.className;
+	var classPosn = className.search('stageshow-boxoffice-seat-requested');
+	
+	/* Remove existing class specifier */
+	className  = className.replace('stageshow-boxoffice-seat-available', ' ');
+	className  = className.replace('stageshow-boxoffice-seat-requested', ' ');
+	className  = className.replace('stageshow-boxoffice-seat-unknown', ' ');
+	className  = className.replace('  ', ' ');
+	
+	seatName = 'Row ' + seatId.replace('_', ' Seat ');
+	
+	if (classPosn < 0)
+	{
+		className = 'stageshow-boxoffice-seat-requested ' + className;
+		seatsElem.value = seatName + ' Changed to Booked';		
+	}
+	else
+	{
+		className = 'stageshow-boxoffice-seat-available ' + className;
+		seatsElem.value = seatName + ' Changed to Available';		
+	}
+	obj.className = className;
+	
+}
+
+function ShowDateTimeCalendar(pSender, pMode)
+{
+	pFormat = 'yyyyMMdd';
+	pScroller = 'arrow';
+	pShowTime = true; 
+	pTimeMode = '24';
+	pShowSeconds = false; 
+	pEnableDateMode = 'future';
+	
+	UseTimeDropdown = false;
+	TimeDropdownIncrements = 5;
+	WeekChar = 3;
+		
+	if (pMode == null) 
+	{
+		pMode = 'DateSeconds';
+	}
+	
+	pMode = pMode.toLowerCase();	
+	switch(pMode)
+	{
+		case 'date':
+			break;
+		
+		case 'dateseconds':
+			pShowSeconds = true; 
+			UseTimeDropdown = true;
+			TimeDropdownIncrements = 1;
+			break;
+		
+		default:
+		case 'datetime':
+			UseTimeDropdown = true;
+			break;
+	}
+
+	return NewCssCal(pSender, pFormat, pScroller, pShowTime, pTimeMode, pShowSeconds, pEnableDateMode);
 }
 

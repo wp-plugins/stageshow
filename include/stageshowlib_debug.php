@@ -153,7 +153,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 				}
 				else
 				{
-					$optEntry = $label.'&nbsp;<input name="'.$ctrlId.'" type="checkbox" value="1" '.$optIsChecked.' />';
+					$optEntry = '<input name="'.$ctrlId.'" type="checkbox" value="1" '.$optIsChecked.' />&nbsp;'.$label;
 				}
 				echo '<td align="left" width="25%">'.$optEntry.'</td>'."\n";
 			}

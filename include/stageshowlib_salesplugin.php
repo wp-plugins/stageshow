@@ -273,8 +273,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$pluginVer = $myDBaseObj->get_version();
 			$pluginAuthor = $myDBaseObj->get_author();
 			$pluginURI = $myDBaseObj->get_pluginURI();
-			echo "\n<!-- $pluginID Plugin $pluginVer for Wordpress by $pluginAuthor - $pluginURI -->\n";			
 			
+			// Remove any incomplete Checkouts
+			$myDBaseObj->PurgePendingSales();
+					
 			$hasActiveTrolley = $this->OnlineStore_HandleTrolley();
 			
 			$atts = shortcode_atts(array(
@@ -291,10 +293,22 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$outputContent = ob_get_contents();
 			ob_end_clean();
 			
-			if ($hasActiveTrolley && $myDBaseObj->getOption('ProductsAfterTrolley'))
+			if ($hasActiveTrolley)
 			{
-				echo $outputContent;
-				$outputContent = '';
+				if ($myDBaseObj->getOption('ProductsAfterTrolley'))
+				{
+					echo $outputContent;
+					$outputContent = '';
+				}
+			}
+			else
+			{
+				$boxofficeURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+				if ($myDBaseObj->getOption('boxofficeURL') != $boxofficeURL)
+				{
+					$myDBaseObj->adminOptions['boxofficeURL'] = $boxofficeURL;
+					$myDBaseObj->saveOptions();
+				}
 			}
 			
 			return $outputContent;						
@@ -723,9 +737,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 				
-			// Remove any incomplete Checkouts
-			$myDBaseObj->PurgePendingSales();
-					
 			// Check that request matches contents of cart
 			$passedParams = array();	// Dummy array used when checking passed params
 			

@@ -204,8 +204,9 @@ if (!class_exists('StageShowPluginClass'))
 			// Get Version Number
 			$pluginID = $myDBaseObj->get_name();
 			$pluginVer = $myDBaseObj->get_version();
+			$boxofficeURL = $myDBaseObj->getOption('boxofficeURL');
 			
-			echo "\n<meta name='$pluginID' content='$pluginID for WordPress by Malcolm Shergold - Ver:$pluginVer' />\n";						
+			echo "\n<meta name='$pluginID' content='$pluginID for WordPress by Malcolm Shergold - Ver:$pluginVer - BoxOfficeURL:$boxofficeURL' />\n";						
 		}
 		
 		function CreateSample()
@@ -289,7 +290,7 @@ if (!class_exists('StageShowPluginClass'))
 		function load_user_scripts()
 		{
 			// Add our own Javascript
-			wp_enqueue_script( 'stageshow', plugins_url( 'admin/js/stageshow.js', __FILE__ ));
+			wp_enqueue_script( 'stageshow', plugins_url( 'js/stageshow.js', __FILE__ ));
 		}	
 		
 		function load_admin_styles()
@@ -300,7 +301,8 @@ if (!class_exists('StageShowPluginClass'))
 			wp_enqueue_style( 'stageshow', plugins_url( 'admin/css/stageshow-admin.css', __FILE__ ));
 			
 			// Add our own Javascript
-			wp_enqueue_script( 'stageshow', plugins_url( 'admin/js/stageshow-admin.js', __FILE__ ));
+			wp_enqueue_script( 'stageshow-admin', plugins_url( 'admin/js/stageshow-admin.js', __FILE__ ));
+			wp_enqueue_script( 'datetimepicker', plugins_url( 'admin/js/datetimepicker_css.js', __FILE__ ));
 		}
 
 		function StageShow_ap() 

@@ -124,6 +124,17 @@ div.ok
 	border-color: #08A008;
 }
 	
+div#message.updated p  
+{
+	vertical-align: middle;
+	line-height: 28px;
+}
+
+div#message.updated #showemailbutton
+{
+	margin: 0 0 0 20px;
+}
+
 /* ----------------------------------------------------------------------------------------------------------------
 	Styles for Debug Messages
 ---------------------------------------------------------------------------------------------------------------- */

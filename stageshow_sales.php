@@ -616,6 +616,9 @@ if (!class_exists('StageShowSalesPluginClass'))
 					$checkoutRslt->saleDetails['salePPCountry'] = $this->GetUserInfo($user_metaInfo, 'UserCountry');
 					$checkoutRslt->saleDetails['salePPPhone'] = $this->GetUserInfo($user_metaInfo, 'UserPhone');
 			
+					// No transaction fee with reservations ... remove it so it defaults to zero
+					unset($checkoutRslt->saleDetails['transactionfee']);
+					
 					// Log sale to DB
 					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails);
 					$emailStatus = $this->myDBaseObj->EMailSale($saleId);

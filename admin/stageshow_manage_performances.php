@@ -33,6 +33,8 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 			// Call base constructor
 			parent::__construct($env, true);
 			
+			$this->dateTimeMode = 'datetime';	// Don't display seconds
+			
 			$this->SetRowsPerPage(self::STAGESHOWLIB_EVENTS_UNPAGED);
 			
 			// FUNCTIONALITY: Performances - Bulk Actions - Activate/Deactivate and Delete
@@ -58,7 +60,7 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 		{
 			// FUNCTIONALITY: Performances - Lists Performance Date & Time, Reference, Max Seats, Tickets Sold Count and Activation State
 			return array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Date & Time',  StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  StageShowLibTableClass::TABLEPARAM_LEN => 28, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Date & Time',  StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibAdminListClass::TABLEENTRY_DATETIME,  StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Reference',    StageShowLibTableClass::TABLEPARAM_ID => 'perfRef',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_PERFREF_TEXTLEN, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Max Seats',    StageShowLibTableClass::TABLEPARAM_ID => 'perfSeats',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,  StageShowLibTableClass::TABLEPARAM_DECODE =>'GetPerfMaxSeats',  StageShowLibTableClass::TABLEPARAM_LEN => 4, ),						
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Tickets Sold', StageShowLibTableClass::TABLEPARAM_ID => 'soldQty',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VALUE, StageShowLibTableClass::TABLEPARAM_LINK =>'admin.php?page='.STAGESHOW_MENUPAGE_SALES.'&action=perf&id=', ),						
