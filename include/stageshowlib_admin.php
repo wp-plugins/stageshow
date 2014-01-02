@@ -426,7 +426,7 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 							break;
 						
 						case StageShowLibTableClass::TABLEENTRY_TEXT:
-						case StageShowLibTableClass::TABLEENTRY_DATETIME:
+						case StageShowLibAdminListClass::TABLEENTRY_DATETIME:
 							// Text Settings are "Trimmed"
 							$controlId = $settingOption[StageShowLibTableClass::TABLEPARAM_ID];
 							if (isset($_POST[$controlId]))
