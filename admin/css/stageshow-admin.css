@@ -130,6 +130,12 @@ input.stageshow-dateinput
 	background-color: #ffffff;
 }
 
+.stageshow-readonly
+{
+	background-color: #ffffff;
+	border: 1px black solid;
+}
+
 /* ----------------------------------------------------------------------------------------------------------------
 	Styles for Settings Page
 ---------------------------------------------------------------------------------------------------------------- */

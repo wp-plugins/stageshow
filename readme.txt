@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.8
-Stable tag: 2.4.3
+Stable tag: 2.4.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -58,18 +58,18 @@ Additional Features in StageShow+ (available <a href="http://corondeck.co.uk/Sta
 
 First Time Installation
 
-* Download the stageshow plugin archive
+* Download the plugin archive
 * Open the Wordpress Dashboard for you site
 * Select the "Upload" option 
 * Click "Add New" under the "Plugins" menu 
-* Under "Install a plugin in .zip format" browse to the stageshow plugin archive file you downloaded
+* Under "Install a plugin in .zip format" browse to the plugin archive file you downloaded
 * Click Install Now.
 * After it has installed, activate the plugin.
 
 Upgrade
 
-* On the WP Plugins Page deactivate StageShow
-* Using FTP (or your ISPs file manager) delete the stageshow plugins folder in wp-content/plugins folder
+* On the WP Plugins Page deactivate (but do <span style="text-decoration: underline;">NOT</span> delete) the current StageShow plugin
+* Using FTP (or your ISPs file manager) delete the stageshow plugins folder in the wp-content/plugins folder
 * Now Proceed as for the First Time Installation
 
 == Frequently Asked Questions ==
@@ -177,6 +177,12 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 2.4.4 (21/01/2014) =
+* Bug Fix: Cannot reserve last seat for a performance
+* Bug Fix: No error message when attempting to Reserve seats when Sold Out
+* Bug Fix: Tickets Reserved Message class is stageshow-error (changed to stageshow-ok)
+* Bug Fix: Booking Fee still shown after last row removed from trolley
 
 = 2.4.3 (02/01/2014) =
 * Bug Fix: Save Settings Error: Undefined constant TABLEENTRY_DATETIME (since 2.4.2)

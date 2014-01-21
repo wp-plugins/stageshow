@@ -73,6 +73,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 		{
 			switch ($optionName)
 			{
+				case 'Show DB Ids':		return 'Output DB Table Index on Admin Pages';
 				case 'Show SQL':		return 'Show SQL Query Strings';
 				case 'Show DB Output':	return 'Show SQL Query Output';
 				case 'Show EMail Msgs':

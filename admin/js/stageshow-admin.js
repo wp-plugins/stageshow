@@ -144,7 +144,7 @@ function OpenTicketView(saleId, showEMailURL)
 	window.open(url);
 }
 
-function clickSeat(obj, zoneID, zoneDef)
+function testclickSeat(obj, zoneID, zoneDef)
 {
 	var seatId, hiddenSeatsElem, hiddenZonesElem, hiddenDefsElem;
 	
@@ -167,12 +167,12 @@ function clickSeat(obj, zoneID, zoneDef)
 	if (classPosn < 0)
 	{
 		className = 'stageshow-boxoffice-seat-requested ' + className;
-		seatsElem.value = seatName + ' Changed to Booked';		
+		seatsElem.innerHTML = seatName + ' Changed to Booked';		
 	}
 	else
 	{
 		className = 'stageshow-boxoffice-seat-available ' + className;
-		seatsElem.value = seatName + ' Changed to Available';		
+		seatsElem.innerHTML = seatName + ' Changed to Available';		
 	}
 	obj.className = className;
 	

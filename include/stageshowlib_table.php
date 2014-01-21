@@ -300,16 +300,40 @@ if (!class_exists('StageShowLibTableClass'))
 			$params .= " maxlength=\"$maxlength\"";
 			$params .= " value=\"$value\"";
 			
-			if ($params != '')
+			if ($extraParams != '')
 			{
 				$params .= ' '.$extraParams;
-			}
-			
+			}			
 			
 			if ($this->noAutoComplete)
 				$params .= " autocomplete=\"off\""; 
 			
 			$content = "<input type=\"text\" $params />";
+			
+			$inputName = 'curr'.$inputName;
+			
+			$params  = " name=$inputName";
+			$params .= " id=$inputName";
+			$params .= " value=\"$value\"";
+			
+			$content .= "<input type=\"hidden\" $params />";
+			
+			$this->AddToTable($result, $content, $col, $newRow);
+		}
+
+		function AddDivToTable($result, $inputName, $value, $col=0, $newRow = false, $extraParams = '')
+		{
+			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
+
+			$params  = " name=$inputName";
+			$params .= " id=$inputName";
+			
+			if ($extraParams != '')
+			{
+				$params .= ' '.$extraParams;
+			}			
+			
+			$content = "<div $params />$value</div>";
 			
 			$inputName = 'curr'.$inputName;
 			

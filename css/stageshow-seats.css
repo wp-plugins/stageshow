@@ -53,16 +53,23 @@ Copyright 2012 Malcolm Shergold
 
 div.stageshow-boxoffice-seat-available
 {
-    background-color: #80FF80;
+	cursor: pointer;
+    background-color: #00C000;
 }
 
 div.stageshow-boxoffice-seat-requested
 {
-    background-color: #FFFF80;
+	cursor: pointer;
+    background-color: #FF800F;
 }
 
 div.stageshow-boxoffice-seat-reserved,
-div.stageshow-boxoffice-seat-unknown
 {
     background-color: #FF0000;
+}
+
+div.stageshow-boxoffice-seat-unknown
+{
+	cursor: pointer;
+    background-color: #FFFF00;
 }
