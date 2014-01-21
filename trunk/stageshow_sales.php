@@ -218,9 +218,10 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$perfSaleQty  = $this->myDBaseObj->GetSalesQtyByPerfID($perfID);	
 				$perfSaleQty += $qty;
 				$seatsAvailable = $maxSales[$perfID];
-				if ( ($seatsAvailable > 0) && ($seatsAvailable <= $perfSaleQty) ) 
+				if ( ($seatsAvailable > 0) && ($seatsAvailable < $perfSaleQty) ) 
 				{
 					$ParamsOK = false;
+					break;
 				}
 			}
 			
@@ -570,17 +571,17 @@ if (!class_exists('StageShowSalesPluginClass'))
 					return;
 						
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
-				if (isset($checkoutRslt->checkoutError)) 
+				if (isset($checkoutRslt->checkoutMsg)) 
 				{
-					echo '<div id="message" class="error"><p>'.$checkoutRslt->checkoutError.'</p></div>';
+					$this->checkoutMsg = $checkoutRslt->checkoutMsg;
 					return;
 				}
 				
 				// Lock tables so we can commit the pending sale
 				$this->myDBaseObj->LockSalesTable();
-					
+
 				// Check quantities before we commit 
-				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt->totalSales, $checkoutRslt->maxSales);
+				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt->totalSales, $checkoutRslt->maxSales);					
 					
 				if ($ParamsOK)
 	  			{
@@ -625,9 +626,15 @@ if (!class_exists('StageShowSalesPluginClass'))
 						
 					$this->ClearTrolleyContents();	// Clear the shopping cart
 					
-					$this->checkoutError = __('Tickets reserved - Confirmation EMail sent to ', $this->myDomain).$checkoutRslt->saleDetails['saleEMail'];					
+					$this->checkoutMsg = __('Tickets reserved - Confirmation EMail sent to ', $this->myDomain).$checkoutRslt->saleDetails['saleEMail'];					
+					$this->checkoutMsgClass = $this->cssDomain.'-ok';
 				}
-						
+				else
+				{
+					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
+					$this->checkoutMsg .= __('Sold out for one or more performances', $this->myDomain);
+				}	
+					
 				// Release Tables
 				$this->myDBaseObj->UnLockTables();					
 			}

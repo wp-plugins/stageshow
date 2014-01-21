@@ -531,9 +531,13 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 			$myDBaseObj = $this->myDBaseObj;
 			
-			if (isset($this->checkoutError))
+			if (isset($this->checkoutMsg))
 			{
-				echo '<div id="message" class="'.$this->cssDomain.'-error">'.$this->checkoutError.'</div>';					
+				if (!isset($this->checkoutMsgClass))
+				{
+					$this->checkoutMsgClass = $this->cssDomain.'-error';
+				}
+				echo '<div id="message" class="'.$this->checkoutMsgClass.'">'.$this->checkoutMsg.'</div>';					
 			}
 				
 			$cartContents = $this->GetTrolleyContents();
@@ -618,6 +622,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 							break;
 						$itemID = $_GET['id'];
 						unset($cartContents->rows[$itemID]);
+						if (count($cartContents->rows) == 0)
+						{
+							$cartContents->fee = 0;
+						}
 						$this->SaveTrolleyContents($cartContents);
 						break;
 				}
@@ -755,8 +763,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 			if (!isset($cartContents->rows))
 			{
-				$rslt->checkoutError  = __('Cannot Checkout', $this->myDomain).' - ';
-				$rslt->checkoutError .= __('Shopping Trolley Empty', $this->myDomain);
+				$rslt->checkoutMsg  = __('Cannot Checkout', $this->myDomain).' - ';
+				$rslt->checkoutMsg .= __('Shopping Trolley Empty', $this->myDomain);
 				return $rslt;
 			}
 			
@@ -784,8 +792,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$ParamsOK &= $this->CheckPayPalParam($passedParams, "qty" , $cartEntry->qty, $cartIndex);
 				if (!$ParamsOK)
 				{
-					$rslt->checkoutError  = __('Cannot Checkout', $this->myDomain).' - ';
-					$rslt->checkoutError .= __('Shopping Trolley Contents have changed', $this->myDomain);
+					$rslt->checkoutMsg  = __('Cannot Checkout', $this->myDomain).' - ';
+					$rslt->checkoutMsg .= __('Shopping Trolley Contents have changed', $this->myDomain);
 					return $rslt;
 				}
 					
@@ -812,8 +820,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$ParamsOK &= !isset($_POST['qty'.$cartIndex]);
 			if (!$ParamsOK)
 			{
-				$rslt->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
-				$rslt->checkoutError .= __('Item(s) removed from Shopping Trolley', $this->myDomain);
+				$rslt->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
+				$rslt->checkoutMsg .= __('Item(s) removed from Shopping Trolley', $this->myDomain);
 				return $rslt;
 			}
 			
@@ -834,16 +842,16 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$myDBaseObj = $this->myDBaseObj;
 				
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
-				if (isset($checkoutRslt->checkoutError)) 
+				if (isset($checkoutRslt->checkoutMsg)) 
 				{
-					echo '<div id="message" class="error"><p>'.$checkoutRslt->checkoutError.'</p></div>';
+					$this->checkoutMsg = $checkoutRslt->checkoutMsg;
 					return;
 				}
 							
 				if ($checkoutRslt->totalDue == 0)
 				{
-					$this->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
-					$this->checkoutError .= __('Total sale is zero', $this->myDomain);
+					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
+					$this->checkoutMsg .= __('Total sale is zero', $this->myDomain);
 					return;						
 				}
 				
@@ -891,7 +899,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					$saleId = $this->myDBaseObj->LogPendingSale($checkoutRslt->saleDetails);
 					$paypalURL = add_query_arg('custom', $saleId, $paypalURL);		
 				}
-						
+				else
+				{
+					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
+					$this->checkoutMsg .= __('Sold out for one or more performances', $this->myDomain);
+				}	
+				
 				// Release Tables
 				$this->myDBaseObj->UnLockTables();
 					
@@ -906,7 +919,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					}
 					elseif ($this->myDBaseObj->isDbgOptionSet('Dev_IPNLocalServer'))
 					{
-						$this->checkoutError .= __('Using Local IPN Server - PayPal Checkout call skipped', $this->myDomain);
+						$this->checkoutMsg .= __('Using Local IPN Server - PayPal Checkout call skipped', $this->myDomain);
 					}
 					else 
 					{
@@ -916,8 +929,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				}
 				else
 				{
-					$this->checkoutError = __('Cannot Checkout', $this->myDomain).' - ';
-					$this->checkoutError .= __('Sold out for one or more performances', $this->myDomain);
+					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
+					$this->checkoutMsg .= __('Sold out for one or more performances', $this->myDomain);
 					return;						
 				}
 				

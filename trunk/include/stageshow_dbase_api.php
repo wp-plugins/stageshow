@@ -50,6 +50,8 @@ if (!class_exists('StageShowDBaseClass'))
 	define('STAGESHOW_SALES_TABLE', STAGESHOW_TABLE_PREFIX.'sales');
 	define('STAGESHOW_TICKETS_TABLE', STAGESHOW_TABLE_PREFIX.'tickets');
 
+	define('STAGESHOW_DEMOLOG_TABLE', STAGESHOW_TABLE_PREFIX.'demolog');
+		
 	if (!defined('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE'))
 		define('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE', 'StageShowLogo.jpg');
 	if (!defined('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE'))
@@ -472,6 +474,12 @@ if (!class_exists('StageShowDBaseClass'))
 						ticketPaid DECIMAL(9,2) NOT NULL DEFAULT 0.0,
 					';
 					break;
+				
+				case STAGESHOW_DEMOLOG_TABLE:
+					$sql .= '
+						logDateTime DATETIME NOT NULL,
+					';
+					break;
 					
 			}
 			
@@ -536,6 +544,11 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			$this->createDBTable(STAGESHOW_PERFORMANCES_TABLE, 'perfID', $dropTable);
 			$this->createDBTable(STAGESHOW_PRICES_TABLE, 'priceID', $dropTable);
+			
+			if (defined('RUNSTAGESHOWDEMO'))
+			{
+				$this->createDBTable(STAGESHOW_DEMOLOG_TABLE, 'loginID', $dropTable);
+			}
     	}
         
 		function DBField($fieldName)
