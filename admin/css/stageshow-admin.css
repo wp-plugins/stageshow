@@ -146,6 +146,18 @@ input.stageshow-dateinput
 	padding: 6px 10px;
 }
 
+#stageshow-settings
+{
+	margin: 0px 0px 10px 0px;
+}
+
+.hiddenRow th
+{
+	border-style: solid; 
+	border-width: 0px 1px 1px 1px;
+	border-color: black;
+}
+
 /* ----------------------------------------------------------------------------------------------------------------
 	Styles for Transaction Validation (on Tools Page)
 ---------------------------------------------------------------------------------------------------------------- */

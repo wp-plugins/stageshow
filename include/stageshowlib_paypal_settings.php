@@ -80,7 +80,6 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 			}
 			
 			$rowDefs = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Environment',                     StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalEnv',             StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, self::TABLEPARAM_PAYPALLOCK => true, StageShowLibTableClass::TABLEPARAM_ITEMS => array('live|Live', 'sandbox|Sandbox'), ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Merchant ID',                     StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalMerchantID',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_MERCHANTID_TEXTLEN,  StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'API User',                        StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPIUser',         StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_USER_TEXTLEN,        StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'API Password',                    StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPIPwd',          StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_PWD_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
@@ -165,21 +164,16 @@ if (!class_exists('PayPalSettingsAdminClass'))
 			$this->hiddenTags = '';
 				
 			// PAYPAL SETTINGS
-			$PayPalAPITestChanged = false;
-
 			if (isset($_POST['savechanges']))
 			{
 				$this->CheckAdminReferer();
 				
 				$PayPalAPIChanged = false;
 
-				if ($this->IsOptionChanged($myDBaseObj->adminOptions, 'PayPalEnv') || isset($_POST['errormsglive']))
+				if (isset($_POST['errormsglive']))
 				{
 					if ($this->blockPayPalEdit)
 					{
-						// Put back original settings
-						$_POST['PayPalEnv'] = $myDBaseObj->adminOptions['PayPalEnv'];
-						
 						$SettingsUpdateMsg = __('Plugin Entries already created - Paypal Login details cannot be changed.', $this->myDomain);
 					}
 				}
@@ -197,7 +191,7 @@ if (!class_exists('PayPalSettingsAdminClass'))
 						{							
 							$payPalAPIObj = new PayPalButtonsAPIClass(__FILE__);
 							if ($payPalAPIObj->VerifyPayPalLogin(
-								stripslashes($_POST['PayPalEnv']), 
+								'live', 
 								stripslashes($_POST['PayPalAPIUser']), 
 								stripslashes($_POST['PayPalAPIPwd']), 
 								stripslashes($_POST['PayPalAPISig'])))
