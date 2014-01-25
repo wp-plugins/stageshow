@@ -876,7 +876,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					
 				$checkoutRslt->paypalParams['notify_url'] = $myDBaseObj->PayPalNotifyURL;
 			
-				$paypalURL = PayPalAPIClass::GetPayPalURL($myDBaseObj->adminOptions['PayPalEnv'] == 'sandbox');
+				$paypalURL = PayPalAPIClass::GetPayPalURL(false);
 				//$paypalURL = 'http://www.paypal.com/cgi-bin/webscr';
 				
 				$paypalMethod = 'GET';				

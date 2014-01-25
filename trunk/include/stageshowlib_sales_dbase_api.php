@@ -170,7 +170,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function getOptions($childOptions = array(), $saveToDB = true) 
 		{
 			$ourOptions = array(
-				'PayPalEnv' => 'live',
 				'PayPalCurrency' => PAYPAL_APILIB_DEFAULT_CURRENCY,
 				        
 				'PayPalMerchantID' => '',
@@ -235,10 +234,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function setPayPalCredentials($OurIPNListener) 
 		{
 			$useLocalIPNServer = $this->isDbgOptionSet('Dev_IPNLocalServer');
-			$payPalTestMode = ($this->adminOptions['PayPalEnv'] == 'sandbox');
 			
 			$this->PayPalNotifyURL = $OurIPNListener;							
-			$this->PayPalURL = PayPalAPIClass::GetPayPalURL($payPalTestMode);
+			$this->PayPalURL = PayPalAPIClass::GetPayPalURL(false);
 
 			// URL for Plugin code to verify PayPal IPNs
 			if ($useLocalIPNServer)

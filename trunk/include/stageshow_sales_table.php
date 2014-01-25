@@ -38,7 +38,7 @@ if (!class_exists('StageShowSalesAdminListClass'))
 		function GetMainRowsDefinition()
 		{
 			if ($this->editMode) return array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Sale Editor',       StageShowLibTableClass::TABLEPARAM_ID => 'edit', ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Sale',       StageShowLibTableClass::TABLEPARAM_ID => 'edit', ),						
 			);
 							
 			$columnDefs = array(

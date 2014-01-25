@@ -318,9 +318,6 @@ if (!class_exists('PayPalSimulator'))
 	        $tags .= $this->AddHiddenTag('payment_date', '23%3A03%3A08+Sep+26%2C+2010+PDT', $state);
 	        $tags .= $this->AddHiddenTag('receiver_email', $receiverEMail, $state);				
 	        $tags .= $this->AddHiddenTag('verify_sign', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123.abcdefghijklmnopqrstuvwxy', $state);
-			
-			if ($currOptions['PayPalEnv'] == 'sandbox')
-	        	$tags .= $this->AddHiddenTag('test_ipn', '1', false, $state);
 				
 	        $tags .= $this->AddHiddenTag('first_name', 'My', true, $state);
 	        $tags .= $this->AddHiddenTag('last_name', 'Tester', true, $state);

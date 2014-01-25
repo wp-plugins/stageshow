@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.8
-Stable tag: 2.4.4
+Tested up to: 3.8.1
+Stable tag: 2.5
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -53,6 +53,12 @@ Additional Features in StageShow+ (available <a href="http://corondeck.co.uk/Sta
 * Performance title output on Box Office page customisable per performance (text/HTML) 
 * Optional EMail with sales summary (to a specified email address) on each new sale 
 * Booking Closing Time can be specified for each performance
+* Custom Style Sheets
+
+Additional Features in StageShowGold (available <a href="http://corondeck.co.uk/StageShow/Gold">here</a>)
+
+* Allocated Seating
+* Custom Seating Layouts
 
 == Installation ==
 
@@ -73,6 +79,12 @@ Upgrade
 * Now Proceed as for the First Time Installation
 
 == Frequently Asked Questions ==
+
+= How do I get help? =
+
+* Read these FAQs
+* Read the <a href=http://corondeck.co.uk/downloads/stageshowplus/StageShowHelp.pdf>documentation</a>
+* Contact the plugin author <a href=http://corondeck.co.uk/contact-us/>here</a>. Requests for help that are already well documented may get a sharp response!
 
 = How do I set up StageShow? =
 
@@ -178,6 +190,14 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
+= 2.5 (25/01/2014) =
+* Updated for WP 3.8.1
+* Bug Fix: Incorrect class for blank cells in Trolley "Remove" column
+* Added link to SSG in readme
+* Added custom stylesheet loader (StageShow+)
+* Support for PayPal Sandbox removed
+* StageShowGold (Beta) Released
+
 = 2.4.4 (21/01/2014) =
 * Bug Fix: Cannot reserve last seat for a performance
 * Bug Fix: No error message when attempting to Reserve seats when Sold Out
@@ -201,7 +221,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * Bug Fix: Verification Performance ID incorrect when performance select drop-down is not shown
 * Blocks Verification if TxnID is blank
 * Added view ticket to Sales Editor and Tools page (opens in separate window)
-* Added "Number of Seats" option to Prices (StageShow+ only)
+* Added "Number of Seats" option to Prices (StageShow+)
 * Added Updates for WP3.8
 * Booking Fee and Total rows realigned in Shopping Trolley output
 

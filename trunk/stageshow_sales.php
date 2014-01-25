@@ -505,7 +505,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				
 				echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";					
 				$this->OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry);
-				echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";					
+				echo '<td>&nbsp;</td>'."\n";					
 				echo "</tr>\n";
 			}
 			

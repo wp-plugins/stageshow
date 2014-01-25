@@ -85,7 +85,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 	{
 		function __construct($env) //constructor	
 		{
-			$this->pageTitle = 'Show Editor';
+			$this->pageTitle = 'Shows';
 			
 			// Call base constructor
 			parent::__construct($env);			

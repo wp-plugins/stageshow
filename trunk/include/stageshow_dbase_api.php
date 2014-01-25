@@ -385,20 +385,10 @@ if (!class_exists('StageShowDBaseClass'))
 				// FUNCTIONALITY: DBase - StageShow - Options - Merge PayPal settings after version 0.9.3
 				// Update from Ver 0.9.3 or earlier setup
 				
-				if ($currOptions['PayPalEnv'] == 'sandbox')
-				{
-					$currOptions['PayPalAPIUser'] = $currOptions['PayPalAPITestUser'];
-					$currOptions['PayPalAPISig']  = $currOptions['PayPalAPITestSig'];
-					$currOptions['PayPalAPIPwd'] = $currOptions['PayPalAPITestPwd'];
-					$currOptions['PayPalAPIEMail'] = $currOptions['PayPalAPITestEMail'];
-				}
-				else
-				{
-					$currOptions['PayPalAPIUser'] = $currOptions['PayPalAPILiveUser'];
-					$currOptions['PayPalAPISig']  = $currOptions['PayPalAPILiveSig'];
-					$currOptions['PayPalAPIPwd'] = $currOptions['PayPalAPILivePwd'];
-					$currOptions['PayPalAPIEMail'] = $currOptions['PayPalAPILiveEMail'];
-				}
+				$currOptions['PayPalAPIUser'] = $currOptions['PayPalAPILiveUser'];
+				$currOptions['PayPalAPISig']  = $currOptions['PayPalAPILiveSig'];
+				$currOptions['PayPalAPIPwd'] = $currOptions['PayPalAPILivePwd'];
+				$currOptions['PayPalAPIEMail'] = $currOptions['PayPalAPILiveEMail'];
 				
 				$this->deleteColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalTESTButtonID');
 				$this->deleteColumn(STAGESHOW_PERFORMANCES_TABLE, 'perfPayPalLIVEButtonID');
@@ -547,7 +537,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			if (defined('RUNSTAGESHOWDEMO'))
 			{
-				$this->createDBTable(STAGESHOW_DEMOLOG_TABLE, 'loginID', $dropTable);
+				$this->createDBTable(STAGESHOW_DEMOLOG_TABLE, 'demologID', $dropTable);
 			}
     	}
         

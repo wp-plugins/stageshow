@@ -59,6 +59,7 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEPARAM_ROWS = 'Rows';
 		const TABLEPARAM_COLS = 'Cols';
 		const TABLEPARAM_DECODE = 'Decode';
+		const TABLEPARAM_ADDEMPTY = 'AddEmpty';
 		const TABLEPARAM_BEFORE = 'Before';
 		const TABLEPARAM_AFTER = 'After';
 		
@@ -1158,6 +1159,11 @@ if (!class_exists('StageShowLibAdminListClass'))
 					
 			$selectOptsArray = array();
 			
+			if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_ADDEMPTY]))
+			{
+				$selectOptsArray[''] = '';
+			}
+						
 			foreach ($selectOpts as $selectOpt)
 			{
 				$selectAttrs = explode('|', $selectOpt);
