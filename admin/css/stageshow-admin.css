@@ -151,7 +151,7 @@ input.stageshow-dateinput
 	margin: 0px 0px 10px 0px;
 }
 
-.hiddenRow th
+#stageshow-settings .hiddenRow th
 {
 	border-style: solid; 
 	border-width: 0px 1px 1px 1px;

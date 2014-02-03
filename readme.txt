@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.8.1
-Stable tag: 2.5
+Stable tag: 2.5.2
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -100,8 +100,6 @@ PayPal API Access must be enabled - and the associated User, Password, Signature
 IPN (Instant Payment Notification) must be enabled for Sales to be recorded by the PlugIn. Payment will still be accepted and the sale will be recorded by PayPal if IPN is disabled. 
 Set the "IPN Listener" URL to http://{Your Site URL}/wp-content/plugins/stageshow/stageshow_NotifyURL.php. 
 
-StageShow can be used with a PayPal developer account (the "SandBox"). Select "SandBox" as the Environment option, and then enter the PayPal account parameters in the usual way.
-	
 = Why can't I edit the PayPal settings? =
 
 PayPal Login details cannot be changed if one or more performance entries are present. 
@@ -189,6 +187,19 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 2.5.2 (03/02/2014) =
+* Bug Fix: Interaction with other plugins can cause Performance Date & Time Picker to fail
+* Bug Fix: Adding border to settings page corrupts other admin pages
+* Bug Fix: No of sets in Price Plan not saved in new performance prices  (StageShow+ only)
+* Bug Fix: Allocated Seats availability not checked before commiting sale (StageShowGold only)
+* Bug Fix: Allocated Seats not saved for Reservations (StageShowGold only)
+* Added check that seats are still available on checkout (StageShowGold only)
+* PHP with E_STRICT enabled generates warnings
+
+= 2.5.1 (26/01/2014) =
+* Bug Fix: Adding border to settings page corrupts other admin pages
+* Bug Fix: Allocated Seats not saved for Reservations (StageShowGold)
 
 = 2.5 (25/01/2014) =
 * Updated for WP 3.8.1

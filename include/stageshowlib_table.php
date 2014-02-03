@@ -1243,7 +1243,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 				case self::TABLEENTRY_DATETIME:
 					$editSize = 28;
 					$inputClass = $this->myDBaseObj->get_domain().'-dateinput';
-					$eventHandler = " class=\"".$inputClass."\" readonly=true onclick=\"javascript:ShowDateTimeCalendar(this,'".$this->dateTimeMode."')\" ";
+					$eventHandler = " class=\"".$inputClass."\" readonly=true onclick=\"javascript:StageShowLib_CalendarSelector(this, '".$this->dateTimeMode."')\" ";
 					$editControl  = '<input type="text"'.$eventHandler.' size="'.$editSize.'" '.$controlIdDef.' value="'.$controlValue.'" />'."\n";
 					$editControl .= '<input type="hidden" '.str_replace('="', '="curr', $controlIdDef).' value="'.$controlValue.'" />'."\n";					
 					$this->hasDateTimeEntry = true;
@@ -1421,7 +1421,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 						case self::TABLEENTRY_DATETIME:
 							$size = 28;
 							$inputClass = $this->myDBaseObj->get_domain().'-dateinput';
-							$extraParams = "class=\"".$inputClass."\" readonly=true onclick=\"javascript:ShowDateTimeCalendar(this,'".$this->dateTimeMode."')\" ";
+							$extraParams = "class=\"".$inputClass."\" readonly=true onclick=\"javascript:StageShowLib_CalendarSelector(this, '".$this->dateTimeMode."')\" ";
 							$this->AddInputToTable($result, $columnId, $size, $currVal, 0, false, $extraParams);
 							$this->hasDateTimeEntry = true;
 							break;
