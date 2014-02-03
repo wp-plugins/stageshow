@@ -144,12 +144,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $result->stockPrice + $result->stockPostage;
 		}
 			
-		function IsOnlineStoreItemSoldOut($result)
+		function IsOnlineStoreItemSoldOut($result, $salesSummary)
 		{
 			return false;
 		}
 			
-		function IsOnlineStoreItemAvailable($totalSales, $maxSales)
+		function IsOnlineStoreItemAvailable($saleItems)
 		{
 			return true;
 		}
@@ -550,6 +550,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return 0;
 		}
 		
+		function OnlineStore_AddTrolleyExtras(&$cartEntry, $result)
+		{
+		}
+		
 		function OnlineStore_HandleTrolleyButtons($cartContents)
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -594,11 +598,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						$cartEntry->itemID = $itemID;
 						$cartEntry->qty = $reqQty;
 						
+						$this->OnlineStore_AddTrolleyExtras($cartEntry, $priceEntries[0]);
 						$cartEntry->sortBy = $this->OnlineStore_GetSortField($priceEntries[0]);
 						
 						$this->AddToTrolleyContents($cartContents, $cartEntry);
 					}
-					
+
 					$this->SaveTrolleyContents($cartContents);
 				}
 			}
@@ -828,7 +833,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $rslt;
 		}		
 
-		function OnlineStore_AddTransactionFee()
+		function OnlineStore_AddTransactionFee(&$rslt, &$paramCount)
 		{
 		}
 		
@@ -891,18 +896,17 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$this->myDBaseObj->LockSalesTable();
 					
 				// Check quantities before we commit 
-				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt->totalSales, $checkoutRslt->maxSales);
+				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt);
 					
 				if ($ParamsOK)
   				{
 					// Update quantities ...
-					$saleId = $this->myDBaseObj->LogPendingSale($checkoutRslt->saleDetails);
+					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails, self::STAGESHOWLIB_LOGSALEMODE_CHECKOUT);
 					$paypalURL = add_query_arg('custom', $saleId, $paypalURL);		
 				}
 				else
 				{
-					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
-					$this->checkoutMsg .= __('Sold out for one or more performances', $this->myDomain);
+					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - '.$this->checkoutMsg;
 				}	
 				
 				// Release Tables
@@ -930,7 +934,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				else
 				{
 					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
-					$this->checkoutMsg .= __('Sold out for one or more performances', $this->myDomain);
+					$this->checkoutMsg .= __('Sold out for one or more items', $this->myDomain);
 					return;						
 				}
 				

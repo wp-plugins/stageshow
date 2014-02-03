@@ -51,8 +51,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
   	class StageShowLibSalesDBaseClass extends StageShowLibDBaseClass // Define class
   	{	
-		const STAGESHOWLIB_TROLLEYTYPE_INTEGRATED = 'Integrated';
-		const STAGESHOWLIB_TROLLEYTYPE_PAYPAL = 'PayPal';
+		const STAGESHOWLIB_LOGSALEMODE_CHECKOUT = 'Checkout';
+		const STAGESHOWLIB_LOGSALEMODE_RESERVE = 'Reserve';
+		const STAGESHOWLIB_LOGSALEMODE_PAYMENT = 'Payment';
 		
 		var		$PayPalURL;			//  URL for PayPal Payment Requests
 		var		$PayPalVerifyURL;	//  URL for PayPal Verify IPN Requests
@@ -714,20 +715,31 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->query($sql);
 		}
 		
-		function AddSaleItem($saleID, $stockID, $qty, $paid)
+		function AddSaleItem($saleID, $stockID, $qty, $paid, $saleExtras = array())
 		{
 			$paid *= $qty;
 			
-			$sql  = 'INSERT INTO '.$this->DBTables->Orders.'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid').')';
-			$sql .= ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'")';
-			 
+			$sqlFields  = 'INSERT INTO '.$this->DBTables->Orders.'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid');
+			$sqlValues  = ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'"';
+			
+			foreach ($saleExtras as $field => $value)
+			{
+				$sqlFields .= ','.$field;
+				$sqlValues .= ', "'.$value.'"';
+			}
+			
+			$sqlFields .= ')';
+			$sqlValues .= ')';
+			
+			$sql = $sqlFields.$sqlValues;
+			
 			$this->query($sql);
 			$orderID = mysql_insert_id();
 				
 			return $orderID;
 		}			
 		
-		function UpdateSaleItem($saleID, $stockID, $qty, $paid)
+		function UpdateSaleItem($saleID, $stockID, $qty, $paid, $saleExtras = array())
 		{
 			$paid *= $qty;
 			
@@ -735,6 +747,12 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql  = 'UPDATE '.$this->DBTables->Orders;
 			$sql .= ' SET '.$this->DBField('orderQty').'="'.$qty.'"';
 			$sql .= ' ,   '.$this->DBField('orderPaid').'="'.$paid.'"';
+			
+			foreach ($saleExtras as $field => $value)
+			{
+				$sql .= ' ,   '.$field.'="'.$value.'"';
+			}
+			
 			$sql .= ' WHERE '.$this->DBTables->Orders.".saleID=$saleID";
 			$sql .= ' AND   '.$this->DBTables->Orders.".".$this->DBField('stockID')."=$stockID";
 
@@ -1182,60 +1200,66 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->query($sql);			
 		}
 		
-		function LogPendingSale($results)
+		function GetSaleExtras($itemNo, $results)
 		{
-			return $this->LogSale($results, true);
+			return array();
 		}
 		
-		function LogSale($results, $isCheckout = false)
+		function LogSale($results, $saleMode = self::STAGESHOWLIB_LOGSALEMODE_PAYMENT)
 		{
-			if ($isCheckout)
+			switch ($saleMode)
 			{
-				$saleDateTime = current_time('mysql'); 
+				case self::STAGESHOWLIB_LOGSALEMODE_CHECKOUT:
+					$saleDateTime = current_time('mysql'); 
+					
+					$saleVals['saleCheckoutTime'] = $saleDateTime;
+					$saleVals['saleStatus'] = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
 				
-				$saleVals['saleCheckoutTime'] = $saleDateTime;
-				$saleVals['saleStatus'] = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
-			
-				// Add empty values for fields that do not have a default value
-				$saleVals['saleFirstName'] = '';	
-				$saleVals['saleLastName'] = '';	
-				$saleVals['saleEMail'] = '';
-				$saleVals['saleTxnid'] = '';
+					// Add empty values for fields that do not have a default value
+					$saleVals['saleFirstName'] = '';	
+					$saleVals['saleLastName'] = '';	
+					$saleVals['saleEMail'] = '';
+					$saleVals['saleTxnid'] = '';
 
-				$saleVals['salePaid'] = '0.0';
-				$saleVals['saleFee'] = '0.0';
-				if (isset($results['transactionfee']))
-				{
-					$saleVals['saleTransactionFee'] = $results['transactionfee'];
-				}
-								
-				$saleID = $this->AddSale($saleDateTime, $saleVals);
-			}
-			else if (isset($results['saleID']))
-			{
-				// Just add the sale details 
-				$saleID = $this->UpdateSale($results);
-				if ($saleID == 0)
-				{
-					// Checkout has timed out ... 
-				}
-				return $saleID;
-			}				
-			else
-			{
-				$saleDateTime  = $results['saleDateTime'];
+					$saleVals['salePaid'] = '0.0';
+					$saleVals['saleFee'] = '0.0';
+					if (isset($results['transactionfee']))
+					{
+						$saleVals['saleTransactionFee'] = $results['transactionfee'];
+					}
+									
+					$saleID = $this->AddSale($saleDateTime, $saleVals);
+					break;
 				
-				foreach ($results as $fieldID => $fieldVal)
-				{
-					// Don't pass ticket details to AddSale() ... these are passed in AddSaleItem()
-					if (is_numeric(substr($fieldID, -1, 1)))
-						continue;
-						
-					$saleVals[$fieldID] = $fieldVal;
-				}
+				case self::STAGESHOWLIB_LOGSALEMODE_PAYMENT:
+					// Just add the sale details 
+					$saleID = $this->UpdateSale($results);
+					if ($saleID == 0)
+					{
+						// Checkout has timed out ... 
+					}
+					return $saleID;
+
+				case self::STAGESHOWLIB_LOGSALEMODE_RESERVE:
+					$saleDateTime  = $results['saleDateTime'];
+					
+					foreach ($results as $fieldID => $fieldVal)
+					{
+						// Don't pass ticket details to AddSale() ... these are passed in AddSaleItem()
+						if (is_numeric(substr($fieldID, -1, 1)))
+							continue;
+							
+						$saleVals[$fieldID] = $fieldVal;
+					}
+					
+					// Log sale to Database
+					$saleID = $this->AddSale($saleDateTime, $saleVals);
+					break;
 				
-				// Log sale to Database
-				$saleID = $this->AddSale($saleDateTime, $saleVals);
+				default:
+					echo "<br><br>Invalid saleMode in LogSale() call<br><br>";
+					return 0;
+				
 			}
 		  		  
 			$itemNo = 1;
@@ -1264,7 +1288,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				if ($qty > 0)
 				{
 					// Log sale item to Database
-					$this->AddSaleItem($saleID, $stockID, $qty, $itemPaid);
+					$saleExtras = $this->GetSaleExtras($itemNo, $results);
+					$this->AddSaleItem($saleID, $stockID, $qty, $itemPaid, $saleExtras);
 			    
 					$lineNo++;
 				}

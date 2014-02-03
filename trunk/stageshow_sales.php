@@ -208,18 +208,20 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $soldOut;
 		}
 			
-		function IsOnlineStoreItemAvailable($totalSales, $maxSales)
+		function IsOnlineStoreItemAvailable($saleItems)
 		{
 			$ParamsOK = true;
+			$this->checkoutMsg = '';
 			
 			// Check quantities before we commit 
-			foreach ($totalSales as $perfID => $qty)
+			foreach ($saleItems->totalSales as $perfID => $qty)
 			{						
 				$perfSaleQty  = $this->myDBaseObj->GetSalesQtyByPerfID($perfID);	
 				$perfSaleQty += $qty;
-				$seatsAvailable = $maxSales[$perfID];
+				$seatsAvailable = $saleItems->maxSales[$perfID];
 				if ( ($seatsAvailable > 0) && ($seatsAvailable < $perfSaleQty) ) 
 				{
+					$this->checkoutMsg = __('Sold out for one or more performances', $this->myDomain);
 					$ParamsOK = false;
 					break;
 				}
@@ -538,6 +540,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $result->perfDateTime.'-'.$result->priceType;
 		}
 		
+		function OnlineStore_AddTrolleyExtras(&$cartEntry, $result)
+		{
+			$cartEntry->perfID = $result->perfID;
+		}
+		
 		function OnlineStore_AddTransactionFee(&$rslt, &$paramCount)
 		{
 			if (($rslt->totalDue > 0) && ($rslt->fee > 0))
@@ -581,7 +588,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$this->myDBaseObj->LockSalesTable();
 
 				// Check quantities before we commit 
-				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt->totalSales, $checkoutRslt->maxSales);					
+				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt);					
 					
 				if ($ParamsOK)
 	  			{
@@ -621,7 +628,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 					unset($checkoutRslt->saleDetails['transactionfee']);
 					
 					// Log sale to DB
-					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails);
+					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails, StageShowLibSalesDBaseClass::STAGESHOWLIB_LOGSALEMODE_RESERVE);
 					$emailStatus = $this->myDBaseObj->EMailSale($saleId);
 						
 					$this->ClearTrolleyContents();	// Clear the shopping cart
@@ -631,8 +638,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				}
 				else
 				{
-					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
-					$this->checkoutMsg .= __('Sold out for one or more performances', $this->myDomain);
+					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - '.$this->checkoutMsg;
 				}	
 					
 				// Release Tables
