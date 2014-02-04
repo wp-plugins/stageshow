@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.8.1
-Stable tag: 2.5.2
+Stable tag: 2.5.3
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -188,13 +188,16 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
+= 2.5.3 (04/02/2014) =
+* Bug Fix: Fatal Error on Checkout - STAGESHOWLIB_LOGSALEMODE_CHECKOUT undefined
+
 = 2.5.2 (03/02/2014) =
 * Bug Fix: Interaction with other plugins can cause Performance Date & Time Picker to fail
 * Bug Fix: Adding border to settings page corrupts other admin pages
-* Bug Fix: No of sets in Price Plan not saved in new performance prices  (StageShow+ only)
-* Bug Fix: Allocated Seats availability not checked before commiting sale (StageShowGold only)
-* Bug Fix: Allocated Seats not saved for Reservations (StageShowGold only)
-* Added check that seats are still available on checkout (StageShowGold only)
+* Bug Fix: No of sets in Price Plan not saved in new performance prices  (StageShow+)
+* Bug Fix: Allocated Seats availability not checked before commiting sale (StageShowGold)
+* Bug Fix: Allocated Seats not saved for Reservations (StageShowGold)
+* Added check that seats are still available on checkout (StageShowGold)
 * PHP with E_STRICT enabled generates warnings
 
 = 2.5.1 (26/01/2014) =
@@ -281,13 +284,13 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * Added Seating Plans editor (StageShowGold)
 
 = 2.2.5 (17/10/2013) =
-* Bug Fix: DB error generating Box Office output  (since v2.2.4) (StageShow only)
+* Bug Fix: DB error generating Box Office output  (since v2.2.4) (StageShow)
 * Bug Fix: Tools-Export does not generate output (since v2.2.4)
-* Bug Fix: stageshowplus_tdt_export.php missing in Distribution (since v2.2.4) (StageShow+ only)
+* Bug Fix: stageshowplus_tdt_export.php missing in Distribution (since v2.2.4) (StageShow+)
 
 = 2.2.4 (08/10/2013) =
-* Bug Fix: Performance Expiry Date/Time does not track performance Date/Time Changes (since v2.1.5) (StageShow+ only)
-* Bug Fix: Performance Expiry Date/Time includes seconds (StageShow+ only)
+* Bug Fix: Performance Expiry Date/Time does not track performance Date/Time Changes (since v2.1.5) (StageShow+)
+* Bug Fix: Performance Expiry Date/Time includes seconds (StageShow+)
 * StageShowPlus/StageShowGold Specific DB Fields moved to Version Specific Classes
 * AddSample********* functions added
 
@@ -344,7 +347,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * Confirm action on Delete or Set Completed Actions
 
 = 2.1.2 (11/07/2013) =
-* Bug Fix: Price Plans not checked for valid prices (StageShow+ only)
+* Bug Fix: Price Plans not checked for valid prices (StageShow+)
 * Bug Fix: Bottom Bulk Action Apply button uses Selected Top Bulk Action when valid
 * Zero prices permitted with Integrated Checkout
 
@@ -359,14 +362,14 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * Bug Fix: Show name not shown when Show sales log has no sales
 * Bug Fix: Bulk actions do not report error if nothing changed
 * Bug Fix: Status message not shown for Activate/Deactivate Show action
-* Bug Fix: Prices entires for unchanged show(s) blank after duplicate price ref error (StageShow+ only)
+* Bug Fix: Prices entires for unchanged show(s) blank after duplicate price ref error (StageShow+)
 * Bug Fix: Default Performance Expires time does not track changes in performance time
 * Bug Fix: Incorrect value for Sample Sales total paid values
-* Added Reservations (StageShow+ only)
+* Added Reservations (StageShow+)
 * EMail Template File renamed "Sale EMail Template" in settings
-* Fuctions in one or both of PayPal mode and Reservation mode (StageShow+ only)
-* Implemented "Visibility" setting for prices (StageShow+ only)
-* Performance Expiry time made editable (StageShow+ only)
+* Fuctions in one or both of PayPal mode and Reservation mode (StageShow+)
+* Implemented "Visibility" setting for prices (StageShow+)
+* Performance Expiry time made editable (StageShow+)
 * Sales use "local time" for sale time/date
 * Leading and trailing spaces removed from text settings entries
 * Settings tabs renamed
@@ -386,7 +389,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * Bug Fix: Box Office shows inactive/expired shows
 * Deleted Shows, Performances and Prices only removed from DB when not referenced by Sales
 * Integrated Checkout syles rationised
-* Added salePaid and saleFee to Sales Summary export (StageShow+ only)
+* Added salePaid and saleFee to Sales Summary export (StageShow+)
 * Flush Sales removed from Tools Menu
 
 = 2.0.4 (21/05/2013) =
@@ -401,7 +404,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * Added Logging of PayPal Transaction Fees
 * Ticket Price logged with each sale
 * Export File Field Names now defined by translatable table
-* Added OFX format export (StageShow+ only)
+* Added OFX format export (StageShow+)
 * Checkout Timeout added to settings
 * Box Office columns widths set by style sheet (stageshow.css)
 * Implemented Checkout Complete and Checkout Cancelled URLs in settings
@@ -577,7 +580,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Upgrade_Notice ==
 
 = 2.2.4 =
-* Performances with dates changed by StageShow versions 2.1.5 to 2.2.3 may have incorrect performance Expiry Date/Time  (StageShow+ only)
+* Performances with dates changed by StageShow versions 2.1.5 to 2.2.3 may have incorrect performance Expiry Date/Time  (StageShow+)
 
 = 2.2 =
 * Support for PayPal Checkout removed - MerchantID on PayPal Settings tab must be set
