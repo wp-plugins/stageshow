@@ -901,7 +901,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				if ($ParamsOK)
   				{
 					// Update quantities ...
-					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails, self::STAGESHOWLIB_LOGSALEMODE_CHECKOUT);
+					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails, StageShowLibSalesDBaseClass::STAGESHOWLIB_LOGSALEMODE_CHECKOUT);
 					$paypalURL = add_query_arg('custom', $saleId, $paypalURL);		
 				}
 				else
