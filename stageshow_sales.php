@@ -96,7 +96,9 @@ if (!class_exists('StageShowSalesPluginClass'))
 	
 		function OutputContent_OnlineStoreMain($reqRecordId = '')
 		{
-			if ($reqRecordId != '')
+			$scanShows = ($reqRecordId === '');
+			$scanShows |= (is_numeric($reqRecordId) && ($reqRecordId < 0));
+			if (!$scanShows)
 			{			
 				parent::OutputContent_OnlineStoreMain($reqRecordId);
 			}			
@@ -108,8 +110,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$shows = $myDBaseObj->GetActiveShowsList();
 	      
 		  		// Count can be used to limit the number of Shows displayed
-				if (isset($atts['count']))
-					$count = $atts['count'];
+				if ($reqRecordId < 0)
+					$count = 0 - $reqRecordId;
 				else
 					$count = count($shows);
 					
@@ -128,6 +130,9 @@ if (!class_exists('StageShowSalesPluginClass'))
 		
 		function OutputContent_OnlineStoreFooter()
 		{
+			if ($this->adminPageActive)
+				return;
+				
 			$url = $this->myDBaseObj ->get_pluginURI();
 			$name = $this->myDBaseObj ->get_name();
 			$weblink = __('Driven by').' <a target="_blank" href="'.$url.'">'.$name.'</a>';
@@ -202,10 +207,29 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $result->priceValue;
 		}
 			
-		function IsOnlineStoreItemSoldOut($result, $salesSummary)
+		function GetOnlineStoreItemsAvailable($result)
 		{
-			$soldOut = ( ($result->perfSeats >=0) && ($salesSummary->totalQty >= $result->perfSeats) );
-			return $soldOut;
+			static $lastPerfID = 0;
+			static $itemsAvailable = 0;
+			
+			if ($lastPerfID != $result->perfID)
+			{
+				$salesSummary = $this->myDBaseObj->GetPerformanceSummaryByPerfID($result->perfID);
+				if ($result->perfSeats >=0) 
+				{
+					$itemsAvailable = $result->perfSeats - $salesSummary->totalQty;
+					if ($itemsAvailable < 0) $itemsAvailable = 0;
+				}
+				else
+				{
+					$itemsAvailable = -1;	// i.e. No limit
+				}
+				
+				$lastPerfID = $result->perfID;
+			}
+			
+			
+			return $itemsAvailable;
 		}
 			
 		function IsOnlineStoreItemAvailable($saleItems)
@@ -216,7 +240,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			// Check quantities before we commit 
 			foreach ($saleItems->totalSales as $perfID => $qty)
 			{						
-				$perfSaleQty  = $this->myDBaseObj->GetSalesQtyByPerfID($perfID);	
+				$perfSaleQty  = $this->myDBaseObj->GetSalesQtyByPerfID($perfID);
 				$perfSaleQty += $qty;
 				$seatsAvailable = $saleItems->maxSales[$perfID];
 				if ( ($seatsAvailable > 0) && ($seatsAvailable < $perfSaleQty) ) 
@@ -274,33 +298,19 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$myDBaseObj = $this->myDBaseObj;
 
 			// Sales Summary from PerfID
-			if (!isset($salesSummary))
+			if (!isset($this->lastPerfDateTime))
 			{
-				$lastShowID = 0;
-				$lastPerfID = 0;
 				$this->lastPerfDateTime = '';
 			}
-			else
-			{
-				$lastShowID = $salesSummary->showID;
-				$lastPerfID = $salesSummary->perfID;
-			}
 				
-			if ($result->perfID != $lastPerfID)
-			{
-				// New performance - Get sales figures
-				$salesSummary = $myDBaseObj->GetPerformanceSummaryByPerfID($result->perfID);
-			}			
+			$seatsAvailable = $this->GetOnlineStoreItemsAvailable($result);
+			$soldOut = ($seatsAvailable == 0);
 			
-			$soldOut = $this->IsOnlineStoreItemSoldOut($result, $salesSummary);
-			
-			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', $this->myDomain);
-						
 			$separator = '';
 			if (($this->lastPerfDateTime !== $result->perfDateTime) || $showAllDates)
 			{
 				$formattedPerfDateTime = $myDBaseObj->FormatDateForDisplay($result->perfDateTime);
-				if ($lastPerfID != 0) $separator = "\n".'<tr><td class="stageshow-boxoffice-separator">&nbsp;</td></tr>';
+				if ($this->lastPerfDateTime != '') $separator = "\n".'<tr><td class="stageshow-boxoffice-separator">&nbsp;</td></tr>';
 				$this->lastPerfDateTime = $result->perfDateTime;
 			}
 			else
@@ -332,13 +342,13 @@ if (!class_exists('StageShowSalesPluginClass'))
 					</select>
 					</td>
 				';
-			}
-															
-			if (!$soldOut)
-			{
+				
+				$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', $this->myDomain);						
+				$buttonClassdef = ($this->adminPageActive) ? 'class="button-secondary " ' : '';
+			
 				$storeRowHTML .= '
 					<td class="stageshow-boxoffice-add">
-					<input type="submit" id="'.$submitId.'" name="'.$submitId.'" value="'.$submitButton.'" alt="'.$altTag.'"/>
+					<input type="submit" '.$buttonClassdef.'id="'.$submitId.'" name="'.$submitId.'" value="'.$submitButton.'" alt="'.$altTag.'"/>
 					</td>
 				';
 			}
@@ -355,12 +365,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 
 			if ($myDBaseObj->getOption('ShowSeatsAvailable'))
 			{
-				if (!isset($result->joinNext))
+				if (isset($result->showAvailable))
 				{
 					// TODO - SSG Allocated Seating - Check Seats Available Count ....
-					if (!$soldOut && ($result->perfSeats >=0))
+					if ($seatsAvailable > 0)
 					{
-						$seatsAvailable = $result->perfSeats - $salesSummary->totalQty;
 						$storeRowHTML .= '
 							<tr>
 							<td colspan="4" class="stageshow-boxoffice-available">'.$seatsAvailable.' '.__('Seats Available', $this->myDomain).'</td>
@@ -381,14 +390,15 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			if (count($results) > 0)
 			{
-		  		$lastIndex = count($results);
-		  		for ($index=0; $index<count($results)-1;$index++)
+		  		$lastIndex = count($results)-1;
+		  		for ($index=0; $index<$lastIndex-1;$index++)
 				{
-					if ($results[$index]->perfID == $results[$index+1]->perfID)
+					if ($results[$index]->perfID != $results[$index+1]->perfID)
 					{
-						$results[$index]->joinNext = true;
+						$results[$index]->showAvailable = true;
 					}
 				}
+				$results[$lastIndex]->showAvailable = true;
 			}
 			
 			return parent::OutputContent_OnlineStoreSection( $results );
@@ -550,6 +560,77 @@ if (!class_exists('StageShowSalesPluginClass'))
 			parent::OnlineStore_ProcessCheckout();
 		}
 		
+		function IsOnlineStoreItemValid($cartEntry, $saleEntries)
+		{
+			// Test if this item is valid (i.e. Available))
+			static $firstPass = true;
+			$myDBaseObj = $this->myDBaseObj;
+			
+			if ($firstPass)
+			{			
+				// Just do this on the first call
+				$firstPass = false;
+//StageShowLibUtilsClass::print_r($saleEntries, 'saleEntries');
+				
+				foreach ($saleEntries as $saleEntry)
+				{
+					$perfID = $saleEntry->perfID;
+					
+					if (!isset($this->seatsAvail[$perfID]))
+					{
+						// Get the maximum number of seats 
+						$this->seatsAvail[$perfID] = $saleEntry->perfSeats;	
+						if ($this->seatsAvail[$perfID] <= 0) continue;
+						
+						// Deduct the total number of seats sold for this performance	
+						$salesSummary = $myDBaseObj->GetPerformanceSummaryByPerfID($perfID);
+						$this->seatsAvail[$perfID] -= $salesSummary->totalQty;				
+//StageShowLibUtilsClass::print_r($salesSummary, 'salesSummary-'.__LINE__);
+					}
+					
+					// Add the number of seats for this performance for this sale entry
+					$qty = isset($saleEntry->priceNoOfSeats) ? $saleEntry->ticketQty * $saleEntry->priceNoOfSeats : $saleEntry->ticketQty;						
+					$this->seatsAvail[$perfID] += $qty;	
+					
+					
+				}
+			}
+
+			$qty = isset($cartEntry->priceNoOfSeats) ? $cartEntry->qty * $cartEntry->priceNoOfSeats : $cartEntry->qty;						
+			$perfID = $cartEntry->perfID;
+			
+			if (!isset($this->seatsAvail[$perfID]))
+			{
+				// This performance has been added to the sale
+				$salesSummary = $myDBaseObj->GetPerformanceSummaryByPerfID($perfID);
+//StageShowLibUtilsClass::print_r($salesSummary, 'salesSummary-'.__LINE__);
+					
+				// Get the maximum number of seats 
+				$this->seatsAvail[$perfID] = $salesSummary->perfSeats;	
+				if ($this->seatsAvail[$perfID] > 0)
+				{
+					// Deduct the total number of seats sold for this performance	
+					$this->seatsAvail[$perfID] -= $salesSummary->totalQty;				
+				}
+			}
+			
+			if ($this->seatsAvail[$perfID] < 0)
+				return true;
+				
+			if ($this->seatsAvail[$perfID] < $qty)
+			{
+				$this->seatsAvail[$perfID] = 0;
+				$salesSummary = $myDBaseObj->GetPerformanceSummaryByPerfID($perfID);
+				$perfDateTime = $this->myDBaseObj->FormatDateForDisplay($salesSummary->perfDateTime);
+				$this->checkoutMsg = __('Insufficient seats', $this->myDomain).' - ('.$salesSummary->showName.' '.$perfDateTime.')';
+				return false;
+			}
+				
+			$this->seatsAvail[$perfID] -= $qty;
+			
+			return true;
+		}
+			
 		
 	}
 } //End Class StageShowSalesPluginClass

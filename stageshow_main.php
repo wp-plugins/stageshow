@@ -315,6 +315,231 @@ if (!class_exists('StageShowPluginClass'))
 			wp_enqueue_script( 'datetimepicker', plugins_url( 'admin/js/datetimepicker_css.js', __FILE__ ));
 		}
 
+		function OutputContent_OnlineStoreMain($reqRecordId = '')
+		{
+			$myDBaseObj = $this->myDBaseObj;
+
+			// Deal with sale editor pages
+			if ($this->adminPageActive)
+			{
+				$buttonID = $this->GetButtonID('editbuyer');
+				if (isset($_POST[$buttonID]))	// 'editbuyer' editing sale - get buyer details
+				{
+					// Output Buyer Details Form
+					if (!current_user_can(STAGESHOW_CAPABILITY_ADMINUSER))
+						return;
+					
+					$saleId = (isset($_POST['id'])) ? $saleId = $_POST['id'] : 0;
+					echo '<input type="hidden" name="id" value="'.$saleId.'"/>'."\n";
+						
+					$this->OutputContent_OnlinePurchaserDetails();
+					return;
+				}
+				
+				$buttonID = $this->GetButtonID('savesaleedit');
+				if (isset($_POST[$buttonID]))
+				{
+					$cartContents = $this->GetTrolleyContents();
+					
+					$cartContents->saleEMail     = $_POST['saleEMail'];
+					$cartContents->saleFirstName = $_POST['saleFirstName'];
+					$cartContents->saleLastName  = $_POST['saleLastName'];
+					$cartContents->salePPStreet  = $_POST['salePPStreet'];
+					$cartContents->salePPCity    = $_POST['salePPCity'];								
+					$cartContents->salePPState   = $_POST['salePPState'];
+					$cartContents->salePPZip     = $_POST['salePPZip'];
+					$cartContents->salePPCountry = $_POST['salePPCountry'];
+					$cartContents->salePPPhone   = $_POST['salePPPhone'];	
+					$cartContents->saleStatus    = $_POST['saleStatus'];	
+															
+					$this->SaveTrolleyContents($cartContents);
+				
+					$saleID = $this->OnlineStoreSaveEdit();
+					
+					if ($saleID > 0)
+					{
+						echo '
+						<div id="message" class="updated">
+						<p>'.__('Sale Details have been saved', $this->myDomain);
+						$myDBaseObj->OutputViewTicketButton($saleID);
+						echo '
+						</div>';
+						
+						return;
+					}
+				}				
+			}
+			
+			parent::OutputContent_OnlineStoreMain($reqRecordId);				
+		}
+
+		function OutputContent_OnlinePurchaserDetails()
+		{
+			$cartContents = $this->GetTrolleyContents();
+			
+			$paramIDs = array(
+				'saleEMail'     => __('EMail', $this->myDomain),
+				'saleFirstName' => __('First Name', $this->myDomain),
+				'saleLastName'  => __('Last Name', $this->myDomain),
+				'salePPStreet'  => __('Street', $this->myDomain),
+				'salePPCity'    => __('City', $this->myDomain),
+				'salePPState'   => __('County', $this->myDomain),
+				'salePPZip'     => __('Postcode', $this->myDomain),
+				'salePPCountry' => __('Country', $this->myDomain),
+				'salePPPhone'   => __('Phone', $this->myDomain),
+				);
+			
+			$formHTML  = ''; 
+			
+			$formHTML .= '<div class="stageshow-boxoffice-purchaserdetails">'."\n";			
+			$formHTML .= "<h2>Purchaser Details:</h2>\n"; 
+			$formHTML .= '<form method="post">'."\n";						
+			$formHTML .= $this->GetParamAsHiddenTag('id');
+			$formHTML .= "<table>\n";			
+
+			// Output all PayPal tags as edit boxes
+			foreach ($paramIDs as $paramID => $paramLabel)
+			{
+				$paramValue = isset($cartContents->$paramID) ? $cartContents->$paramID : '';
+				$formHTML .=  '
+				<tr class="stageshow-boxoffice-formRow">
+					<td class="stageshow-boxoffice-formFieldID">'.$paramLabel.':&nbsp;</td>
+					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
+						<input name="'.$paramID.'" id="'.$paramID.'" type="text" maxlength="50" size="50" value="'.$paramValue.'" />
+					</td>
+				</tr>
+			';
+			}
+			
+			if ($this->myDBaseObj->getOption('EnableReservations'))
+			{
+				// Output Select Status Drop-down Dialogue
+				$selectCompleted = ($cartContents->saleStatus == PAYPAL_APILIB_SALESTATUS_COMPLETED) ? 'selected=true ' : '';
+				$selectReserved  = ($cartContents->saleStatus == STAGESHOW_SALESTATUS_RESERVED) ? 'selected=true ' : '';
+				
+				$formHTML .=  '
+				<tr class="stageshow-boxoffice-formRow">
+					<td class="stageshow-boxoffice-formFieldID">'.__('Status', $this->myDomain).':&nbsp;</td>
+					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
+				<select id="saleStatus" name="saleStatus">
+					<option value="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'" $selectCompleted>'.__('Completed', $this->myDomain).'&nbsp;</option>
+					<option value="'.STAGESHOW_SALESTATUS_RESERVED.'" $selectReserved>'.__('Reserved', $this->myDomain).'&nbsp;</option>
+				</select>
+					</td>
+				</tr>
+				';
+			}
+			else
+			{
+				$formHTML .= '
+				<input type="hidden" id="saleStatus" name="saleStatus" value="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'"/>
+				';
+			}
+			
+			$saveCaption = __('Save', $this->myDomain);
+			$buttonID = $this->GetButtonID('savesaleedit');
+			
+			$buttonClassdef = ($this->adminPageActive) ? 'class="button-secondary " ' : 'class="xx" ';
+			
+			$formHTML .=  '
+				<tr class="stageshow-boxoffice-formRow">
+					<td colspan="2" class="stageshow-boxoffice-savesale">
+						<input name="'.$buttonID.'" '.$buttonClassdef.'id="'.$buttonID.'" type="submit" value="'.$saveCaption.'" />
+					</td>
+				</tr>
+			';
+			
+			$formHTML .= "</table>\n";			
+			$formHTML .= "</form>\n";			
+			$formHTML .= "<div>\n";			
+			
+			// Now Output all PayPal tags as edit boxes
+			//$formHTML .= $this->PayPalTags($this->myDBaseObj->opts['CfgOptionsID'], false);
+			
+			echo $formHTML;
+			return $formHTML;
+		}
+		
+		function OnlineStoreSaveEdit()
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			if (isset($_POST['id']))
+			{
+				// Get Current DB Entry
+				$saleID = $_POST['id'];
+				$saleEntries = $myDBaseObj->GetSale($saleID);				
+			}
+			else
+			{
+				$saleID = 0;
+				$saleEntries = array();
+			}
+//echo "<br> -- saleID=$saleID --<br><br>";
+			
+			// Scan Trolley Contents
+			$cartContents = $this->GetTrolleyContents();
+			
+			$itemsOK = true;
+			foreach ($cartContents->rows as $cartEntry)
+			{
+				$itemsOK &= $this->IsOnlineStoreItemValid($cartEntry, $saleEntries);
+//echo "<br>itemsOK=$itemsOK<br><br>";
+			}
+					
+			if ($itemsOK)
+			{
+				if ($saleID == 0)
+				{
+					// Add a new Sale
+					$saleDateTime = current_time('mysql'); 
+					$runningTotal = 0;
+					
+					foreach ($cartContents->rows as $cartEntry)
+					{
+						$runningTotal += ($cartEntry->price * $cartEntry->qty);
+					}
+				
+					$cartContents->saleTxnId = 'MAN-'.time();				
+					//$cartContents->saleStatus = PAYPAL_APILIB_SALESTATUS_COMPLETED;			
+					$cartContents->salePPName = $cartContents->saleFirstName.''.$cartContents->saleLastName;
+					$cartContents->salePaid = $runningTotal;				
+					$cartContents->saleTransactionFee = $cartContents->fee;			
+					$cartContents->saleFee = 0.0;
+					
+					//$saleVals['saleCheckoutTime'] = $saleDateTime;
+					//$saleVals['saleStatus'] = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
+					
+					$saleID = $myDBaseObj->Ex_AddSale($saleDateTime, $cartContents);
+				}
+				else
+				{
+					// Update Sale
+					$saleID = $myDBaseObj->UpdateSale($cartContents, StageShowLibSalesDBaseClass::STAGESHOWLIB_FROMTROLLEY);
+				}
+				
+				// Delete Existing Tickets and Add New Ones
+				$myDBaseObj->DeleteTickets($saleID);
+				
+				foreach ($cartContents->rows as $cartEntry)
+				{
+					$myDBaseObj->AddSaleFromTrolley($saleID, $cartEntry);					
+				}
+				//DELETE_AND_REPLACE_TICKETS = UNDEFINED_AS_YET;
+			}
+			else if (isset($this->checkoutMsg))
+			{
+				if (!isset($this->checkoutMsgClass))
+				{
+					$this->checkoutMsgClass = $this->cssDomain.'-error';
+				}
+				echo '<div id="message" class="'.$this->checkoutMsgClass.'">'.$this->checkoutMsg.'</div>';					
+				$saleID = 0;
+			}
+				
+			return $saleID;
+		}
+		
 		function StageShow_ap() 
 		{
 			$myDBaseObj = $this->myDBaseObj;		

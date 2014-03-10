@@ -88,7 +88,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
       		// Get all database entries for this item ... ordered by date/time then ticket type
 	      	$results = $this->GetOnlineStoreProducts($reqRecordId);
 			$this->OutputContent_OnlineStoreSection($results);
-			$this->OutputContent_OnlineStoreFooter();
 		}
 			
 		function IsOnlineStoreItemEnabled($result)
@@ -145,19 +144,19 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $result->stockPrice + $result->stockPostage;
 		}
 			
-		function IsOnlineStoreItemSoldOut($result, $salesSummary)
+		function GetOnlineStoreItemsAvailable($result)
 		{
-			return false;
-		}
-			
-		function IsOnlineStoreItemAvailable($saleItems)
-		{
-			return true;
+			return -1;
 		}
 			
 		function GetOnlineStoreItemNote($result, $posn)
 		{
 			return '';
+		}
+			
+		function IsOnlineStoreItemAvailable($saleItems)
+		{
+			return true;
 		}
 			
 		function GetOnlineStoreHiddenTags()
@@ -184,7 +183,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$refColLabel = __($this->refColID, $this->myDomain);
 				
 			echo '
-				<table width="100%" border="0">
+				<table class="'.$this->cssBaseID.'-table" width="100%" border="0">
 					<tr>
 						<td class="'.$this->cssBaseID.'-header">
 							<table width="100%" cellspacing="0">
@@ -203,6 +202,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 		function OutputContent_OnlineStoreRow($result)
 		{
+			$storeRowHTML = '';
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Sales', $this->myDomain);
@@ -213,7 +213,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$stockDetails = isset($result->stockDetails) ? $result->stockDetails : '';
 			$addColSpan = ($stockDetails != '') ? ' rowspan="2" ' : '';
 			
-			echo '
+			$storeRowHTML .= '
 				<table cellspacing="0">
 					<tr>
 						<td class="'.$this->cssBaseID.'-'.$this->cssNameColID.'">'.$result->stockName.'</td>
@@ -225,13 +225,13 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				switch ($result->stockType)
 				{
 					case STAGESHOWLIB_STATE_POST:
-						echo '
+						$storeRowHTML .= '
 								<select name="quantity">
 									<option value="1" selected="">1</option>
 						';
 						for ($no=2; $no<=STAGESHOWLIB_MAXSALECOUNT; $no++)
-							echo '<option value="'.$no.'">'.$no.'</option>'."\n";
-						echo '
+							$storeRowHTML .= '<option value="'.$no.'">'.$no.'</option>'."\n";
+						$storeRowHTML .= '
 								</select>
 							</td>
 						';
@@ -239,26 +239,27 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						
 					case STAGESHOWLIB_STATE_DOWNLOAD:
 					default:
-						echo '<input type="hidden" name="quantity" value="1"/>1'."\n";
+						$storeRowHTML .= '<input type="hidden" name="quantity" value="1"/>1'."\n";
 						break;
 				}
 				
 			$buttonTag = ($buttonURL != '') ? ' src="'.$buttonURL.'"' : '';
 			
-			echo '
+			$storeRowHTML .= '
 				<td '.$addColSpan.'class="'.$this->cssBaseID.'-add">
-					<input type="submit" value="'.__('Add', $this->myDomain).'" alt="'.$altTag.'" '.$buttonTag.' id="AddTicketSale" name="AddTicketSale"/>
+							<input type="submit" value="'.__('Add', $this->myDomain).'" alt="'.$altTag.'" '.$buttonTag.' id="AddTicketSale" name="AddTicketSale"/>
 				</td>
 				</tr>				
 				';
 				
-			if ($stockDetails != '') echo '
+			if ($stockDetails != '') $storeRowHTML .= '
 					<tr>
 						<td colspan="4" class="'.$this->cssBaseID.'-details">'.$result->stockDetails.'</td>
 					</tr>				
 				';
 				
-			echo "</table>\n";
+			$storeRowHTML .= "</table>\n";			
+			return $storeRowHTML;
 		}
 		
 		function OutputContent_OnlineStoreFooter()
@@ -292,7 +293,13 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			ob_start();
 			
 			$reqRecordId = $atts['id'];
+			if (($reqRecordId === '') && ($atts['count'] != ''))
+			{
+				$reqRecordId = 0 - $atts['count'];
+			}
+				
 			$this->OutputContent_OnlineStoreMain($reqRecordId);
+			$this->OutputContent_OnlineStoreFooter();
 			
 			$outputContent = ob_get_contents();
 			ob_end_clean();
@@ -580,7 +587,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function OnlineStore_GetSortField($result)
 		{
-			return 0;
+			return $result->stockName.'_'.$result->stockID;
 		}
 		
 		function OnlineStore_AddTrolleyExtras(&$cartEntry, $result)
@@ -833,7 +840,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						
 				// Save the maximum number of sales for this stock item to a class variable
 				$rslt->maxSales[$stockID] = $this->GetOnlineStoreMaxSales($priceEntry);
-				
+
 				$ParamsOK &= $this->CheckPayPalParam($passedParams, "id" , $cartEntry->itemID, $cartIndex);
 				$ParamsOK &= $this->CheckPayPalParam($passedParams, "qty" , $cartEntry->qty, $cartIndex);
 				if (!$ParamsOK)
