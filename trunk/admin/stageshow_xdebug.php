@@ -29,7 +29,7 @@ if (!class_exists('StageShowDebugAdminClass'))
 		function GetOptionsDefs()
 		{
 			$testOptionDefs = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowTrolley',     StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowTrolley', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowTrolley',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowTrolley', ),
 			);
 			
 			$childOptions = parent::GetOptionsDefs();

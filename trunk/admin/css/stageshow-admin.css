@@ -220,15 +220,45 @@ div.stageshow-validate-unknown
 /* --------------------------------------------------------------------------- */
 
 
+div.stageshow-trolley
+{
+	background: none repeat scroll 0 0 #FFFFFF;
+}
+
 div.stageshow-trolley table
 {
+ 	border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+	
+	padding: 0 0 10px 0;
+	margin: 0 0 10px 0;
+	
+	text-align: center;
+	
 	width: 100%;
 }
 
-div.stageshow-boxoffice table,
-div.stageshow-boxoffice tr,
-div.stageshow-boxoffice td,
-div.stageshow-boxoffice select
+.stageshow-boxoffice-table
+{
+ 	border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+	
+	padding: 0 0 10px 0;
+	margin: 0 0 10px 0;
+	
+	text-align: center;
+	
+	width: 100%;
+	
+	background: none repeat scroll 0 0 #FFFFFF;
+}
+
+div.stageshow-boxoffice-row table,
+div.stageshow-boxoffice-row tr,
+div.stageshow-boxoffice-row td,
+div.stageshow-boxoffice-row select
 {
 	padding: 0 0 0 0;
 	margin: 0 0 0 0;
@@ -261,8 +291,11 @@ div.stageshow-boxoffice td
 	width: 15%;	
 }
 
-.stageshow-trolley-checkout
+.stageshow-boxoffice-available
 {
+	text-align: right !important;
 }
 
+.stageshow-trolley-checkout
+{
 }

@@ -626,22 +626,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		// Edit Sale
-		function EditSale($saleID, $salesVals = array())
-		{
-			$sql  = 'UPDATE '.$this->DBTables->Sales;
-			
-			$comma = ' SET ';
-			
-			foreach ($salesVals as $fieldID => $fieldVal)
-			{
-				$sql .= $comma.$fieldID.'="'.$fieldVal.'"';
-				$comma = ', ';			
-			}
-			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleID='.$saleID;;		 
-
-			$this->query($sql);	
-		}			
-		
 		function GetSalesFields()
 		{
 			return array
@@ -858,17 +842,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->query($sql);
 		}			
 
-		function GetSaleBuyer($saleID)
-		{
-			$sqlFilters['saleID'] = $saleID;
-			$sql  = 'SELECT * FROM '.$this->DBTables->Sales;	
-			$sql .= $this->GetWhereSQL($sqlFilters);
-			
-			$salesListArray = $this->get_results($sql);
-			
-			return $salesListArray;
-		}
-		
 		function AddSaleFields(&$salesListArray)
 		{
 		}
@@ -908,6 +881,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $salesListArray;
 		}			
 
+		function GetTransactionFee()
+		{
+			return 0;
+		}
+		
 		function GetSalesEMail()
 		{
 			return $this->adminOptions['SalesEMail'];

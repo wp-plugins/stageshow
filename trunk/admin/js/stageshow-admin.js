@@ -16,9 +16,9 @@ function addWindowsLoadHandler(newHandler)
 	}
 }
 
-function onSettingsLoad()
+function stageshow_OnSettingsLoad()
 {
-	var selectedTabId = GetURLParam('tab');
+	var selectedTabId = stageshow_GetURLParam('tab');
 	if (selectedTabId != '')
 	{		
 		selectedTabId = selectedTabId.replace(/_/g,'-');
@@ -30,19 +30,15 @@ function onSettingsLoad()
 		selectedTabId = tabIdsList[defaultTabIndex];
 	}
 	
-	SelectTab(selectedTabId);
+	stageshow_SelectTab(selectedTabId);
 }
 
-function clickHeader(obj)
+function stageshow_ClickHeader(obj)
 {
-	SelectTab(obj.id);
+	stageshow_SelectTab(obj.id);
 }
 
-function clickCartInterface(obj)
-{
-}
-
-function GetURLParam(paramID)
+function stageshow_GetURLParam(paramID)
 {
 	var rtnVal = '';
 	
@@ -64,12 +60,12 @@ function GetURLParam(paramID)
 	return rtnVal;
 }
 
-function SelectTab(selectedTabID)
+function stageshow_SelectTab(selectedTabID)
 {
 	for (index = 0; index < tabIdsList.length-1; index++)
 	{
 		tabId = tabIdsList[index];
-		ShowOrHideTab(tabId, selectedTabID);
+		stageshow_ShowOrHideTab(tabId, selectedTabID);
 	}
 	
 	if (selectedTabID == 'paypal-settings-tab')
@@ -79,7 +75,7 @@ function SelectTab(selectedTabID)
 	}
 }
 
-function ShowOrHideTab(tabID, selectedTabID)
+function stageshow_ShowOrHideTab(tabID, selectedTabID)
 {
 	var headerElem, tabElem, pageElem, tabWidth;
 	
@@ -126,14 +122,32 @@ function ShowOrHideTab(tabID, selectedTabID)
 	}	
 }
 
-function OnTicketButtonClick(showEMailURL)
+function stageshow_OnClickSeatingID(obj)
+{
+	var selectId = obj.id;
+	var selectedIndex = obj.selectedIndex;
+	var elemId = selectId.replace('perfSeatingID', '');
+	var showMaxSeats = (selectedIndex == 0);
+	var seatsObjId = 'perfSeats' + elemId;
+	var seatsObj = document.getElementById(seatsObjId);
+	if (showMaxSeats)
+	{
+		seatsObj.style.display = '';
+	}
+	else
+	{
+		seatsObj.style.display = 'none';
+	}
+}
+
+function stageshow_OnTicketButtonClick(showEMailURL)
 {
 	var saleSelectObj = document.getElementById('TestSaleID');
 	saleId = saleSelectObj.value;
-	OpenTicketView(saleId, showEMailURL);
+	stageshow_OpenTicketView(saleId, showEMailURL);
 }
 
-function OpenTicketView(saleId, showEMailURL)
+function stageshow_OpenTicketView(saleId, showEMailURL)
 {
 	var wpnonceObj = document.getElementById('ShowEMailNOnce');
 	
@@ -144,7 +158,7 @@ function OpenTicketView(saleId, showEMailURL)
 	window.open(url);
 }
 
-function testclickSeat(obj, zoneID)
+function stageshow_TestClickSeat(obj, zoneID)
 {
 	var seatId, hiddenSeatsElem, hiddenZonesElem;
 	

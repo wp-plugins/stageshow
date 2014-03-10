@@ -62,15 +62,6 @@ if (!class_exists('StageShowSalesAdminClass'))
 			$ticketsEntry->ticketQty = $qty;
 		}
 		
-		function GetStockInventory($stockID)
-		{
-			$results = $this->myDBaseObj->GetPerformancesListByPerfID($stockID);
-			if (count($results) == 0)
-				return 0;
-				
-			return $results[0]->perfSeats - $results[0]->totalQty;
-		}
-		
 		function NoStockMessage()
 		{
 			$perfsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.STAGESHOW_MENUPAGE_PRICES;
@@ -85,6 +76,19 @@ if (!class_exists('StageShowSalesAdminClass'))
 			{
 				parent::OuputAddSaleButton();
 			}
+		}
+		
+		function Output_MainPage($updateFailed)
+		{
+			if ($this->editingRecord)
+			{
+				// TODO - Sale Editor ... output tickets selector
+				$pluginObj = $this->env['PluginObj'];
+				echo $pluginObj->OutputContent_OnlineStore(NULL);
+				return '';
+			}
+			
+			return parent::Output_MainPage($updateFailed);
 		}
 		
 		function DoActions()
@@ -127,6 +131,33 @@ if (!class_exists('StageShowSalesAdminClass'))
 					$rtnVal = true;
 					break;
 					
+				case 'editsale':
+					if (isset($_POST['PriceId']))
+					{						
+						$editPage = 'tickets';
+					}
+					else
+					{
+						$editPage = isset($_GET['editpage']) ? $_GET['editpage'] : 'start';
+					}
+					$pluginObj = $this->env['PluginObj'];
+					$pluginObj->SetTrolleyID('');
+					$this->editingRecord = true;	// Set this flag to show that we are editing a Sale entry
+					
+					switch($editPage)
+					{
+						case 'start':
+							// Initialise values to start editing a sale							
+							$pluginObj->ClearTrolleyContents();
+							$rtnVal = true;
+							break;
+							
+						case 'tickets':
+							//$rtnVal = parent::DoActions();
+							break;
+					}
+					break;
+										
 				default:
 					$rtnVal = parent::DoActions();
 					break;
@@ -134,24 +165,6 @@ if (!class_exists('StageShowSalesAdminClass'))
 			}
 				
 			return $rtnVal;
-		}
-		
-		function GetEditSaleFormEntries($saleID)
-		{
-			// FUNCTIONALITY: Sales - Restore form values when save edit fails 
-			$prices = parent::GetEditSaleFormEntries($saleID);
-				
-			// Put the POST values into the prices (if they exist)
-			foreach ($prices as $key => $priceItem)
-			{
-				$postId = 'ticketQty'.$priceItem->priceID;
-				if (isset($_POST[$postId]))
-					$prices[$key]->ticketQty = $_POST[$postId];
-				else if (!isset($prices[$key]->ticketQty))
-					$prices[$key]->ticketQty = 0;
-			}			
-			
-			return $prices;
 		}
 		
 	}

@@ -51,7 +51,7 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEPARAM_NOTFORDEMO = 'NotForDemo';
 		
 		const TABLEPARAM_NAME = 'Name';
-		const TABLEPARAM_OPTION = 'Option';
+		//const TABLEPARAM_OPTION = 'Option';
 
 		const TABLEPARAM_DIR = 'Dir';
 		const TABLEPARAM_EXTN = 'Extn';
@@ -347,11 +347,14 @@ if (!class_exists('StageShowLibTableClass'))
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
-		function AddSelectToTable($result, $inputName, $options, $value='', $col=0, $newRow = false)
+		function AddSelectToTable($result, $columnDef, $options, $value='', $col=0, $newRow = false)
 		{
+			$inputName = $columnDef[self::TABLEPARAM_ID];
 			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);
 			
-			$content = "<select name=$inputName>"."\n";
+			$onChange = isset($columnDef[self::TABLEPARAM_ONCHANGE]) ? ' onchange="'.$columnDef[self::TABLEPARAM_ONCHANGE].'(this)" ' : '';
+		
+			$content = "<select name=$inputName id=$inputName $onChange>"."\n";
 			foreach ($options as $index => $option)
 			{
 				$selected = ($index == $value) ? ' selected=""' : '';
@@ -417,7 +420,7 @@ if (!class_exists('StageShowLibTableClass'))
 			{
 				$separatorWidth = 1;
 				$width -= $separatorWidth;
-				$tabParam .= " onclick=clickHeader(this)";
+				$tabParam .= " onclick=stageshow_ClickHeader(this)";
 				$tabParam .= ' width="'.$width.'%"';
 				$tabParam .= ' style="border: 1px solid black;"';
 				$separatorParam = ' class=mjstab-tab-gap width="'.$separatorWidth.'%"';
@@ -1223,7 +1226,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			
 			$settingType = $settingOption[self::TABLEPARAM_TYPE];
 			$onChange = isset($settingOption[self::TABLEPARAM_ONCHANGE]) ? ' onchange="'.$settingOption[self::TABLEPARAM_ONCHANGE].'(this)" ' : '';
-			
+
 			if ( (!$editMode) || isset($settingOption[self::TABLEPARAM_READONLY]) )
 			{
 				switch ($settingType)
@@ -1395,7 +1398,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 						
 						case self::TABLEENTRY_SELECT:
 							$options = self::GetSelectOptsArray($columnDef, $result);							
-							$this->AddSelectToTable($result, $columnId, $options, $currVal);
+							$this->AddSelectToTable($result, $columnDef, $options, $currVal);
 							break;
 						
 						case self::TABLEENTRY_COOKIE:
@@ -1794,7 +1797,7 @@ var tabIdsList  = [";
 			$jsCode .= "var defaultTabIndex = ".$defaultTab.";\n";
 			$jsCode .= "
 
-window.onload = onSettingsLoad;
+window.onload = stageshow_OnSettingsLoad;
 
 </script>
 			";

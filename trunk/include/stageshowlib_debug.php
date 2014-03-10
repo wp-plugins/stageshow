@@ -59,11 +59,9 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 		function GetOptionsDefs()
 		{
 			$testOptionDefs = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Ids',       StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBIds',        StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowDBIds', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show SQL',          StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowSQL',          StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowSQL', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Output',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBOutput',     StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowDBOutput', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show EMail Msgs',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowEMailMsgs',    StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_ShowEMailMsgs', ),				
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log IPN Requests',  StageShowLibTableClass::TABLEPARAM_NAME => 'cbLogIPNRequests',   StageShowLibTableClass::TABLEPARAM_OPTION => 'Dev_IPNLogRequests', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show SQL',          StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowSQL',          StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowSQL', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Output',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBOutput',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowDBOutput', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show EMail Msgs',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowEMailMsgs',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowEMailMsgs', ),				
 			);
 			
 			return $testOptionDefs;
@@ -73,11 +71,9 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 		{
 			switch ($optionName)
 			{
-				case 'Show DB Ids':		return 'Output DB Table Index on Admin Pages';
 				case 'Show SQL':		return 'Show SQL Query Strings';
 				case 'Show DB Output':	return 'Show SQL Query Output';
 				case 'Show EMail Msgs': return 'Output EMail Message Content to Screen';
-				case 'Log IPN Requests':return 'Log IPN Requests and Responses to a File';
 				
 				default:	
 					return "No Description Available for $optionName";					
@@ -99,7 +95,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 					if ($label === '') continue;
 					
 					$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
-					$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_OPTION];
+					$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_ID];
 					$settingValue = trim(StageShowLibUtilsClass::GetHTTPElement($_POST,$ctrlId));
 					
 					if (isset($optDef[StageShowLibTableClass::TABLEPARAM_FUNC]))
@@ -144,7 +140,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			if ($label !== '')
 			{
 				$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
-				$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_OPTION];
+				$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_ID];
 				$optIsChecked = StageShowLibUtilsClass::GetArrayElement($myDBaseObj->dbgOptions, $settingId) == 1 ? 'checked="yes" ' : '';
 				if (isset($optDef[StageShowLibTableClass::TABLEPARAM_TYPE]))
 				{
