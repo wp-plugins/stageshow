@@ -43,11 +43,8 @@ if (!class_exists('StageShowDebugAdminClass'))
 		{
 			switch ($optionName)
 			{
-				case 'Show Trolley':
-					return 'TBD';
-				
-				default:	
-					return parent::GetOptionsDescription($optionName);					
+				case 'Show Trolley':	return 'Dump Trolley Variables to Screen';				
+				default:				return parent::GetOptionsDescription($optionName);					
 			}
 		}
 		

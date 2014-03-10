@@ -218,6 +218,16 @@ if (!class_exists('StageShowPluginClass'))
 		
 		function printAdminPage() 
 		{
+			$this->adminPageActive = true;
+			
+			$id = isset($_GET['id']) ? $_GET['id'] : '';
+			$this->SetTrolleyID($id);
+
+			$this->outputAdminPage();
+		}
+		
+		function outputAdminPage() 
+		{
 			//Outputs an admin page
       			
 			$myDBaseObj = $this->myDBaseObj;					
@@ -277,7 +287,7 @@ if (!class_exists('StageShowPluginClass'))
 					
 				case STAGESHOW_MENUPAGE_DEVTEST:
 					include STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php';   
-					new StageShowDevCalllerClass($this->env);
+					new StageShowDevCallerClass($this->env);
 					break;
 							
 				case STAGESHOW_MENUPAGE_DEBUG:

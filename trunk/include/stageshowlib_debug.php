@@ -76,9 +76,8 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 				case 'Show DB Ids':		return 'Output DB Table Index on Admin Pages';
 				case 'Show SQL':		return 'Show SQL Query Strings';
 				case 'Show DB Output':	return 'Show SQL Query Output';
-				case 'Show EMail Msgs':
-				case 'Log IPN Requests':
-					return 'TBD';
+				case 'Show EMail Msgs': return 'Output EMail Message Content to Screen';
+				case 'Log IPN Requests':return 'Log IPN Requests and Responses to a File';
 				
 				default:	
 					return "No Description Available for $optionName";					

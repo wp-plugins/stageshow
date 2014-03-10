@@ -32,6 +32,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 	class StageShowLibDBaseClass // Define class
 	{
 		const MYSQL_DATE_FORMAT = 'Y-m-d';
+		const MYSQL_TIME_FORMAT = 'H:i:s';
 		const MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
 		
 		const ForReading = 1;
@@ -356,7 +357,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			}	
 			
 			$this->ShowSQL($sql);
-			return $wpdb->query($sql);			
+			return ($wpdb->query($sql) !== false);			
 		}
 		
 		function CheckVersionNumber($stockRec)
