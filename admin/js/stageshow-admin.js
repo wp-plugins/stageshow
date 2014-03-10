@@ -144,9 +144,9 @@ function OpenTicketView(saleId, showEMailURL)
 	window.open(url);
 }
 
-function testclickSeat(obj, zoneID, zoneDef)
+function testclickSeat(obj, zoneID)
 {
-	var seatId, hiddenSeatsElem, hiddenZonesElem, hiddenDefsElem;
+	var seatId, hiddenSeatsElem, hiddenZonesElem;
 	
 	seatIdParts = obj.id.split("-");
 	seatId = seatIdParts[seatIdParts.length-1];

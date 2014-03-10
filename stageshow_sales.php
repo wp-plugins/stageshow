@@ -256,11 +256,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}
 		}
 			
-		function SelectPerfMode($result)
-		{
-			return false;
-		}
-			
 		function OutputContent_OnlineStoreHeader($result)
 		{
 			parent::OutputContent_OnlineStoreHeader($result);
@@ -270,31 +265,14 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			static $salesSummary;
 			
-			$showSelectPerfs = $this->SelectPerfMode($result);
-			
 			$storeRowHTML = '';
 			
-			if (!$showSelectPerfs)
-			{
-				// TODO - Allocated Seating - Move this code to stageshowplus_main.php
-				$submitButton = __('Add', $this->myDomain);
-				$submitId     = 'AddTicketSale';
-				$showAllDates = defined('STAGESHOW_BOXOFFICE_ALLDATES');
+			$submitButton = __('Add', $this->myDomain);
+			$submitId     = 'AddTicketSale';
+			$showAllDates = defined('STAGESHOW_BOXOFFICE_ALLDATES');
 				
-				if (isset($_POST['SelectPerf']))
-				{
-					$storeRowHTML .= '<input type="hidden" name="SelectPerf" value="'.$result->perfID.'"/>'."\n";
-				}	
-			}
-			else
-			{
-				$submitButton = __('Select', $this->myDomain);
-				$submitId     = 'SelectPerf';
-				$showAllDates = false;
-			}
-			
 			$myDBaseObj = $this->myDBaseObj;
-			
+
 			// Sales Summary from PerfID
 			if (!isset($salesSummary))
 			{
@@ -325,10 +303,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 				if ($lastPerfID != 0) $separator = "\n".'<tr><td class="stageshow-boxoffice-separator">&nbsp;</td></tr>';
 				$this->lastPerfDateTime = $result->perfDateTime;
 			}
-			else if ($showSelectPerfs)
-			{
-				return '';	// Only output one row per performance
-			}
 			else
 			{
 				$formattedPerfDateTime = '&nbsp;';
@@ -340,27 +314,24 @@ if (!class_exists('StageShowSalesPluginClass'))
 				<td class="stageshow-boxoffice-datetime">'.$formattedPerfDateTime.'</td>
 				';
 				
-			if (!$showSelectPerfs) 
+			$storeRowHTML .= '
+			<td class="stageshow-boxoffice-type">'.$this->OnlineStore_GetPriceType($result).'</td>
+			<td class="stageshow-boxoffice-price">'.$myDBaseObj->FormatCurrency($result->priceValue).'</td>
+			';
+															
+			if (!$soldOut)
 			{
 				$storeRowHTML .= '
-				<td class="stageshow-boxoffice-type">'.$result->priceType.'</td>
-				<td class="stageshow-boxoffice-price">'.$myDBaseObj->FormatCurrency($result->priceValue).'</td>
-				';
-																
-				if (!$soldOut)
-				{
-					$storeRowHTML .= '
-						<td class="stageshow-boxoffice-qty">
-						<select name="quantity">
-						<option value="1" selected="">1</option>
-						';
-					for ($no=2; $no<=$myDBaseObj->adminOptions['MaxTicketQty']; $no++)
-						$storeRowHTML .= '<option value="'.$no.'">'.$no.'</option>'."\n";
-					$storeRowHTML .= '
-						</select>
-						</td>
+					<td class="stageshow-boxoffice-qty">
+					<select name="quantity">
+					<option value="1" selected="">1</option>
 					';
-				}
+				for ($no=2; $no<=$myDBaseObj->adminOptions['MaxTicketQty']; $no++)
+					$storeRowHTML .= '<option value="'.$no.'">'.$no.'</option>'."\n";
+				$storeRowHTML .= '
+					</select>
+					</td>
+				';
 			}
 															
 			if (!$soldOut)
@@ -386,7 +357,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 			{
 				if (!isset($result->joinNext))
 				{
-					if (!$showSelectPerfs && !$soldOut && ($result->perfSeats >=0))
+					// TODO - SSG Allocated Seating - Check Seats Available Count ....
+					if (!$soldOut && ($result->perfSeats >=0))
 					{
 						$seatsAvailable = $result->perfSeats - $salesSummary->totalQty;
 						$storeRowHTML .= '
@@ -443,19 +415,17 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 		}
 				
-		function OutputContent_OnlineCheckoutButton()
+		function OutputContent_OnlineCheckoutButton($cartContents)
 		{
+			if ($this->adminPageActive)
 			{
-				if ($this->myDBaseObj->getOption('EnableReservations') && current_user_can(STAGESHOW_CAPABILITY_RESERVEUSER))
-				{
-					echo '<input class="button-primary" type="submit" name="'.$this->GetButtonID('reserve').'" value="'.__('Reserve', $this->myDomain).'"/>';
-					echo '&nbsp;&nbsp;&nbsp;&nbsp;';
-				}				
+				echo '<input class="button-primary" type="submit" name="'.$this->GetButtonID('editbuyer').'" value="'.__('Next', $this->myDomain).'"/>'."\n";
+				return;
 			}
 			
 			if ($this->myDBaseObj->PayPalConfigured())
 			{
-				parent::OutputContent_OnlineCheckoutButton();
+				parent::OutputContent_OnlineCheckoutButton($cartContents);
 			}
 		}
 		
@@ -469,8 +439,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			$showName = $priceEntry->showName;
 			$perfDateTime = $this->myDBaseObj->FormatDateForDisplay($priceEntry->perfDateTime);
-			$priceType = $priceEntry->priceType;
-			$priceValue = $this->GetOnlineStoreItemPrice($priceEntry);
+			$priceType = $this->OnlineStore_GetPriceType($priceEntry);
+			$priceValue = $cartEntry->price;
 			$qty = $cartEntry->qty;
 			$total = $priceValue * $qty;
 			$formattedTotal = $this->myDBaseObj->FormatCurrency($total);
@@ -502,8 +472,9 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$priceEntry->showName = '';						
 				$priceEntry->perfDateTime = '';						
 				$priceEntry->priceType = __('Booking Fee', $this->myDomain);
-				$priceEntry->priceValue = $cartContents->fee;
+				
 				$cartEntry->qty = 1;
+				$cartEntry->price = $cartContents->fee;
 				
 				echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";					
 				$this->OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry);
@@ -533,6 +504,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 			$userInfoVal = 	$user_metaInfo[$metaField][0];
 			return $fieldSep.$userInfoVal;
+		}
+		
+		function OnlineStore_GetPriceType($result)
+		{
+			return $result->priceType;
 		}
 		
 		function OnlineStore_GetSortField($result)
@@ -571,80 +547,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 				
-			$buttonID = $this->GetButtonID('reserve');
-			if (isset($_POST[$buttonID]))	// 'checkout' without online payment
-			{
-				if (!current_user_can(STAGESHOW_CAPABILITY_RESERVEUSER))
-					return;
-						
-				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
-				if (isset($checkoutRslt->checkoutMsg)) 
-				{
-					$this->checkoutMsg = $checkoutRslt->checkoutMsg;
-					return;
-				}
-				
-				// Lock tables so we can commit the pending sale
-				$this->myDBaseObj->LockSalesTable();
-
-				// Check quantities before we commit 
-				$ParamsOK = $this->IsOnlineStoreItemAvailable($checkoutRslt);					
-					
-				if ($ParamsOK)
-	  			{
-					$saleDateTime = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT);
-						
-					// Get User details from User DB
-					$loggedInUser = wp_get_current_user();										
-					$user_metaInfo = get_user_meta($loggedInUser->ID);
-
-					// TODO - Make sure that TxnID is unique
-					$saleTxnid = 'RES-'.time();	
-					
-					$checkoutRslt->saleDetails['saleFirstName'] = $this->GetUserInfo($user_metaInfo, 'first_name');
-					$checkoutRslt->saleDetails['saleLastName'] = $this->GetUserInfo($user_metaInfo, 'last_name');	
-					$checkoutRslt->saleDetails['saleEMail'] = $loggedInUser->data->user_email;
-					$checkoutRslt->saleDetails['saleTxnid'] = $saleTxnid;
-
-					$checkoutRslt->saleDetails['salePaid'] = $checkoutRslt->totalDue;
-					$checkoutRslt->saleDetails['saleFee'] = '0.0';
-								
-					$checkoutRslt->saleDetails['saleDateTime'] = $saleDateTime;
-					$checkoutRslt->saleDetails['saleStatus'] = STAGESHOW_SALESTATUS_RESERVED;
-									
-					$checkoutRslt->saleDetails['salePPName'] = $myDBaseObj->GetSaleName($checkoutRslt->saleDetails);
-					
-					$checkoutRslt->saleDetails['salePPStreet']  = $this->GetUserInfo($user_metaInfo, 'UserAddress1');
-					$checkoutRslt->saleDetails['salePPStreet'] .= $this->GetUserInfo($user_metaInfo, 'UserAddress2', "\n");
-					$checkoutRslt->saleDetails['salePPStreet'] .= $this->GetUserInfo($user_metaInfo, 'UserAddress3', "\n");
-						
-					$checkoutRslt->saleDetails['salePPCity'] = $this->GetUserInfo($user_metaInfo, 'UserCity');
-					$checkoutRslt->saleDetails['salePPState'] = $this->GetUserInfo($user_metaInfo, 'UserCounty');
-					$checkoutRslt->saleDetails['salePPZip'] = $this->GetUserInfo($user_metaInfo, 'UserPostcode');
-					$checkoutRslt->saleDetails['salePPCountry'] = $this->GetUserInfo($user_metaInfo, 'UserCountry');
-					$checkoutRslt->saleDetails['salePPPhone'] = $this->GetUserInfo($user_metaInfo, 'UserPhone');
-			
-					// No transaction fee with reservations ... remove it so it defaults to zero
-					unset($checkoutRslt->saleDetails['transactionfee']);
-					
-					// Log sale to DB
-					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails, StageShowLibSalesDBaseClass::STAGESHOWLIB_LOGSALEMODE_RESERVE);
-					$emailStatus = $this->myDBaseObj->EMailSale($saleId);
-						
-					$this->ClearTrolleyContents();	// Clear the shopping cart
-					
-					$this->checkoutMsg = __('Tickets reserved - Confirmation EMail sent to ', $this->myDomain).$checkoutRslt->saleDetails['saleEMail'];					
-					$this->checkoutMsgClass = $this->cssDomain.'-ok';
-				}
-				else
-				{
-					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - '.$this->checkoutMsg;
-				}	
-					
-				// Release Tables
-				$this->myDBaseObj->UnLockTables();					
-			}
-					
 			parent::OnlineStore_ProcessCheckout();
 		}
 		

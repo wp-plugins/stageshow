@@ -1136,7 +1136,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			echo "</div>\n";
 		}
 		
-		function GetSelectOptsArray($settingOption)
+		function GetSelectOptsArray($settingOption, $result=null)
 		{
 			if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_DIR]))
 			{
@@ -1154,9 +1154,18 @@ if (!class_exists('StageShowLibAdminListClass'))
 				foreach ($selectOpts as $key => $path)
 					$selectOpts[$key] = basename($path);
 			}
-			else
+			else if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_FUNC]))
+			{
+				$functionId = $settingOption[StageShowLibTableClass::TABLEPARAM_FUNC];
+				$selectOpts = $this->$functionId($result);
+			}
+			else if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_ITEMS]))
+			{
 				$selectOpts = $settingOption[StageShowLibTableClass::TABLEPARAM_ITEMS];
-					
+			}
+			else
+				return array();
+									
 			$selectOptsArray = array();
 			
 			if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_ADDEMPTY]))
@@ -1385,16 +1394,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 						//case self::TABLEENTRY_TEXTBOX:
 						
 						case self::TABLEENTRY_SELECT:
-							if (isset($columnDef[self::TABLEPARAM_ITEMS]))
-							{
-								$options = self::GetSelectOptsArray($columnDef);
-							}
-							else
-							{
-								$functionId = $columnDef[self::TABLEPARAM_FUNC];
-								$options = $this->$functionId($result);
-							}
-							
+							$options = self::GetSelectOptsArray($columnDef, $result);							
 							$this->AddSelectToTable($result, $columnId, $options, $currVal);
 							break;
 						

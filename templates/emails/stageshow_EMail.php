@@ -19,8 +19,8 @@ Purchaser:
 
 Purchased:
 [startloop]
-[ticketQty] x [ticketType] for [ticketName] [endloop]
-
+[ticketName] - [ticketType] - [ticketQty][ticketSeat] - [ticketPaid] [endloop]
+Booking Fee: [saleTransactionFee]
 Payment:
 Total: [salePaid]
 

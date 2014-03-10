@@ -55,6 +55,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		const STAGESHOWLIB_LOGSALEMODE_RESERVE = 'Reserve';
 		const STAGESHOWLIB_LOGSALEMODE_PAYMENT = 'Payment';
 		
+		const STAGESHOWLIB_FROMTROLLEY = true;
+		const STAGESHOWLIB_NOTFROMTROLLEY = false;
+		
 		var		$PayPalURL;			//  URL for PayPal Payment Requests
 		var		$PayPalVerifyURL;	//  URL for PayPal Verify IPN Requests
 		
@@ -663,9 +666,47 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			);
 		}			
 		
-		function UpdateSale($results)
+		function Ex_AddSale($saleDateTime = '', $salesVals = array())
 		{
-			$saleID = $results['saleID'];
+			$sqlFields = 'INSERT INTO '.$this->DBTables->Sales.'(saleDateTime';
+			$sqlValues = ' VALUES("'.$saleDateTime.'"';
+			
+			$fieldsList = $this->GetSalesFields();
+			
+			foreach ($fieldsList as $fieldName)
+			{
+				if ($fieldName == 'saleDateTime')
+					continue;
+					
+				//if (!isset($salesVals->$fieldName))
+				//	continue;
+				$fieldValue = $salesVals->$fieldName;
+				
+				$sqlFields .= ', '.$fieldName;
+				$sqlValues .= ', "'.$fieldValue.'"';
+			}
+			$sqlFields .= ')';
+			$sqlValues .= ')';
+			
+			$sql = $sqlFields.$sqlValues;
+			 
+			$this->query($sql);
+			$saleID = mysql_insert_id();
+	
+			return $saleID;
+		}			
+		
+		function UpdateSale($results, $fromTrolley = self::STAGESHOWLIB_NOTFROMTROLLEY)
+		{
+			if ($fromTrolley)
+			{
+//StageShowLibUtilsClass::print_r($results, 'results in UpdateSale');				
+				$saleID = $results->saleID;
+			}
+			else
+			{
+				$saleID = $results['saleID'];
+			}
 			
 			$fieldsList = $this->GetSalesFields();
 			
@@ -674,10 +715,20 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql = '';
 			foreach ($fieldsList as $fieldName)
 			{
-				if (!isset($results[$fieldName]))
-					continue;
+				if ($fromTrolley)
+				{
+					if (!isset($results->$fieldName))
+						continue;
+					$fieldValue = $results->$fieldName;
+				}
+				else
+				{
+					if (!isset($results[$fieldName]))
+						continue;
+					$fieldValue = $results[$fieldName];
+				}
 					
-				$sql .= $fieldSep.$fieldName.'="'.$results[$fieldName].'"';
+				$sql .= $fieldSep.$fieldName.'="'.$fieldValue.'"';
 				$fieldSep = ' , ';
 			}
 			
@@ -1155,10 +1206,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return 'OK';		
 		}
 		
-		function OutputViewTicketButton($saleId = 0)
+		function OutputViewTicketButton($saleID = 0)
 		{
 			$text = __('View Ticket', $this->get_domain());
-			echo $this->GetViewTicketLink($text, 'button-secondary', $saleId);
+			echo $this->GetViewTicketLink($text, 'button-secondary', $saleID);
 		}
 		
 		function GetViewTicketLink($text='', $class = '', $saleId = 0)

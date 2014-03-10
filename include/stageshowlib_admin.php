@@ -267,9 +267,9 @@ function HideElement(obj)
 			echo "GetBulkActionMsg() function not defined in ".get_class()."<br>\n";
 		}
 		
-		static function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass = '', $elementId = 0)
+		static function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass, $elementId, $buttonAction)
 		{
-			$buttonAction = strtolower(str_replace(" ", "", $buttonText));
+			//if ($buttonAction == '') $buttonAction = strtolower(str_replace(" ", "", $buttonText));
 			$buttonText = __($buttonText, $domainId);
 			$page = $_GET['page'];
 				

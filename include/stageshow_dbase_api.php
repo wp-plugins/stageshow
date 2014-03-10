@@ -456,7 +456,7 @@ if (!class_exists('StageShowDBaseClass'))
 					';
 					break;
 					
-				case $this->DBTables->Orders:
+				case STAGESHOW_TICKETS_TABLE:
 					$ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
 					$sql .= '
 						saleID INT UNSIGNED NOT NULL,
@@ -491,7 +491,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			parent::createDB($dropTable);
 
-			$this->createDBTable($this->DBTables->Orders, 'ticketID', $dropTable);
+			$this->createDBTable(STAGESHOW_TICKETS_TABLE, 'ticketID', $dropTable);
 
 			// ------------------- STAGESHOW_SHOWS_TABLE -------------------
 			if ($dropTable)
@@ -559,11 +559,14 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			$perfID = $this->CreateNewPerformance($rtnMsg, $showID, $perfDateTime, $perfRef, $perfSeats);
 			
+			$this->perfIDs[$perfRef] = $perfID;
+			
 			return $perfID;
 		}
 		
-		function AddSamplePrice($perfID, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $visibility = STAGESHOW_VISIBILITY_PUBLIC)
+		function AddSamplePrice($perfRef, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $visibility = STAGESHOW_VISIBILITY_PUBLIC)
 		{
+			$perfID = $this->perfIDs[$perfRef];
 			$priceID = $this->AddPrice($perfID, $priceType, $priceValue, $visibility);
 			
 			return $priceID;
@@ -605,14 +608,14 @@ if (!class_exists('StageShowDBaseClass'))
 				echo '<div id="message" class="error"><p>'.__('Cannot Add Performances', $this->get_domain()).' - '.$statusMsg.'</p></div>';
 				return;
 			}
+			
 			// Populate prices table
-			$priceID1_A1 = $this->AddSamplePrice($perfID1, 'All',   STAGESHOW_PRICEID1_A1);
-			$priceID1_A2 = $this->AddSamplePrice($perfID2, 'Adult', STAGESHOW_PRICEID1_A2);
-			$priceID1_A3 = $this->AddSamplePrice($perfID3, 'Adult', STAGESHOW_PRICEID1_A3);
-			$priceID1_A4 = $this->AddSamplePrice($perfID4, 'All',   STAGESHOW_PRICEID1_A4);
-			$priceID1_C2 = $this->AddSamplePrice($perfID2, 'Child', STAGESHOW_PRICEID1_C2);
-			$priceID1_C3 = $this->AddSamplePrice($perfID3, 'Child', STAGESHOW_PRICEID1_C3);
-			$this->firstSamplePricesID = $priceID1_A1;
+			$this->priceID1_A1 = $this->AddSamplePrice('Day1Eve', 'All',   STAGESHOW_PRICEID1_A1);
+			$this->priceID1_A2 = $this->AddSamplePrice('Day2Eve', 'Adult', STAGESHOW_PRICEID1_A2);
+			$this->priceID1_A3 = $this->AddSamplePrice('Day3Mat', 'Adult', STAGESHOW_PRICEID1_A3);
+			$this->priceID1_A4 = $this->AddSamplePrice('Day3Eve', 'All',   STAGESHOW_PRICEID1_A4);
+			$this->priceID1_C2 = $this->AddSamplePrice('Day2Eve', 'Child', STAGESHOW_PRICEID1_C2);
+			$this->priceID1_C3 = $this->AddSamplePrice('Day3Mat', 'Child', STAGESHOW_PRICEID1_C3);
 			
 			if (!$this->isDbgOptionSet('Dev_NoSampleSales'))
 			{
@@ -623,15 +626,18 @@ if (!class_exists('StageShowDBaseClass'))
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 0.60, 'SQP4KMTNIEXGS5ZBU', PAYPAL_APILIB_SALESTATUS_COMPLETED,
-				'1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
-				$this->AddSaleItem($saleID, $priceID1_C3, 4, STAGESHOW_PRICEID1_C3);
-				$this->AddSaleItem($saleID, $priceID1_A3, 1, STAGESHOW_PRICEID1_A3);
+					'1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
+				$this->AddSaleItem($saleID, $this->priceID1_C3, 4, STAGESHOW_PRICEID1_C3);
+				$this->AddSaleItem($saleID, $this->priceID1_A3, 1, STAGESHOW_PRICEID1_A3);
+				
 				$saleEMail = 'mybrother@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, 24.00, 1.01, '1S34QJHTK9AAQGGVG', PAYPAL_APILIB_SALESTATUS_COMPLETED,
-				'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
-				$this->AddSaleItem($saleID, $priceID1_A1, 4, STAGESHOW_PRICEID1_A1);
+				$total2 = (4 * STAGESHOW_PRICEID1_A1);
+				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, $total2, 1.01, '1S34QJHTK9AAQGGVG', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+					'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
+				$this->AddSaleItem($saleID, $this->priceID1_A1, 4, STAGESHOW_PRICEID1_A1);
+				
 				$timeStamp = current_time('timestamp');
 				if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
 				{
@@ -644,7 +650,7 @@ if (!class_exists('StageShowDBaseClass'))
 						$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
 						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 0.62, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
 						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
-						$this->AddSaleItem($saleID, $priceID1_A3, 3, STAGESHOW_PRICEID1_A3);
+						$this->AddSaleItem($saleID, $this->priceID1_A3, 3, STAGESHOW_PRICEID1_A3);
 						$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
 					}
 				}
@@ -1249,7 +1255,7 @@ if (!class_exists('StageShowDBaseClass'))
 			if (isset($sqlFilters['saleID']))
 			{
 				// Explicitly add joined fields from "base" tables (otherwise values will be NULL if there is no matching JOIN)
-				$selectFields .= ', '.$this->DBTables->Sales.'.saleID';
+				$selectFields .= ', '.STAGESHOW_SALES_TABLE.'.saleID';
 
 				$joinCmd = ' LEFT JOIN ';
 			}
@@ -1304,7 +1310,10 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function AddPrice($perfID, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $visibility = STAGESHOW_VISIBILITY_PUBLIC, $noOfSeats = 1)
 		{
-     		if ($perfID <= 0) return 0;
+     		if ($perfID <= 0) 
+     		{
+     			return 0;
+     		}
       
       		if ($priceType === '')
       		{
@@ -1321,7 +1330,9 @@ if (!class_exists('StageShowDBaseClass'))
 			else
 			{
 				if (!$this->IsPriceTypeUnique($perfID, $priceType))
-					return 0;	// Error - Performance Reference is not unique
+				{
+					return 0;	// Error - Performance Reference is not unique					
+				}
 			}
 			
 			$sql  = 'INSERT INTO '.STAGESHOW_PRICES_TABLE.' (perfID, priceType, priceValue)';
@@ -1329,7 +1340,7 @@ if (!class_exists('StageShowDBaseClass'))
 			 			
 			$this->query($sql);
 			
-     	return mysql_insert_id();
+     		return mysql_insert_id();
 		}
 		
 		function UpdatePricePerfID($priceID, $newPerfID)
@@ -1680,7 +1691,7 @@ if (!class_exists('StageShowDBaseClass'))
 		function GetAllSalesList($sqlFilters = null)
 		{
 			$sqlFilters['groupBy'] = 'saleID';
-			$sqlFilters['orderBy'] = $this->DBTables->Sales.'.saleID DESC';
+			$sqlFilters['orderBy'] = STAGESHOW_SALES_TABLE.'.saleID DESC';
 			return $this->GetSalesList($sqlFilters);
 		}
 
@@ -1747,33 +1758,20 @@ if (!class_exists('StageShowDBaseClass'))
 			return $salesListArray;
 		}
 		
-		function GetWhereParam($fieldID, $whereID)
+		function DeleteTickets($saleID)
 		{
-			if (is_array($whereID))
-			{
-				$whereList = '';
-				foreach ($whereID as $whereItem)
-				{
-					if ($whereList != '') $whereList .= ',';
-					$whereList .= $whereItem->$fieldID;
-				}
-				$sqlWhere = " IN ($whereList)";
-			}
-			else
-				$sqlWhere = "=$whereID";
-				
-			return $sqlWhere;
+			// Delete a show entry
+			$sql  = 'DELETE FROM '.STAGESHOW_TICKETS_TABLE;
+			$sql .= ' WHERE '.STAGESHOW_TICKETS_TABLE.".saleID=$saleID";
+		 
+			$this->query($sql);
 		}
 		
 		function DeleteSale($saleID)
 		{
 			parent::DeleteSale($saleID);
 
-			// Delete a show entry
-			$sql  = 'DELETE FROM '.$this->DBTables->Orders;
-			$sql .= ' WHERE '.$this->DBTables->Orders.".saleID".$this->GetWhereParam('saleID', $saleID);
-		 
-			$this->query($sql);
+			$this->DeleteTickets($saleID);			
 		}			
 		
 				
@@ -1843,6 +1841,11 @@ if (!class_exists('StageShowDBaseClass'))
 			return parent::AddSalesDetailsEMailFields($EMailTemplate, $saleDetails);
 		}
 		
+		function AddSaleFromTrolley($saleID, $cartEntry, $saleExtras = array())
+		{
+			$this->AddSaleItem($saleID, $cartEntry->itemID, $cartEntry->qty, $cartEntry->price, $saleExtras);
+		}
+
 		function echoHTML($html)
 		{
 			$search = array ("'<br>[\s]*\n'i",				
@@ -1990,6 +1993,14 @@ if (!class_exists('StageShowDBaseClass'))
 			parent::ShowSQL($sql, $values);
 			
 			unset($this->showJoined);
+		}			
+		
+		function FormatEMailField($tag, $field, $saleDetails)
+		{
+			if ($tag =='[ticketSeat]') 
+				return '';
+			
+			return parent::FormatEMailField($tag, $field, $saleDetails);
 		}	
 		
 	}

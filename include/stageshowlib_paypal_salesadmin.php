@@ -289,18 +289,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 			$this->detailsSaleId = 0;
 			$this->salesFor = '';
 			
-			if (isset($_POST['addsalebutton']))
-			{
-				// Add a new sale
-				$this->CheckAdminReferer();
-				
-				$this->pricesList = $this->myDBaseObj->GetPricesListWithSales(0);
-				if (count($this->pricesList) == 0) break;
-				$this->editSaleEntry[0] = $this->pricesList[0];
-
-				$this->editingRecord = true;
-			}
-			
 			$this->DoSalesSearch();
 			
 			if (isset($_POST['emailsale']))
@@ -318,18 +306,19 @@ if (!class_exists('PayPalSalesAdminClass'))
 			}
 
 			$this->invalidInputId = '';
+/*
+	Create arrays of quantities
+	
+	new***** arrays are the new quantities requested by the user
+	curr**** arrays are the quantities currently in the database
+	
+	****stockQtys are the quantities for a particular stock item (i.e. a hosted button)
+	****priceQtys are the quantities for a particular stock option
+*/
 			if (isset($_POST['savechanges']))
 			{
+				// TODO - SSG SalesEditor - This section is redundant for new sale editor
 				// TODO-IMPROVEMENT - Adding Manual Sale - Check for address errors 				
-				/*
-					Create arrays of quantities
-					
-					new***** arrays are the new quantities requested by the user
-					curr**** arrays are the quantities currently in the database
-					
-					****stockQtys are the quantities for a particular stock item (i.e. a hosted button)
-					****priceQtys are the quantities for a particular stock option
-				*/
 				
 				if ($this->myDBaseObj->getDbgOption('Dev_ShowMiscDebug')) StageShowLibUtilsClass::print_r($_POST, '_POST');
 				$this->editingRecord = true;
@@ -482,7 +471,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function OuputAddSaleButton()
 		{
-			$this->OutputButton("addsalebutton", __("Add Sale", $this->myDomain));
+			echo StageShowLibAdminClass::ActionButtonHTML('Add Sale', $this->caller, $this->myDomain, 'edit-entry-button', 0, 'editsale');    
 		}
 		
 		function DoActions()
@@ -708,7 +697,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			if ($saleId == 0)
 			{
 				// Add Transaction Number (from timestamp)
-				$salesVals['saleTxnid'] = 'MAN-'.time();	
+				$salesVals['saleTxnid'] = 'MAN-'.time();
 				
 				// TODO - Manual Sale - Fee is zero .... Is this OK?
 				$salesVals['saleFee'] = 0;

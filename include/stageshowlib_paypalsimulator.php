@@ -69,11 +69,13 @@ if (!class_exists('PayPalSimulator'))
 			$formHTML .= "<h2>Purchaser Details:</h2>\n"; 
 			$formHTML .= "<table>\n";			
 
+			// Output all PayPal tags as edit boxes
 			$formHTML .= $this->PayPalTags($this->myDBaseObj->opts['CfgOptionsID'], true);
 			$formHTML .= $this->OutputActionsTable();	
 			$formHTML .= "</table>\n";			
 			$formHTML .= "<div>\n";			
 			
+			// Now Output all PayPal tags as edit boxes
 			$formHTML .= $this->PayPalTags($this->myDBaseObj->opts['CfgOptionsID'], false);
 			
 	        $formHTML .= '<input type="hidden" name="paramIDs" value="'.$this->paramIDs.'">'."\n";

@@ -212,3 +212,57 @@ div.stageshow-validate-unknown
 	background-color: #ffebe8;
 	border-color: #CC0000;
 }
+
+/* --------------------------------------------------------------------------- */
+/*                                                                             */
+/*                StageShow Sale Editor (Box Office UI)                        */
+/*                                                                             */
+/* --------------------------------------------------------------------------- */
+
+
+div.stageshow-trolley table
+{
+	width: 100%;
+}
+
+div.stageshow-boxoffice table,
+div.stageshow-boxoffice tr,
+div.stageshow-boxoffice td,
+div.stageshow-boxoffice select
+{
+	padding: 0 0 0 0;
+	margin: 0 0 0 0;
+	border: 0 none;
+	text-align: left;
+}
+
+div.stageshow-boxoffice td
+{
+    padding: 0px 0px 6px 0px;
+}
+
+.stageshow-boxoffice-datetime
+{
+	width: 25%;	
+}
+
+.stageshow-boxoffice-type
+{
+	width: 25%;	
+}
+
+.stageshow-boxoffice-price
+{
+	width: 15%;	
+}
+
+.stageshow-boxoffice-qty
+{
+	width: 15%;	
+}
+
+.stageshow-trolley-checkout
+{
+}
+
+}

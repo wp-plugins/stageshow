@@ -93,12 +93,18 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 			return $result->priceID;
 		}
 		
+	
+		function FormatTicketType($ticketTypeInDB, $result)
+		{
+			return $ticketTypeInDB;
+		}
+		
 		function GetMainRowsDefinition()
 		{
 			return array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show',        StageShowLibTableClass::TABLEPARAM_ID => 'showName',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Performance', StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Ticket Type', StageShowLibTableClass::TABLEPARAM_ID => 'ticketType',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Ticket Type', StageShowLibTableClass::TABLEPARAM_ID => 'ticketType',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatTicketType', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Price',       StageShowLibTableClass::TABLEPARAM_ID => 'priceValue',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),						
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Quantity',    StageShowLibTableClass::TABLEPARAM_ID => 'ticketQty',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => 4, ),						
 			);
