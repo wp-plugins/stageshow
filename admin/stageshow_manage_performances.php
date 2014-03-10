@@ -296,6 +296,24 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				}
 			}
 			
+					echo "
+<script>
+var PerfIDList = new Array();
+
+window.onload = stageshow_OnLoadPerformances;
+
+function stageshow_OnLoadPerformances()
+{
+	for (var index=0; index<PerfIDList.length; index++)
+	{
+		var seatingSetObjId = 'perfSeatingID' + PerfIDList[index];
+		var seatingSetObj = document.getElementById(seatingSetObjId);
+		stageshow_OnClickSeatingID(seatingSetObj);	
+	}
+}
+</script>
+						";
+						
 			foreach ($showLists as $showList)
 			{
 				$results = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
@@ -304,6 +322,14 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 	<form method="post">
 	<h3><?php echo($showList->showName); ?></h3>
 <?php
+				foreach ($results as $result)
+				{
+					echo '
+<script>
+PerfIDList.push('.$result->perfID.');
+</script>
+						';
+				}
 				$this->WPNonceField();
 				if (count($results) == 0)
 				{

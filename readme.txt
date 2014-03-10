@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.8.1
-Stable tag: 2.5.3.5
+Stable tag: 3.0
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -188,9 +188,20 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
+= 3.0 (10/03/2014) =
+* Bug Fix: Link to settings page from Overview page incorrect
+* Bug Fix: Shortcode with count=** attribute not working
+* Add/Edit Sales uses same UI as Box-Office page
+* Ticket Options removed from Box Office Listing once Allocated Seats all taken (StageShowGold)
+* Number of Available Seats for each Zone now shown on Box Office (StageShowGold)
+* Edit of Seating Plan blocked when Prices have been defined  (StageShowGold)
+* Max Seats edit hidden for Performances with Allocated Seating (StageShowGold)
+* Updated Seating Plan stylesheet (StageShowGold)
+* Added Number of Seats to Seating Plan Page  (StageShowGold)
+
 = 2.5.3.5
-* Implemented Manual Edit/Add for Allocated Seating Sales
-* Added Seat Number in Confirmation EMails
+* Implemented Manual Edit/Add for Allocated Seating Sales (StageShowGold)
+* Added Seat Number in Confirmation EMails (StageShowGold)
 
 = 2.5.3.3 (19/02/2014) =
 * Bug Fix: Errors in Sample Data 

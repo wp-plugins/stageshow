@@ -1,5 +1,5 @@
 
-function seatAvailability(seatId)
+function stageshow_SeatAvailability(seatId)
 {
 	var bookedIndex = bookedSeats.indexOf(seatId);
 	if (bookedIndex >= 0) return 'booked';
@@ -10,7 +10,7 @@ function seatAvailability(seatId)
 	return '';
 }
 
-function getZoneNo(obj)
+function stageshow_GetZoneNo(obj)
 {
 	var className = obj.className;
 	var posn = className.indexOf("stageshow-boxoffice-zone");
@@ -20,39 +20,36 @@ function getZoneNo(obj)
 	return zoneNo;
 }
 
-function isZoneValid(obj)
+function stageshow_IsZoneValid(obj)
 {
-	var zoneID = getZoneNo(obj);
-	if ((zoneID > 0) && (zones[zoneID] > 0))
+	var zoneID = stageshow_GetZoneNo(obj);
+	if ((zoneID > 0) && (zones[zoneID] >= 0))
 	{
-		return true;		
+		return zoneID;		
 	}
 		
-	return false;
+	return 0;
 }
 
-function initSeatFromTrolley(obj)
+function stageshow_InitSeatFromTrolley(obj)
 {
-	var html = obj.outerHTML;
-	var posn = html.indexOf("clickSeat");
-	var params = html.slice(posn).split(/[\(\),]+/);
-	var zoneNo = params[2];
-	clickSeat(obj, zoneNo);
+	stageshow_ClickSeat(obj);
 }
 
-function clickSeat(obj, zoneID)
+function stageshow_ClickSeat(obj)
 {
 	var seatId, hiddenSeatsElem, hiddenZonesElem;
 	
 	seatIdParts = obj.id.split("-");
 	seatId = seatIdParts[seatIdParts.length-1];
 	
-	if (!isZoneValid(obj))
+	zoneID = stageshow_IsZoneValid(obj);
+	if (zoneID == 0)
 	{
 		return;
 	}
 				
-	seatStatus = seatAvailability(seatId);
+	seatStatus = stageshow_SeatAvailability(seatId);
 	if (seatStatus == 'booked')
 	{
 		return;
@@ -63,8 +60,8 @@ function clickSeat(obj, zoneID)
 	
 	/* Add a space either side of the name */
 	/* This prevents a match with part of any longer Ids */
-	seatId = " " + seatId + " ";
-	zoneID = " " + zoneID + " ";
+	seatIdMark = " " + seatId + " ";
+	zoneIDMark = " " + zoneID + " ";
 	
 	var className = obj.className;
 	var classPosn = className.search('stageshow-boxoffice-seat-available');
@@ -75,21 +72,26 @@ function clickSeat(obj, zoneID)
 	
 	if (classPosn >= 0)
 	{
+		if (zones[zoneID] <= 0)
+			return;
+			
 		className = 'stageshow-boxoffice-seat-requested ' + className;		
-		hiddenSeatsElem.value = hiddenSeatsElem.value + seatId;
-		hiddenZonesElem.value = hiddenZonesElem.value + zoneID;
+		hiddenSeatsElem.value = hiddenSeatsElem.value + seatIdMark;
+		hiddenZonesElem.value = hiddenZonesElem.value + zoneIDMark;
+		zones[zoneID] = zones[zoneID] - 1;
 	}
 	else
 	{
 		className = 'stageshow-boxoffice-seat-available ' + className;
-		hiddenSeatsElem.value = hiddenSeatsElem.value.replace(seatId, "");
-		hiddenZonesElem.value = hiddenZonesElem.value.replace(zoneID, "");
+		hiddenSeatsElem.value = hiddenSeatsElem.value.replace(seatIdMark, "");
+		hiddenZonesElem.value = hiddenZonesElem.value.replace(zoneIDMark, "");
+		zones[zoneID] = zones[zoneID] + 1;
 	}
 	obj.className = className;
 	
 }
 
-function onSeatsLoad()
+function stageshow_OnSeatsLoad()
 {
 	/* Clear hidden pass back values - Required if page is refreshed */
 	document.getElementById("stageshow-boxoffice-layout-seats").value = '';
@@ -107,11 +109,11 @@ function onSeatsLoad()
 			if (seatObj != null)
 			{
 				var className  = seatObj.className.replace('stageshow-boxoffice-seat-unknown', '');
-				var zoneValid = isZoneValid(seatObj);
+				var zoneID = stageshow_IsZoneValid(seatObj);
 				
-				if (zoneValid)
+				if (zoneID > 0)
 				{					
-					switch (seatAvailability(seatId))
+					switch (stageshow_SeatAvailability(seatId))
 					{
 						case '': 
 							seatObj.className = 'stageshow-boxoffice-seat-available ' + className;
@@ -119,7 +121,7 @@ function onSeatsLoad()
 							
 						case 'selected': 
 							seatObj.className = 'stageshow-boxoffice-seat-available ' + className;
-							initSeatFromTrolley(seatObj);
+							stageshow_ClickSeat(seatObj);
 							break;
 							
 						default: 
