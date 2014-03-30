@@ -452,7 +452,6 @@ if (!class_exists('StageShowDBaseClass'))
 						perfID INT UNSIGNED NOT NULL,
 						priceType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL,
 						priceValue DECIMAL(9,2) NOT NULL,
-						priceHeadCount INT UNSIGNED NOT NULL DEFAULT 1,
 					';
 					break;
 					
@@ -500,10 +499,10 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 			else
 			{
-				if( mysql_num_rows( mysql_query("SHOW TABLES LIKE '".STAGESHOW_PERFORMANCES_TABLE."'")) > 0)
-					$addingShowsTable = ($wpdb->get_var("SHOW TABLES LIKE '".STAGESHOW_SHOWS_TABLE."'") != STAGESHOW_SHOWS_TABLE);
+				if ($this->tableExists(STAGESHOW_PERFORMANCES_TABLE)) 
+					$addingShowsTable = !$this->tableExists(STAGESHOW_SHOWS_TABLE);
 				else
-					$addingShowsTable = false;			
+					$addingShowsTable = false;	
 			}
 				
 			$this->createDBTable(STAGESHOW_SHOWS_TABLE, 'showID', $dropTable);
@@ -581,7 +580,7 @@ if (!class_exists('StageShowDBaseClass'))
 			return current_user_can(STAGESHOW_CAPABILITY_DEVUSER);
 		}
 		
-		function CreateSample()
+		function CreateSample($sampleDepth = 0)
 		{
 			// FUNCTIONALITY: DBase - StageShow - Implement "Create Sample"
 			$showName1 = "The Wordpress Show";
@@ -609,15 +608,18 @@ if (!class_exists('StageShowDBaseClass'))
 				return;
 			}
 			
-			// Populate prices table
-			$this->priceID1_A1 = $this->AddSamplePrice('Day1Eve', 'All',   STAGESHOW_PRICEID1_A1);
-			$this->priceID1_A2 = $this->AddSamplePrice('Day2Eve', 'Adult', STAGESHOW_PRICEID1_A2);
-			$this->priceID1_A3 = $this->AddSamplePrice('Day3Mat', 'Adult', STAGESHOW_PRICEID1_A3);
-			$this->priceID1_A4 = $this->AddSamplePrice('Day3Eve', 'All',   STAGESHOW_PRICEID1_A4);
-			$this->priceID1_C2 = $this->AddSamplePrice('Day2Eve', 'Child', STAGESHOW_PRICEID1_C2);
-			$this->priceID1_C3 = $this->AddSamplePrice('Day3Mat', 'Child', STAGESHOW_PRICEID1_C3);
+			if ($sampleDepth < 2)
+			{
+				// Populate prices table
+				$this->priceID1_A1 = $this->AddSamplePrice('Day1Eve', 'All',   STAGESHOW_PRICEID1_A1);
+				$this->priceID1_A2 = $this->AddSamplePrice('Day2Eve', 'Adult', STAGESHOW_PRICEID1_A2);
+				$this->priceID1_A3 = $this->AddSamplePrice('Day3Mat', 'Adult', STAGESHOW_PRICEID1_A3);
+				$this->priceID1_A4 = $this->AddSamplePrice('Day3Eve', 'All',   STAGESHOW_PRICEID1_A4);
+				$this->priceID1_C2 = $this->AddSamplePrice('Day2Eve', 'Child', STAGESHOW_PRICEID1_C2);
+				$this->priceID1_C3 = $this->AddSamplePrice('Day3Mat', 'Child', STAGESHOW_PRICEID1_C3);
+			}
 			
-			if (!$this->isDbgOptionSet('Dev_NoSampleSales'))
+			if (!$this->isDbgOptionSet('Dev_NoSampleSales') && ($sampleDepth < 1))
 			{
 				// Add some ticket sales
 				$saleTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47";
@@ -894,7 +896,7 @@ if (!class_exists('StageShowDBaseClass'))
 			$sql = 'INSERT INTO '.STAGESHOW_SHOWS_TABLE.'(showName, showState) VALUES("'.$showName.'", "'.$showState.'")';
 			$this->query($sql);	
 					
-     		return mysql_insert_id();
+     		return $this->GetInsertId();
 		}
 				
 		function UpdateShowName($showID, $showName)
@@ -1167,7 +1169,7 @@ if (!class_exists('StageShowDBaseClass'))
 			 
 			$this->query($sql);
 			
-     		return mysql_insert_id();
+     		return $this->GetInsertId();
 		}
 				
 		function UpdatePerformanceTime($perfID, $newPerfDateTime)
@@ -1340,7 +1342,7 @@ if (!class_exists('StageShowDBaseClass'))
 			 			
 			$this->query($sql);
 			
-     		return mysql_insert_id();
+     		return $this->GetInsertId();
 		}
 		
 		function UpdatePricePerfID($priceID, $newPerfID)

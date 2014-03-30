@@ -203,30 +203,18 @@ function HideElement(obj)
 		{
 			if (isset($_POST[$optionID1]) && (trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID1)) !== trim($_POST[$optionID1])))
 			{
-				//$currVal = trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID1));
-				//$newVal = trim($_POST[$optionID1]);
-				//echo "Changing $optionID1: ";
-				//echo $currVal.'('.strlen($currVal).')->'.$newVal.'('.strlen($newVal).')';
 				return true;
 			}
 			
 			if ($optionID2 === '') return false;			
 			if (isset($_POST[$optionID2]) && (trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID2)) !== trim($_POST[$optionID2])))
 			{
-				//$currVal = trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID2));
-				//$newVal = trim($_POST[$optionID2]);
-				//echo "Changing $optionID2: ";
-				//echo $currVal.'('.strlen($currVal).')->'.$newVal.'('.strlen($newVal).')';
 				return true;
 			}
 			
 			if ($optionID3 === '') return false;			
 			if (isset($_POST[$optionID3]) && (trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID3)) !== trim($_POST[$optionID3])))
 			{
-				//$currVal = trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID3));
-				//$newVal = trim($_POST[$optionID3]);
-				//echo "Changing $optionID3: ";
-				//echo $currVal.'('.strlen($currVal).')->'.$newVal.'('.strlen($newVal).')';
 				return true;
 			}
 			

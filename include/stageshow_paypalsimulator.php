@@ -43,7 +43,14 @@ if (!class_exists('StageShowPayPalSimulator'))
 			
 			$description = $result->showName.' - '.$this->myDBaseObj->FormatDateForDisplay($result->perfDateTime);
 			$reference = $result->showID.'-'.$result->perfID;
-			$seat = isset($result->ticketSeat) ? $result->ticketSeat : 'N/A';		
+			$seat = isset($result->ticketSeat) ? $result->ticketSeat : 'N/A';	
+				
+			$html .= '
+				<input type="hidden" name="item_name'.$indexNo.'" value="'.$result->itemName.'"/>
+				<input type="hidden" name="item_number'.$indexNo.'" value="'.$result->itemRef.'"/>
+				<input type="hidden" name="option_selection1_'.$indexNo.'" value="'.$result->itemOption.'"/>
+				<input type="hidden" name="mc_gross_'.$indexNo.'" value="'.$result->itemPaid.'"/>
+				';
 
 			$html .= '<td class="stageshow-simulator-datetime" >'.$this->myDBaseObj->FormatDateForDisplay($result->perfDateTime).'</td>';
 			$html .= '<td class="stageshow-simulator-type" >'.$result->ticketType.'</td>';
@@ -56,7 +63,7 @@ if (!class_exists('StageShowPayPalSimulator'))
 			';
 			
 			
-			$this->totalSale += ($result->priceValue * $result->ticketQty * $result->priceNoOfSeats);
+			$this->totalSale += ($result->priceValue * $result->ticketQty); // ($result->priceValue * $result->ticketQty * $result->priceNoOfSeats);
 			$html .= $result->ticketQty;
 			$customVal = $result->saleID;
 				

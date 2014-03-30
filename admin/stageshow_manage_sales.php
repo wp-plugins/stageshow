@@ -82,7 +82,7 @@ if (!class_exists('StageShowSalesAdminClass'))
 		{
 			if ($this->editingRecord)
 			{
-				// TODO - Sale Editor ... output tickets selector
+				// Sale Editor ... output tickets selector
 				$pluginObj = $this->env['PluginObj'];
 				echo $pluginObj->OutputContent_OnlineStore(NULL);
 				return '';

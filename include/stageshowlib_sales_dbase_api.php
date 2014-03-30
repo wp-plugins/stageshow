@@ -618,10 +618,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sqlValues .= ')';
 			
 			$sql = $sqlFields.$sqlValues;
-			 
+
 			$this->query($sql);
-			$saleID = mysql_insert_id();
-	
+			$saleID = $this->GetInsertId();
+			
 			return $saleID;
 		}
 		
@@ -675,7 +675,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql = $sqlFields.$sqlValues;
 			 
 			$this->query($sql);
-			$saleID = mysql_insert_id();
+			$saleID = $this->GetInsertId();
 	
 			return $saleID;
 		}			
@@ -684,7 +684,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			if ($fromTrolley)
 			{
-//StageShowLibUtilsClass::print_r($results, 'results in UpdateSale');				
 				$saleID = $results->saleID;
 			}
 			else
@@ -721,12 +720,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$rtnVal = $this->query($sql);	
 			if ($this->getDbgOption('Dev_ShowSQL'))
 			{
-				echo "<br>UpdateSale Returned: $rtnVal<br>\n";
+				echo "<br>UpdateSale - query() Returned: $rtnVal<br>\n";
 			}
 			
 			if (!$rtnVal)
 				return 0;
 			
+			if ($this->queryResult == 0)
+				return 0-$saleID;
+				
 			return $saleID;
 		}
 			
@@ -740,7 +742,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql  = 'DELETE FROM '.$this->DBTables->Sales;
 			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleStatus="'.PAYPAL_APILIB_SALESTATUS_CHECKOUT.'"';
 			$sql .= ' AND   '.$this->DBTables->Sales.'.saleCheckoutTime < "'.$limitDateTime.'"';
-			 
+			
 			$this->query($sql);
 			
 			$sql  = 'DELETE o FROM '.$this->DBTables->Orders.' o ';
@@ -769,7 +771,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql = $sqlFields.$sqlValues;
 			
 			$this->query($sql);
-			$orderID = mysql_insert_id();
+			$orderID = $this->GetInsertId();
 				
 			return $orderID;
 		}			
@@ -1258,15 +1260,12 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					}
 									
 					$saleID = $this->AddSale($saleDateTime, $saleVals);
+
 					break;
 				
 				case self::STAGESHOWLIB_LOGSALEMODE_PAYMENT:
 					// Just add the sale details 
 					$saleID = $this->UpdateSale($results);
-					if ($saleID == 0)
-					{
-						// Checkout has timed out ... 
-					}
 					return $saleID;
 
 				case self::STAGESHOWLIB_LOGSALEMODE_RESERVE:

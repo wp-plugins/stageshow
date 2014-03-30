@@ -19,7 +19,7 @@ Purchaser:
 
 Purchased:
 [startloop]
-[ticketQty] x [ticketType] for [ticketName] [endloop]
+[qty] x [itemRef] for [itemName] [endloop]
 
 Payment:
 Total: [salePaid]

@@ -59,6 +59,7 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEPARAM_ROWS = 'Rows';
 		const TABLEPARAM_COLS = 'Cols';
 		const TABLEPARAM_DECODE = 'Decode';
+		const TABLEPARAM_CANEDIT = 'CanEdit';	
 		const TABLEPARAM_ADDEMPTY = 'AddEmpty';
 		const TABLEPARAM_BEFORE = 'Before';
 		const TABLEPARAM_AFTER = 'After';
@@ -1227,7 +1228,16 @@ if (!class_exists('StageShowLibAdminListClass'))
 			$settingType = $settingOption[self::TABLEPARAM_TYPE];
 			$onChange = isset($settingOption[self::TABLEPARAM_ONCHANGE]) ? ' onchange="'.$settingOption[self::TABLEPARAM_ONCHANGE].'(this)" ' : '';
 
-			if ( (!$editMode) || isset($settingOption[self::TABLEPARAM_READONLY]) )
+			if (isset($settingOption[self::TABLEPARAM_READONLY]))
+				$editMode = false;
+				
+			if ($editMode && isset($settingOption[self::TABLEPARAM_CANEDIT]))
+			{
+				$funcName = $columnDef[StageShowLibTableClass::TABLEPARAM_CANEDIT];
+				$editMode = $this->$funcName($result);
+			}
+			
+			if (!$editMode)
 			{
 				switch ($settingType)
 				{
@@ -1343,7 +1353,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					case self::TABLEENTRY_COOKIE:
 					case self::TABLEENTRY_FUNCTION:
 						break;
-						
+												
 					default:
 						$canDisplayTable = false;
 						echo "Can't display this table - Label:".$columnDef[self::TABLEPARAM_LABEL]." Id:".$columnDef[self::TABLEPARAM_ID]." Column Type:".$columnDef[self::TABLEPARAM_TYPE]."<br>\n";						
@@ -1384,11 +1394,39 @@ if (!class_exists('StageShowLibAdminListClass'))
 						$funcName = $columnDef[StageShowLibTableClass::TABLEPARAM_DECODE];
 						$currVal = $this->$funcName($result->$optionId, $result);
 					}
+					$hiddenVal = $currVal;
 					
 					$columnType = $columnDef[self::TABLEPARAM_TYPE];
 					if ((!$this->editMode) && ($columnType != self::TABLEENTRY_FUNCTION))
 					{
 						$columnType = self::TABLEENTRY_VIEW;
+					}
+
+					if ($this->editMode)	
+					{
+						if (isset($columnDef[self::TABLEPARAM_CANEDIT]))
+						{
+							$funcName = $columnDef[self::TABLEPARAM_CANEDIT];
+							$editMode = $this->$funcName($result);
+							if (!$editMode)
+							{
+								if ($columnType == self::TABLEENTRY_SELECT)
+								{
+									// Get Value from Items List
+									$srchText = $currVal.'|';
+									$srchLen = strlen($srchText);
+									foreach ($columnDef[StageShowLibTableClass::TABLEPARAM_ITEMS] as $item)
+									{
+										if (substr($item, 0, $srchLen) === $srchText)
+										{
+											$currVal = substr($item, $srchLen);
+											break;
+										}
+									}
+								}
+								$columnType = self::TABLEENTRY_VIEW;
+							}
+						}						
 					}
 						
 					switch ($columnType)
@@ -1433,7 +1471,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 						case self::TABLEENTRY_VIEW:
 						case self::TABLEENTRY_READONLY:
 							$recId = $this->GetRecordID($result).$this->GetDetailID($result);
-							$hiddenTag = '<input type="hidden" name="'.$columnId.$recId.'" id="'.$columnId.$recId.'" value="'.$currVal.'"/>';
+							$hiddenTag = '<input type="hidden" name="'.$columnId.$recId.'" id="'.$columnId.$recId.'" value="'.$hiddenVal.'"/>';
 							if (isset($columnDef[StageShowLibTableClass::TABLEPARAM_LINK]))
 							{
 								$currValLink = $columnDef[StageShowLibTableClass::TABLEPARAM_LINK];

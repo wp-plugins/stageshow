@@ -209,11 +209,11 @@ if (!class_exists('StageShowPluginClass'))
 			echo "\n<meta name='$pluginID' content='$pluginID for WordPress by Malcolm Shergold - Ver:$pluginVer - BoxOfficeURL:$boxofficeURL' />\n";						
 		}
 		
-		function CreateSample()
+		function CreateSample($sampleDepth = 0)
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			$this->saveStageshowOptions();
-			$myDBaseObj->CreateSample();
+			$myDBaseObj->CreateSample($sampleDepth);
 		}
 		
 		function printAdminPage() 
