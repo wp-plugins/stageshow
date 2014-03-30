@@ -17,8 +17,6 @@ if (!class_exists('PayPalSimulator'))
 
 			$formHTML = '';
 			
-			$formHTML .= $this->OutputHeader();
-
 			$devMode = true;
 			if (isset($_GET['id']))
 			{
@@ -32,21 +30,27 @@ if (!class_exists('PayPalSimulator'))
 				
 			if ($saleId > 0)
 			{
-				if (defined('RUNSTAGESHOWDEMO'))
-				{
-					$actionHTML = '';
-				}
-				else
+				$actionHTML = '';
+				if (!defined('RUNSTAGESHOWDEMO'))
 				{
 					$notifyURL = $this->myDBaseObj->PayPalNotifyURL;
-					$actionHTML = ($notifyURL != '') ? 'action="'.$notifyURL.'" ' : '';
+					if ($notifyURL == '')
+					{
+						echo "Warning: No NotifyURL specified<br></br>";
+					}
+					else
+					{
+						$actionHTML = 'action="'.$notifyURL.'" ';
+					}
 				}
 
+				$formHTML .= $this->OutputHeader();
 				$formHTML .=  '<form name="ipntest" '.$actionHTML.' method="post">';			
 				$formHTML .=  $this->OutputSaleForm($saleId);
 			}
 			else
 			{
+				$formHTML .= $this->OutputHeader();
 				$formHTML .=  '<form name="ipntest" method="post">';			
 				$formHTML .=  $this->OutputSaleSelect(); 
 			}
@@ -212,6 +216,7 @@ if (!class_exists('PayPalSimulator'))
 		
 		function OutputActionsTable() 
 		{
+			$readOnly = isset($this->CanEditTotal) ? '' : ' readonly="readonly" ';
 			$actionsHTML = '';
 			$actionsHTML .= '
 				<tr class="paypalsim_formRow">
@@ -223,7 +228,7 @@ if (!class_exists('PayPalSimulator'))
 				<tr class="paypalsim_formRow">
 					<td class="paypalsim_formFieldID">Total:&nbsp;</td>
 					<td class="paypalsim_formFieldValue" colspan="2">
-						<input name="mc_gross" id="mc_gross" type="text" maxlength="6" size="6" value="'.$this->totalSale.'" readonly="readonly" />
+						<input name="mc_gross" id="mc_gross" type="text" maxlength="6" size="6" value="'.$this->totalSale.'" '.$readOnly.'/>
 					</td>
 				</tr>
 			';

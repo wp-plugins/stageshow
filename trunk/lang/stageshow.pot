@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 3.0 \n"
+"Project-Id-Version: StageShow 3.1 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowgold\n"
-"POT-Creation-Date: 2014-03-10 21:35:54+00:00\n"
+"POT-Creation-Date: 2014-03-30 10:18:54+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -87,12 +87,12 @@ msgid "Delete"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:86
-#: include\stageshow_dbase_api.php:742
+#: include\stageshow_dbase_api.php:744
 msgid "Active"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:90
-#: include\stageshow_dbase_api.php:744
+#: include\stageshow_dbase_api.php:746
 msgid "INACTIVE"
 msgstr ""
 
@@ -129,7 +129,7 @@ msgstr ""
 #: admin\stageshow_manage_performances.php:259
 #: admin\stageshow_manage_prices.php:201 admin\stageshow_manage_prices.php:214
 #: admin\stageshow_manage_shows.php:155
-#: admin\stageshowplus_manage_priceplans.php:218 include\mjslib_admin.php:358
+#: admin\stageshowplus_manage_priceplans.php:218 include\mjslib_admin.php:346
 #: include\mjslib_paypal_settings.php:251
 msgid "Settings have been saved"
 msgstr ""
@@ -150,8 +150,8 @@ msgstr ""
 
 #: admin\stageshow_manage_performances.php:358
 #: admin\stageshow_manage_prices.php:278 admin\stageshow_manage_shows.php:210
-#: admin\stageshowgold_manage_seating.php:401
-#: admin\stageshowplus_manage_priceplans.php:316 include\mjslib_admin.php:398
+#: admin\stageshowgold_manage_seating.php:400
+#: admin\stageshowplus_manage_priceplans.php:316 include\mjslib_admin.php:386
 msgid "Save Changes"
 msgstr ""
 
@@ -186,7 +186,7 @@ msgstr ""
 
 #: admin\stageshow_manage_performances.php:440
 #: admin\stageshow_manage_prices.php:342 admin\stageshow_manage_shows.php:301
-#: admin\stageshowgold_manage_seating.php:588
+#: admin\stageshowgold_manage_seating.php:583
 #: admin\stageshowplus_manage_priceplans.php:363
 #: include\mjslib_paypal_salesadmin.php:480
 msgid "Nothing to Delete"
@@ -625,7 +625,7 @@ msgstr ""
 msgid "EMail"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:321 include\mjslib_table.php:170
+#: admin\stageshow_tdt_export.php:321 include\mjslib_table.php:171
 #: stageshow_sales.php:418 stageshowgold.php:117 stageshowgold.php:255
 #: stageshowgold.php:262
 msgid "Show"
@@ -641,7 +641,7 @@ msgstr ""
 msgid "No matching record found"
 msgstr ""
 
-#: admin\stageshowgold_manage_performances.php:72
+#: admin\stageshowgold_manage_performances.php:78
 msgid "Cannot Change Seating Plan - Prices already defined"
 msgstr ""
 
@@ -654,7 +654,7 @@ msgid "N/A"
 msgstr ""
 
 #: admin\stageshowgold_manage_seating.php:39
-#: include\mjslib_paypal_salesadmin.php:37 include\mjslib_table.php:1008
+#: include\mjslib_paypal_salesadmin.php:37 include\mjslib_table.php:1009
 msgid "Details"
 msgstr ""
 
@@ -674,19 +674,15 @@ msgstr ""
 msgid "No Seating Plans"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:400
+#: admin\stageshowgold_manage_seating.php:397
 msgid "Add Seating Plan"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:405
-msgid "No Seating Plans Defined"
-msgstr ""
-
-#: admin\stageshowgold_manage_seating.php:586
+#: admin\stageshowgold_manage_seating.php:581
 msgid "1 Seating Plan has been deleted"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:586
+#: admin\stageshowgold_manage_seating.php:581
 msgid "Seating Plans have been deleted"
 msgstr ""
 
@@ -738,19 +734,19 @@ msgstr ""
 msgid "Below Entry"
 msgstr ""
 
-#: admin\stageshowplus_manage_performances.php:91
+#: admin\stageshowplus_manage_performances.php:90
 msgid "Empty Expiry Date Entry"
 msgstr ""
 
-#: admin\stageshowplus_manage_performances.php:96
+#: admin\stageshowplus_manage_performances.php:95
 msgid "Invalid Expiry Date Entry"
 msgstr ""
 
-#: admin\stageshowplus_manage_performances.php:132
+#: admin\stageshowplus_manage_performances.php:131
 msgid "initialised as"
 msgstr ""
 
-#: admin\stageshowplus_manage_performances.php:147
+#: admin\stageshowplus_manage_performances.php:146
 msgid "No Price Plan"
 msgstr ""
 
@@ -855,11 +851,11 @@ msgstr ""
 msgid "Performance Note Position"
 msgstr ""
 
-#: include\mjslib_admin.php:365 include\mjslib_paypal_settings.php:258
+#: include\mjslib_admin.php:353 include\mjslib_paypal_settings.php:258
 msgid "Paypal settings have NOT been saved."
 msgstr ""
 
-#: include\mjslib_admin.php:390
+#: include\mjslib_admin.php:378
 msgid "No Settings Configured"
 msgstr ""
 
@@ -945,11 +941,11 @@ msgstr ""
 msgid "Timezone"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:929
+#: include\mjslib_sales_dbase_api.php:931
 msgid "Undefined"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:1189
+#: include\mjslib_sales_dbase_api.php:1191
 msgid "View Ticket"
 msgstr ""
 
@@ -1024,57 +1020,57 @@ msgstr ""
 msgid "Sold out for one or more items"
 msgstr ""
 
-#: include\mjslib_table.php:171
+#: include\mjslib_table.php:172
 msgid "Hide"
 msgstr ""
 
-#: include\mjslib_table.php:528
+#: include\mjslib_table.php:529
 msgid "Bulk Actions"
 msgstr ""
 
-#: include\mjslib_table.php:538
+#: include\mjslib_table.php:539
 msgid "Apply"
 msgstr ""
 
-#: include\mjslib_table.php:741
+#: include\mjslib_table.php:742
 msgid "1 item"
 msgid_plural "%s items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: include\mjslib_table.php:757
+#: include\mjslib_table.php:758
 msgid "Go to the first page"
 msgstr ""
 
-#: include\mjslib_table.php:764
+#: include\mjslib_table.php:765
 msgid "Go to the previous page"
 msgstr ""
 
-#: include\mjslib_table.php:773
+#: include\mjslib_table.php:774
 msgid "Current page"
 msgstr ""
 
-#: include\mjslib_table.php:780
+#: include\mjslib_table.php:781
 msgid "of"
 msgstr ""
 
-#: include\mjslib_table.php:784
+#: include\mjslib_table.php:785
 msgid "Go to the next page"
 msgstr ""
 
-#: include\mjslib_table.php:791
+#: include\mjslib_table.php:792
 msgid "Go to the last page"
 msgstr ""
 
-#: include\mjslib_table.php:1131
+#: include\mjslib_table.php:1132
 msgid "Show all Events"
 msgstr ""
 
-#: include\mjslib_table.php:1240
+#: include\mjslib_table.php:1250
 msgid "Yes"
 msgstr ""
 
-#: include\mjslib_table.php:1240
+#: include\mjslib_table.php:1250
 msgid "No"
 msgstr ""
 
@@ -1098,101 +1094,101 @@ msgstr ""
 msgid "EMail Sale"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:608 include\stageshowplus_dbase_api.php:509
+#: include\stageshow_dbase_api.php:607 include\stageshowplus_dbase_api.php:509
 msgid "Cannot Add Performances"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:674
+#: include\stageshow_dbase_api.php:676
 msgid "Internal Error - showID"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:689
+#: include\stageshow_dbase_api.php:691
 msgid "Performance Reference is not unique"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:691
+#: include\stageshow_dbase_api.php:693
 msgid "New Performance Added"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:738
+#: include\stageshow_dbase_api.php:740
 msgid "DELETED"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:879
+#: include\stageshow_dbase_api.php:881
 msgid "Unnamed Show"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:958
+#: include\stageshow_dbase_api.php:960
 msgid "DB Error"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:958
+#: include\stageshow_dbase_api.php:960
 msgid "Column does not exist"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1283
+#: include\stageshow_dbase_api.php:1285
 msgid "Price Not Specified"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1289
+#: include\stageshow_dbase_api.php:1291
 msgid "Invalid Price Entry"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1295
+#: include\stageshow_dbase_api.php:1297
 msgid "Price Entry cannot be negative"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:433
+#: include\stageshowgold_dbase_api.php:436
 msgid "Error Finding Tag"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:441
+#: include\stageshowgold_dbase_api.php:444
 msgid "Missing \" in Tag Param"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:451
+#: include\stageshowgold_dbase_api.php:454
 msgid "Missing End of Tag Marker"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:578
+#: include\stageshowgold_dbase_api.php:581
 msgid "No Zone Found for Seat"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:594
+#: include\stageshowgold_dbase_api.php:597
 msgid "Template Uploaded"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:607
-#: include\stageshowgold_dbase_api.php:620
-#: include\stageshowgold_dbase_api.php:629
+#: include\stageshowgold_dbase_api.php:610
+#: include\stageshowgold_dbase_api.php:623
+#: include\stageshowgold_dbase_api.php:632
 msgid "Template Import Error"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:608
+#: include\stageshowgold_dbase_api.php:611
 msgid "Seating ID not specified"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:621
+#: include\stageshowgold_dbase_api.php:624
 msgid "Empty Filename"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:630
+#: include\stageshowgold_dbase_api.php:633
 msgid "Empty File"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1055
+#: include\stageshowgold_dbase_api.php:1058
 msgid "Invalid Seat Specification"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1068
+#: include\stageshowgold_dbase_api.php:1071
 msgid "Seat Allocated Twice"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1264
+#: include\stageshowgold_dbase_api.php:1267
 msgid "Qty"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1272 stageshowgold.php:20
+#: include\stageshowgold_dbase_api.php:1275 stageshowgold.php:20
 #: stageshowgold_main.php:450
 msgid "Seat"
 msgstr ""

@@ -287,7 +287,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 				if (!current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
 				return;
 			}
-				
+
 			if ($this->getDbgOption('Dev_ShowCallStack'))
 				$this->ShowCallStack();
 			
@@ -338,6 +338,13 @@ if (!class_exists('StageShowLibDBaseClass'))
 			dbDelta($sql);
 		}
 		
+		function tableExists($table_name)
+		{
+			global $wpdb;
+			
+			return ( $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name );			
+		}
+		
 		function queryWithPrepare($sql, $values)
 		{
 			global $wpdb;
@@ -357,9 +364,20 @@ if (!class_exists('StageShowLibDBaseClass'))
 			}	
 			
 			$this->ShowSQL($sql);
-			return ($wpdb->query($sql) !== false);			
+			
+			$this->queryResult = $wpdb->query($sql);
+			$rtnStatus = ($this->queryResult !== false);	
+			
+			return $rtnStatus;		
 		}
-		
+
+		function GetInsertId()
+		{
+			global $wpdb;
+			
+			return $wpdb->insert_id;
+		}
+
 		function CheckVersionNumber($stockRec)
 		{
 		}

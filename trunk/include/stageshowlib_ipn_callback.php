@@ -289,7 +289,7 @@ if (!class_exists('IPNNotifyClass'))
 						$results['saleID'] = $this->HTTPParam('custom');
 						
 	  					// FUNCTIONALITY: IPN Notify - Log Sale to DB
-						$saleID = $this->notifyDBaseObj->LogSale($results);
+						$saleID = $this->notifyDBaseObj->LogSale($results, StageShowLibSalesDBaseClass::STAGESHOWLIB_LOGSALEMODE_PAYMENT);
 						
 						if ($saleID > 0)
 						{
@@ -299,9 +299,9 @@ if (!class_exists('IPNNotifyClass'))
 							$emailStatus = $this->notifyDBaseObj->EMailSale($saleID);
 							$this->AddToLog('EMail Status: '.$emailStatus);
 						}
-						else
+						else if ($saleID < 0)
 						{
-							// Send Sale Rejected EMail 
+							// Send Sale Rejected EMail - No Matching Rows
 							$this->AddToLog('Sale Rejected (Checkout Timed Out) - SaleID: '.$saleID);
 							
 							$templatePath = $this->notifyDBaseObj->GetEmailTemplatePath('TimeoutEMailTemplatePath');
@@ -310,13 +310,39 @@ if (!class_exists('IPNNotifyClass'))
 							$emailData[0] = new stdClass();
 							foreach ($results as $key => $result)
 							{
+								if (is_numeric(substr($key, -1, 1)))
+									continue;
+									
 								$emailData[0]->$key = $result;
 							}
 							
+							for ($i=1; $i<$itemNo; $i++)
+							{
+								$elemId = 'itemName' . $lineNo;
+								$emailData[0]->$elemId = $results[$elemId];
+								$elemId = 'itemRef' . $lineNo;
+								$emailData[0]->$elemId = $results[$elemId];
+								$elemId = 'itemOption' . $lineNo;
+								$emailData[0]->$elemId = $results[$elemId];
+								$elemId = 'qty' . $lineNo;
+								$emailData[0]->$elemId = $results[$elemId];
+								$elemId = 'itemPaid' . $lineNo;
+								$emailData[0]->$elemId = $results[$elemId];
+							}
+
 							$emailStatus = $this->notifyDBaseObj->SendEMailFromTemplate($emailData, $templatePath, $emailTo);
 							$this->AddToLog('EMail Status: '.$emailStatus);
 						}
+						else
+						{
+							// Error in LogSale()
+							$IPNError = 'DB Error in LogSale';
+						}
 					}
+				}
+				
+				if ($IPNError === '')
+				{
 					echo "OK<br>\n";
 				}
 				else
