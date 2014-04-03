@@ -45,13 +45,6 @@ if (!class_exists('StageShowPayPalSimulator'))
 			$reference = $result->showID.'-'.$result->perfID;
 			$seat = isset($result->ticketSeat) ? $result->ticketSeat : 'N/A';	
 				
-			$html .= '
-				<input type="hidden" name="item_name'.$indexNo.'" value="'.$result->itemName.'"/>
-				<input type="hidden" name="item_number'.$indexNo.'" value="'.$result->itemRef.'"/>
-				<input type="hidden" name="option_selection1_'.$indexNo.'" value="'.$result->itemOption.'"/>
-				<input type="hidden" name="mc_gross_'.$indexNo.'" value="'.$result->itemPaid.'"/>
-				';
-
 			$html .= '<td class="stageshow-simulator-datetime" >'.$this->myDBaseObj->FormatDateForDisplay($result->perfDateTime).'</td>';
 			$html .= '<td class="stageshow-simulator-type" >'.$result->ticketType.'</td>';
 			$html .= '<td class="stageshow-simulator-seat" >'.$seat.'</td>';
@@ -67,6 +60,14 @@ if (!class_exists('StageShowPayPalSimulator'))
 			$html .= $result->ticketQty;
 			$customVal = $result->saleID;
 				
+			$html .= '
+				<input type="hidden" name="item_name'.$indexNo.'" value="'.$description.'"/>
+				<input type="hidden" name="item_number'.$indexNo.'" value="'.$reference.'"/>
+				<input type="hidden" name="option_name1_'.$indexNo.'" value="Ticket Type"/>
+				<input type="hidden" name="option_selection1_'.$indexNo.'" value="'.$result->ticketType.'"/>
+				<input type="hidden" name="mc_gross_'.$indexNo.'" value="'.$result->priceValue.'"/>
+				';
+
 			$html .= '
 				</td>
 			</tr>';

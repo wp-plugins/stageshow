@@ -84,10 +84,10 @@ if (!class_exists('StageShowPricesAdminListClass'))
 			return $perfDatesList;
 		}
 		
-		function OutputList($results, $updateFailed)
+		function OutputList($results, $updateFailed = false)
 		{
 			$this->updateFailed = $updateFailed;
-			parent::OutputList($results);
+			parent::OutputList($results, $updateFailed);
 		}
 	}
 }

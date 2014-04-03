@@ -101,7 +101,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 			return $this->perfsList[$result->showID];
 		}
 		
-		function OutputList($results)
+		function OutputList($results, $updateFailed = false)
 		{
 			// FUNCTIONALITY: Overview - Calculate Performances Count for each show
 			foreach ($results as $key=>$result)
@@ -112,7 +112,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 				$results[$key]->perfCount = count($this->perfsList[$result->showID]);
 			}
 			
-			parent::OutputList($results);
+			parent::OutputList($results, $updateFailed);
 		}
 		
 	}
