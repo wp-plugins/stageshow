@@ -35,6 +35,11 @@ if (!class_exists('StageShowPluginClass'))
 		
 		function __construct($caller)		 
 		{
+			if (defined('STAGESHOW_ERROR_REPORTING')) 
+			{
+				error_reporting(STAGESHOW_ERROR_REPORTING);
+			}
+			
 			$myDBaseObj = $this->CreateDBClass($caller);
 			
 			$myDBaseObj->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');

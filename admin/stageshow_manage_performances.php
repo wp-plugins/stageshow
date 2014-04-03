@@ -99,11 +99,11 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 			return $perfStateText;
 		}
 		
-		function OutputList($results, $updateFailed)
+		function OutputList($results, $updateFailed = false)
 		{
 			// FUNCTIONALITY: Performances - Reset Shows form on update failure
 			$this->updateFailed = $updateFailed;
-			parent::OutputList($results);
+			parent::OutputList($results, $updateFailed);
 		}
 		
 	}

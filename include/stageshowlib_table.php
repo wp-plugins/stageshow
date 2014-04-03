@@ -1735,7 +1735,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			echo $javascript;
 		}
 
-		function OutputList($results)
+		function OutputList($results, $updateFailed = false)
 		{
 			if (count($results) == 0) return;
 			

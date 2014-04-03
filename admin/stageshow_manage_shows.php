@@ -67,11 +67,11 @@ if (!class_exists('StageShowShowsAdminListClass'))
 			return $this->myDBaseObj->StateActiveText($showState);
 		}
 		
-		function OutputList($results, $updateFailed)
+		function OutputList($results, $updateFailed = false)
 		{
 			// FUNCTIONALITY: Shows - Reset Shows form on update failure
 			$this->updateFailed = $updateFailed;
-			parent::OutputList($results);
+			parent::OutputList($results, $updateFailed);
 		}
 		
 	}
