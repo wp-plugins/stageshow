@@ -38,6 +38,11 @@ if (!class_exists('StageShowToolsAdminClass'))
 			parent::__construct($env);
 		}
 		
+		function CreateToolsAdminDetailsListObject($env, $editMode = false)
+		{
+			return new StageShowSalesAdminDetailsListClass($env, $editMode);	
+		}
+		
 		function ProcessActionButtons()
 		{
 		}
@@ -238,7 +243,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 				echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
 				
 				$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
-				$salesList = new StageShowSalesAdminDetailsListClass($env);		
+				$salesList = $this->CreateToolsAdminDetailsListObject($env);		
 							
 				echo '<tr><td colspan="2">'."\n";
 				$salesList->OutputList($results);	
@@ -289,7 +294,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
 			}
 			
-			$salesList = new StageShowSalesAdminDetailsListClass($env);		
+			$salesList = $this->CreateToolsAdminDetailsListObject($env);		
 						
 			echo '<tr><td colspan="2">'."\n";
 			$salesList->OutputList($results);	

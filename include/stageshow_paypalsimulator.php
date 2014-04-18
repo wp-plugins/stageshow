@@ -43,7 +43,7 @@ if (!class_exists('StageShowPayPalSimulator'))
 			
 			$description = $result->showName.' - '.$this->myDBaseObj->FormatDateForDisplay($result->perfDateTime);
 			$reference = $result->showID.'-'.$result->perfID;
-			$seat = isset($result->ticketSeat) ? $result->ticketSeat : 'N/A';	
+			$seat = isset($result->ticketSeat) ? $this->myDBaseObj->DecodeSeatsList($result->ticketSeat, $result->seatingID) : 'N/A';	
 				
 			$html .= '<td class="stageshow-simulator-datetime" >'.$this->myDBaseObj->FormatDateForDisplay($result->perfDateTime).'</td>';
 			$html .= '<td class="stageshow-simulator-type" >'.$result->ticketType.'</td>';
@@ -54,9 +54,8 @@ if (!class_exists('StageShowPayPalSimulator'))
 			$html .= '
 				<input type="hidden" name="quantity'.$indexNo.'" value="'.$result->ticketQty.'"/>
 			';
-			
-			
-			$this->totalSale += ($result->priceValue * $result->ticketQty); // ($result->priceValue * $result->ticketQty * $result->priceNoOfSeats);
+					
+			$this->totalSale += ($result->priceValue * $result->ticketQty);
 			$html .= $result->ticketQty;
 			$customVal = $result->saleID;
 				
@@ -65,7 +64,7 @@ if (!class_exists('StageShowPayPalSimulator'))
 				<input type="hidden" name="item_number'.$indexNo.'" value="'.$reference.'"/>
 				<input type="hidden" name="option_name1_'.$indexNo.'" value="Ticket Type"/>
 				<input type="hidden" name="option_selection1_'.$indexNo.'" value="'.$result->ticketType.'"/>
-				<input type="hidden" name="mc_gross_'.$indexNo.'" value="'.$result->priceValue.'"/>
+				<input type="hidden" name="mc_gross_'.$indexNo.'" value="'.($result->priceValue * $result->ticketQty).'"/>
 				';
 
 			$html .= '

@@ -129,7 +129,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $result->stockID;
 		}
 			
-		function GetOnlineStoreItemName($result)
+		function GetOnlineStoreItemName($result, $cartEntry = null)
 		{
 			return $result->stockName;
 		}
@@ -278,7 +278,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 			// Remove any incomplete Checkouts
 			$myDBaseObj->PurgePendingSales();
-					
+			
+			$outputContent  = "\n<!-- StageShow Plugin Code - Starts Here -->\n";
+			$outputContent .= '<form></form>'."\n";		// Insulate StageShow from unterminated form tags
+			
 			ob_start();			
 			$hasActiveTrolley = $this->OnlineStore_HandleTrolley();
 			$trolleyContent = ob_get_contents();
@@ -301,17 +304,19 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$this->OutputContent_OnlineStoreMain($reqRecordId);
 			$this->OutputContent_OnlineStoreFooter();
 			
-			$outputContent = ob_get_contents();
+			$boxofficeContent = ob_get_contents();
 			ob_end_clean();
 			
 			if ($myDBaseObj->getOption('ProductsAfterTrolley'))
 			{
-				$outputContent = $trolleyContent.$outputContent;
+				$outputContent .= $trolleyContent.$boxofficeContent;
 			}
 			else
 			{
-				$outputContent .= $trolleyContent;
+				$outputContent .= $boxofficeContent.$trolleyContent;
 			}
+			
+			$outputContent .= "\n<!-- StageShow Plugin Code - Ends Here -->\n";
 			
 			if (!$hasActiveTrolley)
 			{
@@ -853,7 +858,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$itemPrice = $this->GetOnlineStoreItemPrice($priceEntry);
 				$shipping = 0.0;						
 				
-				$rslt->paypalParams['item_name_'.$paramCount] = $this->GetOnlineStoreItemName($priceEntry);
+				$rslt->paypalParams['item_name_'.$paramCount] = $this->GetOnlineStoreItemName($priceEntry, $cartEntry);
 				$rslt->paypalParams['amount_'.$paramCount] = $itemPrice;
 				$rslt->paypalParams['quantity_'.$paramCount] = $qty;
 				$rslt->paypalParams['shipping_'.$paramCount] = $shipping;
@@ -972,6 +977,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					elseif ($this->myDBaseObj->isDbgOptionSet('Dev_IPNLocalServer'))
 					{
 						$this->checkoutMsg .= __('Using Local IPN Server - PayPal Checkout call skipped', $this->myDomain);
+						if ($this->myDBaseObj->isDbgOptionSet('Dev_IPNDisplay'))
+						{
+							$paypalURLParams = str_replace('&', '<br>', $paypalURL);
+							$this->checkoutMsg .= "<br>PayPal URL:$paypalURLParams<br>\n";
+						}					
 					}
 					else 
 					{

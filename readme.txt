@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.9
-Stable tag: 3.2
+Stable tag: 3.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,6 +187,23 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 3.4 (18/04/2014) =
+* Bug Fix: Validate ticket output does not output seats (StageShowGold)
+* Bug Fix: Sale Total incorrect for Sample Sale with Allocated Seating (StageShowGold)
+* Added Booking Fee to Sample Sales
+* TDT Download Filenames changed
+* Paid/Fee etc. fields removed from Summary Download
+* Added ticketFee entry to Tickets Export
+* Rendundant Columns removed from Tickets Export
+* PayPal Fees and Booking Fees split between each ticket in Ticket Export
+* Tickets Export Fields Rationised
+
+= 3.3 (12/04/2014) =
+* Bug Fix: Some HTML &lt;input&gt;tags on Admin pages incorrect size (size attribute is zero)
+* Bug Fix: Missing space between tags in Seating Templates (StageShowGold)
+* Bug Fix: Max Seats hidden on Performances page once Sales have been made (StageShowGold)
+* Added seating Row/Seat "Translator" (StageShowGold)
 
 = 3.2 (02/04/2014) =
 * Bug Fix: OutputList() E_STRICT error 

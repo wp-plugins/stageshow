@@ -59,6 +59,9 @@ if (!class_exists('StageShowDBaseClass'))
 	
 	define('STAGESHOW_DATETIME_TEXTLEN', 19);
 	
+	if( !defined( 'STAGESHOW_FILENAME_TEXTLEN' ) )
+		define('STAGESHOW_FILENAME_TEXTLEN', 80);
+	
 	if( !defined( 'STAGESHOW_SHOWNAME_TEXTLEN' ) )
 		define('STAGESHOW_SHOWNAME_TEXTLEN', 80);
 	if( !defined( 'STAGESHOW_PERFREF_TEXTLEN' ) )
@@ -91,12 +94,12 @@ if (!class_exists('StageShowDBaseClass'))
 
 	define('STAGESHOW_SALESTATUS_RESERVED', 'Reserved');
 
-	define('STAGESHOW_PRICEID1_A1', '12.50');
-	define('STAGESHOW_PRICEID1_A2', '5.50');
-	define('STAGESHOW_PRICEID1_A3', '4.00');
-	define('STAGESHOW_PRICEID1_A4', '6.00');
-	define('STAGESHOW_PRICEID1_C2', '3.00');
-	define('STAGESHOW_PRICEID1_C3', '2.00');
+	define('STAGESHOW_PRICE_S1_P1_ALL', '12.50');
+	define('STAGESHOW_PRICE_S1_P2_ADULT', '5.50');
+	define('STAGESHOW_PRICE_S1_P3_ADULT', '4.00');
+	define('STAGESHOW_PRICE_S1_P4_ALL', '6.00');
+	define('STAGESHOW_PRICE_S1_P2_CHILD', '3.00');
+	define('STAGESHOW_PRICE_S1_P3_CHILD', '2.00');
 	
 	class StageShowDBaseClass extends StageShowLibSalesDBaseClass // Define class
   	{
@@ -611,12 +614,12 @@ if (!class_exists('StageShowDBaseClass'))
 			if ($sampleDepth < 2)
 			{
 				// Populate prices table
-				$this->priceID1_A1 = $this->AddSamplePrice('Day1Eve', 'All',   STAGESHOW_PRICEID1_A1);
-				$this->priceID1_A2 = $this->AddSamplePrice('Day2Eve', 'Adult', STAGESHOW_PRICEID1_A2);
-				$this->priceID1_A3 = $this->AddSamplePrice('Day3Mat', 'Adult', STAGESHOW_PRICEID1_A3);
-				$this->priceID1_A4 = $this->AddSamplePrice('Day3Eve', 'All',   STAGESHOW_PRICEID1_A4);
-				$this->priceID1_C2 = $this->AddSamplePrice('Day2Eve', 'Child', STAGESHOW_PRICEID1_C2);
-				$this->priceID1_C3 = $this->AddSamplePrice('Day3Mat', 'Child', STAGESHOW_PRICEID1_C3);
+				$this->priceID_S1_P1_ALL   = $this->AddSamplePrice('Day1Eve', 'All',   STAGESHOW_PRICE_S1_P1_ALL);
+				$this->priceID_S1_P2_ADULT = $this->AddSamplePrice('Day2Eve', 'Adult', STAGESHOW_PRICE_S1_P2_ADULT);
+				$this->priceID_S1_P3_ADULT = $this->AddSamplePrice('Day3Mat', 'Adult', STAGESHOW_PRICE_S1_P3_ADULT);
+				$this->priceID_S1_P4_ALL   = $this->AddSamplePrice('Day3Eve', 'All',   STAGESHOW_PRICE_S1_P4_ALL);
+				$this->priceID_S1_P2_CHILD = $this->AddSamplePrice('Day2Eve', 'Child', STAGESHOW_PRICE_S1_P2_CHILD);
+				$this->priceID_S1_P3_CHILD = $this->AddSamplePrice('Day3Mat', 'Child', STAGESHOW_PRICE_S1_P3_CHILD);
 			}
 			
 			if (!$this->isDbgOptionSet('Dev_NoSampleSales') && ($sampleDepth < 1))
@@ -629,16 +632,16 @@ if (!class_exists('StageShowDBaseClass'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 0.60, 'SQP4KMTNIEXGS5ZBU', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 					'1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
-				$this->AddSaleItem($saleID, $this->priceID1_C3, 4, STAGESHOW_PRICEID1_C3);
-				$this->AddSaleItem($saleID, $this->priceID1_A3, 1, STAGESHOW_PRICEID1_A3);
+				$this->AddSaleItem($saleID, $this->priceID_S1_P3_CHILD, 4, STAGESHOW_PRICE_S1_P3_CHILD);
+				$this->AddSaleItem($saleID, $this->priceID_S1_P3_ADULT, 1, STAGESHOW_PRICE_S1_P3_ADULT);
 				
 				$saleEMail = 'mybrother@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$total2 = (4 * STAGESHOW_PRICEID1_A1);
+				$total2 = (4 * STAGESHOW_PRICE_S1_P1_ALL);
 				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, $total2, 1.01, '1S34QJHTK9AAQGGVG', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 					'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
-				$this->AddSaleItem($saleID, $this->priceID1_A1, 4, STAGESHOW_PRICEID1_A1);
+				$this->AddSaleItem($saleID, $this->priceID_S1_P1_ALL, 4, STAGESHOW_PRICE_S1_P1_ALL);
 				
 				$timeStamp = current_time('timestamp');
 				if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
@@ -652,7 +655,7 @@ if (!class_exists('StageShowDBaseClass'))
 						$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
 						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 0.62, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
 						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
-						$this->AddSaleItem($saleID, $this->priceID1_A3, 3, STAGESHOW_PRICEID1_A3);
+						$this->AddSaleItem($saleID, $this->priceID_S1_P3_ADULT, 3, STAGESHOW_PRICE_S1_P3_ADULT);
 						$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
 					}
 				}
@@ -1476,6 +1479,21 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->GetSalesQty($sqlFilters);
 		}
 				
+		function GetSalesQueryFields($sqlFilters = null)
+		{		
+			if (isset($sqlFilters['addTicketFee']))
+			{
+				$sql  = "ticketID, saleTxnId, saleFirstName, saleLastName, showName, perfDateTime, priceType, ticketQty, ticketPaid, ";
+				$sql .= "(saleTransactionFee+saleFee)*(ticketQty)/saleTotalQty AS ticketFee, ";
+				$sql .= "saleDateTime, saleEMail, salePPPhone, salePPStreet, salePPCity, salePPState, salePPZip, salePPCountry, perfRef";
+			}
+			else
+			{
+				$sql = parent::GetSalesQueryFields($sqlFilters);
+			}
+			return $sql;
+		}
+		
 		function GetJoinedTables($sqlFilters = null, $classID = '')
 		{
 			$sqlJoin = '';
@@ -1493,6 +1511,17 @@ if (!class_exists('StageShowDBaseClass'))
 						
 			$this->showJoined = true;
 						
+			if (isset($sqlFilters['addTicketFee']))
+			{
+				$sqlJoin .= " LEFT JOIN (";
+				$sqlJoin .= "SELECT wp_sshow_sales.saleID";
+				$sqlJoin .= ", SUM(ticketQty) AS saleTotalQty ";
+				$sqlJoin .= "FROM wp_sshow_sales JOIN wp_sshow_tickets ON wp_sshow_tickets.saleID=wp_sshow_sales.saleID ";
+				$sqlJoin .= "JOIN wp_sshow_prices ON wp_sshow_prices.priceID=wp_sshow_tickets.priceID ";
+				$sqlJoin .= "GROUP BY wp_sshow_sales.saleID";
+				$sqlJoin .= ") AS totals ON wp_sshow_sales.saleID = totals.saleID ";
+			}
+			
 			return $sqlJoin;
 		}
 		

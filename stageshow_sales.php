@@ -186,7 +186,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $result->priceID;
 		}
 			
-		function GetOnlineStoreItemName($result)
+		function GetOnlineStoreItemName($result, $cartEntry = null)
 		{
 			$showName = $result->showName;
 			$perfDateTime = $result->perfDateTime;

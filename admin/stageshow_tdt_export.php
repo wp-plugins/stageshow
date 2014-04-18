@@ -41,16 +41,19 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 					{          
 						case 'settings':
 								if (!current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) die("Access Denied"); 
+								$this->fileName = 'stageshow-settings';
 								$this->output_downloadHeader('text/tab-separated-values');
 								$this->export_shows();
 								break;
 			          
 						case 'tickets':
+								$this->fileName = 'stageshow-tickets';
 								$this->output_downloadHeader('text/tab-separated-values');
 								$this->export_tickets();
 								break;          
 
 						case 'summary':
+								$this->fileName = 'stageshow-summary';
 								$this->output_downloadHeader('text/tab-separated-values');
 								$this->export_summary();
 								break;								
@@ -73,7 +76,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 		}
 
 		function GetFields()
-		{
+		{	
 			$fieldNames = array(
 				'perfDateTime'       => __('Performance Date & Time', $this->myDomain),
 				'perfID'             => __('Performance ID', $this->myDomain),
@@ -112,7 +115,9 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'showOpens'          => __('Show Opens', $this->myDomain),
 				'showState'          => __('Show State', $this->myDomain),
 				'ticketID'           => __('Ticket ID', $this->myDomain),
+				'ticketFee'          => __('Ticket Fee', $this->myDomain),
 				'ticketName'         => __('Ticket Name', $this->myDomain),
+				'ticketPaid'         => __('Ticket Paid', $this->myDomain),
 				'ticketQty'          => __('Ticket Qty', $this->myDomain),
 				'ticketType'         => __('Ticket Type', $this->myDomain),
 				'verifyDateTime'     => __('Verify Date & Time', $this->myDomain),
@@ -213,7 +218,8 @@ td.col_show
 (
 ';
 				
-			$this->exportDB($this->myDBaseObj->GetSalesList(null), $exportHTML);
+			$sqlFilters['addTicketFee'] = true;
+			$this->exportDB($this->myDBaseObj->GetSalesList($sqlFilters), $exportHTML);
 			if (!$exportHTML)
 				return;
 			
@@ -401,7 +407,7 @@ function VerifyTxnId()
 								$saleRec->$typeName = 0;
 							}
 							
-							$fieldsList = array('ticketName', 'saleEMail', 'saleDateTime', 'saleTxnId', 'salePaid', 'saleFee', 'saleTransactionFee');
+							$fieldsList = array('ticketName', 'saleEMail', 'saleDateTime', 'saleTxnId');
 							foreach ($fieldsList as $fieldId)
 								$saleRec->$fieldId = $thisSale->$fieldId;
 								

@@ -126,6 +126,10 @@ function stageshow_OnClickSeatingID(obj)
 {
 	var selectId = obj.id;
 	var selectedIndex = obj.selectedIndex;
+	if (typeof(selectedIndex) == 'undefined')
+	{
+		selectedIndex = obj.value;
+	}
 	var elemId = selectId.replace('perfSeatingID', '');
 	var showMaxSeats = (selectedIndex == 0);
 	var seatsObjId = 'perfSeats' + elemId;

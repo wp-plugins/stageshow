@@ -102,6 +102,25 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 			$rowDefs = $this->MergeSettings(parent::GetDetailsRowsDefinition(), $rowDefs);
 			return $rowDefs;
 		}
+		
+		function JS_Bottom($defaultTab)
+		{
+			$jsCode  = parent::JS_Bottom($defaultTab);		
+			$jsCode .= "
+
+window.onload = stageshow_OnSettingsLoad;
+
+</script>
+			";
+			
+			return $jsCode;
+		}
+		
+		function GetOnClickHandler()
+		{
+			return 'stageshow_ClickHeader(this)';
+		}
+		
 	}
 }
 		
