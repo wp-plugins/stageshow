@@ -51,7 +51,6 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEPARAM_NOTFORDEMO = 'NotForDemo';
 		
 		const TABLEPARAM_NAME = 'Name';
-		//const TABLEPARAM_OPTION = 'Option';
 
 		const TABLEPARAM_DIR = 'Dir';
 		const TABLEPARAM_EXTN = 'Extn';
@@ -410,6 +409,11 @@ if (!class_exists('StageShowLibTableClass'))
 			$this->maxCol = max($col, $this->maxCol);
 		}
 		
+		function GetOnClickHandler()
+		{
+			return '';
+		}
+		
 		function Output_ColHeader()
 		{
 			$addSeparator = false;
@@ -421,7 +425,7 @@ if (!class_exists('StageShowLibTableClass'))
 			{
 				$separatorWidth = 1;
 				$width -= $separatorWidth;
-				$tabParam .= " onclick=stageshow_ClickHeader(this)";
+				$tabParam .= " onclick=".$this->GetOnClickHandler();
 				$tabParam .= ' width="'.$width.'%"';
 				$tabParam .= ' style="border: 1px solid black;"';
 				$separatorParam = ' class=mjstab-tab-gap width="'.$separatorWidth.'%"';
@@ -1454,7 +1458,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 								StageShowLibUtilsClass::print_r($columnDef, 'columnDef');
 							}
 							
-							$size = isset($columnDef[self::TABLEPARAM_SIZE]) ? $columnDef[self::TABLEPARAM_SIZE] : 0;
+							$size = isset($columnDef[self::TABLEPARAM_SIZE]) ? $columnDef[self::TABLEPARAM_SIZE] : $columnDef[self::TABLEPARAM_LEN]+1;
 							$extraParams = 'size="'.$size.'"';
 							$this->AddInputToTable($result, $columnId, $columnDef[self::TABLEPARAM_LEN], $currVal, 0, false, $extraParams);
 							break;
@@ -1833,12 +1837,6 @@ var tabIdsList  = [";
 		{
 			$jsCode  = "''];\n";		
 			$jsCode .= "var defaultTabIndex = ".$defaultTab.";\n";
-			$jsCode .= "
-
-window.onload = stageshow_OnSettingsLoad;
-
-</script>
-			";
 			
 			return $jsCode;
 		}

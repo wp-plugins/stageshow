@@ -525,6 +525,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 		}
 		
+		function GetSalesQueryFields($sqlFilters = null)
+		{
+			return '*';
+		}
+		
 		function GetJoinedTables($sqlFilters = null, $classID = '')
 		{
 			return '';
@@ -597,6 +602,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$salesVals['saleFee'] = $saleFee;
 			$salesVals['saleTxnId'] = $saleTxnId;
 			$salesVals['saleStatus'] = $saleStatus;
+			
+			$salesVals['saleTransactionFee'] = $this->GetTransactionFee();
 			
 			return $this->AddSale($saleDateTime, $salesVals);
 		}
@@ -850,7 +857,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function GetSalesList($sqlFilters)
 		{
-			$selectFields  = '*';
+			$selectFields  = $this->GetSalesQueryFields($sqlFilters);
+			
 			if (isset($sqlFilters['saleID']) || isset($sqlFilters['priceID']))
 			{
 				// Explicitly add joined fields from "base" tables (otherwise values will be NULL if there is no matching JOIN)

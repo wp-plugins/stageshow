@@ -26,7 +26,7 @@ include 'stageshowlib_table.php';
 if (!class_exists('PayPalSettingsAdminListClass')) 
 {
 	define('PAYPAL_APILIB_URL_TEXTLEN',110);
-	define('PAYPAL_APILIB_URL_EDITLEN',110);
+	define('PAYPAL_APILIB_URL_EDITLEN',80);
 		
 	class PayPalSettingsAdminListClass extends StageShowLibAdminListClass // Define class
 	{	
