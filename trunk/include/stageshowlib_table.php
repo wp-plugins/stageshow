@@ -270,7 +270,7 @@ if (!class_exists('StageShowLibTableClass'))
 			if (isset($this->bulkActions))
 			{
 				// Add the Checkbox column
-				$columns = array_merge(array('eventCb' => '<input name="checkall" id="checkall" type="checkbox"  onClick="updateCheckboxes(this)" />'), $columns); 
+				$columns = array_merge(array('eventCb' => '<input name="checkall" id="checkall" type="checkbox"  onClick="StageShowLib_updateCheckboxes(this)" />'), $columns); 
 			}
 			
 			if ($this->HasHiddenRows() && ($this->hiddenRowsButtonId !== ''))
@@ -378,7 +378,7 @@ if (!class_exists('StageShowLibTableClass'))
 			$recordID = $this->GetRecordID($result);
 			$moreName = 'more'.$recordID;
 			
-			$content = '<a id="'.$moreName.'" class="button-secondary" onClick="HideOrShowRows(\''.$moreName.'\', \''.$rowId.'\')">'.$content.'</a>';
+			$content = '<a id="'.$moreName.'" class="button-secondary" onClick="StageShowLib_HideOrShowRows(\''.$moreName.'\', \''.$rowId.'\')">'.$content.'</a>';
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
@@ -532,7 +532,7 @@ if (!class_exists('StageShowLibTableClass'))
 			
 			$bulkActions = __('Bulk Actions', $this->myDomain);
 			
-			$onclickParam = "onclick=\"return confirmBulkAction(this, '$buttonId')\"";
+			$onclickParam = "onclick=\"return StageShowLib_confirmBulkAction(this, '$buttonId')\"";
 			
 			$output  = "<div class='alignleft actions'>\n";
 			$output .= "<select id='$buttonId' name='action$ctrlPosn'>\n"; 
@@ -557,7 +557,7 @@ if (!class_exists('StageShowLibTableClass'))
 			echo "
 <script>
 
-function HideOrShowRows(buttonId, rowId)
+function StageShowLib_HideOrShowRows(buttonId, rowId)
 {
 	var rowObj = document.getElementById(rowId);
 	var buttonObj = document.getElementById(buttonId);
@@ -591,7 +591,7 @@ function HideOrShowRows(buttonId, rowId)
 			echo "
 <script>
 
-function getParentNode(obj, nodeName)
+function StageShowLib_getParentNode(obj, nodeName)
 {
 	var pobj = obj;
 	while (pobj !== null)
@@ -607,11 +607,11 @@ function getParentNode(obj, nodeName)
 	return pobj;
 }
 
-function updateCheckboxes(obj)
+function StageShowLib_updateCheckboxes(obj)
 {
 	var boxid = 'rowSelect[]';
 	
-	var elem = getParentNode(obj, 'FORM');
+	var elem = StageShowLib_getParentNode(obj, 'FORM');
 	elem = elem.elements;
 	
 	var newState = obj.checked;				
@@ -654,10 +654,10 @@ var confirmActionsArray = new Array(
 			echo "
 \"\");
 
-function confirmBulkAction(obj, ctrlId)
+function StageShowLib_confirmBulkAction(obj, ctrlId)
 {
-	var elem = getParentNode(obj, 'FORM');
-	var count = getCheckboxesCount(elem);
+	var elem = StageShowLib_getParentNode(obj, 'FORM');
+	var count = StageShowLib_getCheckboxesCount(elem);
 	if (count == 0)
 	{
 		return false;
@@ -697,7 +697,7 @@ function confirmBulkAction(obj, ctrlId)
 	return true;	
 }
 	
-function getCheckboxesCount(elem)
+function StageShowLib_getCheckboxesCount(elem)
 {
 	var boxid = 'rowSelect[]';
 	

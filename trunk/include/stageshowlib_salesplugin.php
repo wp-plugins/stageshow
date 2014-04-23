@@ -279,7 +279,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			// Remove any incomplete Checkouts
 			$myDBaseObj->PurgePendingSales();
 			
-			$outputContent  = "\n<!-- StageShow Plugin Code - Starts Here -->\n";
+			$outputContent  = "\n<!-- $pluginID Plugin Code - Starts Here -->\n";
 			$outputContent .= '<form></form>'."\n";		// Insulate StageShow from unterminated form tags
 			
 			ob_start();			
@@ -316,7 +316,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$outputContent .= $boxofficeContent.$trolleyContent;
 			}
 			
-			$outputContent .= "\n<!-- StageShow Plugin Code - Ends Here -->\n";
+			$outputContent .= "\n<!-- $pluginID Plugin Code - Ends Here -->\n";
 			
 			if (!$hasActiveTrolley)
 			{

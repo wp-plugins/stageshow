@@ -305,6 +305,7 @@ if (!class_exists('StageShowPluginClass'))
 		function load_user_scripts()
 		{
 			// Add our own Javascript
+			wp_enqueue_script( 'stageshow-lib', plugins_url( 'js/stageshowlib_js.js', __FILE__ ));
 			wp_enqueue_script( 'stageshow', plugins_url( 'js/stageshow.js', __FILE__ ));
 		}	
 		

@@ -149,11 +149,11 @@ if (!class_exists('StageShowLibUtilsClass'))
 	<!--
 ';
 			echo '
-	function setInitialFocus()
+	function StageShowLib_setInitialFocus()
 	{
      document.getElementById("'.$elementId.'").focus();
 	}
-	window.onload = setInitialFocus;
+	StageShowLib_addWindowsLoadHandler(StageShowLib_setInitialFocus); 
 ';
 			if (!$inScript)
 				echo '
