@@ -37,6 +37,14 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 			{
 				if ( isset( $_GET['download'] ) ) 
 				{
+					$showID = isset($_GET['export_showid']) ? $_GET['export_showid'] : 0;
+					$perfID = isset($_GET['export_perfid']) ? $_GET['export_perfid'] : 0;
+					if ($perfID != 0)
+					{
+						$showAndperfID = explode('-', $_GET['export_perfid']);
+						$perfID = $showAndperfID[1];
+					}
+					
 					switch ($_GET['export_type'])
 					{          
 						case 'settings':
@@ -49,13 +57,13 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 						case 'tickets':
 								$this->fileName = 'stageshow-tickets';
 								$this->output_downloadHeader('text/tab-separated-values');
-								$this->export_tickets();
+								$this->export_tickets(false, $showID, $perfID);
 								break;          
 
 						case 'summary':
 								$this->fileName = 'stageshow-summary';
 								$this->output_downloadHeader('text/tab-separated-values');
-								$this->export_summary();
+								$this->export_summary($showID, $perfID);
 								break;								
 					}
 				}			       
@@ -211,12 +219,18 @@ td.col_show
 			$this->exportDB($this->myDBaseObj->GetPricesList(null));
 		}
 
-		function export_tickets($exportHTML = false)
+		function export_tickets($exportHTML=false, $showID=0, $perfID=0)
 		{			
 			if ($exportHTML)
 				echo 'var ticketDataList = new Array
 (
 ';
+
+			if ($showID !=0)
+				$sqlFilters['showID'] = $showID;
+					
+			if ($perfID !=0)
+				$sqlFilters['perfID'] = $perfID;
 				
 			$sqlFilters['addTicketFee'] = true;
 			$this->exportDB($this->myDBaseObj->GetSalesList($sqlFilters), $exportHTML);
@@ -360,21 +374,27 @@ function VerifyTxnId()
 ';			
 		}
 
-		function export_summary()
+		function export_summary($showID=0, $perfID=0)
 		{
 			$accumList = array();
 			
 			// Get All Sales - Sort by Show Name, then Performance Date/Time, then by Performance ID, then by Buyer Name, then Sale EMail
-			
+
 			// Get list of ticket types for all shows
 			$typesList = $this->myDBaseObj->GetAllTicketTypes();
 					
 			$showLists = $this->myDBaseObj->GetAllShowsList();
 			foreach ($showLists as $showEntry)
 			{
+				if (($showID !=0) && ($showEntry->showID != $showID))
+					continue;					
+					
 				$perfsLists = $this->myDBaseObj->GetPerformancesListByShowID($showEntry->showID);
 				foreach ($perfsLists as $perfsList)
 				{
+					if (($perfID !=0) && ($perfsList->perfID != $perfID))
+						continue;					
+
 					// Get all sales for this performance
 					$salesList = $this->myDBaseObj->GetTicketsListByPerfID($perfsList->perfID);
 					

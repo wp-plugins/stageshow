@@ -174,7 +174,7 @@ if (!class_exists('StageShowLibAdminClass'))
 			echo "
 <script>
 
-function HideElement(obj)
+function StageShowLib_HideElement(obj)
 {
 	// Get the header 'Tab' Element					
 	tabElem = document.getElementById(obj.id);

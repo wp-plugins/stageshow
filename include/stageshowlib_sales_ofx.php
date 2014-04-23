@@ -64,7 +64,7 @@ if (!class_exists('StageShowLibOFXExportAdminClass'))
 				die;
 		}
 
-		function Export($application, $charset = 'utf-8')
+		function Export($application, $charset = 'utf-8', $content = '')
 		{
 			parent::Export($application);
 			$this->ofx_content();

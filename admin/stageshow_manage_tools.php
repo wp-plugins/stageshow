@@ -117,20 +117,47 @@ if (!class_exists('StageShowToolsAdminClass'))
 	
 ?>
 <script type="text/javascript">
-	function onSelectDownload(obj)
+	function stageshow_onSelectExportType(obj)
 	{
-	selectControl = document.getElementById("export_type");
-	newDownloadType = selectControl.value;
-	isSummaryDownload = newDownloadType == "summary";
+		SelectControl = document.getElementById("export_format");
+		newExportFormat = SelectControl.value;
+		isOFXDownload = newExportFormat == "ofx";
+		
+		exportTypeRow = document.getElementById("stageshow-export_type-row");
+		if (isOFXDownload)
+		{
+			exportTypeRow.style.display = 'none';
+			downloadButton = document.getElementById("downloadvalidator");
+			downloadButton.style.visibility = 'hidden';
+		}
+		else
+		{
+			exportTypeRow.style.display = '';
+			stageshow_SetDownloadButtonStyle(obj);
+		}
+		stageshow_updateExportOptions();		
+	}
+	
+	function stageshow_onSelectDownload(obj)
+	{
+		stageshow_SetDownloadButtonStyle();
+		stageshow_updateExportOptions();		
+	}
+	
+	function stageshow_SetDownloadButtonStyle(obj)
+	{
+		SelectControl = document.getElementById("export_type");
+		newDownloadType = SelectControl.value;
+		downloadValidatorEnabled = newDownloadType == "summary";
 
-	downloadButton = document.getElementById("downloadvalidator");
-	if (newDownloadType == "summary")
-	downloadButton.style.visibility = 'visible';
-	else
-	downloadButton.style.visibility = 'hidden';
+		downloadButton = document.getElementById("downloadvalidator");
+		if (downloadValidatorEnabled)
+			downloadButton.style.visibility = 'visible';
+		else
+			downloadButton.style.visibility = 'hidden';
 	}
 
-	function TxnIdValid()
+	function stageshow_TxnIdValid()
 	{
 		/* Block Validation requests if TxnId is blank */
 		txnidElem = document.getElementById("TxnId");
@@ -148,7 +175,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 				$TerminalLocation = $myDBaseObj->GetLocation();
 				echo "
 					<tr>
-						<td>".__('Location / Computer ID', $myDBaseObj->get_domain())."</td>
+						<td>".__('Location / Computer ID', $myDBaseObj->get_domain())."&nbsp;</td>
 						<td>$TerminalLocation</td>
 					</tr>
 					<tr>
@@ -174,7 +201,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 		</table>
 		<p>
 			<p class="submit">
-<input class="button-secondary" onclick="return TxnIdValid()" type="submit" name="validatesalebutton" value="<?php _e('Validate', $this->myDomain) ?>"/>
+<input class="button-secondary" onclick="return stageshow_TxnIdValid()" type="submit" name="validatesalebutton" value="<?php _e('Validate', $this->myDomain) ?>"/>
 					</form>
 <?php
 		}
@@ -310,6 +337,17 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php
 		}
 		
+		function OutputExportOptions()
+		{
+?>
+<script type="text/javascript">
+	function stageshow_updateExportOptions(obj)
+	{
+	}
+</script>
+<?php
+		}
+		
 		function Tools_Export()
 		{
 			$actionURL = STAGESHOW_ADMIN_URL.STAGESHOW_FOLDER.'_export.php';
@@ -320,21 +358,21 @@ if (!class_exists('StageShowToolsAdminClass'))
 <p><?php _e('This format can be imported to many applications including spreadsheets and databases.', $this->myDomain); ?></p>
 <form action="<?php echo $actionURL; ?>" method="get">
 <?php $this->WPNonceField(); ?>
-<table class="stageshow-form-table">
+<table class="stageshow-form-table stageshow-export-table">
 <tr>
 <th><?php _e('Format', $this->myDomain); ?></th>
 <td>
-<select name="export_format" id="export_format" onchange=onSelectDownload(this)>
+<select name="export_format" id="export_format" onchange=stageshow_onSelectExportType(this)>
 <?php
 	$this->OutputExportFormatOptions();
 ?>	
 </select>
 </td>
 </tr>
-<tr>
+<tr id="stageshow-export_type-row">
 <th><?php _e('Type', $this->myDomain); ?></th>
 <td>
-<select name="export_type" id="export_type" onchange=onSelectDownload(this)>
+<select name="export_type" id="export_type" onchange=stageshow_onSelectDownload(this)>
 	<?php if (current_user_can(STAGESHOW_CAPABILITY_SETUPUSER)) { ?>
 	<option value="settings"><?php _e('Settings', $this->myDomain); ?> </option>
 	<?php } ?>
@@ -343,6 +381,10 @@ if (!class_exists('StageShowToolsAdminClass'))
 </select>
 </td>
 </tr>
+
+<?php
+	$this->OutputExportOptions();
+?>	
 </table>
 <p>
 <p class="submit">
