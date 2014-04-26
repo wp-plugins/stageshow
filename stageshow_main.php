@@ -344,36 +344,8 @@ if (!class_exists('StageShowPluginClass'))
 				
 				$buttonID = $this->GetButtonID('savesaleedit');
 				if (isset($_POST[$buttonID]))
-				{
-					$cartContents = $this->GetTrolleyContents();
-					
-					$cartContents->saleEMail     = $_POST['saleEMail'];
-					$cartContents->saleFirstName = $_POST['saleFirstName'];
-					$cartContents->saleLastName  = $_POST['saleLastName'];
-					$cartContents->salePPStreet  = $_POST['salePPStreet'];
-					$cartContents->salePPCity    = $_POST['salePPCity'];								
-					$cartContents->salePPState   = $_POST['salePPState'];
-					$cartContents->salePPZip     = $_POST['salePPZip'];
-					$cartContents->salePPCountry = $_POST['salePPCountry'];
-					$cartContents->salePPPhone   = $_POST['salePPPhone'];	
-					$cartContents->saleStatus    = $_POST['saleStatus'];	
-															
-					$this->SaveTrolleyContents($cartContents);
-				
-					$saleID = $this->OnlineStoreSaveEdit();
-					
-					if ($saleID > 0)
-					{
-						echo '
-						<div id="message" class="updated">
-						<p>'.__('Sale Details have been saved', $this->myDomain);
-						$myDBaseObj->OutputViewTicketButton($saleID);
-						echo '
-						</div>';
-						
-						return;
-					}
-				}				
+					return;
+
 			}
 			
 			parent::OutputContent_OnlineStoreMain($reqRecordId);				
@@ -420,8 +392,9 @@ if (!class_exists('StageShowPluginClass'))
 			if ($this->myDBaseObj->getOption('EnableReservations'))
 			{
 				// Output Select Status Drop-down Dialogue
-				$selectCompleted = ($cartContents->saleStatus == PAYPAL_APILIB_SALESTATUS_COMPLETED) ? 'selected=true ' : '';
-				$selectReserved  = ($cartContents->saleStatus == STAGESHOW_SALESTATUS_RESERVED) ? 'selected=true ' : '';
+				$saleStatus = isset($cartContents->saleStatus) ? $cartContents->saleStatus : '';
+				$selectCompleted = ($saleStatus == PAYPAL_APILIB_SALESTATUS_COMPLETED) ? 'selected=true ' : '';
+				$selectReserved  = ($saleStatus == STAGESHOW_SALESTATUS_RESERVED) ? 'selected=true ' : '';
 				
 				$formHTML .=  '
 				<tr class="stageshow-boxoffice-formRow">
@@ -487,12 +460,18 @@ if (!class_exists('StageShowPluginClass'))
 			$cartContents = $this->GetTrolleyContents();
 			
 			$itemsOK = true;
-			foreach ($cartContents->rows as $cartEntry)
+			foreach ($cartContents->rows as $cartIndex => $cartEntry)
 			{
-				$itemsOK &= $this->IsOnlineStoreItemValid($cartEntry, $saleEntries);
+				$itemValid = $this->IsOnlineStoreItemValid($cartContents->rows[$cartIndex], $saleEntries);
+				$itemsOK &= $itemValid;
 //echo "<br>itemsOK=$itemsOK<br><br>";
 			}
-					
+			
+			if (!$itemsOK)
+			{
+				$this->SaveTrolleyContents($cartContents);
+			}
+
 			if ($itemsOK)
 			{
 				if ($saleID == 0)
@@ -537,7 +516,7 @@ if (!class_exists('StageShowPluginClass'))
 			{
 				if (!isset($this->checkoutMsgClass))
 				{
-					$this->checkoutMsgClass = $this->cssDomain.'-error';
+					$this->checkoutMsgClass = $this->cssDomain.'-error error';
 				}
 				echo '<div id="message" class="'.$this->checkoutMsgClass.'">'.$this->checkoutMsg.'</div>';					
 				$saleID = 0;
