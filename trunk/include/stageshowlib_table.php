@@ -1148,19 +1148,28 @@ if (!class_exists('StageShowLibAdminListClass'))
 		{
 			if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_DIR]))
 			{
-				// Folder is defined ... create the search path
-				$dir = $settingOption[StageShowLibTableClass::TABLEPARAM_DIR];
-				if (substr($dir, strlen($dir)-1, 1) != '/')
-					$dir .= '/';
 				if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_EXTN]))
-					$dir .= '*.'.$settingOption[StageShowLibTableClass::TABLEPARAM_EXTN];
+					$fileExtns = $settingOption[StageShowLibTableClass::TABLEPARAM_EXTN];
 				else
-					$dir .= '*.*';
+					$fileExtns = '*';
+				
+				$selectOpts = array();
+				
+				$fileExtnsArray = explode(',', $fileExtns);
+				foreach($fileExtnsArray as $fileExtn)
+				{
+					// Folder is defined ... create the search path
+					$dir = $settingOption[StageShowLibTableClass::TABLEPARAM_DIR];
+					if (substr($dir, strlen($dir)-1, 1) != '/')
+						$dir .= '/';
+						
+					$dir .= '*.'.$fileExtn;					
 
-				// Now get the files list and convert paths to file names
-				$selectOpts = glob($dir);
-				foreach ($selectOpts as $key => $path)
-					$selectOpts[$key] = basename($path);
+					// Now get the files list and convert paths to file names
+					$filesList = glob($dir);
+					foreach ($filesList as $key => $path)
+						$selectOpts[] = basename($path);
+				}
 			}
 			else if (isset($settingOption[StageShowLibTableClass::TABLEPARAM_FUNC]))
 			{

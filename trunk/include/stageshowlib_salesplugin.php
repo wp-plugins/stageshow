@@ -580,7 +580,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				if (!isset($this->checkoutMsgClass))
 				{
-					$this->checkoutMsgClass = $this->cssDomain.'-error';
+					$this->checkoutMsgClass = $this->cssDomain.'-error error';
 				}
 				echo '<div id="message" class="'.$this->checkoutMsgClass.'">'.$this->checkoutMsg.'</div>';					
 			}
@@ -611,7 +611,41 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					if (isset($_POST[$buttonID])) $this->cart_ReadOnly = true;
 					
 					$buttonID = $this->GetButtonID('savesaleedit');
-					if (isset($_POST[$buttonID])) return true;
+					if (isset($_POST[$buttonID])) 
+					{
+						$cartContents = $this->GetTrolleyContents();
+						
+						$cartContents->saleEMail     = $_POST['saleEMail'];
+						$cartContents->saleFirstName = $_POST['saleFirstName'];
+						$cartContents->saleLastName  = $_POST['saleLastName'];
+						$cartContents->salePPStreet  = $_POST['salePPStreet'];
+						$cartContents->salePPCity    = $_POST['salePPCity'];								
+						$cartContents->salePPState   = $_POST['salePPState'];
+						$cartContents->salePPZip     = $_POST['salePPZip'];
+						$cartContents->salePPCountry = $_POST['salePPCountry'];
+						$cartContents->salePPPhone   = $_POST['salePPPhone'];	
+						$cartContents->saleStatus    = $_POST['saleStatus'];	
+																
+						$this->SaveTrolleyContents($cartContents);
+					
+						$saleID = $this->OnlineStoreSaveEdit();
+						
+						if ($saleID > 0)
+						{
+							echo '
+							<div id="message" class="updated">
+							<p>'.__('Sale Details have been saved', $this->myDomain);
+							$myDBaseObj->OutputViewTicketButton($saleID);
+							echo '
+							</div>';
+							
+							return true;	// Supress output of shopping trolley
+						}
+						
+						// $cartContents is updated when OnlineStoreSaveEdit() fails - Reload it!
+						$cartContents = $this->GetTrolleyContents();
+						unset($_POST[$buttonID]);
+					}				
 				}
 			}
 			
@@ -680,7 +714,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
 				if (count($priceEntries) == 0)
 				{
-					echo '<div id="message" class="'.$this->cssDomain.'-error">'.__("Shopping Trolley Cleared", $this->myDomain).'</div>';					
+					echo '<div id="message" class="'.$this->cssDomain.'-error error">'.__("Shopping Trolley Cleared", $this->myDomain).'</div>';					
 					if (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
 					{
 						echo "<br><strong></strong></br>Dumping Trolley (only for SysAdmin User)</strong><br>";

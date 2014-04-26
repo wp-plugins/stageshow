@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 3.5 \n"
+"Project-Id-Version: StageShow 3.6 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowgold\n"
-"POT-Creation-Date: 2014-04-22 04:27:17+00:00\n"
+"POT-Creation-Date: 2014-04-26 08:47:57+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Language-Team: EMAIL@ADDRESS\n"
 "Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
 
-#: admin\stageshow_manage_overview.php:205 stageshow_main.php:596
+#: admin\stageshow_manage_overview.php:205 stageshow_main.php:575
 msgid "Shows"
 msgstr ""
 
@@ -415,7 +415,7 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:377 stageshow_main.php:610
+#: admin\stageshow_manage_tools.php:377 stageshow_main.php:589
 msgid "Settings"
 msgstr ""
 
@@ -503,12 +503,12 @@ msgstr ""
 msgid "Sale ID"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:106 stageshow_main.php:388
+#: admin\stageshow_tdt_export.php:106 stageshow_main.php:360
 #: stageshowgold.php:196
 msgid "First Name"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:107 stageshow_main.php:389
+#: admin\stageshow_tdt_export.php:107 stageshow_main.php:361
 #: stageshowgold.php:197
 msgid "Last Name"
 msgstr ""
@@ -517,13 +517,13 @@ msgstr ""
 msgid "Paid"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:109 stageshow_main.php:391
+#: admin\stageshow_tdt_export.php:109 stageshow_main.php:363
 #: stageshowgold.php:84
 msgid "City"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:110 include\mjslib_paypal_salesadmin.php:103
-#: stageshow_main.php:394 stageshowgold.php:87
+#: stageshow_main.php:366 stageshowgold.php:87
 msgid "Country"
 msgstr ""
 
@@ -534,21 +534,21 @@ msgid "Name"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:112 include\mjslib_paypal_salesadmin.php:104
-#: stageshow_main.php:395 stageshowgold.php:88
+#: stageshow_main.php:367 stageshowgold.php:88
 msgid "Phone"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:113 include\mjslib_paypal_salesadmin.php:101
-#: stageshow_main.php:392 stageshowgold.php:85
+#: stageshow_main.php:364 stageshowgold.php:85
 msgid "County"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:114 stageshow_main.php:390
+#: admin\stageshow_tdt_export.php:114 stageshow_main.php:362
 msgid "Street"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:115 include\mjslib_paypal_salesadmin.php:102
-#: stageshow_main.php:393 stageshowgold.php:86
+#: stageshow_main.php:365 stageshowgold.php:86
 msgid "Postcode"
 msgstr ""
 
@@ -629,7 +629,7 @@ msgstr ""
 msgid "TxnId"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:335 stageshow_main.php:387
+#: admin\stageshow_tdt_export.php:335 stageshow_main.php:359
 #: stageshowgold.php:198
 msgid "EMail"
 msgstr ""
@@ -667,7 +667,7 @@ msgstr ""
 msgid "Details"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:237 stageshow_main.php:594
+#: admin\stageshowgold_manage_seating.php:237 stageshow_main.php:573
 msgid "Seating Plans"
 msgstr ""
 
@@ -885,7 +885,7 @@ msgstr ""
 msgid "Missing PayPal Login Param"
 msgstr ""
 
-#: include\mjslib_paypal_salesadmin.php:92 stageshow_main.php:431
+#: include\mjslib_paypal_salesadmin.php:92 stageshow_main.php:404
 msgid "Completed"
 msgstr ""
 
@@ -963,7 +963,7 @@ msgstr ""
 msgid "View Ticket"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:208 stageshow_main.php:604
+#: include\mjslib_salesplugin.php:208 stageshow_main.php:583
 msgid "Sales"
 msgstr ""
 
@@ -983,54 +983,58 @@ msgstr ""
 msgid "Checkout"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:683
+#: include\mjslib_salesplugin.php:637
+msgid "Sale Details have been saved"
+msgstr ""
+
+#: include\mjslib_salesplugin.php:717
 msgid "Shopping Trolley Cleared"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:697
+#: include\mjslib_salesplugin.php:731
 msgid "Selected Seats"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:697
+#: include\mjslib_salesplugin.php:731
 msgid "Your Shopping Trolley"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:730
+#: include\mjslib_salesplugin.php:764
 msgid "Remove"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:752
+#: include\mjslib_salesplugin.php:786
 msgid "Total"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:824 include\mjslib_salesplugin.php:853
-#: include\mjslib_salesplugin.php:881 include\mjslib_salesplugin.php:911
-#: include\mjslib_salesplugin.php:962 include\mjslib_salesplugin.php:994
+#: include\mjslib_salesplugin.php:858 include\mjslib_salesplugin.php:887
+#: include\mjslib_salesplugin.php:915 include\mjslib_salesplugin.php:945
+#: include\mjslib_salesplugin.php:996 include\mjslib_salesplugin.php:1028
 #: stageshowplus_main.php:237
 msgid "Cannot Checkout"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:825
+#: include\mjslib_salesplugin.php:859
 msgid "Shopping Trolley Empty"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:854
+#: include\mjslib_salesplugin.php:888
 msgid "Shopping Trolley Contents have changed"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:882
+#: include\mjslib_salesplugin.php:916
 msgid "Item(s) removed from Shopping Trolley"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:912
+#: include\mjslib_salesplugin.php:946
 msgid "Total sale is zero"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:979
+#: include\mjslib_salesplugin.php:1013
 msgid "Using Local IPN Server - PayPal Checkout call skipped"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:995
+#: include\mjslib_salesplugin.php:1029
 msgid "Sold out for one or more items"
 msgstr ""
 
@@ -1080,11 +1084,11 @@ msgstr ""
 msgid "Show all Events"
 msgstr ""
 
-#: include\mjslib_table.php:1254
+#: include\mjslib_table.php:1263
 msgid "Yes"
 msgstr ""
 
-#: include\mjslib_table.php:1254
+#: include\mjslib_table.php:1263
 msgid "No"
 msgstr ""
 
@@ -1211,47 +1215,43 @@ msgstr ""
 msgid "Set Completed"
 msgstr ""
 
-#: include\stageshowplus_sales_table.php:78 stageshow_main.php:432
+#: include\stageshowplus_sales_table.php:78 stageshow_main.php:405
 msgid "Reserved"
 msgstr ""
 
-#: stageshow_main.php:369
-msgid "Sale Details have been saved"
-msgstr ""
-
-#: stageshow_main.php:428 stageshowgold.php:195 stageshowgold.php:203
+#: stageshow_main.php:401 stageshowgold.php:195 stageshowgold.php:203
 msgid "Status"
 msgstr ""
 
-#: stageshow_main.php:445
+#: stageshow_main.php:418
 msgid "Save"
 msgstr ""
 
-#: stageshow_main.php:591
+#: stageshow_main.php:570
 msgid "Overview"
 msgstr ""
 
-#: stageshow_main.php:598
+#: stageshow_main.php:577
 msgid "Price Plans"
 msgstr ""
 
-#: stageshow_main.php:599 stageshowgold.php:116
+#: stageshow_main.php:578 stageshowgold.php:116
 msgid "Performances"
 msgstr ""
 
-#: stageshow_main.php:600
+#: stageshow_main.php:579
 msgid "Prices"
 msgstr ""
 
-#: stageshow_main.php:608
+#: stageshow_main.php:587
 msgid "Tools"
 msgstr ""
 
-#: stageshow_main.php:622
+#: stageshow_main.php:601
 msgid "Dev TESTING"
 msgstr ""
 
-#: stageshow_main.php:625
+#: stageshow_main.php:604
 msgid "DEBUG"
 msgstr ""
 
@@ -1628,7 +1628,7 @@ msgstr ""
 msgid "One or more seats selected is no longer available"
 msgstr ""
 
-#: stageshowgold_main.php:606
+#: stageshowgold_main.php:607
 msgid "One or more seats selected is not available"
 msgstr ""
 

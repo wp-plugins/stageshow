@@ -88,7 +88,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$simulatorOutput = ob_get_contents();
 				ob_end_clean();
 				$saleStatus = 'DEMO MODE: Sale Completed';
-				echo '<div id="message" class="stageshow-ok">'.$saleStatus.'</div>';
+				echo '<div id="message" class="stageshow-ok ok">'.$saleStatus.'</div>';
 			}
 			
 			return parent::OutputContent_OnlineStore($atts);
@@ -560,7 +560,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			parent::OnlineStore_ProcessCheckout();
 		}
 		
-		function IsOnlineStoreItemValid($cartEntry, $saleEntries)
+		function IsOnlineStoreItemValid(&$cartEntry, $saleEntries)
 		{
 			// Test if this item is valid (i.e. Available))
 			static $firstPass = true;
