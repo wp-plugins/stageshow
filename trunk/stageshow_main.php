@@ -501,6 +501,7 @@ if (!class_exists('StageShowPluginClass'))
 				{
 					// Update Sale
 					$saleID = $myDBaseObj->UpdateSale($cartContents, StageShowLibSalesDBaseClass::STAGESHOWLIB_FROMTROLLEY);
+					$saleID = abs($saleID);		// Returned value will be negative if nothing is changed
 				}
 				
 				// Delete Existing Tickets and Add New Ones
