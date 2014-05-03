@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 3.7 \n"
+"Project-Id-Version: StageShow 3.8 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowgold\n"
-"POT-Creation-Date: 2014-04-27 08:30:32+00:00\n"
+"POT-Creation-Date: 2014-05-03 04:46:53+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -87,12 +87,12 @@ msgid "Delete"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:86
-#: include\stageshow_dbase_api.php:747
+#: include\stageshow_dbase_api.php:748
 msgid "Active"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:90
-#: include\stageshow_dbase_api.php:749
+#: include\stageshow_dbase_api.php:750
 msgid "INACTIVE"
 msgstr ""
 
@@ -1112,101 +1112,101 @@ msgstr ""
 msgid "EMail Sale"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:610 include\stageshowplus_dbase_api.php:510
+#: include\stageshow_dbase_api.php:611 include\stageshowplus_dbase_api.php:510
 msgid "Cannot Add Performances"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:679
+#: include\stageshow_dbase_api.php:680
 msgid "Internal Error - showID"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:694
+#: include\stageshow_dbase_api.php:695
 msgid "Performance Reference is not unique"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:696
+#: include\stageshow_dbase_api.php:697
 msgid "New Performance Added"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:743
+#: include\stageshow_dbase_api.php:744
 msgid "DELETED"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:884
+#: include\stageshow_dbase_api.php:885
 msgid "Unnamed Show"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:963
+#: include\stageshow_dbase_api.php:964
 msgid "DB Error"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:963
+#: include\stageshow_dbase_api.php:964
 msgid "Column does not exist"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1288
+#: include\stageshow_dbase_api.php:1289
 msgid "Price Not Specified"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1294
+#: include\stageshow_dbase_api.php:1295
 msgid "Invalid Price Entry"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1300
+#: include\stageshow_dbase_api.php:1301
 msgid "Price Entry cannot be negative"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:466
+#: include\stageshowgold_dbase_api.php:465
 msgid "Error Finding Tag"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:474
+#: include\stageshowgold_dbase_api.php:473
 msgid "Missing \" in Tag Param"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:484
+#: include\stageshowgold_dbase_api.php:483
 msgid "Missing End of Tag Marker"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:606
+#: include\stageshowgold_dbase_api.php:605
 msgid "No Zone Found for Seat"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:620
+#: include\stageshowgold_dbase_api.php:619
 msgid "Template Uploaded"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:633
-#: include\stageshowgold_dbase_api.php:646
-#: include\stageshowgold_dbase_api.php:655
+#: include\stageshowgold_dbase_api.php:632
+#: include\stageshowgold_dbase_api.php:645
+#: include\stageshowgold_dbase_api.php:654
 msgid "Template Import Error"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:634
+#: include\stageshowgold_dbase_api.php:633
 msgid "Seating ID not specified"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:647
+#: include\stageshowgold_dbase_api.php:646
 msgid "Empty Filename"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:656
+#: include\stageshowgold_dbase_api.php:655
 msgid "Empty File"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1237
+#: include\stageshowgold_dbase_api.php:1236
 msgid "Invalid Seat Specification"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1250
+#: include\stageshowgold_dbase_api.php:1249
 msgid "Seat Allocated Twice"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1454
+#: include\stageshowgold_dbase_api.php:1453
 msgid "Qty"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1463 stageshowgold.php:240
+#: include\stageshowgold_dbase_api.php:1462 stageshowgold.php:240
 #: stageshowgold_main.php:497
 msgid "Seat"
 msgstr ""

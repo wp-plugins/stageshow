@@ -467,7 +467,8 @@ if (!class_exists('StageShowDBaseClass'))
 						ticketType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL DEFAULT "",
 						ticketQty INT NOT NULL,
 						ticketPaid DECIMAL(9,2) NOT NULL DEFAULT 0.0,
-					';
+						ticketSeat TEXT,
+						';
 					break;
 				
 				case STAGESHOW_DEMOLOG_TABLE:
@@ -1251,11 +1252,11 @@ if (!class_exists('StageShowDBaseClass'))
 		{
 			if ($activeOnly)
 			{
-				$sqlFilters['publicPrices'] = true;
+				if (!isset($this->allowAdminOnly)) $sqlFilters['publicPrices'] = true;
 				$sqlFilters['activePrices'] = true;
 				$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
 			}
-				 
+
 			$selectFields  = '*';
 			if (isset($sqlFilters['saleID']))
 			{
@@ -1483,7 +1484,7 @@ if (!class_exists('StageShowDBaseClass'))
 		{		
 			if (isset($sqlFilters['addTicketFee']))
 			{
-				$sql  = "ticketID, saleTxnId, saleFirstName, saleLastName, showName, perfDateTime, priceType, ticketQty, ticketPaid, ";
+				$sql  = "ticketID, saleTxnId, saleStatus, saleFirstName, saleLastName, showName, perfDateTime, priceType, ticketQty, ticketPaid, ";
 				$sql .= "(saleTransactionFee+saleFee)*(ticketQty)/saleTotalQty AS ticketFee, ";
 				$sql .= "saleDateTime, saleEMail, salePPPhone, salePPStreet, salePPCity, salePPState, salePPZip, salePPCountry, perfRef";
 			}

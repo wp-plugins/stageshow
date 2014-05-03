@@ -345,6 +345,12 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return ( $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name );			
 		}
 		
+		function _real_escape($string) 
+		{
+			global $wpdb;
+			return $wpdb->_real_escape($string);
+		}
+		
 		function queryWithPrepare($sql, $values)
 		{
 			global $wpdb;

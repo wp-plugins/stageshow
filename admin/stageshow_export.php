@@ -20,9 +20,10 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include '../../../../wp-config.php';
-  
-$stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
+if (!defined('STAGESHOW_DBASE_CLASS'))
+{
+	include '../../../../wp-config.php';
+}
 
 if ( isset( $_GET['download'] ) )
 {

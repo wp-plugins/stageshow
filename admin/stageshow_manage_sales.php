@@ -84,6 +84,11 @@ if (!class_exists('StageShowSalesAdminClass'))
 			{
 				// Sale Editor ... output tickets selector
 				$pluginObj = $this->env['PluginObj'];
+				if (current_user_can(STAGESHOW_CAPABILITY_SALESUSER))
+				{
+					$myDBaseObj = $this->env['DBaseObj'];
+					$myDBaseObj->allowAdminOnly = true;
+				}
 				echo $pluginObj->OutputContent_OnlineStore(NULL);
 				return '';
 			}
