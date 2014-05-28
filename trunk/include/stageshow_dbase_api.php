@@ -596,16 +596,16 @@ if (!class_exists('StageShowDBaseClass'))
 			$showTime3 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 14:30";
 			$showTime4 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 20:00";
 			// Populate table
-			$showID1 = $this->AddShow($showName1);
+			$this->sample_showID1 = $this->AddShow($showName1);
 			$statusMsg = '';
 			// Populate performances table	  
 			$perfCount = 4;
 			if (defined('STAGESHOW_SAMPLE_PERFORMANCES_COUNT'))
 				$perfCount = STAGESHOW_SAMPLE_PERFORMANCES_COUNT;
-			$perfID1 = $perfCount >= 1 ? $this->AddSamplePerformance($statusMsg, $showID1, $showTime1, "Day1Eve", 80) : -1;
-			$perfID2 = $perfCount >= 2 ? $this->AddSamplePerformance($statusMsg, $showID1, $showTime2, "Day2Eve", 60) : -1;
-			$perfID3 = $perfCount >= 3 ? $this->AddSamplePerformance($statusMsg, $showID1, $showTime3, "Day3Mat", 80) : -1;
-			$perfID4 = $perfCount >= 4 ? $this->AddSamplePerformance($statusMsg, $showID1, $showTime4, "Day3Eve", 60) : -1;
+			$perfID1 = $perfCount >= 1 ? $this->AddSamplePerformance($statusMsg, $this->sample_showID1, $showTime1, "Day1Eve", 80) : -1;
+			$perfID2 = $perfCount >= 2 ? $this->AddSamplePerformance($statusMsg, $this->sample_showID1, $showTime2, "Day2Eve", 60) : -1;
+			$perfID3 = $perfCount >= 3 ? $this->AddSamplePerformance($statusMsg, $this->sample_showID1, $showTime3, "Day3Mat", 80) : -1;
+			$perfID4 = $perfCount >= 4 ? $this->AddSamplePerformance($statusMsg, $this->sample_showID1, $showTime4, "Day3Eve", 60) : -1;
 			if (($perfID1 == 0) ||($perfID2 == 0) || ($perfID3 == 0) || ($perfID4 == 0))
 			{
 				echo '<div id="message" class="error"><p>'.__('Cannot Add Performances', $this->get_domain()).' - '.$statusMsg.'</p></div>';
