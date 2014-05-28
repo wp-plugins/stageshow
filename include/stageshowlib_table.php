@@ -284,11 +284,16 @@ if (!class_exists('StageShowLibTableClass'))
 			//register_column_headers($this->columnHeadersId, $columns);	
 		}
 		
-		function AddCheckBoxToTable($result, $inputName, $col=0, $value='checked', $checked=false, $label='', $newRow = false)
+		function AddCheckBoxToTable($result, $inputName, $checked=false, $col=0, $checkedValue='checked', $label='', $newRow = false)
 		{
+			if (substr($inputName, -2) != '[]')
+			{
+				$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
+			}
+
 			$checkedTag = $checked ? ' checked="yes"' : '';
 			
-			$content = "$label<input name=\"$inputName\" id=\"$inputName\" type=\"checkbox\" value=\"$value\" $checkedTag/>";
+		    $content = "$label<input name=\"$inputName\" id=\"$inputName\" type=\"checkbox\" value=\"$checkedValue\" $checkedTag/>";
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
@@ -1046,7 +1051,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			{
 				//echo "Adding Checkbox - Col = $col<br>";				
 				if ($isFirstLine)
-					$this->AddCheckBoxToTable($result, 'rowSelect[]', $col++, $recordID);
+					$this->AddCheckBoxToTable($result, 'rowSelect[]', false, $col++, $recordID);
 				else	
 					$this->AddToTable($result, ' ', $col++);
 			}
@@ -1355,7 +1360,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 				
 				switch ($columnDef[self::TABLEPARAM_TYPE])
 				{
-					//case self::TABLEENTRY_CHECKBOX:
+					case self::TABLEENTRY_CHECKBOX:
 					case self::TABLEENTRY_TEXT:
 					case self::TABLEENTRY_DATETIME:
 					//case self::TABLEENTRY_TEXTBOX:
@@ -1444,7 +1449,11 @@ if (!class_exists('StageShowLibAdminListClass'))
 						
 					switch ($columnType)
 					{
-						//case self::TABLEENTRY_CHECKBOX:
+						case self::TABLEENTRY_CHECKBOX:
+							$checked = ($currVal==1);
+							$this->AddCheckBoxToTable($result, $columnId, $checked, 0, "1");
+							break;
+							
 						//case self::TABLEENTRY_TEXTBOX:
 						
 						case self::TABLEENTRY_SELECT:

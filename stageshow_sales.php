@@ -391,7 +391,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			if (count($results) > 0)
 			{
 		  		$lastIndex = count($results)-1;
-		  		for ($index=0; $index<$lastIndex-1;$index++)
+		  		for ($index=0; $index<$lastIndex;$index++)
 				{
 					if ($results[$index]->perfID != $results[$index+1]->perfID)
 					{
