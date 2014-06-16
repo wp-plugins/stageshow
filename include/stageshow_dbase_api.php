@@ -1116,8 +1116,31 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->IsStateActive($result->showState);
 		}
 		
+ 		function IsPerfExpired($result)
+		{
+			// Calculate how long before the booking window closes ...
+			$timeToPerf = strtotime($result->perfDateTime) - current_time('timestamp');				
+							
+			if ($timeToPerf < 0) 
+			{					
+				$timeToPerf *= -1;
+				
+				echo "<!-- Performance (".$result->perfDateTime.") Expired ".$timeToPerf." seconds ago -->\n";
+				// TODO-PRIORITY - Disable Performance Button (using Inventory Control) when it expires
+				return true;
+			}
+			//echo "<!-- Performance Expires in ".$timeToPerf." seconds -->\n";
+			
+			return false;
+		}
+		
 		function IsPerfEnabled($result)
 		{
+			if ($this->IsPerfExpired($result))
+			{
+				return false;
+			}
+			
 			//echo "Show:$result->showID $result->showState Perf:$result->perfID $result->perfState<br>\n";
 			return $this->IsStateActive($result->showState) && $this->IsStateActive($result->perfState);
 		}

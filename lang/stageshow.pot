@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 3.8.1 \n"
+"Project-Id-Version: StageShow 3.8.3 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowgold\n"
-"POT-Creation-Date: 2014-05-28 06:22:12+00:00\n"
+"POT-Creation-Date: 2014-06-16 07:15:38+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -186,7 +186,7 @@ msgstr ""
 
 #: admin\stageshow_manage_performances.php:440
 #: admin\stageshow_manage_prices.php:342 admin\stageshow_manage_shows.php:301
-#: admin\stageshowgold_manage_seating.php:607
+#: admin\stageshowgold_manage_seating.php:613
 #: admin\stageshowplus_manage_priceplans.php:363
 #: include\mjslib_paypal_salesadmin.php:480
 msgid "Nothing to Delete"
@@ -687,11 +687,19 @@ msgstr ""
 msgid "Add Seating Plan"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:605
+#: admin\stageshowgold_manage_seating.php:609
+msgid "1 Seating Plan cannot be deleted"
+msgstr ""
+
+#: admin\stageshowgold_manage_seating.php:609
+msgid "Seating Plans cannot be deleted"
+msgstr ""
+
+#: admin\stageshowgold_manage_seating.php:611
 msgid "1 Seating Plan has been deleted"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:605
+#: admin\stageshowgold_manage_seating.php:611
 msgid "Seating Plans have been deleted"
 msgstr ""
 
@@ -1145,15 +1153,15 @@ msgstr ""
 msgid "Column does not exist"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1289
+#: include\stageshow_dbase_api.php:1312
 msgid "Price Not Specified"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1295
+#: include\stageshow_dbase_api.php:1318
 msgid "Invalid Price Entry"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1301
+#: include\stageshow_dbase_api.php:1324
 msgid "Price Entry cannot be negative"
 msgstr ""
 
@@ -1169,47 +1177,52 @@ msgstr ""
 msgid "Missing End of Tag Marker"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:628
+#: include\stageshowgold_dbase_api.php:585
+msgid "Row"
+msgstr ""
+
+#: include\stageshowgold_dbase_api.php:585
+#: include\stageshowgold_dbase_api.php:1510 stageshowgold.php:242
+#: stageshowgold_main.php:512
+msgid "Seat"
+msgstr ""
+
+#: include\stageshowgold_dbase_api.php:645
 msgid "No Zone Found for Seat"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:642
+#: include\stageshowgold_dbase_api.php:659
 msgid "Template Uploaded"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:655
-#: include\stageshowgold_dbase_api.php:668
-#: include\stageshowgold_dbase_api.php:677
+#: include\stageshowgold_dbase_api.php:672
+#: include\stageshowgold_dbase_api.php:685
+#: include\stageshowgold_dbase_api.php:694
 msgid "Template Import Error"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:656
+#: include\stageshowgold_dbase_api.php:673
 msgid "Seating ID not specified"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:669
+#: include\stageshowgold_dbase_api.php:686
 msgid "Empty Filename"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:678
+#: include\stageshowgold_dbase_api.php:695
 msgid "Empty File"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1266
+#: include\stageshowgold_dbase_api.php:1284
 msgid "Invalid Seat Specification"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1279
+#: include\stageshowgold_dbase_api.php:1297
 msgid "Seat Allocated Twice"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1473
+#: include\stageshowgold_dbase_api.php:1501
 msgid "Qty"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:1482 stageshowgold.php:242
-#: stageshowgold_main.php:512
-msgid "Seat"
 msgstr ""
 
 #: include\stageshowplus_sales_table.php:43

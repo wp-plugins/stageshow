@@ -146,7 +146,7 @@ function stageshow_OpenTicketView(saleId, showEMailURL)
 	window.open(url);
 }
 
-function stageshow_TestClickSeat(obj, zoneID)
+function stageshow_TestClickSeat(obj)
 {
 	var seatId, hiddenSeatsElem, hiddenZonesElem;
 	
