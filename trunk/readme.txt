@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.9.2
-Stable tag: 3.8.1
+Tested up to: 3.9.1
+Stable tag: 3.8.3
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,6 +187,14 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 3.8.3 (16/06/2014) =
+* Bug Fix: StageShow displays expired performances when ther are non-expired performances (StageShow)
+* Bug Fix: layoutNames not defined error when reporting zone spec parsing error (StageShowGold)
+* Added DecodedSeatIDs as title param in Seat Layout Template seats tags (StageShowGold)
+
+= 3.8.2 (29/05/2014) =
+* Bug Fix: Seating Plan "Bulk" Delete gives "Nothing to Delete" Error
 
 = 3.8.1 (27/05/2014) =
 * Bug Fix: Number of seats remaining never shown on last box office entry
