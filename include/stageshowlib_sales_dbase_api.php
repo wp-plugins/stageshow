@@ -159,7 +159,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function getImagesURL()
 		{
+			if (defined('STAGESHOWLIB_IMAGESURL'))
+				return STAGESHOWLIB_IMAGESURL;
+				
 			$siteurl = get_option('siteurl');
+			if ($this->adminOptions['PayPalImagesUseSSL'])
+			{
+				$siteurl = str_replace('http', 'https', $siteurl);
+			}
 			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
 			return $siteurl.'/wp-content/uploads/'.$pluginID.'/images/';
 		}
