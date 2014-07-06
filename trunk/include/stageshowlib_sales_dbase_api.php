@@ -385,17 +385,19 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			if (!defined('RUNSTAGESHOWDEMO'))
 			{
-				if (!isset($this->adminOptions['PayPalMerchantID']))
+				// Check that PayPal is Configured
+				
+				// Must have EITHER PayPalMerchantID or PayPalAPIEMail
+				if (!$this->isOptionSet('PayPalMerchantID') && !$this->isOptionSet('PayPalAPIEMail'))
 					return false;
-					
-				if (!isset($this->adminOptions['PayPalAPIEMail']))
-					return false;
-					
-				if (strlen($this->adminOptions['PayPalMerchantID']) == 0)
-					return false;
-					
-				if (strlen($this->adminOptions['PayPalAPIEMail']) == 0)
-					return false;				
+				
+				// Either All of PayPalAPIUser, PayPalAPIPwd and PayPalAPISig must be defined or none of them
+				$ApiOptsCount = 0;
+				if ($this->isOptionSet('PayPalAPIUser')) $ApiOptsCount++;
+				if ($this->isOptionSet('PayPalAPIPwd')) $ApiOptsCount++;
+				if ($this->isOptionSet('PayPalAPISig')) $ApiOptsCount++;
+				if (($ApiOptsCount != 0) && ($ApiOptsCount != 3))
+					return false;					
 			}
 				
 			return true;				
@@ -501,6 +503,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						saleFee DECIMAL(9,2) NOT NULL,
 						saleTxnId VARCHAR('.PAYPAL_APILIB_PPSALETXNID_TEXTLEN.') NOT NULL,
 						saleStatus VARCHAR('.PAYPAL_APILIB_PPSALESTATUS_TEXTLEN.'),
+						saleNoteToSeller TEXT,
 					';
 					break;
 			}
@@ -941,6 +944,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				return $this->GetSaleName($saleDetails);
 			}
 			
+			if ($tag =='[saleNoteToSender]')
+			{
+				return stripslashes($saleDetails->saleNoteToSender);
+			}
+			
 			if (!property_exists($saleDetails, $field))
 			{
 				return "**** $field ".__("Undefined", $this->get_domain())." ****";
@@ -977,6 +985,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'[salePaid]' => 'salePaid',
 				'[saleTxnId]' => 'saleTxnId',
 				'[saleStatus]' => 'saleStatus',
+
+				'[saleNoteToSeller]' => 'saleNoteToSeller',
 
 				'[saleName]' => 'saleName',
 
@@ -1272,6 +1282,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					if (isset($results['transactionfee']))
 					{
 						$saleVals['saleTransactionFee'] = $results['transactionfee'];
+					}
+					if (isset($results['saleNoteToSeller']))
+					{
+						$saleVals['saleNoteToSeller'] = $results['saleNoteToSeller'];
 					}
 									
 					$saleID = $this->AddSale($saleDateTime, $saleVals);

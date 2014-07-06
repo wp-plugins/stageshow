@@ -253,22 +253,13 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 			return $ParamsOK;
 		}
-			
-		function GetOnlineStoreHiddenTags()
-		{
-			$myDBaseObj = $this->myDBaseObj;
-			$hiddenTags  = parent::GetOnlineStoreHiddenTags();
-
-			return $hiddenTags;
-		}
 		
-		function GetOnlineStoreRowHiddenTags($result)
+		function GetOnlineStoreElemTagId($id, $result)
 		{
-			$hiddenTags  = '<input type="hidden" name="PerfId" value="'.$result->perfID.'"/>'."\n";
-			$hiddenTags .= parent::GetOnlineStoreRowHiddenTags($result);
-			
-			return $hiddenTags;
-		}		
+			$id  = parent::GetOnlineStoreElemTagId($id, $result);
+//			$id .= '_' . $result->perfID;
+			return $id;
+		}
 
 		function OutputContent_OnlineStoreTitle($result)
 		{
@@ -292,7 +283,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$storeRowHTML = '';
 			
 			$submitButton = __('Add', $this->myDomain);
-			$submitId     = 'AddTicketSale';
+			$submitId     = $this->GetOnlineStoreElemTagId('AddTicketSale', $result);
 			$showAllDates = defined('STAGESHOW_BOXOFFICE_ALLDATES');
 				
 			$myDBaseObj = $this->myDBaseObj;
@@ -331,9 +322,10 @@ if (!class_exists('StageShowSalesPluginClass'))
 															
 			if (!$soldOut)
 			{
+				$quantityTagId = $this->GetOnlineStoreElemTagId('quantity', $result); 
 				$storeRowHTML .= '
 					<td class="stageshow-boxoffice-qty">
-					<select name="quantity">
+					<select name="'.$quantityTagId.'">
 					<option value="1" selected="">1</option>
 					';
 				for ($no=2; $no<=$myDBaseObj->adminOptions['MaxTicketQty']; $no++)

@@ -34,6 +34,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		const MYSQL_DATE_FORMAT = 'Y-m-d';
 		const MYSQL_TIME_FORMAT = 'H:i:s';
 		const MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
+		const MYSQL_DATETIME_NOSECS_FORMAT = 'Y-m-d H:i';
 		
 		const ForReading = 1;
 		const ForWriting = 2;
