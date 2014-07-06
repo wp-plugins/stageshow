@@ -32,6 +32,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		define('STAGESHOWLIB_MAXSALECOUNT', 4);
 	}
 	
+	if (!defined('STAGESHOWLIB_NOTETOSELLER_ROWS'))
+	{
+		define('STAGESHOWLIB_NOTETOSELLER_ROWS', 2);
+	}
+	
 	class StageShowLibSalesPluginBaseClass
 	{
 		const PAGEMODE_NORMAL = 'normal';
@@ -158,21 +163,14 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			return true;
 		}
-			
-		function GetOnlineStoreHiddenTags()
-		{
-			$hiddenTags  = "\n";
 
-			return $hiddenTags;
-		}
-		
-		function GetOnlineStoreRowHiddenTags($result)
+		function GetOnlineStoreElemTagId($id, $result)
 		{
-			$itemID = $this->GetOnlineStoreItemID($result);
-								
-			return '<input type="hidden" name="PriceId" value="'.$itemID.'"/>'."\n";
+			$itemID = $this->GetOnlineStoreItemID($result);	
+			$id .= '_' . $itemID;
+			return $id;
 		}
-		
+
 		function OutputContent_OnlineStoreTitle($result)
 		{
 		}
@@ -225,8 +223,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				switch ($result->stockType)
 				{
 					case STAGESHOWLIB_STATE_POST:
+						$quantityTagId = $this->GetOnlineStoreElemTagId('quantity', $result); 
 						$storeRowHTML .= '
-								<select name="quantity">
+								<select name="'.$quantityTagId.'">
 									<option value="1" selected="">1</option>
 						';
 						for ($no=2; $no<=STAGESHOWLIB_MAXSALECOUNT; $no++)
@@ -245,9 +244,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 			$buttonTag = ($buttonURL != '') ? ' src="'.$buttonURL.'"' : '';
 			
+			$buttonId = $this->GetOnlineStoreElemTagId('AddTicketSale', $result);
+						
 			$storeRowHTML .= '
 				<td '.$addColSpan.'class="'.$this->cssBaseID.'-add">
-							<input type="submit" value="'.__('Add', $this->myDomain).'" alt="'.$altTag.'" '.$buttonTag.' id="AddTicketSale" name="AddTicketSale"/>
+							<input type="submit" value="'.__('Add', $this->myDomain).'" alt="'.$altTag.'" '.$buttonTag.' id="'.$buttonId.'" name="'.$buttonId.'"/>
 				</td>
 				</tr>				
 				';
@@ -281,6 +282,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			
 			$outputContent  = "\n<!-- $pluginID Plugin Code - Starts Here -->\n";
 			$outputContent .= '<form></form>'."\n";		// Insulate StageShow from unterminated form tags
+			
+			$outputContent .= '<form id=trolley method="post">'."\n";	
 			
 			ob_start();			
 			$hasActiveTrolley = $this->OnlineStore_HandleTrolley();
@@ -316,6 +319,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$outputContent .= $boxofficeContent.$trolleyContent;
 			}
 			
+			$outputContent .= '</form>'."\n";	
+			
 			$outputContent .= "\n<!-- $pluginID Plugin Code - Ends Here -->\n";
 			
 			if (!$hasActiveTrolley)
@@ -344,15 +349,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			}
       
 			echo '<div class="'.$this->cssBaseID.'">'."\n";
-			$this->OutputContent_OnlineStoreTitle($results[0]);
-			
-			$hiddenTags  = "\n";
- 			$hiddenTags .= $this->GetOnlineStoreHiddenTags();
-   
-			if (strlen($myDBaseObj->PayPalNotifyURL) > 0)
-				$notifyTag  = '<input type="hidden" name="notify_url" value="'.$myDBaseObj->PayPalNotifyURL.'"/>'."\n";
-			else
-				$notifyTag = '';
+			$this->OutputContent_OnlineStoreTitle($results[0]);			
 				
 			$oddPage = true;
 			
@@ -389,15 +386,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				echo '
 					<tr class="'.$rowClass.'">
 					<td class="'.$this->cssBaseID.'-data">
-					<form '.$addSaleItemParams.' method="post">
 					';
-				echo $this->GetOnlineStoreRowHiddenTags($result);
-				echo $hiddenTags;
-				echo $notifyTag;
+
 				echo $storeRowHTML;
 				
 				echo '
-					</form>
 					</td>
 					</tr>
 				';
@@ -649,21 +642,25 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				}
 			}
 			
-			if (isset($_POST['AddTicketSale']))
+			$itemID = 0;
+			foreach ($_POST as $postId => $postVal)
+			{
+				$postIdElems = explode("_", $postId);
+				if (count($postIdElems) < 2) continue;
+				if ($postIdElems[0] != 'AddTicketSale') continue;
+				
+				$itemID = $postIdElems[1];
+			}
+			
+			if ($itemID > 0)
 			{
 				// Get the product ID from posted data
 				//$ticketType = $_POST['os0'];
-				$reqQty = $_POST['quantity'];
-					
-				$itemID = $_POST['PriceId'];
-					
+				$reqQty = $_POST['quantity_'.$itemID];
+
 				// Interogate the database to confirm that the item exists
 				$priceEntries = $this->GetOnlineStoreProductDetails($itemID);
-	/*									
-				$priceEntry = $priceEntries[0];
-					
-				$itemID = $this->GetOnlineStoreItemID($priceEntry);	
-	*/
+
 				// Add the item to the shopping trolley
 				if (count($priceEntries) > 0)
 				{
@@ -741,7 +738,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					$actionURL = add_query_arg('editpage', 'seats', $actionURL);
 					
 					echo '<div class="'.$this->cssTrolleyBaseID.'">'."\n";
-					echo '<form method="post" action="'.$actionURL.'">'."\n";
 					echo '<table class="'.$this->cssTrolleyBaseID.'-table">'."\n";
 					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'titles') && ($myDBaseObj->getOption('CheckoutNote') != '') )
 					{
@@ -796,6 +792,22 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					
 				if (!isset($this->cart_ReadOnly))
 				{
+					if ($myDBaseObj->isOptionSet('UseNoteToSeller'))
+					{
+						$noteToSeller = isset($_POST['NoteToSeller']) ? $_POST['NoteToSeller'] : '';
+						$noteCols = $this->trolleyHeaderCols-1;
+						$rowsDef = defined('STAGESHOWLIB_NOTETOSELLER_ROWS') ? "rows=".STAGESHOWLIB_NOTETOSELLER_ROWS." " : "";
+						
+						echo '
+							<tr class="stageshow-trolley-notetoseller">
+							<td>'.__('Message To Seller', $this->myDomain).'</td>
+							<td colspan="'.$noteCols.'">
+							<textarea name="NoteToSeller" id="NoteToSeller" '.$rowsDef.'>'.$noteToSeller.'</textarea>
+							</td>
+							</tr>
+							';
+					}
+					
 					echo '<tr>'."\n";
 					echo '<td align="center" colspan="'.$this->trolleyHeaderCols.'" class="'.$this->cssTrolleyBaseID.'-checkout">'."\n";
 					
@@ -810,9 +822,13 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
 				}
 					
+				if ($myDBaseObj->getOption('CheckoutNoteToSeller'))
+				{
+					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
+				}
+					
 				echo "</table>\n";
 				echo $hiddenTags;						
-				echo '</form>'."\n";					
 				echo '</div>'."\n";
 				
 				if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'bottom') && ($myDBaseObj->getOption('CheckoutNote') != '') )
@@ -852,7 +868,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
 			}
-				
+			
+			if (isset($_POST['NoteToSeller']))
+			{
+				$rslt->saleDetails['saleNoteToSeller']  = $myDBaseObj->_real_escape($_POST['NoteToSeller']);
+			}
+			
 			if (!isset($cartContents->rows))
 			{
 				$rslt->checkoutMsg  = __('Cannot Checkout', $this->myDomain).' - ';
@@ -950,7 +971,16 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$checkoutRslt->paypalParams['image_url'] = $myDBaseObj->getImageURL('PayPalLogoImageFile');
 				$checkoutRslt->paypalParams['cpp_header_image'] = $myDBaseObj->getImageURL('PayPalHeaderImageFile');
 				$checkoutRslt->paypalParams['no_shipping'] = '2';
-				$checkoutRslt->paypalParams['business'] = $myDBaseObj->adminOptions['PayPalMerchantID'];	// Can use adminOptions['PayPalAPIEMail']
+				
+				// Use Merchant ID if it is defined
+				if ($myDBaseObj->isOptionSet('PayPalMerchantID'))
+				{
+					$checkoutRslt->paypalParams['business'] = $myDBaseObj->adminOptions['PayPalMerchantID'];	// Can use adminOptions['PayPalAPIEMail']
+				}
+				else
+				{
+					$checkoutRslt->paypalParams['business'] = $myDBaseObj->adminOptions['PayPalAPIEMail'];	// Can use adminOptions['PayPalAPIEMail']
+				}
 				$checkoutRslt->paypalParams['currency_code'] = $myDBaseObj->adminOptions['PayPalCurrency'];
 				$checkoutRslt->paypalParams['cmd'] = '_cart';
 				$checkoutRslt->paypalParams['upload'] = '1';

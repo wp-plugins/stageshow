@@ -60,6 +60,7 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEPARAM_DECODE = 'Decode';
 		const TABLEPARAM_CANEDIT = 'CanEdit';	
 		const TABLEPARAM_ADDEMPTY = 'AddEmpty';
+		const TABLEPARAM_BLOCKBLANK = 'BlockBlank';
 		const TABLEPARAM_BEFORE = 'Before';
 		const TABLEPARAM_AFTER = 'After';
 		
@@ -1578,6 +1579,16 @@ if (!class_exists('StageShowLibAdminListClass'))
 					else
 						$tabRowId = '';
 						
+					if (isset($option[self::TABLEPARAM_BLOCKBLANK]))
+					{
+						$optionId = $option[self::TABLEPARAM_ID];
+						if ($result->$optionId == '')
+						{
+							// Hide Row if the value is blank
+							$tabRowId = 'style="display: none;"';
+						}
+					}
+					 					
 					$tableRowTag = '<tr '.$tabRowId.' >';
 					switch ($option[self::TABLEPARAM_TYPE])
 					{

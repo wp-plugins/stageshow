@@ -51,12 +51,6 @@ function stageshow_SelectTab(selectedTabID)
 		tabId = tabIdsList[index];
 		stageshow_ShowOrHideTab(tabId, selectedTabID);
 	}
-	
-	if (selectedTabID == 'paypal-settings-tab')
-	{
-		selectInterfaceElem = document.getElementById('TrolleyType');
-		SetSalesInterfaceControls(selectInterfaceElem);
-	}
 }
 
 function stageshow_ShowOrHideTab(tabID, selectedTabID)

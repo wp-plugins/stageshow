@@ -4,19 +4,19 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 3.9.1
-Stable tag: 3.8.5
+Stable tag: 3.8.6
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
 == Description ==
 
-StageShow provides a simple interface to define your Shows and then a single Wordpress shortcode adds a online BoxOffice to your website.
+StageShow provides a simple interface to define your Shows, Performances and Prices. Then a single Wordpress shortcode adds a online BoxOffice to your website.
 
-StageShow uses its’ own integrated Shopping Trolley to collect orders, and the PayPal checkout to collect payments, which can be made using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
+StageShow uses its’ own integrated Shopping Trolley to collect orders, and PayPal to collect payments. Purchasers can pay using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
 
 Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and can be copied to the system administrator.
 
-EMails are in text only format, and the PayPal transaction number if included for validation purposes.  StageShow includes the facility on the admin pages to verify the transaction number for use at show time 
+EMails are in text only format, and the PayPal transaction number is included for validation purposes.  StageShow includes the facility on the admin pages to verify the transaction number for use at show time.
 
 StageShow includes the facility to export sales to a "TAB Separated Text" file for further analysis or processing by other programs (i.e. Spreadsheets etc.).
 
@@ -188,9 +188,19 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
+= 3.8.6 (06/07/2014) =
+* Bug Fix: Obsolete JS call to SetSalesInterfaceControls() removed
+* Bug Fix: Exported Seating Plans not stripped of automatically created tag parameters (StageShowGold)
+* Bug Fix: Seating Template seat tags missing stageshow-boxoffice-seat class (StageShowGold)
+* Box Office screen changed to have a single &lt;form&gt; tag (StageShowGold)
+* Added optional "Note to Seller" to Checkout
+* PayPal API settings made optional
+* MerchantID made optional (Uses PayPal Account email if blank)
+* Added stageshow-boxoffice-zone-{ZoneRef} to Seating Template seats classes (StageShowGold)
+
 = 3.8.5 (25/06/2014) =
 * Added SSL option for PayPal images
-* Added option to specify Seating Plan for Price Plans  (StageShowGold)
+* Added option to specify Seating Plan for Price Plans (StageShowGold)
 * Bug Fix: Zone selection missing in Price Plans (StageShowGold)
 
 = 3.8.4 (18/06/2014) =

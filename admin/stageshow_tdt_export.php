@@ -115,6 +115,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'salePPZip'          => __('Postcode', $this->myDomain),
 				'saleStatus'         => __('Sale Status', $this->myDomain),
 				'saleTxnId'          => __('Transaction ID', $this->myDomain),
+				'saleNoteToSeller'   => __('Note To Seller', $this->myDomain),
 				'showEMail'          => __('Show EMail', $this->myDomain),
 				'showExpires'        => __('Show Expires', $this->myDomain),
 				'showID'             => __('Show ID', $this->myDomain),
@@ -427,7 +428,7 @@ function VerifyTxnId()
 								$saleRec->$typeName = 0;
 							}
 							
-							$fieldsList = array('ticketName', 'saleEMail', 'saleDateTime', 'saleTxnId');
+							$fieldsList = array('ticketName', 'saleEMail', 'saleDateTime', 'saleTxnId', 'saleNoteToSeller');
 							foreach ($fieldsList as $fieldId)
 								$saleRec->$fieldId = $thisSale->$fieldId;
 								
