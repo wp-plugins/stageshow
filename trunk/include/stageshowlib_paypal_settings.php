@@ -94,7 +94,7 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Cancelled URL',          StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutCancelledURL',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALEDIT => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
 			);
 			
-			if (isset($this->env['IncludeAPI']))
+			if ($this->IncludeAPI)
 			{
 				$rowDefs = self::MergeSettings($rowDefs, array(
 					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'API User',                        StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPIUser',         StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_USER_TEXTLEN,        StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, StageShowLibTableClass::TABLEPARAM_AFTER => 'PayPalMerchantID', ),

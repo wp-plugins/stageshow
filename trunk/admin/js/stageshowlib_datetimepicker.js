@@ -16,8 +16,8 @@
 //	Time Spinners changed to Drop Down boxes with caller defined Increments
 //	Global variables converted to properties
 //
-//Global variables+
-var StageShowLib_CalObj;
+//Global variables
+//var StageShowLib_CalObj;
 
 // Calendar prototype
 function StageShowLib_DTPicker(pDate, pCtrl, pSpanID)
@@ -858,9 +858,9 @@ function StageShowLib_DateTimeSelect(pSender, pFormat, pShowTime, pShowSeconds, 
     // get current date and time
 
     var dtToday = new Date();
-    if (!StageShowLib_CalObj)
+    //if (!StageShowLib_CalObj)
     {
-        StageShowLib_CalObj = new StageShowLib_DTPicker(dtToday); // Class Constructor Declaration: StageShowLib_DTPicker(pDate, pCtrl, pSpanID)
+        StageShowLib_CalObj = new StageShowLib_DTPicker(dtToday);
     }
 
 	var pickerObj = StageShowLib_CalObj;

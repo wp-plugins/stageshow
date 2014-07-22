@@ -89,6 +89,11 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $EMailTemplate;
 		}
 		
+		function GetWPNonceField($referer = '', $name = '_wpnonce')
+		{
+			return $this->WPNonceField($referer, $name, false);
+		}
+		
 		function WPNonceField($referer = '', $name = '_wpnonce', $echo = true)
 		{
 			$nonceField = '';
@@ -132,7 +137,9 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if ($this->getDbgOption('Dev_ShowWPOnce'))
 			{
 				echo "<!-- check_admin_referer($referer) -->\n";
-				if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
+				if (!isset($_REQUEST['_wpnonce']))
+					echo "<br><strong>check_admin_referer FAILED - _wpnonce NOT DEFINED</strong></br>\n";
+				else if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
 					echo "<br><strong>check_admin_referer FAILED - Referer: $referer </strong></br>\n";
 				return;
 			}

@@ -944,9 +944,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				return $this->GetSaleName($saleDetails);
 			}
 			
-			if ($tag =='[saleNoteToSender]')
+			if ($tag =='[saleNoteToSeller]')
 			{
-				return stripslashes($saleDetails->saleNoteToSender);
+				$saleNoteToSeller = stripslashes($saleDetails->saleNoteToSeller);
+				if ($saleNoteToSeller != '')
+				{
+					$saleNoteToSeller = str_replace("\n", "<br>", $saleNoteToSeller);
+					$saleNoteToSeller = str_replace("<br><br>", "<br>", $saleNoteToSeller);
+				}
+				return $saleNoteToSeller;
 			}
 			
 			if (!property_exists($saleDetails, $field))

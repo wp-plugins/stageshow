@@ -21,8 +21,8 @@ Purchased:
 [startloop]
 [ticketName] - [ticketType] - [ticketQty][ticketSeat] - [ticketPaid] [endloop]
 Booking Fee: [saleTransactionFee]
-Note:        [saleNoteToSender]
-
+Note:
+[saleNoteToSeller]
 Payment:
 Total: [salePaid]
 

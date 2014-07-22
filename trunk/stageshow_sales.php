@@ -338,9 +338,18 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', $this->myDomain);						
 				$buttonClassdef = ($this->adminPageActive) ? 'class="button-secondary " ' : '';
 			
+				if (defined('STAGESHOW_ADDBUTTON_URL'))
+				{
+					$buttonClassdef .= 'type="image" src="'.STAGESHOW_ADDBUTTON_URL.'" ';
+				}
+				else
+				{
+					$buttonClassdef .= 'type="submit" ';
+				}
+				
 				$storeRowHTML .= '
 					<td class="stageshow-boxoffice-add">
-					<input type="submit" '.$buttonClassdef.'id="'.$submitId.'" name="'.$submitId.'" value="'.$submitButton.'" alt="'.$altTag.'"/>
+					<input '.$buttonClassdef.'id="'.$submitId.'" name="'.$submitId.'" value="'.$submitButton.'" alt="'.$altTag.'"/>
 					</td>
 				';
 			}
@@ -415,6 +424,21 @@ if (!class_exists('StageShowSalesPluginClass'))
 			echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
 			echo "</tr>\n";
 			
+		}
+				
+		function GetButtonTypeDef($buttonID)
+		{
+			switch ($buttonID)
+			{
+				case 'checkout':
+					if (defined('STAGESHOW_CHECKOUTBUTTON_URL'))
+					{
+						return 'type="image" src="'.STAGESHOW_CHECKOUTBUTTON_URL.'" ';
+					}
+					break;
+			}
+			
+			return parent::GetButtonTypeDef($buttonID);
 		}
 				
 		function OutputContent_OnlineCheckoutButton($cartContents)
