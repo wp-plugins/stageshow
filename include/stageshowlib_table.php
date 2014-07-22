@@ -1566,9 +1566,14 @@ if (!class_exists('StageShowLibAdminListClass'))
 				foreach ($this->detailsRowsDef as $option)
 				{
 					if (isset($option[self::TABLEPARAM_LABEL]))
-						$optionLabel = __($option[self::TABLEPARAM_LABEL], $this->myDomain);
+						$optionLabel = __($option[self::TABLEPARAM_LABEL], $this->myDomain);						
 						
-					if (!$nextInline && isset($option[self::TABLEPARAM_TAB]))
+					if (isset($option[self::TABLEPARAM_BLOCKBLANK]) && ($result->$option[self::TABLEPARAM_ID] == ''))
+					{
+						// Hide Row if the value is blank
+						$tabRowId = 'style="display: none;"';
+					}
+					else if (!$nextInline && isset($option[self::TABLEPARAM_TAB]))
 					{
 						$tabId = $option[self::TABLEPARAM_TAB];
 						$rowNumber = isset($tabbedRowCounts[$tabId]) ? $tabbedRowCounts[$tabId] + 1 : 1;
@@ -1578,16 +1583,6 @@ if (!class_exists('StageShowLibAdminListClass'))
 					}
 					else
 						$tabRowId = '';
-						
-					if (isset($option[self::TABLEPARAM_BLOCKBLANK]))
-					{
-						$optionId = $option[self::TABLEPARAM_ID];
-						if ($result->$optionId == '')
-						{
-							// Hide Row if the value is blank
-							$tabRowId = 'style="display: none;"';
-						}
-					}
 					 					
 					$tableRowTag = '<tr '.$tabRowId.' >';
 					switch ($option[self::TABLEPARAM_TYPE])

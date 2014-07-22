@@ -60,6 +60,8 @@ if (!class_exists('StageShowPluginClass'))
 			// Add a reference to the header
 			add_action('wp_head', array(&$this, 'OutputMetaTag'));
 			
+			//add_filter('plugin_action_links', array(&$this, 'sshow_plugin_actions_links_filter'), 10, 2);
+
 			$this->myDBaseObj->pluginSlug = 'stageshow';
 			$this->adminClassFilePrefix = 'stageshow';
 			$this->adminClassPrefix = 'StageShow';
@@ -100,6 +102,23 @@ if (!class_exists('StageShowPluginClass'))
 			wp_enqueue_style(STAGESHOW_CODE_PREFIX, STAGESHOW_STYLESHEET_URL); // StageShow core style
 		}
 		
+		// Action Links
+		function sshow_plugin_actions_links_filter($links, $file)
+		{
+			static $this_plugin;
+			$sshow_donate_link = "";
+			$sshow_donate_text = "Make Donation";
+			$sshow_donate_alt = "If you like my plugin, please make a small Donation.";
+			
+			if(!$this_plugin) $this_plugin = plugin_basename(__FILE__);
+			if( $file == $this_plugin )
+			{
+				$donateHREF = "<a href='$sshow_donate_link' title='$sshow_donate_alt' target='_blank'>" . $sshow_donate_text . '</a> ';
+				$links = array_merge(array($donateHREF), $links);
+			}
+			return $links;
+		}
+
 		//Returns an array of admin options
 		function getStageshowOptions() 
 		{
@@ -305,8 +324,8 @@ if (!class_exists('StageShowPluginClass'))
 		function load_user_scripts()
 		{
 			// Add our own Javascript
-			wp_enqueue_script( 'stageshow-lib', plugins_url( 'js/stageshowlib_js.js', __FILE__ ));
-			wp_enqueue_script( 'stageshow', plugins_url( 'js/stageshow.js', __FILE__ ));
+			wp_enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', __FILE__ ));
+			wp_enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ));
 		}	
 		
 		function load_admin_styles()
@@ -317,8 +336,8 @@ if (!class_exists('StageShowPluginClass'))
 			wp_enqueue_style( 'stageshow', plugins_url( 'admin/css/stageshow-admin.css', __FILE__ ));
 			
 			// Add our own Javascript
-			wp_enqueue_script( 'stageshow-admin', plugins_url( 'admin/js/stageshow-admin.js', __FILE__ ));
-			wp_enqueue_script( 'datetimepicker', plugins_url( 'admin/js/datetimepicker_css.js', __FILE__ ));
+			wp_enqueue_script( $this->adminClassPrefix.'-admin', plugins_url( 'admin/js/stageshow-admin.js', __FILE__ ));
+			wp_enqueue_script( $this->adminClassPrefix.'-dtpicker', plugins_url( 'admin/js/datetimepicker_css.js', __FILE__ ));
 		}
 
 		function OutputContent_OnlineStoreMain($reqRecordId = '')
@@ -401,8 +420,8 @@ if (!class_exists('StageShowPluginClass'))
 					<td class="stageshow-boxoffice-formFieldID">'.__('Status', $this->myDomain).':&nbsp;</td>
 					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
 				<select id="saleStatus" name="saleStatus">
-					<option value="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'" $selectCompleted>'.__('Completed', $this->myDomain).'&nbsp;</option>
-					<option value="'.STAGESHOW_SALESTATUS_RESERVED.'" $selectReserved>'.__('Reserved', $this->myDomain).'&nbsp;</option>
+					<option value="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'" '.$selectCompleted.'>'.__('Completed', $this->myDomain).'&nbsp;</option>
+					<option value="'.STAGESHOW_SALESTATUS_RESERVED.'" '.$selectReserved.'>'.__('Reserved', $this->myDomain).'&nbsp;</option>
 				</select>
 					</td>
 				</tr>

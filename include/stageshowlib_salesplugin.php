@@ -84,6 +84,15 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			add_shortcode($this->shortcode, array(&$this, 'OutputContent_OnlineStore'));
 		}
 		
+		function GetOurURL()
+		{			
+			$actionURL = remove_query_arg('_wpnonce');
+			$actionURL = remove_query_arg('remove', $actionURL);
+			$actionURL = remove_query_arg('editpage', $actionURL);
+			
+			return $actionURL;
+		}
+		
 		function CheckAdminReferer($referer = '')
 		{
 		}
@@ -283,7 +292,15 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$outputContent  = "\n<!-- $pluginID Plugin Code - Starts Here -->\n";
 			$outputContent .= '<form></form>'."\n";		// Insulate StageShow from unterminated form tags
 			
-			$outputContent .= '<form id=trolley method="post">'."\n";	
+			$actionURL = $this->GetOurURL();
+			$outputContent .= '<form id=trolley method="post" action="'.$actionURL.'">'."\n";				
+			$outputContent .= $myDBaseObj->GetWPNonceField();
+				 
+			if (isset($this->editpage))
+			{
+				$outputContent .= '<input type="hidden" name="editpage" value="'.$this->editpage.'"/>'."\n";				
+			}
+
 			
 			ob_start();			
 			$hasActiveTrolley = $this->OnlineStore_HandleTrolley();
@@ -463,10 +480,16 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $buttonID;
 		}
 				
+		function GetButtonTypeDef($buttonID)
+		{
+			return 'type="submit"';
+		}
+				
 		function OutputContent_OnlineCheckoutButton($cartContents)
 		{
 			$buttonID = $this->GetButtonID('checkout');
-			echo '<input class="button-primary" type="submit" name="'.$buttonID.'" id="'.$buttonID.'" value="'.__('Checkout', $this->myDomain).'"/>'."\n";
+			$buttonType = $this->GetButtonTypeDef('checkout');
+			echo '<input class="button-primary" '.$buttonType.' name="'.$buttonID.'" id="'.$buttonID.'" value="'.__('Checkout', $this->myDomain).'"/>'."\n";
 		}
 		
 		function GetTrolleyContents()
@@ -596,13 +619,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
-			if (isset($_GET['action']) && isset($_GET['editpage']))
+			if (isset($_GET['action']) && isset($_REQUEST['editpage']))
 			{
 				if ($_GET['action'] == 'editsale')
 				{
 					$buttonID = $this->GetButtonID('editbuyer');
 					if (isset($_POST[$buttonID])) $this->cart_ReadOnly = true;
-					
 					$buttonID = $this->GetButtonID('savesaleedit');
 					if (isset($_POST[$buttonID])) 
 					{
@@ -618,6 +640,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						$cartContents->salePPCountry = $_POST['salePPCountry'];
 						$cartContents->salePPPhone   = $_POST['salePPPhone'];	
 						$cartContents->saleStatus    = $_POST['saleStatus'];	
+																
+						$cartContents->saleNoteToSeller = isset($_POST['NoteToSeller']) ? $_POST['NoteToSeller'] : '';	
 																
 						$this->SaveTrolleyContents($cartContents);
 					
@@ -732,11 +756,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						echo $myDBaseObj->getOption('CheckoutNote');
 					}
 					
-					$actionURL = get_permalink();
-					$actionURL = remove_query_arg('remove', $actionURL);
-					$actionURL = remove_query_arg('editpage', $actionURL);
-					$actionURL = add_query_arg('editpage', 'seats', $actionURL);
-					
 					echo '<div class="'.$this->cssTrolleyBaseID.'">'."\n";
 					echo '<table class="'.$this->cssTrolleyBaseID.'-table">'."\n";
 					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'titles') && ($myDBaseObj->getOption('CheckoutNote') != '') )
@@ -754,9 +773,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					
 				if (!isset($this->cart_ReadOnly))
 				{
-					$removeLineURL = get_permalink();
+					$removeLineURL = $this->GetOurURL();
 					$removeLineURL  = add_query_arg('editpage', 'tickets', $removeLineURL);
 					$removeLineURL  = add_query_arg('remove', $cartIndex, $removeLineURL);
+					$removeLineURL  = add_query_arg('_wpnonce', $_REQUEST['_wpnonce'], $removeLineURL);
 					echo '<td class="'.$this->cssTrolleyBaseID.'-remove"><a href=' . $removeLineURL . '>'.__('Remove', $this->myDomain).'</a></td>'."\n";
 				}
 				else
@@ -792,9 +812,15 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					
 				if (!isset($this->cart_ReadOnly))
 				{
-					if ($myDBaseObj->isOptionSet('UseNoteToSeller'))
+					if (!isset($this->editpage) && $myDBaseObj->isOptionSet('UseNoteToSeller'))
 					{
-						$noteToSeller = isset($_POST['NoteToSeller']) ? $_POST['NoteToSeller'] : '';
+						if (isset($_POST['NoteToSeller']))
+							$noteToSeller = $_POST['NoteToSeller'];
+						else if (isset($cartContents->saleNoteToSeller))
+							$noteToSeller = $cartContents->saleNoteToSeller;
+						else
+							$noteToSeller = '';
+
 						$noteCols = $this->trolleyHeaderCols-1;
 						$rowsDef = defined('STAGESHOWLIB_NOTETOSELLER_ROWS') ? "rows=".STAGESHOWLIB_NOTETOSELLER_ROWS." " : "";
 						

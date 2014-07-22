@@ -137,22 +137,17 @@ if (!class_exists('StageShowSalesAdminClass'))
 					break;
 					
 				case 'editsale':
-					if (isset($_POST['PriceId']))
-					{						
-						$editPage = 'tickets';
-					}
-					else
-					{
-						$editPage = isset($_GET['editpage']) ? $_GET['editpage'] : 'start';
-					}
 					$pluginObj = $this->env['PluginObj'];
 					$pluginObj->SetTrolleyID('');
+					$pluginObj->editpage = isset($_REQUEST['editpage']) ? $_REQUEST['editpage'] : 'start';
+
 					$this->editingRecord = true;	// Set this flag to show that we are editing a Sale entry
 					
-					switch($editPage)
+					switch($pluginObj->editpage)
 					{
 						case 'start':
 							// Initialise values to start editing a sale							
+							$pluginObj->editpage = 'tickets';
 							$pluginObj->ClearTrolleyContents();
 							$rtnVal = true;
 							break;

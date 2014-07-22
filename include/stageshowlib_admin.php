@@ -146,6 +146,7 @@ if (!class_exists('StageShowLibAdminClass'))
 							$actionCount++;
 						}
 					}
+					// TODO - Entry Updated - Generate iCal file
 				}
 				
 				if ($actionCount > 0)

@@ -91,6 +91,11 @@ div.stageshow-boxoffice-weblink
 	text-align: right;
 }
 
+td.stageshow-boxoffice-add input
+{
+	border: none;
+}
+
 /* --------------------------------------------------------------------------- */
 /*                                                                             */
 /*                       StageShow Trolley Styles                              */
@@ -137,6 +142,11 @@ div.stageshow-trolley input
 {
 	margin: 0 0 0 0;
 	text-align: left;
+}
+
+td.stageshow-trolley-checkout input
+{
+	border: none;
 }
 
 /* --------------------------------------------------------------------------- */
