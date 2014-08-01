@@ -97,10 +97,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 		}
 		
-		function OutputContent_OnlineStoreMain($reqRecordId)
+		function OutputContent_OnlineStoreMain($atts)
 		{
       		// Get all database entries for this item ... ordered by date/time then ticket type
-	      	$results = $this->GetOnlineStoreProducts($reqRecordId);
+	      	$results = $this->GetOnlineStoreProducts($atts);
 			$this->OutputContent_OnlineStoreSection($results);
 		}
 			
@@ -114,15 +114,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $this->myDBaseObj->GetStockItem($reqRecordId);
 		}
 		
-		function GetOnlineStoreProducts($reqRecordId = 0)
+		function GetOnlineStoreProducts($atts)
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
-			if ($reqRecordId === 0)
-			{
-				$reqRecordId = '';
-			}
-			
+			$reqRecordId = $atts['id'];
 			return ($reqRecordId == '') ? $myDBaseObj->GetPricesList(null) :  $this->GetOnlineStoreProductDetails($reqRecordId);
 		}
 		
@@ -276,6 +272,17 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 		}
 		
+		function OutputContent_GetAtts( $atts )
+		{
+			$atts = shortcode_atts(array(
+				'id'    => '',
+				'count' => '',
+				'style' => 'normal' 
+			), $atts );
+        
+        	return $atts;
+		}
+		
 		function OutputContent_OnlineStore( $atts )
 		{
 	  		// FUNCTIONALITY: Runtime - Output Shop Front
@@ -307,21 +314,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$trolleyContent = ob_get_contents();
 			ob_end_clean();
 			
-			$atts = shortcode_atts(array(
-				'id'    => '',
-				'count' => '',
-				'style' => 'normal' 
-			), $atts );
+			$atts = $this->OutputContent_GetAtts($atts);
         
 			ob_start();
 			
-			$reqRecordId = $atts['id'];
-			if (($reqRecordId === '') && ($atts['count'] != ''))
-			{
-				$reqRecordId = 0 - $atts['count'];
-			}
-				
-			$this->OutputContent_OnlineStoreMain($reqRecordId);
+			$this->OutputContent_OnlineStoreMain($atts);
 			$this->OutputContent_OnlineStoreFooter();
 			
 			$boxofficeContent = ob_get_contents();
@@ -480,16 +477,23 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $buttonID;
 		}
 				
-		function GetButtonTypeDef($buttonID)
+		function GetButtonTypeDef($buttonID, $buttonName = '')
 		{
-			return 'type="submit"';
+			$buttonTypeDef = 'type="submit"';
+			
+			if ($buttonName == '')
+			{
+				$buttonName = $this->GetButtonID($buttonID);
+			}
+			$buttonTypeDef .= ' id="'.$buttonName.'" name="'.$buttonName.'"';
+			
+			return $buttonTypeDef;
 		}
 				
 		function OutputContent_OnlineCheckoutButton($cartContents)
 		{
-			$buttonID = $this->GetButtonID('checkout');
 			$buttonType = $this->GetButtonTypeDef('checkout');
-			echo '<input class="button-primary" '.$buttonType.' name="'.$buttonID.'" id="'.$buttonID.'" value="'.__('Checkout', $this->myDomain).'"/>'."\n";
+			echo '<input '.$buttonType.' value="'.__('Checkout', $this->myDomain).'"/>'."\n";
 		}
 		
 		function GetTrolleyContents()
@@ -641,7 +645,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						$cartContents->salePPPhone   = $_POST['salePPPhone'];	
 						$cartContents->saleStatus    = $_POST['saleStatus'];	
 																
-						$cartContents->saleNoteToSeller = isset($_POST['NoteToSeller']) ? $_POST['NoteToSeller'] : '';	
+						$cartContents->saleNoteToSeller = isset($_POST['saleNoteToSeller']) ? $_POST['saleNoteToSeller'] : '';	
 																
 						$this->SaveTrolleyContents($cartContents);
 					
@@ -814,8 +818,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				{
 					if (!isset($this->editpage) && $myDBaseObj->isOptionSet('UseNoteToSeller'))
 					{
-						if (isset($_POST['NoteToSeller']))
-							$noteToSeller = $_POST['NoteToSeller'];
+						if (isset($_POST['saleNoteToSeller']))
+							$noteToSeller = $_POST['saleNoteToSeller'];
 						else if (isset($cartContents->saleNoteToSeller))
 							$noteToSeller = $cartContents->saleNoteToSeller;
 						else
@@ -828,7 +832,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 							<tr class="stageshow-trolley-notetoseller">
 							<td>'.__('Message To Seller', $this->myDomain).'</td>
 							<td colspan="'.$noteCols.'">
-							<textarea name="NoteToSeller" id="NoteToSeller" '.$rowsDef.'>'.$noteToSeller.'</textarea>
+							<textarea name="saleNoteToSeller" id="saleNoteToSeller" '.$rowsDef.'>'.$noteToSeller.'</textarea>
 							</td>
 							</tr>
 							';
@@ -838,7 +842,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					echo '<td align="center" colspan="'.$this->trolleyHeaderCols.'" class="'.$this->cssTrolleyBaseID.'-checkout">'."\n";
 					
 					$this->OutputContent_OnlineCheckoutButton($cartContents);
-						
+					
+					echo '<input type="hidden" id="saleCustomValues" name="saleCustomValues" value=""/>'."\n";
+					
 					echo '</td>'."\n";
 					echo "</tr>\n";
 				}
@@ -895,10 +901,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
 			}
 			
-			if (isset($_POST['NoteToSeller']))
-			{
-				$rslt->saleDetails['saleNoteToSeller']  = $myDBaseObj->_real_escape($_POST['NoteToSeller']);
-			}
+			$rslt->saleDetails['saleNoteToSeller'] = isset($_POST['saleNoteToSeller']) ? $myDBaseObj->_real_escape($_POST['saleNoteToSeller']) : '';
 			
 			if (!isset($cartContents->rows))
 			{

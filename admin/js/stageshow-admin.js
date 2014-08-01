@@ -15,6 +15,16 @@ function stageshow_OnSettingsLoad()
 	}
 	
 	stageshow_SelectTab(selectedTabId);
+	
+	var selectedItemId = stageshow_GetURLParam('focus');
+	if (selectedItemId != '')
+	{		
+		var focusElem;
+		
+		// Get the header 'Tab' Element					
+		focusElem = document.getElementById(selectedItemId);
+		focusElem.focus();
+	}
 }
 
 function stageshow_ClickHeader(obj)

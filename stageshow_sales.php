@@ -56,6 +56,18 @@ if (!class_exists('StageShowSalesPluginClass'))
 			parent::__construct();
 		}
 	
+		function OutputContent_GetAtts( $atts )
+		{
+			$atts = shortcode_atts(array(
+				'id'    => '',
+				'perf'  => '',
+				'count' => '',
+				'style' => 'normal' 
+			), $atts );
+        
+        	return $atts;
+		}
+		
 		function OutputContent_OnlineStore($atts)
 		{
 			if ($this->pageMode == self::PAGEMODE_DEMOSALE)
@@ -94,13 +106,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return parent::OutputContent_OnlineStore($atts);
 		}
 	
-		function OutputContent_OnlineStoreMain($reqRecordId = '')
+		function OutputContent_OnlineStoreMain($atts)
 		{
-			$scanShows = ($reqRecordId === '');
-			$scanShows |= (is_numeric($reqRecordId) && ($reqRecordId < 0));
-			if (!$scanShows)
+			if (($atts['id'] != '') || ($atts['perf'] != ''))
 			{			
-				parent::OutputContent_OnlineStoreMain($reqRecordId);
+				parent::OutputContent_OnlineStoreMain($atts);
 			}			
 		    else
 			{
@@ -110,8 +120,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$shows = $myDBaseObj->GetActiveShowsList();
 	      
 		  		// Count can be used to limit the number of Shows displayed
-				if ($reqRecordId < 0)
-					$count = 0 - $reqRecordId;
+				if ($atts['count'] > 0)
+					$count = $atts['count'];
 				else
 					$count = count($shows);
 					
@@ -119,8 +129,9 @@ if (!class_exists('StageShowSalesPluginClass'))
 				{
 					if (!$myDBaseObj->IsShowEnabled($show))
 						continue;
-						
-					parent::OutputContent_OnlineStoreMain($show->showID);
+					
+					$atts['id'] = $show->showID;
+					parent::OutputContent_OnlineStoreMain($atts);
 					if (--$count == 0)
 						break;
 				}
@@ -151,24 +162,30 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $this->myDBaseObj->GetPricesListByPriceID($priceID);
 		}
 		
-		function GetOnlineStoreProducts($showID = 0)
+		function GetOnlineStoreProducts($atts)
 		{
 			$myDBaseObj = $this->myDBaseObj;
 
-			if ($showID === 0)
+			$showID = $atts['id'];
+								
+			if ($showID !== '')
+			{
+				// Get the prices list for a single show
+				$results = $myDBaseObj->GetPricesListByShowID($showID, true);
+				$myDBaseObj->prepareBoxOffice($showID);			
+				if (count($results) == 0)
+				{
+					echo "<!-- StageShow BoxOffice - No Output for ShowID=$showID -->\n";
+				}
+	      
+				return $results;
+			}
+			else if ($atts['count'] == '')
 			{
 				return $myDBaseObj->GetPricesList(null, true);
 			}
 			
-			// Get the prices list for a single show
-			$results = $myDBaseObj->GetPricesListByShowID($showID, true);
-			$myDBaseObj->prepareBoxOffice($showID);			
-			if (count($results) == 0)
-			{
-				echo "<!-- StageShow BoxOffice - No Output for ShowID=$showID -->\n";
-			}
-      
-			return $results;
+			return null;
 		}
 		
 		function GetOnlineStorePriceID($result)
@@ -338,18 +355,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Tickets', $this->myDomain);						
 				$buttonClassdef = ($this->adminPageActive) ? 'class="button-secondary " ' : '';
 			
-				if (defined('STAGESHOW_ADDBUTTON_URL'))
-				{
-					$buttonClassdef .= 'type="image" src="'.STAGESHOW_ADDBUTTON_URL.'" ';
-				}
-				else
-				{
-					$buttonClassdef .= 'type="submit" ';
-				}
+				$buttonClassdef .= $this->GetButtonTypeDef('add', $submitId);
 				
 				$storeRowHTML .= '
 					<td class="stageshow-boxoffice-add">
-					<input '.$buttonClassdef.'id="'.$submitId.'" name="'.$submitId.'" value="'.$submitButton.'" alt="'.$altTag.'"/>
+					<input '.$buttonClassdef.' value="'.$submitButton.'" alt="'.$altTag.'"/>
 					</td>
 				';
 			}
@@ -426,19 +436,31 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 		}
 				
-		function GetButtonTypeDef($buttonID)
+		function GetButtonTypeDef($buttonID, $buttonName = '')
 		{
+			$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName);
+			
+			$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
+			$buttonTypeDef .= ' onClick="'.$onClickHandler.'(this)"';
+			
 			switch ($buttonID)
 			{
+				case 'add':
+					if (defined('STAGESHOW_ADDBUTTON_URL'))
+					{
+						$buttonTypeDef .= ' src="'.STAGESHOW_ADDBUTTON_URL.'"';
+					}
+					break;
+					
 				case 'checkout':
 					if (defined('STAGESHOW_CHECKOUTBUTTON_URL'))
 					{
-						return 'type="image" src="'.STAGESHOW_CHECKOUTBUTTON_URL.'" ';
+						$buttonTypeDef .= ' src="'.STAGESHOW_CHECKOUTBUTTON_URL.'"';
 					}
 					break;
 			}
 			
-			return parent::GetButtonTypeDef($buttonID);
+			return $buttonTypeDef;
 		}
 				
 		function OutputContent_OnlineCheckoutButton($cartContents)

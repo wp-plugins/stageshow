@@ -125,14 +125,8 @@ if (!class_exists('StageShowLibPayPalSalesAdminListClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Transaction Date & Time',   StageShowLibTableClass::TABLEPARAM_ID => 'saleDateTime',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Transaction ID',            StageShowLibTableClass::TABLEPARAM_ID => 'saleTxnId',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),						
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Status',                    StageShowLibTableClass::TABLEPARAM_ID => 'saleStatus',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $statusOptions),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Note',                      StageShowLibTableClass::TABLEPARAM_ID => 'saleNoteToSeller', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatSaleNote'),
 			);
-			
-			if ($this->myDBaseObj->isOptionSet('UseNoteToSeller')) // Accept Purchaser Text Input
-			{ 
-				$ourOptions = self::MergeSettings($ourOptions, array(
-					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Note',               StageShowLibTableClass::TABLEPARAM_ID => 'saleNoteToSeller', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatSaleNote'),
-				));				
-			}
 			
 			$ourOptions = self::MergeSettings(parent::GetDetailsRowsDefinition(), $ourOptions);
 			return $ourOptions;

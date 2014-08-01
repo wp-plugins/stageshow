@@ -664,6 +664,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'salePPZip', 
 				'salePPCountry', 
 				'salePPPhone', 
+				
+				'saleNoteToSeller', 
 			);
 		}			
 		
