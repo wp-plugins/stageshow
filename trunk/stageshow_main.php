@@ -60,7 +60,7 @@ if (!class_exists('StageShowPluginClass'))
 			// Add a reference to the header
 			add_action('wp_head', array(&$this, 'OutputMetaTag'));
 			
-			//add_filter('plugin_action_links', array(&$this, 'sshow_plugin_actions_links_filter'), 10, 2);
+			add_filter('plugin_action_links', array(&$this, 'sshow_plugin_action_links_filter'), 10, 2);
 
 			$this->myDBaseObj->pluginSlug = 'stageshow';
 			$this->adminClassFilePrefix = 'stageshow';
@@ -103,8 +103,17 @@ if (!class_exists('StageShowPluginClass'))
 		}
 		
 		// Action Links
-		function sshow_plugin_actions_links_filter($links, $file)
+		function sshow_plugin_action_links_filter($links, $file)
 		{
+			if (dirname($file) === STAGESHOW_FOLDER)
+			{
+				$actionMsg = $this->myDBaseObj->GetPluginStatus();
+				if ($actionMsg != '')
+				{
+					$links['autoupdate'] = '<div class="update-message">'.$actionMsg.'</div>';
+				}
+			}
+/*			
 			static $this_plugin;
 			$sshow_donate_link = "";
 			$sshow_donate_text = "Make Donation";
@@ -116,6 +125,7 @@ if (!class_exists('StageShowPluginClass'))
 				$donateHREF = "<a href='$sshow_donate_link' title='$sshow_donate_alt' target='_blank'>" . $sshow_donate_text . '</a> ';
 				$links = array_merge(array($donateHREF), $links);
 			}
+*/
 			return $links;
 		}
 
@@ -340,7 +350,7 @@ if (!class_exists('StageShowPluginClass'))
 			wp_enqueue_script( $this->adminClassPrefix.'-dtpicker', plugins_url( 'admin/js/datetimepicker_css.js', __FILE__ ));
 		}
 
-		function OutputContent_OnlineStoreMain($reqRecordId = '')
+		function OutputContent_OnlineStoreMain($atts)
 		{
 			$myDBaseObj = $this->myDBaseObj;
 
@@ -367,7 +377,7 @@ if (!class_exists('StageShowPluginClass'))
 
 			}
 			
-			parent::OutputContent_OnlineStoreMain($reqRecordId);				
+			parent::OutputContent_OnlineStoreMain($atts);				
 		}
 
 		function OutputContent_OnlinePurchaserDetails()
@@ -431,6 +441,21 @@ if (!class_exists('StageShowPluginClass'))
 			{
 				$formHTML .= '
 				<input type="hidden" id="saleStatus" name="saleStatus" value="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'"/>
+				';
+			}
+			
+			if ($this->myDBaseObj->getOption('UseNoteToSeller'))
+			{
+				$rowsDef = '';
+				$noteToSeller = $cartContents->saleNoteToSeller;	// 'TODO - Get User Note';
+				
+				$formHTML .=  '
+				<tr class="stageshow-boxoffice-formRow">
+				<td class="stageshow-boxoffice-formFieldID">'.__('Message To Seller', $this->myDomain).'</td>
+				<td class="stageshow-boxoffice-formFieldValue" colspan="2">
+				<textarea name="saleNoteToSeller" id="saleNoteToSeller" '.$rowsDef.'>'.$noteToSeller.'</textarea>
+				</td>
+				</tr>
 				';
 			}
 			
@@ -588,7 +613,7 @@ if (!class_exists('StageShowPluginClass'))
 				$icon_url = STAGESHOW_ADMIN_IMAGES_URL.'stageshow16grey.png';
 				add_menu_page($ourPluginName, $ourPluginName, $adminCap, STAGESHOW_MENUPAGE_ADMINMENU, array(&$this, 'printAdminPage'), $icon_url);
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Overview', $this->myDomain),__('Overview', $this->myDomain),     $adminCap,                         STAGESHOW_MENUPAGE_ADMINMENU,    array(&$this, 'printAdminPage'));
-				if (isset($this->useAllocatedSeats) && $this->useAllocatedSeats)
+				if (isset($this->useAllocatedSeats))
 				{
 					add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Seating Plans', $this->myDomain), __('Seating Plans', $this->myDomain),      STAGESHOW_CAPABILITY_ADMINUSER,    STAGESHOW_MENUPAGE_SEATING,      array(&$this, 'printAdminPage'));					
 				}

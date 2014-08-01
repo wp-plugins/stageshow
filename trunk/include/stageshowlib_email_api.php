@@ -23,7 +23,7 @@ Copyright 2012 Malcolm Shergold
 require_once ABSPATH . WPINC . '/class-phpmailer.php';
 require_once ABSPATH . WPINC . '/class-smtp.php';
 		
-if (!class_exists('StageShowLibEMailAPIClass')) 
+if (!class_exists('StageShowLibMailer')) 
 {
 	class StageShowLibMailer extends PHPMailer
 	{
@@ -57,7 +57,10 @@ if (!class_exists('StageShowLibEMailAPIClass'))
 		}
 		
 	}
+}
 
+if (!class_exists('StageShowLibEMailAPIClass')) 
+{
 	class StageShowLibEMailAPIClass // Define class
 	{	
 		var $parentObj;

@@ -918,11 +918,50 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function GetShowID($showName)
 		{
-			$sql  = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
-			$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showName="'.$showName.'"';
+			if ($showName == '')
+			{
+				$showID = 0;
+			}
+			else if (is_numeric($showName))
+			{
+				$showID = $showName;
+			}
+			else
+			{
+				$sql  = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
+				$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showName="'.$showName.'"';
+				
+				$showsEntries = $this->get_results($sql);
+				$showID = (count($showsEntries) > 0) ? $showsEntries[0]->showID : 0;				
+			}
 			
-			$showsEntries = $this->get_results($sql);
-			return (count($showsEntries) > 0) ? $showsEntries[0]->showID : 0;
+			return $showID;
+		}
+		
+		function GetPerfID($showName, $perfDate)
+		{
+			if (is_numeric($perfDate))
+			{
+				$perfID = $perfDate;
+			}
+			else if (($showName == '') || ($perfDate == ''))
+			{
+				$perfID = 0;
+			}
+			else 
+			{
+				$showID = $this->GetShowID($showName);
+				
+				$sql  = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
+				$sql .= " LEFT JOIN ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.showID='.STAGESHOW_SHOWS_TABLE.'.showID';
+				$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showID="'.$showID.'"';
+				$sql .= ' AND '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime="'.$perfDate.'"';
+				
+				$perfsEntries = $this->get_results($sql);
+				$perfID = (count($perfsEntries) > 0) ? $perfsEntries[0]->perfID : 0;
+			}
+			
+			return $perfID;
 		}
 		
 		function CanDeleteShow($showEntry)
@@ -1236,13 +1275,7 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function GetPricesListByShowID($showID, $activeOnly = false)
 		{
-			if (!is_numeric($showID))
-			{
-				$showID = $this->GetShowID($showID);
-				if ($showID == 0) 
-					return array();
-			}
-			
+			$showID = $this->GetShowID($showID);
 			$sqlFilters['showID'] = $showID;
 			return $this->GetPricesList($sqlFilters, $activeOnly);
 		}

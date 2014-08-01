@@ -139,3 +139,42 @@ function stageshow_OnSeatsLoad()
 	}
 }
 
+function stageshow_OnClickAdd(obj)
+{
+	if (typeof stageshow_OnClickAdd == 'function') 
+	{ 
+  		stageshow_OnClickAdd(obj); 
+	}	
+}
+
+function stageshow_OnClickSelectseats(obj)
+{
+	if (typeof stageshowCustom_OnClickSelectseats == 'function') 
+	{ 
+  		stageshowCustom_OnClickSelectseats(obj); 
+	}	
+}
+
+function stageshow_OnClickSeatsselected(obj)
+{
+	if (typeof stageshowCustom_OnClickSeatsselected == 'function') 
+	{ 
+  		stageshowCustom_OnClickSeatsselected(obj); 
+	}	
+}
+
+function stageshow_OnClickReserve(obj)
+{
+	if (typeof stageshowCustom_OnClickReserve == 'function') 
+	{ 
+  		stageshowCustom_OnClickReserve(obj); 
+	}	
+}
+
+function stageshow_OnClickCheckout(obj)
+{
+	if (typeof stageshowCustom_OnClickCheckout == 'function') 
+	{ 
+  		stageshowCustom_OnClickCheckout(obj); 
+	}
+}
