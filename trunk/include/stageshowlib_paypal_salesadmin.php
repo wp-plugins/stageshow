@@ -461,6 +461,27 @@ if (!class_exists('PayPalSalesAdminClass'))
 			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'SetSaleQty');
 		}
 		
+		function DoBulkPreAction($bulkAction, $recordId)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			// Reset error count etc. on first pass
+			if (!isset($this->errorCount)) $this->errorCount = 0;
+			
+			switch ($bulkAction)
+			{
+				case StageShowLibAdminListClass::BULKACTION_DELETE:
+				default:
+					// FUNCTIONALITY: Price Plans - Bulk Action Delete - Check Plan Exists
+					$saleResults = $this->myDBaseObj->GetSale($recordId);
+					if (count($saleResults) == 0)
+						$this->errorCount++;
+					return ($this->errorCount > 0);
+			}
+			
+			return false;
+		}
+		
 		function DoBulkAction($bulkAction, $recordId)
 		{
 			switch ($bulkAction)
@@ -480,8 +501,10 @@ if (!class_exists('PayPalSalesAdminClass'))
 			switch ($bulkAction)
 			{
 				case StageShowLibAdminListClass::BULKACTION_DELETE:		
-					if ($actionCount > 0)		
-						$actionMsg = ($actionCount == 1) ? __("1 Sale has been deleted", $this->myDomain) : $actionCount.' '.__("Sales have been deleted", $this->myDomain); 
+					if ($this->errorCount > 0)
+						$actionMsg = $this->errorCount . ' ' . _n("sale Entry does not exist in Database", "Sale Entries do not exist in Database", $this->errorCount, $this->myDomain);
+					else if ($actionCount > 0)		
+						$actionMsg = $actionCount . ' ' . _n("Sale has been deleted", "Sales have been deleted", $actionCount, $this->myDomain);
 					else
 						$actionMsg =  __("Nothing to Delete", $this->myDomain);
 					break;

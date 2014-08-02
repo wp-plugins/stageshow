@@ -105,14 +105,6 @@ if (!class_exists('StageShowPluginClass'))
 		// Action Links
 		function sshow_plugin_action_links_filter($links, $file)
 		{
-			if (dirname($file) === STAGESHOW_FOLDER)
-			{
-				$actionMsg = $this->myDBaseObj->GetPluginStatus();
-				if ($actionMsg != '')
-				{
-					$links['autoupdate'] = '<div class="update-message">'.$actionMsg.'</div>';
-				}
-			}
 /*			
 			static $this_plugin;
 			$sshow_donate_link = "";

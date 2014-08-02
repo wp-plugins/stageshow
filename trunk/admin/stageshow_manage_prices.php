@@ -299,8 +299,11 @@ if (!class_exists('StageShowPricesAdminClass'))
 				// FUNCTIONALITY: Prices - Bulk Action Delete - Block if tickets sold
 				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// Don't delete if any tickets have been sold for this performance
+					$priceEntry = $myDBaseObj->GetPricesListByPriceID($recordId);
 					$results = $myDBaseObj->GetSalesListByPriceID($recordId);
-					if (count($results) > 0)
+					if (count($priceEntry) == 0)
+						$this->errorCount++;
+					else if (count($results) > 0)
 						$this->blockCount++;
 					return (($this->errorCount > 0) || ($this->blockCount > 0));
 			}
@@ -333,11 +336,11 @@ if (!class_exists('StageShowPricesAdminClass'))
 				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Prices - Bulk Action Delete - Output Action Status Message
 					if ($this->errorCount > 0)
-						$actionMsg = ($this->errorCount == 1) ? __("1 Price has a Database Error", $this->myDomain) : $errorCount . ' ' . __("Prices have a Database Error", $this->myDomain);
+						$actionMsg = $this->errorCount . ' ' . _n("Price does not exist in Database", "Prices do not exist in Database", $this->errorCount, $this->myDomain);
 					else if ($this->blockCount > 0)
-						$actionMsg = ($this->blockCount == 1) ? __("1 Price cannot be deleted", $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain) : $this->blockCount . ' ' . __("Prices cannot be deleted", $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain);
+						$actionMsg = $this->blockCount . ' ' . _n("Price cannot be deleted", "Prices cannot be deleted", $this->blockCount, $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain);
 					else if ($actionCount > 0)
-						$actionMsg = ($actionCount == 1) ? __("1 Price has been deleted", $this->myDomain) : $actionCount . ' ' . __("Prices have been deleted", $this->myDomain);
+						$actionMsg = $actionCount . ' ' . _n("Price has been deleted", "Prices have been deleted", $actionCount, $this->myDomain);
 					else
 						$actionMsg = __("Nothing to Delete", $this->myDomain);
 					break;

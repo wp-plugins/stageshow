@@ -230,7 +230,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 					// Don't delete if any tickets have been sold for this performance
 					$delShowEntry = $myDBaseObj->GetShowsList($recordId);
 					if (count($delShowEntry) == 0)
-						$errorCount++;
+						$this->errorCount++;
 					else if (!$myDBaseObj->CanDeleteShow($delShowEntry[0]))
 						$this->blockCount++;
 					return (($this->errorCount > 0) || ($this->blockCount > 0));
@@ -292,11 +292,11 @@ if (!class_exists('StageShowShowsAdminClass'))
 				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Shows - Bulk Action Delete - Output Action Status Message
 					if ($this->errorCount > 0)
-						$actionMsg = ($this->errorCount == 1) ? __("1 Show has a Database Error", $this->myDomain) : $errorCount . ' ' . __("Shows have a Database Error", $this->myDomain);
+						$actionMsg = $this->errorCount . ' ' . _n("Show does not exist in Database", "Shows do not exist in Database", $this->errorCount, $this->myDomain);
 					else if ($this->blockCount > 0)
-						$actionMsg = ($this->blockCount == 1) ? __("1 Show cannot be deleted", $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain) : $this->blockCount . ' ' . __("Shows cannot be deleted", $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain);
+						$actionMsg = $this->blockCount . ' ' . _n("Show cannot be deleted", "Shows cannot be deleted", $this->blockCount, $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain);
 					else if ($actionCount > 0)
-						$actionMsg = ($actionCount == 1) ? __("1 Show has been deleted", $this->myDomain) : $actionCount . ' ' . __("Shows have been deleted", $this->myDomain);
+						$actionMsg = $actionCount . ' ' . _n("Show has been deleted", "Shows have been deleted", $actionCount, $this->myDomain);
 					else
 						$actionMsg = __("Nothing to Delete", $this->myDomain);
 					break;
@@ -304,7 +304,7 @@ if (!class_exists('StageShowShowsAdminClass'))
 				case StageShowLibAdminListClass::BULKACTION_TOGGLE:
 					// FUNCTIONALITY: Shows - Bulk Action Delete - Output Action Status Message
 					if ($actionCount > 0)
-						$actionMsg = ($actionCount == 1) ? __("1 Show has been Activated/Deactivated", $this->myDomain) : $actionCount . ' ' . __("Shows have been Activated/Deactivated", $this->myDomain);
+						$actionMsg = $actionCount . ' ' . _n("Show has been Activated/Deactivated", "Shows have been Activated/Deactivated", $actionCount, $this->myDomain);
 					else
 						$actionMsg = __("Nothing to Activate/Deactivate", $this->myDomain);
 					break;
