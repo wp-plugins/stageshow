@@ -60,8 +60,6 @@ if (!class_exists('StageShowPluginClass'))
 			// Add a reference to the header
 			add_action('wp_head', array(&$this, 'OutputMetaTag'));
 			
-			add_filter('plugin_action_links', array(&$this, 'sshow_plugin_action_links_filter'), 10, 2);
-
 			$this->myDBaseObj->pluginSlug = 'stageshow';
 			$this->adminClassFilePrefix = 'stageshow';
 			$this->adminClassPrefix = 'StageShow';
@@ -102,25 +100,6 @@ if (!class_exists('StageShowPluginClass'))
 			wp_enqueue_style(STAGESHOW_CODE_PREFIX, STAGESHOW_STYLESHEET_URL); // StageShow core style
 		}
 		
-		// Action Links
-		function sshow_plugin_action_links_filter($links, $file)
-		{
-/*			
-			static $this_plugin;
-			$sshow_donate_link = "";
-			$sshow_donate_text = "Make Donation";
-			$sshow_donate_alt = "If you like my plugin, please make a small Donation.";
-			
-			if(!$this_plugin) $this_plugin = plugin_basename(__FILE__);
-			if( $file == $this_plugin )
-			{
-				$donateHREF = "<a href='$sshow_donate_link' title='$sshow_donate_alt' target='_blank'>" . $sshow_donate_text . '</a> ';
-				$links = array_merge(array($donateHREF), $links);
-			}
-*/
-			return $links;
-		}
-
 		//Returns an array of admin options
 		function getStageshowOptions() 
 		{
