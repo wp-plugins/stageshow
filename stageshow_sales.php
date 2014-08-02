@@ -345,7 +345,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 					<select name="'.$quantityTagId.'">
 					<option value="1" selected="">1</option>
 					';
-				for ($no=2; $no<=$myDBaseObj->adminOptions['MaxTicketQty']; $no++)
+				$maxQty = $seatsAvailable <= $myDBaseObj->adminOptions['MaxTicketQty'] ? $seatsAvailable : $myDBaseObj->adminOptions['MaxTicketQty'];
+				for ($no=2; $no<=$maxQty; $no++)
 					$storeRowHTML .= '<option value="'.$no.'">'.$no.'</option>'."\n";
 				$storeRowHTML .= '
 					</select>
@@ -383,7 +384,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 					{
 						$storeRowHTML .= '
 							<tr>
-							<td colspan="4" class="stageshow-boxoffice-available">'.$seatsAvailable.' '.__('Seats Available', $this->myDomain).'</td>
+							<td colspan="4" class="stageshow-boxoffice-available">'.$seatsAvailable.' '._n('Seat Available', 'Seats Available', $seatsAvailable, $this->myDomain).'</td>
 							</tr>
 							';
 					}				

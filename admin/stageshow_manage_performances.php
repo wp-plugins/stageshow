@@ -431,11 +431,11 @@ PerfIDList.push('.$result->perfID.');
 				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Performances - Bulk Action Delete - Output Action Status Message
 					if ($this->errorCount > 0)
-						$actionMsg = ($this->errorCount == 1) ? __("1 Performance has a Database Error", $this->myDomain) : $errorCount . ' ' . __("Performances have a Database Error", $this->myDomain);
+						$actionMsg = $this->errorCount . ' ' . _n("Performance does not exist in Database", "Performances do not exist in Database", $this->errorCount, $this->myDomain);
 					else if ($this->blockCount > 0)
-						$actionMsg = ($this->blockCount == 1) ? __("1 Performance cannot be deleted", $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain) : $this->blockCount . ' ' . __("Performances cannot be deleted", $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain);
+						$actionMsg = $this->blockCount . ' ' . _n("Performance cannot be deleted", "Performances cannot be deleted", $this->blockCount, $this->myDomain).' - '.__("Tickets already sold!", $this->myDomain);
 					else if ($actionCount > 0)
-						$actionMsg = ($actionCount == 1) ? __("1 Performance has been deleted", $this->myDomain) : $actionCount . ' ' . __("Performances have been deleted", $this->myDomain);
+						$actionMsg = $actionCount . ' ' . _n("Performance has been deleted", "Performances have been deleted", $actionCount, $this->myDomain);
 					else
 						$actionMsg = __("Nothing to Delete", $this->myDomain);
 					break;
@@ -443,7 +443,7 @@ PerfIDList.push('.$result->perfID.');
 				case StageShowLibAdminListClass::BULKACTION_TOGGLE:
 					// FUNCTIONALITY: Performances - Bulk Action Activate/Deactivate - Output Action Status Message
 					if ($actionCount > 0)
-						$actionMsg = ($actionCount == 1) ? __("1 Performance has been Activated/Deactivated", $this->myDomain) : $actionCount . ' ' . __("Performances have been Activated/Deactivated", $this->myDomain);
+						$actionMsg = $actionCount . ' ' . _n("Performance has been Activated/Deactivated", "Performances have been Activated/Deactivated", $actionCount, $this->myDomain);
 					else
 						$actionMsg = __("Nothing to Activate/Deactivate", $this->myDomain);
 					break;

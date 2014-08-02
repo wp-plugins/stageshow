@@ -730,7 +730,19 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$this->SaveTrolleyContents($cartContents);
 			}
 				
-			$runningTotal = 0;			
+			$runningTotal = 0;		
+			
+			if (isset($this->editpage))
+			{
+				$checkoutNote = '';
+				$checkoutNotePosn = '';
+			}			
+			else
+			{
+				$checkoutNote = $myDBaseObj->getOption('CheckoutNote');
+				$checkoutNotePosn = $myDBaseObj->getOption('CheckoutNotePosn');
+			}
+				
 			foreach ($cartContents->rows as $cartIndex => $cartEntry)
 			{				
 				$itemID = $cartEntry->itemID;
@@ -755,16 +767,16 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				{
 					$trolleyHeading = $this->adminPageActive ? __('Selected Seats', $this->myDomain) : __('Your Shopping Trolley', $this->myDomain);
 					echo '<div class="'.$this->cssTrolleyBaseID.'-header"><h2>'."$trolleyHeading</h2></div>\n";
-					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'header') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+					if ( ($checkoutNotePosn == 'header') && ($checkoutNote != '') )
 					{
-						echo $myDBaseObj->getOption('CheckoutNote');
+						echo $checkoutNote;
 					}
 					
 					echo '<div class="'.$this->cssTrolleyBaseID.'">'."\n";
 					echo '<table class="'.$this->cssTrolleyBaseID.'-table">'."\n";
-					if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'titles') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+					if ( ($checkoutNotePosn == 'titles') && ($checkoutNote != '') )
 					{
-						echo $myDBaseObj->getOption('CheckoutNote');
+						echo $checkoutNote;
 					}
 					$this->OutputContent_OnlineTrolleyHeader($priceEntry);
 						
@@ -809,9 +821,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				echo '<td>&nbsp;</td>'."\n";
 				echo "</tr>\n";
 			
-				if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'above') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+				if ( ($checkoutNotePosn == 'above') && ($checkoutNote != '') )
 				{
-					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
+					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
 				}
 					
 				if (!isset($this->cart_ReadOnly))
@@ -849,23 +861,23 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					echo "</tr>\n";
 				}
 				
-				if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'below') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+				if ( ($checkoutNotePosn == 'below') && ($checkoutNote != '') )
 				{
-					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
+					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
 				}
 					
 				if ($myDBaseObj->getOption('CheckoutNoteToSeller'))
 				{
-					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$myDBaseObj->getOption('CheckoutNote')."</td></tr>\n";
+					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
 				}
 					
 				echo "</table>\n";
 				echo $hiddenTags;						
 				echo '</div>'."\n";
 				
-				if ( ($myDBaseObj->getOption('CheckoutNotePosn') == 'bottom') && ($myDBaseObj->getOption('CheckoutNote') != '') )
+				if ( ($checkoutNotePosn == 'bottom') && ($checkoutNote != '') )
 				{
-					echo $myDBaseObj->getOption('CheckoutNote');
+					echo $checkoutNote;
 				}
 				
 			}		

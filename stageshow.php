@@ -2,7 +2,7 @@
 /* 
 Plugin Name: StageShow
 Plugin URI: http://www.corondeck.co.uk/StageShow/
-Version: 3.9
+Version: 3.9.1
 Author: Malcolm Shergold
 Author URI: http://www.corondeck.co.uk
 Description: A Wordpress Plugin to sell theatre tickets online
