@@ -70,15 +70,23 @@ define('STAGESHOW_FILEPATH_EDITLEN', 95);
 define('STAGESHOW_URL_TEXTLEN',110);
 	
 define('STAGESHOW_PRICE_UNKNOWN',-100);
-	
+
+/*
+------------------------------------------------------------------------
+	This section contains definitions that have default values
+	set here, but which can have site specific values defined 
+	by an entry in the wp-config.php file which will then 
+	replace this default value.
+------------------------------------------------------------------------
+*/
 if (!defined('STAGESHOW_NEWS_UPDATE_INTERVAL'))
 	define('STAGESHOW_NEWS_UPDATE_INTERVAL', 10);
 
 if (!defined('STAGESHOW_MAXTICKETCOUNT'))
-	define('STAGESHOW_MAXTICKETCOUNT', 4);
+	define('STAGESHOW_MAXTICKETCOUNT', 4);	// Default value for "Max Ticket Qty" in settings
 
 if (!defined('STAGESHOW_MAX_TICKETSEATS'))
-	define('STAGESHOW_MAX_TICKETSEATS', 8);
+	define('STAGESHOW_MAX_TICKETSEATS', 8);	// Maximum number of tickets in drop down quantity selector (Prices and Price Plans pages)
 
 if (!defined('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH'))
 	define('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH', 'stageshow_SaleTimeoutEMail.php');
