@@ -32,14 +32,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 		{
 			$this->cssBaseID = "stageshow-boxoffice";
 		
-			// nameColID and refColID are defined here
-			// Note: The same text strings must be used on admin pages for translations to work
-			$this->nameColID = 'Date & Time';
-			$this->cssNameColID = "datetime";
-			
-			$this->refColID = 'Ticket Type';
-			$this->cssRefColID = "type";
-
 			if (defined('STAGESHOW_SHORTCODE'))
 			{
 				$this->shortcode = STAGESHOW_SHORTCODE;
@@ -54,6 +46,21 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}
 			
 			parent::__construct();
+			
+			// colID and cssColID are re-defined here 
+			$this->colID['name'] = defined('STAGESHOW_BOXOFFICECOL_NAME') ? STAGESHOW_BOXOFFICECOL_NAME : __('Show', $this->myDomain);
+			$this->cssColID['name'] = "show";					
+			$this->colID['datetime'] = defined('STAGESHOW_BOXOFFICECOL_DATETIME') ? STAGESHOW_BOXOFFICECOL_DATETIME : __('Date & Time', $this->myDomain);
+			$this->cssColID['datetime'] = "datetime";		
+			$this->colID['ref'] = defined('STAGESHOW_BOXOFFICECOL_TICKET') ? STAGESHOW_BOXOFFICECOL_TICKET : __('Ticket Type', $this->myDomain);
+			$this->cssColID['ref'] = "type";
+			$this->colID['price'] = defined('STAGESHOW_BOXOFFICECOL_PRICE') ? STAGESHOW_BOXOFFICECOL_PRICE : __('Price', $this->myDomain);
+			$this->cssColID['price'] = "price";
+			$this->colID['qty'] = defined('STAGESHOW_BOXOFFICECOL_QTY') ? STAGESHOW_BOXOFFICECOL_QTY : __('Quantity', $this->myDomain);
+			$this->cssColID['qty'] = "qty";
+				
+			$this->colID['cartqty'] = defined('STAGESHOW_BOXOFFICECOL_CARTQTY') ? STAGESHOW_BOXOFFICECOL_CARTQTY : __('Quantity', $this->myDomain);
+			$this->cssColID['cartqty'] = "qty";	
 		}
 	
 		function OutputContent_GetAtts( $atts )
@@ -418,7 +425,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 		
 		function OutputContent_OnlineTrolleyDetailsHeaders()
 		{
-			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.__('Quantity', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['cartqty'].'">'.$this->colID['cartqty'].'</td>'."\n";
 			return 1;
 		}
 		
@@ -427,14 +434,13 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$this->trolleyHeaderCols = 5;	// Count of the number of columns in the header
 			
 			echo '<tr class="'.$this->cssTrolleyBaseID.'-titles">'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.__('Show', $this->myDomain).'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.__('Date & Time', $this->myDomain).'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-type">'.__('Ticket Type', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['name'].'">'.$this->colID['name'].'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['datetime'].'">'.$this->colID['datetime'].'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['ref'].'">'.$this->colID['ref'].'</td>'."\n";
 			$this->trolleyHeaderCols += $this->OutputContent_OnlineTrolleyDetailsHeaders();
-			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.__('Price', $this->myDomain).'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['price'].'">'.$this->colID['price'].'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
 			echo "</tr>\n";
-			
 		}
 				
 		function GetButtonTypeDef($buttonID, $buttonName = '')
@@ -464,11 +470,33 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $buttonTypeDef;
 		}
 				
+		function OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent='')
+		{
+			$removeLinkText = __('Remove', $this->myDomain);	
+			if (!defined('STAGESHOW_REMOVEBUTTON_URL'))
+			{
+				$removeLinkContent = parent::OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent);
+			}
+			else if (STAGESHOW_REMOVEBUTTON_URL != '')
+			{
+				$removeLinkContent = '<img alt='.$removeLinkText.' src="'.STAGESHOW_REMOVEBUTTON_URL.'">';
+				$removeLinkContent = parent::OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent);
+			}
+			else
+			{
+				$buttonName = 'RemoveTicketSale_'.$cartIndex;
+				$buttonType = $this->GetButtonTypeDef('remove', $buttonName);
+				$removeLinkContent =  '<input class="stageshow-boxoffice-button button-primary" '.$buttonType.' value="'.$removeLinkText.'"/>';
+			}
+
+			return $removeLinkContent;
+		}
+		
 		function OutputContent_OnlineCheckoutButton($cartContents)
 		{
 			if ($this->adminPageActive)
 			{
-				echo '<input class="button-primary" type="submit" name="'.$this->GetButtonID('editbuyer').'" value="'.__('Next', $this->myDomain).'"/>'."\n";
+				echo '<input class="stageshow-boxoffice-button button-primary" type="submit" name="'.$this->GetButtonID('editbuyer').'" value="'.__('Next', $this->myDomain).'"/>'."\n";
 				return;
 			}
 			
@@ -481,7 +509,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 		function OutputContent_OnlineTrolleyDetailsCols($priceEntry, $cartEntry)
 		{
 			$qty = $cartEntry->qty;
-			echo '<td class="'.$this->cssTrolleyBaseID.'-qty">'.$qty.'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['cartqty'].'">'.$qty.'</td>'."\n";
 		}
 		
 		function OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry)
@@ -497,16 +525,16 @@ if (!class_exists('StageShowSalesPluginClass'))
 						
 			if ($showName != '')
 			{
-				echo '<td class="'.$this->cssTrolleyBaseID.'-show">'.$showName.'</td>'."\n";
-				echo '<td class="'.$this->cssTrolleyBaseID.'-datetime">'.$perfDateTime.'</td>'."\n";
+				echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['name'].'">'.$showName.'</td>'."\n";
+				echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['datetime'].'">'.$perfDateTime.'</td>'."\n";
 			}
 			else
 			{
 				echo '<td colspan="2">&nbsp;</td>'."\n";
 			}
-			echo '<td class="'.$this->cssTrolleyBaseID.'-type">'.$priceType.'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['ref'].'">'.$priceType.'</td>'."\n";
 			$this->OutputContent_OnlineTrolleyDetailsCols($priceEntry, $cartEntry);
-			echo '<td class="'.$this->cssTrolleyBaseID.'-price">'.$formattedTotal.'</td>'."\n";
+			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['price'].'">'.$formattedTotal.'</td>'."\n";
 
 			return $total;
 		}
