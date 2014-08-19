@@ -5,7 +5,7 @@ if (defined('STAGESHOW_FOLDER'))
 	if (STAGESHOW_FOLDER != dirname(plugin_basename(__FILE__)))
 	{
 		echo "ERROR Activating ".dirname(plugin_basename(__FILE__))."<br>\n";
-		echo "Dectivate ".STAGESHOW_FOLDER." First<br>\n";
+		echo "Deactivate ".STAGESHOW_FOLDER." First<br>\n";
 		die;
 	}
 	return;

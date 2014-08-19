@@ -42,6 +42,17 @@ if (!class_exists('StageShowPluginClass'))
 			
 			$myDBaseObj = $this->CreateDBClass($caller);
 			
+			if ($myDBaseObj->getDbgOption('Dev_ShowGET'))
+			{
+				echo "<br>".'$_GET'."<br>\n";
+				print_r($_GET);
+			}
+			if ($myDBaseObj->getDbgOption('Dev_ShowPOST'))
+			{
+				echo "<br>".'$_POST'."<br>\n";
+				print_r($_POST);
+			}
+			
 			$myDBaseObj->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
 			$this->myDBaseObj = $myDBaseObj;
 					
