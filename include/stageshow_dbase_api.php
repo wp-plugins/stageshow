@@ -1541,7 +1541,8 @@ if (!class_exists('StageShowDBaseClass'))
 			if (isset($sqlFilters['addTicketFee']))
 			{
 				$sql  = "ticketID, saleTxnId, saleStatus, saleFirstName, saleLastName, showName, perfDateTime, priceType, ticketQty, ticketPaid, ";
-				$sql .= "(saleTransactionFee+saleFee)*(ticketQty)/saleTotalQty AS ticketFee, ";
+				$sql .= "saleFee*(ticketQty)/saleTotalQty AS ticketFee, ";
+				$sql .= "saleTransactionFee*(ticketQty)/saleTotalQty AS ticketCharge, ";
 				$sql .= "saleDateTime, saleEMail, salePPPhone, salePPStreet, salePPCity, salePPState, salePPZip, salePPCountry, perfRef";
 			}
 			else

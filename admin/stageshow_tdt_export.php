@@ -124,6 +124,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'showOpens'          => __('Show Opens', $this->myDomain),
 				'showState'          => __('Show State', $this->myDomain),
 				'ticketID'           => __('Ticket ID', $this->myDomain),
+				'ticketCharge'       => __('Ticket Charge', $this->myDomain),
 				'ticketFee'          => __('Ticket Fee', $this->myDomain),
 				'ticketName'         => __('Ticket Name', $this->myDomain),
 				'ticketPaid'         => __('Ticket Paid', $this->myDomain),

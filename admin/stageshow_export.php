@@ -25,6 +25,8 @@ if (!defined('STAGESHOW_DBASE_CLASS'))
 	include '../../../../wp-config.php';
 }
 
+$stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
+
 if ( isset( $_GET['download'] ) )
 {
 	switch ( $_GET['export_format'] )

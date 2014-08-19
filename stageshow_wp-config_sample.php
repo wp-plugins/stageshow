@@ -1,13 +1,8 @@
 <?php
 /* 
-Plugin Name: StageShow
-Plugin URI: http://www.corondeck.co.uk/StageShow/
-Version: 3.9.3
-Author: Malcolm Shergold
-Author URI: http://www.corondeck.co.uk
-Description: A Wordpress Plugin to sell theatre tickets online
+Description: StageShow Plugin Top Level Code
  
-Copyright 2013 Malcolm Shergold
+Copyright 2012 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,24 +13,28 @@ Copyright 2013 Malcolm Shergold
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-if (defined('IPN_CALLBACK'))
-{
-	if (IPN_CALLBACK != 'STAGESHOW_VARIANT')
-		return;
-}
+/*
+	This file lists examples of definitions of Advanced Customisation constants
+	
+	The file is never loaded when running StageShow
+*/
 
-define('STAGESHOW_CODE_PREFIX', 'stageshow');
+/* --------------------------------------------------------------------------------
+	Box-Office Output Date & Time Format
+	
+	The default output format is 'd-m-Y H:i'
+	
+-------------------------------------------------------------------------------- */
+define('STAGESHOW_DATETIME_BOXOFFICE_FORMAT', 'd-m-Y H:i');
 
-include 'stageshow_defs.php';
-include 'stageshow_main.php';
+define('STAGESHOWLIB_IMAGESURL', 'http://asite.com/images/');
 
-new StageShowPluginClass(__FILE__);
-		
+
 ?>

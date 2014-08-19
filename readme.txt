@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.9.1
-Stable tag: 3.9.2
+Tested up to: 3.9.2
+Stable tag: 3.9.3
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -188,6 +188,12 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
+= 3.9.3 (19/08/2014) =
+* Bug Fix: Invalid Class name in stageshow_export.php on line 34 (since 3.8)
+* Added sample wp-config.php file (stageshow_wp-config_sample.php)
+* Added $_GET and $_POST to debug output options
+* Separated Booking Fee and PayPal Fees in TDT Export
+
 = 3.9.2 (08/08/2014) =
 * Bug Fix: Entries with empty filenames added when Custom CSS or JS files are not defined
 * Bug Fix: Note to Seller entry lost when "Select Seats" is selected (StageShowGold)
@@ -244,7 +250,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 * Seat Template has Decoded seat names as title tags (StageShowGold)
 
 = 3.8.3 (16/06/2014) =
-* Bug Fix: StageShow displays expired performances when ther are non-expired performances (StageShow)
+* Bug Fix: StageShow displays expired performances when there are non-expired performances (StageShow)
 * Bug Fix: layoutNames not defined error when reporting zone spec parsing error (StageShowGold)
 * Added DecodedSeatIDs as title param in Seat Layout Template seats tags (StageShowGold)
 
