@@ -278,8 +278,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		static function FormatTimestampForDisplay($timestamp)
 		{
-			if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
-				$dateFormat = STAGESHOW_DATETIME_BOXOFFICE_FORMAT;
+			if (defined('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT'))
+				$dateFormat = STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT;
 			else
 				// Use Wordpress Date and Time Format
 				$dateFormat = get_option( 'date_format' ).' '.get_option( 'time_format' );
@@ -335,32 +335,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 			
 			return null;
-		}
-		
-		function GetCurrencySymbol($currency)	// TODO - redundant?
-		{
-			$currencySymbol = '';
-			
-			$currencyDef = StageShowLibSalesDBaseClass::GetCurrencyDef($currency);
-			if (isset($currencyDef['Symbol']))
-			{
-				$currencySymbol = $currencyDef['Symbol'];
-			}
-			
-			return $currencySymbol;
-		}
-		
-		function GetCurrencyFormat($currency)	// TODO - redundant?
-		{
-			$currencyFormat = '';
-			
-			$currencyDef = StageShowLibSalesDBaseClass::GetCurrencyDef($currency);
-			if (isset($currencyDef['Format']))
-			{
-				$currencyFormat = $currencyDef['Format'];
-			}
-			
-			return $currencyFormat;
 		}
 		
 		function FormatCurrency($amount, $asHTML = true)
@@ -499,6 +473,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						salePPCountry VARCHAR('.PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN.'),
 						salePPPhone VARCHAR('.PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN.'),
 						salePaid DECIMAL(9,2) NOT NULL,
+						saleDonation DECIMAL(9,2) NOT NULL DEFAULT 0,
 						saleTransactionFee DECIMAL(9,2) NOT NULL DEFAULT 0,
 						saleFee DECIMAL(9,2) NOT NULL,
 						saleTxnId VARCHAR('.PAYPAL_APILIB_PPSALETXNID_TEXTLEN.') NOT NULL,
@@ -614,6 +589,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$salesVals['saleStatus'] = $saleStatus;
 			
 			$salesVals['saleTransactionFee'] = $this->GetTransactionFee();
+			$salesVals['saleDonation'] = 0;
 			
 			return $this->AddSale($saleDateTime, $salesVals);
 		}
@@ -656,6 +632,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				
 				'saleEMail', 
 				'salePaid', 
+				'saleDonation', 
 				'saleTransactionFee', 
 				'saleFee', 
 				'salePPStreet', 
@@ -933,6 +910,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				case '[saleFee]':
 				case '[saleTransactionFee]':
 				case '[salePaid]':
+				case '[saleDonation]':
 					return true;
 			}
 			
@@ -990,6 +968,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'[saleLastName]' => 'saleLastName',
 				'[saleEMail]' => 'saleEMail',
 				'[saleTransactionFee]' => 'saleTransactionFee',
+				'[saleDonation]' => 'saleDonation',
 				'[salePaid]' => 'salePaid',
 				'[saleTxnId]' => 'saleTxnId',
 				'[saleStatus]' => 'saleStatus',
@@ -1287,9 +1266,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 					$saleVals['salePaid'] = '0.0';
 					$saleVals['saleFee'] = '0.0';
-					if (isset($results['transactionfee']))
+					if (isset($results['saleTransactionfee']))
 					{
-						$saleVals['saleTransactionFee'] = $results['transactionfee'];
+						$saleVals['saleTransactionFee'] = $results['saleTransactionfee'];
+					}
+					if (isset($results['saleDonation']))
+					{
+						$saleVals['saleDonation'] = $results['saleDonation'];
 					}
 					if (isset($results['saleNoteToSeller']))
 					{

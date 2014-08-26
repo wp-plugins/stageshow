@@ -71,6 +71,11 @@ define('STAGESHOW_URL_TEXTLEN',110);
 	
 define('STAGESHOW_PRICE_UNKNOWN',-100);
 
+if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
+{
+	define('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT',STAGESHOW_DATETIME_BOXOFFICE_FORMAT);
+}
+
 /*
 ------------------------------------------------------------------------
 	This section contains definitions that have default values

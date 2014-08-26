@@ -22,7 +22,8 @@ Copyright 2012 Malcolm Shergold
 	
 if (!class_exists('StageShowLibTableTestEMailClass')) 
 {
-	define('SALESMAN_TESTSALES_LIMIT', 20);
+	if (!defined('STAGESHOWLIB_TESTSALES_LIMIT')) 
+		define('STAGESHOWLIB_TESTSALES_LIMIT', 20);
 	
 	class StageShowLibTableTestEMailClass
 	{
@@ -30,7 +31,7 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 		{	
 			$myDBaseObj = $caller->myDBaseObj;
 			
-			echo '<h3>'.__('EMail Sale Test', $myDBaseObj->get_domain()).'</h3>';
+			echo '<h3>'.__('Sale EMail Test', $myDBaseObj->get_domain()).'</h3>';
 			
 			if (isset($_POST['DivertEMailTo']))
 				$DivertEMailTo = $_POST['DivertEMailTo'];
@@ -39,7 +40,7 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 			else
 				$DivertEMailTo = get_bloginfo('admin_email');
 
-			$sqlFilters['limit'] = SALESMAN_TESTSALES_LIMIT;
+			$sqlFilters['limit'] = STAGESHOWLIB_TESTSALES_LIMIT;
 			$results = $myDBaseObj->GetAllSalesList($sqlFilters);		// Get list of sales (one row per sale)
 			
 			if (isset($_POST['testbutton_EMailSale'])) 
@@ -69,13 +70,7 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 	<?php $caller->WPNonceField(); ?>
 	<table class="stageshow-form-table">			
 		<tr valign="top">
-      <td><?php _e('Divert EMail To', $myDBaseObj->get_domain()); ?>:</td>
-			<td>
-				<input name="DivertEMailTo" id="DivertEMailTo" type="text" maxlength="110" size="50" value="<?php echo $DivertEMailTo; ?>" />
-			</td>
-		</tr>
-		<tr valign="top">
-      <td><?php _e('Selected Sale', $myDBaseObj->get_domain()); ?>:</td>
+			<td vertical-align="middle"><?php _e('Selected Sale', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
 				<select name="TestSaleID" id="TestSaleID">
 <?php		
@@ -84,6 +79,12 @@ foreach($results as $result) {
 }
 ?>
 				</select>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td vertical-align="middle"><?php _e('Divert EMail To', $myDBaseObj->get_domain()); ?>:</td>
+			<td>
+				<input name="DivertEMailTo" id="DivertEMailTo" type="text" maxlength="110" size="50" value="<?php echo $DivertEMailTo; ?>" />
 			</td>
 		</tr>
 		<tr valign="top">

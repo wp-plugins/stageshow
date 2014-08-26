@@ -3,7 +3,7 @@ function stageshow_AddEntryToCheckout(customHTMLObjId)
 {	
 	/* Append custom HTML element value to a Standard Checkout Value */
 	/* Note:
-		Custom HTML can be added to the checkout by enetering it as the "Checkout Note"
+		Custom HTML can be added to the checkout by entering it as the "Checkout Note"
 		setting on the "Advanced" tab of the StageShow Settings admin page.
 		
 		For example HTML to add a drop down selection box is as follows:
