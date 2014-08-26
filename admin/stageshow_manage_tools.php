@@ -318,7 +318,11 @@ if (!class_exists('StageShowToolsAdminClass'))
 				{
 					echo '<tr><td>'.__('Booking Fee', $this->myDomain).':</td><td>'.$salerecord->saleTransactionFee.'</td></tr>'."\n";
 				}
-				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+				if ($salerecord->saleDonation > 0)
+				{
+					echo '<tr><td>'.__('Donation', $this->myDomain).':</td><td>'.$salerecord->saleDonation.'</td></tr>'."\n";
+				}
+				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->saleDonation.'</td></tr>'."\n";
 			}
 			
 			$salesList = $this->CreateToolsAdminDetailsListObject($env);		

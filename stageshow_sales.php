@@ -443,18 +443,16 @@ if (!class_exists('StageShowSalesPluginClass'))
 			echo "</tr>\n";
 		}
 				
-		function GetButtonTypeDef($buttonID, $buttonName = '')
+		function GetButtonTypeDef($buttonID, $buttonName = '', $buttonType = 'submit')
 		{
-			$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName);
-			
-			$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
-			$buttonTypeDef .= ' onClick="'.$onClickHandler.'(this)"';
+			$buttonTypeDef = '';
 			
 			switch ($buttonID)
 			{
 				case 'add':
 					if (defined('STAGESHOW_ADDBUTTON_URL'))
 					{
+						$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, 'image');
 						$buttonTypeDef .= ' src="'.STAGESHOW_ADDBUTTON_URL.'"';
 					}
 					break;
@@ -462,10 +460,22 @@ if (!class_exists('StageShowSalesPluginClass'))
 				case 'checkout':
 					if (defined('STAGESHOW_CHECKOUTBUTTON_URL'))
 					{
+						$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, 'image');
 						$buttonTypeDef .= ' src="'.STAGESHOW_CHECKOUTBUTTON_URL.'"';
 					}
 					break;
+					
+				default:
+					break;					
 			}
+			
+			if ($buttonTypeDef == '')
+			{
+				$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName);
+			}
+
+			$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
+			$buttonTypeDef .= ' onClick="'.$onClickHandler.'(this)"';
 			
 			return $buttonTypeDef;
 		}
@@ -541,7 +551,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 		
 		function OutputContent_OnlineTrolleyFee($cartContents)
 		{
-			if ($cartContents->fee > 0)
+			if ($cartContents->saleTransactionFee > 0)
 			{				
 				$priceEntry = new stdClass;
 				$cartEntry = new stdClass;
@@ -551,7 +561,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				$priceEntry->priceType = __('Booking Fee', $this->myDomain);
 				
 				$cartEntry->qty = 1;
-				$cartEntry->price = $cartContents->fee;
+				$cartEntry->price = $cartContents->saleTransactionFee;
 				
 				echo '<tr class="'.$this->cssTrolleyBaseID.'-row">'."\n";					
 				$this->OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry);
@@ -559,7 +569,12 @@ if (!class_exists('StageShowSalesPluginClass'))
 				echo "</tr>\n";
 			}
 			
-			return $cartContents->fee;				
+			return $cartContents->saleTransactionFee;				
+		}
+		
+		function OutputContent_OnlineTrolleyDonation($cartContents)
+		{
+			return 0;
 		}
 				
 		function GetUserInfo($user_metaInfo, $fieldId, $fieldSep = '')
@@ -598,25 +613,24 @@ if (!class_exists('StageShowSalesPluginClass'))
 			$cartEntry->perfID = $result->perfID;
 		}
 		
-		function OnlineStore_AddTransactionFee(&$rslt, &$paramCount)
+		function OnlineStore_AddExtraPayment(&$rslt, &$paramCount, $amount, $name, $detailID)
 		{
-			if (($rslt->totalDue > 0) && ($rslt->fee > 0))
+			if (($rslt->totalDue > 0) && ($amount > 0))
 			{
-				$fee = $rslt->fee;
-				$rslt->totalDue += $fee;
+				$rslt->totalDue += $amount;
 				
 				$paramCount++;
 				
-				$rslt->paypalParams['item_name_'.$paramCount] = __('Booking Fee', $this->myDomain);
-				$rslt->paypalParams['amount_'.$paramCount] = $fee;
+				$rslt->paypalParams['item_name_'.$paramCount] = $name;
+				$rslt->paypalParams['amount_'.$paramCount] = $amount;
 				$rslt->paypalParams['quantity_'.$paramCount] = 1;
 				$rslt->paypalParams['shipping_'.$paramCount] = 0;	
 				
-				$rslt->saleDetails['transactionfee'] = $fee;			
+				$rslt->saleDetails[$detailID] = $amount;			
 			}
 			else
 			{
-				$rslt->saleDetails['transactionfee'] = 0;				
+				$rslt->saleDetails[$detailID] = 0;				
 			}	
 		}
 		
@@ -637,7 +651,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 			{			
 				// Just do this on the first call
 				$firstPass = false;
-//StageShowLibUtilsClass::print_r($saleEntries, 'saleEntries');
 				
 				foreach ($saleEntries as $saleEntry)
 				{

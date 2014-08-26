@@ -189,8 +189,8 @@ if (!class_exists('StageShowLibUtilsClass'))
 					// Separate Filename and Line No
 					$fields2 = explode(' called at ', $fields1[1]);
 				}
-				
-				if (strpos($fncall,'->ShowCallStack('))
+
+				if (strpos($fncall,'::ShowCallStack('))
 				{
 					$showEntry = true;
 					continue;
@@ -198,7 +198,7 @@ if (!class_exists('StageShowLibUtilsClass'))
 					
 				if (!$showEntry)
 					continue;
-					
+				
 				echo $fields1[0].'()';
 				
 				if (count($fields2) > 1)

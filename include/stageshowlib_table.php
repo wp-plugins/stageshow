@@ -1418,6 +1418,10 @@ if (!class_exists('StageShowLibAdminListClass'))
 					$columnType = $columnDef[self::TABLEPARAM_TYPE];
 					if ((!$this->editMode) && ($columnType != self::TABLEENTRY_FUNCTION))
 					{
+						if ($columnType == self::TABLEENTRY_CHECKBOX)
+						{
+							$currVal = ($currVal == 1) ? __('Yes', $this->myDomain) : __('No', $this->myDomain);
+						}
 						$columnType = self::TABLEENTRY_VIEW;
 					}
 

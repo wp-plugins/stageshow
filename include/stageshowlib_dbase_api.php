@@ -89,6 +89,17 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $EMailTemplate;
 		}
 		
+		function GetWPNonce($referer = '')
+		{
+			if ($referer == '')
+			{
+				$caller = $this->opts['Caller'];
+				$referer = plugin_basename($caller);
+			}
+			
+			return wp_create_nonce($referer);
+		}
+		
 		function GetWPNonceField($referer = '', $name = '_wpnonce')
 		{
 			return $this->WPNonceField($referer, $name, false);
@@ -280,11 +291,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $this->get_pluginInfo('PluginURI');
 		}
 		
-		function ShowCallStack()
-		{
-			StageShowLibUtilsClass::ShowCallStack(true, $this->getDbgOption('Dev_CallStackParams'));
-		}
-		
 		function ShowSQL($sql, $values = null)
 		{			
 			if ($this->getDbgOption('Dev_ShowSQL') <= 0)
@@ -297,7 +303,9 @@ if (!class_exists('StageShowLibDBaseClass'))
 			}
 
 			if ($this->getDbgOption('Dev_ShowCallStack'))
-				$this->ShowCallStack();
+			{
+				StageShowLibUtilsClass::ShowCallStack();
+			}
 			
 			$sql = str_replace("\n", "<br>\n", $sql);
 			echo "<br>$sql<br>\n";

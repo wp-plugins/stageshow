@@ -43,6 +43,7 @@ div.stageshow-boxoffice select
 	margin: 0 0 0 0;
 	border: 0 none;
 	text-align: left;
+	vertical-align: middle;
 }
 
 div.stageshow-boxoffice td
@@ -147,6 +148,11 @@ div.stageshow-trolley input
 td.stageshow-trolley-checkout input
 {
 	border: none;
+}
+
+#saleDonation
+{
+	text-align: center;
 }
 
 /* --------------------------------------------------------------------------- */

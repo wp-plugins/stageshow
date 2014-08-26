@@ -311,7 +311,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				$outputContent .= '<input type="hidden" name="editpage" value="'.$this->editpage.'"/>'."\n";				
 			}
-
+		
 			
 			ob_start();			
 			$hasActiveTrolley = $this->OnlineStore_HandleTrolley();
@@ -470,6 +470,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return 0;
 		}
 				
+		function OutputContent_OnlineTrolleyDonation($cartContents)
+		{
+			return 0;
+		}
+				
 		function GetButtonID($buttonID)
 		{
 			if (defined('RUNSTAGESHOWDEMO'))
@@ -481,9 +486,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $buttonID;
 		}
 				
-		function GetButtonTypeDef($buttonID, $buttonName = '')
+		function GetButtonTypeDef($buttonID, $buttonName = '', $buttonType = 'submit')
 		{
-			$buttonTypeDef = 'type="submit"';
+			$buttonTypeDef = 'type="'.$buttonType.'"';
 			
 			if ($buttonName == '')
 			{
@@ -496,6 +501,16 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 		function OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent='')
 		{
+			if (isset($_REQUEST['_wpnonce']))
+			{
+				$wpNonce = $_REQUEST['_wpnonce'];
+			}
+			else
+			{
+				$myDBaseObj = $this->myDBaseObj;
+				$wpNonce = $myDBaseObj->GetWPNonce();
+			}
+			
 			if ($removeLinkContent == '')
 			{
 				$removeLinkContent = __('Remove', $this->myDomain);
@@ -503,8 +518,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$removeLineURL = $this->GetOurURL();
 			$removeLineURL  = add_query_arg('editpage', 'tickets', $removeLineURL);
 			$removeLineURL  = add_query_arg('remove', $cartIndex, $removeLineURL);
-			$removeLineURL  = add_query_arg('_wpnonce', $_REQUEST['_wpnonce'], $removeLineURL);
-			$removeButton = '<a href=' . $removeLineURL . '>'.$removeLinkContent.'</a>';
+			$removeLineURL  = add_query_arg('_wpnonce', $wpNonce, $removeLineURL);
+			$removeButton = '<a href="' . $removeLineURL . '">'.$removeLinkContent.'</a>';
 			return $removeButton;
 		}
 		
@@ -524,10 +539,15 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				$cartContents = new stdClass;
 				$cartContents->nextIndex = 1;
+				$cartContents->saleDonation = '';
 			}
 			
 			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
 			{
+				if ($this->myDBaseObj->getDbgOption('Dev_ShowCallStack'))
+				{
+					StageShowLibUtilsClass::ShowCallStack();
+				}
 				StageShowLibUtilsClass::print_r($cartContents, 'Get cartContents ('.$this->trolleyid.')');
 			}
 			
@@ -560,7 +580,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				}				
 			}
 			
-			$cartContents->fee = $this->myDBaseObj->GetTransactionFee();
+			$cartContents->saleTransactionFee = $this->myDBaseObj->GetTransactionFee();
 			
 			$index = $cartContents->nextIndex;
 			$cartContents->nextIndex++;
@@ -572,6 +592,10 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
 			{
+				if ($this->myDBaseObj->getDbgOption('Dev_ShowCallStack'))
+				{
+					StageShowLibUtilsClass::ShowCallStack();
+				}
 				StageShowLibUtilsClass::print_r($cartContents, 'Save cartContents ('.$this->trolleyid.')');
 			}
 			
@@ -738,6 +762,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			if (count($cartContents->rows) == 0)
 				return false;
 				
+			if (isset($_POST['saleDonation']))
+			{
+				$cartContents->saleDonation = $myDBaseObj->FormatCurrency($_POST['saleDonation']);
+				$this->SaveTrolleyContents($cartContents);
+			}
+			
 			$hiddenTags  = "\n";
 		
 			$doneHeader = false;
@@ -748,7 +778,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				unset($cartContents->rows[$itemID]);
 				if (count($cartContents->rows) == 0)
 				{
-					$cartContents->fee = 0;
+					$cartContents->saleTransactionFee = $myDBaseObj->FormatCurrency(0);
+					$cartContents->saleDonation = '';
 				}
 				$this->SaveTrolleyContents($cartContents);
 			}
@@ -826,21 +857,25 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$hiddenTags .= '<input type="hidden" name="qty'.$cartIndex.'" value="'.$qty.'"/>'."\n";
 			}
 			
-			$runningTotal += $this->OutputContent_OnlineTrolleyFee($cartContents);
-				
 			if ($doneHeader)
 			{	
+				$runningTotal += $this->OutputContent_OnlineTrolleyFee($cartContents);
+				$trolleyTotal = $runningTotal + $this->OutputContent_OnlineTrolleyDonation($cartContents);
+				
 				// Add totals row and checkout button
-				$trolleyTotal = $myDBaseObj->FormatCurrency($runningTotal);
-			
+				$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);				
+				$trolleyTotal = $myDBaseObj->FormatCurrency($trolleyTotal);
+				
 				echo '<tr class="'.$this->cssTrolleyBaseID.'-totalrow">'."\n";
 				echo '<td colspan="'.($this->trolleyHeaderCols-4).'">&nbsp;</td>'."\n";
-				echo '<td>'.__('Total', $this->myDomain).'</td>'."\n";
+				echo '<td>'.__('Total', $this->myDomain)."\n";
+				echo '<input type="hidden" id="saleTrolleyTotal" name="saleTrolleyTotal" value="'.$runningTotal.'"/>'."\n";
+				echo '</td>'."\n";
 				echo '<td>&nbsp;</td>'."\n";
-				echo '<td class="'.$this->cssTrolleyBaseID.'-total">'.$trolleyTotal.'</td>'."\n";
+				echo '<td class="'.$this->cssTrolleyBaseID.'-total" id="'.$this->cssTrolleyBaseID.'-totalval" name="'.$this->cssTrolleyBaseID.'-totalval">'.$trolleyTotal.'</td>'."\n";
 				echo '<td>&nbsp;</td>'."\n";
 				echo "</tr>\n";
-			
+				
 				if ( ($checkoutNotePosn == 'above') && ($checkoutNote != '') )
 				{
 					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
@@ -985,9 +1020,22 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$rslt->totalDue += ($itemPrice * $qty);
 			}
 			
-			$rslt->fee = $cartContents->fee;
-			$this->OnlineStore_AddTransactionFee($rslt, $paramCount);
-											
+			$this->OnlineStore_AddExtraPayment($rslt, $paramCount, $cartContents->saleTransactionFee, __('Booking Fee', $this->myDomain), 'saleTransactionfee');
+
+			if (isset($_POST['saleDonation']))
+			{
+				$newSaleDonation = $_POST['saleDonation'];
+				if (!is_numeric($newSaleDonation) || ($newSaleDonation < 0))
+				{
+					$newSaleDonation = 0;
+				}
+				$cartContents->saleDonation = $myDBaseObj->FormatCurrency($newSaleDonation);					
+			}	
+			if ($cartContents->saleDonation > 0)
+			{
+				$this->OnlineStore_AddExtraPayment($rslt, $paramCount, $cartContents->saleDonation, __('Donation', $this->myDomain), 'saleDonation');				
+			}	
+			
 			// Shopping Trolley contents have changed if there are "extra" passed parameters 
 			$cartIndex++;
 			$ParamsOK &= !isset($_POST['id'.$cartIndex]);
@@ -1002,7 +1050,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $rslt;
 		}		
 
-		function OnlineStore_AddTransactionFee(&$rslt, &$paramCount)
+		function OnlineStore_AddExtraPayment(&$rslt, &$paramCount, $amount, $name, $detailID)
 		{
 		}
 		

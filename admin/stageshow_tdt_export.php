@@ -102,6 +102,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'saleEMail'          => __('Sale EMail', $this->myDomain),
 				'saleTransactionFee' => __('Booking Fee', $this->myDomain),
 				'saleFee'            => __('PayPal Fees', $this->myDomain),
+				'saleDonation'       => __('Donation', $this->myDomain),
 				'saleID'             => __('Sale ID', $this->myDomain),
 				'saleFirstName'      => __('First Name', $this->myDomain),
 				'saleLastName'       => __('Last Name', $this->myDomain),

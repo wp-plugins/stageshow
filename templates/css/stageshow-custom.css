@@ -25,3 +25,9 @@
 	text-decoration: none;
 }
 
+/* Hide the block separator in the Box-Office output */
+td.stageshow-boxoffice-separator
+{
+	display: none;
+}
+

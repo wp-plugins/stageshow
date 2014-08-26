@@ -515,7 +515,6 @@ if (!class_exists('StageShowPluginClass'))
 					//$cartContents->saleStatus = PAYPAL_APILIB_SALESTATUS_COMPLETED;			
 					$cartContents->salePPName = $cartContents->saleFirstName.''.$cartContents->saleLastName;
 					$cartContents->salePaid = $runningTotal;				
-					$cartContents->saleTransactionFee = $cartContents->fee;			
 					$cartContents->saleFee = 0.0;
 					
 					//$saleVals['saleCheckoutTime'] = $saleDateTime;
