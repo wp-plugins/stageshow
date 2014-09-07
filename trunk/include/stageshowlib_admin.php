@@ -53,11 +53,6 @@ if (!class_exists('StageShowLibAdminBaseClass'))
 			$this->myDBaseObj->WPNonceField($referer, $name, $echo);
 		}
 		
-		function AddParamAdminReferer($caller, $theLink)
-		{
-			return StageShowLibDBaseClass::AddParamAdminReferer($caller, $theLink);
-		}
-		
 		function CheckAdminReferer($referer = '')
 		{
 			return $this->myDBaseObj->CheckAdminReferer($referer);
@@ -254,23 +249,6 @@ function StageShowLib_HideElement(obj)
 		function GetBulkActionMsg($bulkAction, $actionCount)
 		{
 			echo "GetBulkActionMsg() function not defined in ".get_class()."<br>\n";
-		}
-		
-		static function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass, $elementId, $buttonAction)
-		{
-			//if ($buttonAction == '') $buttonAction = strtolower(str_replace(" ", "", $buttonText));
-			$buttonText = __($buttonText, $domainId);
-			$page = $_GET['page'];
-				
-			$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
-			if ($elementId !== 0) $editLink .= '&id='.$elementId;
-			$editLink = StageShowLibDBaseClass::AddParamAdminReferer($caller, $editLink);
-			$editControl = '<a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a>'."\n";  
-			if ($buttonClass != '')
-			{
-				$editControl = '<div class='.$buttonClass.'>'.$editControl.'</div>'."\n";  
-			}
-			return $editControl;    
 		}
 		
 		function GetAdminListClass()

@@ -540,6 +540,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$cartContents = new stdClass;
 				$cartContents->nextIndex = 1;
 				$cartContents->saleDonation = '';
+				$cartContents->saleNoteToSeller = '';
 			}
 			
 			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))

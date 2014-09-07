@@ -360,8 +360,8 @@ if (!class_exists('StageShowToolsAdminClass'))
 <h3><?php _e('Export', $this->myDomain); ?></h3>
 <p><?php _e('Export to a "TAB Separated Values" format file on your computer.', $this->myDomain); ?></p>
 <p><?php _e('This format can be imported to many applications including spreadsheets and databases.', $this->myDomain); ?></p>
-<form action="<?php echo $actionURL; ?>" method="get">
-<?php $this->WPNonceField(); ?>
+<form action="<?php echo $actionURL; ?>" method="POST">
+<?php $this->WPNonceField('stageshowlib_export.php'); ?>
 <table class="stageshow-form-table stageshow-export-table">
 <tr>
 <th><?php _e('Format', $this->myDomain); ?></th>

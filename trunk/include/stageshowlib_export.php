@@ -37,6 +37,8 @@ if (!class_exists('StageShowLibExportAdminClass'))
 			$this->myDomain = $this->myDBaseObj->get_domain();
 			
 			$this->fileName = $this->myDomain;
+			$this->DispositionExtras = "";	// was attachment;
+			$myDBaseObj->CheckAdminReferer('stageshowlib_export.php');
 		}
 			
 		function Export($application, $charset = 'utf-8', $content = '')
@@ -62,7 +64,7 @@ if (!class_exists('StageShowLibExportAdminClass'))
 		function output_downloadHeader($application, $charset = 'utf-8')
 		{
 			$this->header( 'Content-Description: File Transfer' );
-			$this->header( 'Content-Disposition: attachment; filename=' . $this->fileName.'.'. $this->fileExtn );
+			$this->header( 'Content-Disposition:'.$this->DispositionExtras.' filename=' . $this->fileName.'.'. $this->fileExtn );
 			$this->header( "Content-Type: $application; charset=$charset" );	
 		}
 

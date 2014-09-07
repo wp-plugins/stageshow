@@ -960,43 +960,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			if ($this->isDbgOptionSet('Dev_ShowMiscDebug'))
 				StageShowLibUtilsClass::print_r($this->adminOptions, 'adminOptions');
+				
+			// Add any email fields that are not in the sale record
+			$saleDetails->saleName = '';
 			
-			$emailFields = array(
-				// Details from Sale Record
-				'[saleDateTime]' => 'saleDateTime',
-				'[saleFirstName]' => 'saleFirstName',
-				'[saleLastName]' => 'saleLastName',
-				'[saleEMail]' => 'saleEMail',
-				'[saleTransactionFee]' => 'saleTransactionFee',
-				'[saleDonation]' => 'saleDonation',
-				'[salePaid]' => 'salePaid',
-				'[saleTxnId]' => 'saleTxnId',
-				'[saleStatus]' => 'saleStatus',
-
-				'[saleNoteToSeller]' => 'saleNoteToSeller',
-
-				'[saleName]' => 'saleName',
-
-				'[salePPName]' => 'salePPName',
-				'[salePPStreet]' => 'salePPStreet',
-				'[salePPCity]' => 'salePPCity',
-				'[salePPState]' => 'salePPState',
-				'[salePPZip]' => 'salePPZip',
-				'[salePPCountry]' => 'salePPCountry',
-				'[salePPPhone]' => 'salePPPhone',
-			);
-							
-			foreach ($emailFields as $tag => $field)
-			{
-				$saleFieldValue = $this->FormatEMailField($tag, $field, $saleDetails);
-				$EMailTemplate = str_replace($tag, $saleFieldValue, $EMailTemplate);
-			}
-			
-			return $EMailTemplate;
-		}
-		
-		function AddSalesDetailsEMailFields($EMailTemplate, $saleDetails)
-		{
 			foreach ($saleDetails as $key => $value)
 			{
 				$tag = '['.$key.']';
@@ -1123,28 +1090,28 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $mailTemplate;
 		}
 		
-		function SendEMailFromTemplate($emailContent, $templatePath, $EMailTo = '')
+		function SendEMailFromTemplate($saleRecord, $templatePath, $EMailTo = '')
 		{		
 			$EMailSubject = '';
 			$saleConfirmation = '';
-			
+
 			$this->emailObj = new $this->emailObjClass($this);
 			
-			$rtnStatus = $this->GetEMailFromTemplate($emailContent, $templatePath, $EMailSubject, $saleConfirmation);	
+			$rtnStatus = $this->AddSaleToTemplate($saleRecord, $templatePath, $EMailSubject, $saleConfirmation);	
 			if ($rtnStatus != 'OK')
 				return $rtnStatus;
 				
 			// Get email address and organisation name from settings
 			$EMailFrom = $this->GetEmail($this->adminOptions, 'Sales');
 
-			if (strlen($EMailTo) == 0) $EMailTo = $emailContent[0]->saleEMail;
+			if (strlen($EMailTo) == 0) $EMailTo = $saleRecord[0]->saleEMail;
 
 			$this->emailObj->sendMail($EMailTo, $EMailFrom, $EMailSubject, $saleConfirmation);
 
 			return 'OK';		
 		}
 		
-		function GetEMailFromTemplate($emailContent, $templatePath, &$EMailSubject, &$saleConfirmation)	
+		function AddSaleToTemplate($saleRecord, $templatePath, &$EMailSubject, &$saleConfirmation)	
 		{				
 			$mailTemplate = $this->ReadTemplateFile($templatePath);
 			if (strlen($mailTemplate) == 0)
@@ -1158,7 +1125,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if ($posnPHP !== false) $posnEOL = strpos($mailTemplate, "\n", $posnPHP+1);
 			if (($posnPHP !== false) && ($posnEOL !== false)) 
 			{
-				$EMailSubject = $this->AddEMailFields(substr($mailTemplate, $posnPHP, $posnEOL-$posnPHP), $emailContent[0]);
+				$EMailSubject = $this->AddEMailFields(substr($mailTemplate, $posnPHP, $posnEOL-$posnPHP), $saleRecord[0]);
 				$mailTemplate = substr($mailTemplate, $posnEOL);
 			}
 						
@@ -1177,15 +1144,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					break;
 
 				$section = substr($mailTemplate, 0, $loopStart);
-				$saleConfirmation .= $this->AddEMailFields($section, $emailContent[0]);
+				$saleConfirmation .= $this->AddEMailFields($section, $saleRecord[0]);
 
 				$loopStart += strlen('[startloop]');
 				$loopLen = $loopEnd - $loopStart;
 
-				foreach($emailContent as $ticket)
+				foreach($saleRecord as $ticket)
 				{
 					$section = substr($mailTemplate, $loopStart, $loopLen);
-					$saleConfirmation .= $this->AddSalesDetailsEMailFields($section, $ticket);
+					$saleConfirmation .= $this->AddEMailFields($section, $ticket);
 				}
 
 				$loopEnd += strlen('[endloop]');
@@ -1193,7 +1160,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 
 			// Process the rest of the mail template
-			$saleConfirmation .= $this->AddEMailFields($mailTemplate, $emailContent[0]);
+			$saleConfirmation .= $this->AddEMailFields($mailTemplate, $saleRecord[0]);
 			
 			return 'OK';		
 		}

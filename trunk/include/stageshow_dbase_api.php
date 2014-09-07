@@ -558,6 +558,22 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 		}
 		
+		function GetShowsSettings($extraFields = '')
+		{
+			$selectFields = 'showName,perfState,perfDateTime,perfSeats,priceType,priceValue';
+			if ($extraFields != '')
+			{
+				$selectFields .= ','.$extraFields;
+			}
+			
+			$sql  = 'SELECT '.$selectFields.' FROM '.STAGESHOW_SHOWS_TABLE.' ';
+			$sql .= 'LEFT JOIN '.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.showID='.STAGESHOW_SHOWS_TABLE.'.showID ';
+			$sql .= 'LEFT JOIN '.STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID ';
+			$sql .= 'ORDER BY showName, perfDateTime, priceType ';
+				
+			return $this->get_results($sql);
+		}
+
 		function AddSamplePerformance(&$rtnMsg, $showID, $perfDateTime, $perfRef = '', $perfSeats = -1)
 		{
 			$perfID = $this->CreateNewPerformance($rtnMsg, $showID, $perfDateTime, $perfRef, $perfSeats);
@@ -1336,7 +1352,7 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			return $this->get_results($sql);
 		}
-
+				
 		function IsPriceValid($newPriceValue, $result)
 		{
 			// Verify that the price value is not empty
@@ -1923,11 +1939,6 @@ if (!class_exists('StageShowDBaseClass'))
 			}
 			
 			return parent::IsCurrencyField($tag);					
-		}
-		
-		function AddSalesDetailsEMailFields($EMailTemplate, $saleDetails)
-		{
-			return parent::AddSalesDetailsEMailFields($EMailTemplate, $saleDetails);
 		}
 		
 		function AddSaleFromTrolley($saleID, $cartEntry, $saleExtras = array())

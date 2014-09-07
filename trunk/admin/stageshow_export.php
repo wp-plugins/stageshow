@@ -27,9 +27,9 @@ if (!defined('STAGESHOW_DBASE_CLASS'))
 
 $stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
 
-if ( isset( $_GET['download'] ) )
+if ( isset( $_POST['download'] ) )
 {
-	switch ( $_GET['export_format'] )
+	switch ( $_POST['export_format'] )
 	{
 		case 'tdt':
 			include 'stageshow_tdt_export.php';      

@@ -183,4 +183,3 @@ function stageshow_TestClickSeat(obj)
 	obj.className = className;
 	
 }
-
