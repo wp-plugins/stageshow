@@ -329,7 +329,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 				if (!isset($this->results))	
 					$this->results = $myDBaseObj->GetAllSalesList();		// Get list of sales (one row per sale)
 			}
-			
+	
 			// HTML Output - Start 
 			$formClass = $this->myDomain.'-admin-form '.$this->myDomain.'-sales-summary';
 			echo '<div class="'.$formClass.'">'."\n";
@@ -378,20 +378,14 @@ if (!class_exists('PayPalSalesAdminClass'))
 				$this->OutputSalesList($this->env);
 			}
 
-			if ($this->detailsSaleId <= 0)
+			$pricesList = $myDBaseObj->GetPricesList(null);
+			if (count($pricesList) > 0)
 			{
-				$pricesList = $myDBaseObj->GetPricesList(null);
-				if (count($pricesList) > 0)
-				{
-					$this->OuputAddSaleButton();
-				}			
-				else
-					echo $this->NoStockMessage();
-			}
+				$this->OuputAddSaleButton();
+			}			
 			else
 			{
-				echo StageShowLibAdminClass::ActionButtonHTML('Back to Sales Summary', $this->caller, $this->myDomain, 'tablenav_bottom_actions'); 
-				echo StageShowLibAdminClass::ActionButtonHTML('Send Confirmation EMail', $this->caller, $this->myDomain, 'tablenav_bottom_actions'); 
+				echo $this->NoStockMessage();				
 			}
 
 ?>
@@ -415,7 +409,8 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function OuputAddSaleButton()
 		{
-			echo StageShowLibAdminClass::ActionButtonHTML('Add Sale', $this->caller, $this->myDomain, 'edit-entry-button', 0, 'editsale');    
+			$myDBaseObj = $this->myDBaseObj;
+			echo $myDBaseObj->ActionButtonHTML('Add Sale', $this->caller, $this->myDomain, 'edit-entry-button', 0, 'editsale');    
 		}
 		
 		function DoActions()

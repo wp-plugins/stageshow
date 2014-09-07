@@ -352,7 +352,12 @@ if (!class_exists('StageShowSalesPluginClass'))
 					<select name="'.$quantityTagId.'">
 					<option value="1" selected="">1</option>
 					';
-				$maxQty = $seatsAvailable <= $myDBaseObj->adminOptions['MaxTicketQty'] ? $seatsAvailable : $myDBaseObj->adminOptions['MaxTicketQty'];
+				$maxQty = $myDBaseObj->adminOptions['MaxTicketQty'];
+				if (($seatsAvailable > 0) && ($seatsAvailable <= $myDBaseObj->adminOptions['MaxTicketQty']))
+				{
+					// TODO - Deduct number of seats in shopping trolley from $seatsAvailable
+					$maxQty = $seatsAvailable;
+				}
 				for ($no=2; $no<=$maxQty; $no++)
 					$storeRowHTML .= '<option value="'.$no.'">'.$no.'</option>'."\n";
 				$storeRowHTML .= '

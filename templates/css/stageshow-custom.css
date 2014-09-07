@@ -31,3 +31,10 @@ td.stageshow-boxoffice-separator
 	display: none;
 }
 
+/* Hide the date/time column in the Box-Office and Shopping Trolley output */
+.stageshow-boxoffice-datetime,
+.stageshow-trolley-datetime
+{
+	display: none;
+}
+

@@ -45,13 +45,13 @@ if (!class_exists('StageShowLibOFXExportAdminClass'))
 			$this->myDomain = $this->myDBaseObj->get_domain();
 	
 	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
-			if ( isset( $_GET['downloadexport'] ) )
+			if ( isset( $_POST['downloadexport'] ) )
 			{
-				$this->fileName = 'stageshow.ofx';	
+				$this->fileName = 'stageshow';	
 							
-				if ( isset( $_GET['download'] ) ) 
+				if ( isset( $_POST['download'] ) ) 
 				{
-					switch ($_GET['export_type'])
+					switch ($_POST['export_type'])
 					{          
 						default :
 							$this->fileExtn = 'ofx';

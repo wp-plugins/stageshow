@@ -33,19 +33,26 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 			$this->fieldNames = $this->GetFields();
 	
 	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
-			if ( isset( $_GET['downloadexport'] ) )
+			if ( isset( $_POST['downloadexport'] ) )
 			{
-				if ( isset( $_GET['download'] ) ) 
+				if ( isset( $_POST['download'] ) ) 
 				{
-					$showID = isset($_GET['export_showid']) ? $_GET['export_showid'] : 0;
-					$perfID = isset($_GET['export_perfid']) ? $_GET['export_perfid'] : 0;
-					if ($perfID != 0)
+					$showID = 0;
+					$perfID = 0;
+					if (isset($_POST['export_showid']))
 					{
-						$showAndperfID = explode('-', $_GET['export_perfid']);
-						$perfID = $showAndperfID[1];
+						$showID = $_POST['export_showid'];
+						if (($showID != 0) && isset($_POST['export_perfid']))
+						{
+							if ($_POST['export_perfid'] != "0")
+							{
+								$showAndperfID = explode('-', $_POST['export_perfid']);
+								$perfID = $showAndperfID[1];
+							}
+						}
 					}
 					
-					switch ($_GET['export_type'])
+					switch ($_POST['export_type'])
 					{          
 						case 'settings':
 								if (!current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) die("Access Denied"); 
@@ -68,7 +75,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 					}
 				}			       
 			}
-			else if ( isset( $_GET['downloadvalidator'] ) )
+			else if ( isset( $_POST['downloadvalidator'] ) )
 			{
 				$this->fileName = 'stageshowValidator';
 				$this->fileExtn = 'html';
@@ -219,7 +226,7 @@ td.col_show
 
 		function export_shows()
 		{
-			$this->exportDB($this->myDBaseObj->GetPricesList(null));
+			$this->exportDB($this->myDBaseObj->GetShowsSettings());
 		}
 
 		function export_tickets($exportHTML=false, $showID=0, $perfID=0)

@@ -119,7 +119,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			{
 				if ($this->getDbgOption('Dev_ShowWPOnce'))
 					$nonceField .= "<!-- wp_nonce_field($referer) -->\n";
-				$nonceField .= wp_nonce_field($referer, $name, false);
+				$nonceField .= wp_nonce_field($referer, $name, false, false);
 				$nonceField .=  "\n";
 			}
 			
@@ -127,12 +127,20 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $nonceField;
 		}
 		
-		static function AddParamAdminReferer($caller, $theLink)
+		function AddParamAdminReferer($caller, $theLink)
 		{
 			if (!function_exists('add_query_arg'))
 				return $theLink;
 			
-			$theLink = add_query_arg( '_wpnonce', wp_create_nonce( plugin_basename($caller) ), $theLink );
+			$baseName = plugin_basename($caller);
+			$nonceVal = wp_create_nonce( $baseName );
+
+			if ($this->getDbgOption('Dev_ShowWPOnce'))
+			{
+				echo "\n<!-- AddParamAdminReferer  caller:$caller  baseName:$baseName  NOnce:$nonceVal -->\n";
+			}
+			
+			$theLink = add_query_arg( '_wpnonce', $nonceVal, $theLink );
 			
 			return $theLink;
 		}
@@ -150,14 +158,35 @@ if (!class_exists('StageShowLibDBaseClass'))
 				echo "<!-- check_admin_referer($referer) -->\n";
 				if (!isset($_REQUEST['_wpnonce']))
 					echo "<br><strong>check_admin_referer FAILED - _wpnonce NOT DEFINED</strong></br>\n";
-				else if (!wp_verify_nonce($_REQUEST['_wpnonce'], $referer))
-					echo "<br><strong>check_admin_referer FAILED - Referer: $referer </strong></br>\n";
+				else 
+				{
+					$nOnceVal = $_REQUEST['_wpnonce'];
+					if (!wp_verify_nonce($nOnceVal, $referer))
+					echo "<br><strong>check_admin_referer FAILED - Referer: $referer  NOnce:$nOnceVal </strong></br>\n";
+				}
 				return;
 			}
 			
 			check_admin_referer($referer);
 		}
 
+		function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass, $elementId, $buttonAction)
+		{
+			//if ($buttonAction == '') $buttonAction = strtolower(str_replace(" ", "", $buttonText));
+			$buttonText = __($buttonText, $domainId);
+			$page = $_GET['page'];
+				
+			$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
+			if ($elementId !== 0) $editLink .= '&id='.$elementId;
+			$editLink = $this->AddParamAdminReferer($caller, $editLink);
+			$editControl = '<a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a>'."\n";  
+			if ($buttonClass != '')
+			{
+				$editControl = '<div class='.$buttonClass.'>'.$editControl.'</div>'."\n";  
+			}
+			return $editControl;    
+		}
+		
 		function HasSettings()
 		{
 			return false;

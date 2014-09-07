@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 3.9.2
-Stable tag: 3.9.4
+Tested up to: 4.0
+Stable tag: 4.0
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,6 +187,16 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 4.0 (07/09/2014) =
+* Bug Fix: Error on OFX Export with no sales
+* Bug Fix: Non-existent CSS file imported (admin.css)
+* Bug Fix: Content-Disposition MIME type should not include attachment
+* Bug Fix: Box-Office quantity drop-down limited to 1 when no of seats is unlimited
+* Bug Fix: saleNoteToSeller not initialised in empty Shopping Trolley
+* Duplicate output of wp_nonce removed
+* Added CSS for removing Date/Time column to stageshow-custom.css
+* Export settings includes uncompleted Show & Performance entries
 
 = 3.9.4 (26/08/2014) =
 * Bug Fix: nonce missing in Remove from Shopping Trolley link
