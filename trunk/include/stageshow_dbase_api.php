@@ -1684,22 +1684,6 @@ if (!class_exists('StageShowDBaseClass'))
 				}
 			}
 			
-			if (isset($sqlFilters['searchtext']))
-			{
-				$searchFields = array('saleEMail', 'saleFirstName', 'saleLastName');
-				
-				$sqlWhere .= $sqlCmd.'(';
-				$sqlOr = '';				
-				foreach ($searchFields as $searchField)
-				{
-					$sqlWhere .= $sqlOr;
-					$sqlWhere .= STAGESHOW_SALES_TABLE.'.'.$searchField.' LIKE "'.$sqlFilters['searchtext'].'"';
-					$sqlOr = ' OR ';
-				}
-				$sqlWhere .= ')';
-				$sqlCmd = ' AND ';
-			}
-			
 			return $sqlWhere;
 		}
 		
@@ -1793,30 +1777,11 @@ if (!class_exists('StageShowDBaseClass'))
 			return $this->GetSalesList($sqlFilters);
 		}
 				
-		function GetAllSalesList($sqlFilters = null)
-		{
-			$sqlFilters['groupBy'] = 'saleID';
-			$sqlFilters['orderBy'] = STAGESHOW_SALES_TABLE.'.saleID DESC';
-			return $this->GetSalesList($sqlFilters);
-		}
-
-		function SearchSalesList($searchtext)
-		{
-			$sqlFilters['searchtext'] = '%'.$searchtext.'%';
-			return $this->GetAllSalesList($sqlFilters);
-		}						
-		
 		function GetAllSalesListBySaleTxnId($saleTxnId)
 		{
 			// Add TotalSalesField .... groupBy does the trick!
 			$sqlFilters['saleTxnId'] = $saleTxnId;
 			//$sqlFilters['groupBy'] = 'saleID';
-			return $this->GetSalesList($sqlFilters);
-		}
-				
-		function GetSale($saleID)
-		{
-			$sqlFilters['saleID'] = $saleID;
 			return $this->GetSalesList($sqlFilters);
 		}
 				

@@ -239,7 +239,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 {
 	class PayPalSalesAdminClass extends StageShowLibAdminClass // Define class
 	{		
-		var $detailsSaleId;
 		var $results;
 		var $payPalAPIObj;
 		var $saleQtyInputID;
@@ -292,7 +291,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 				
  			$this->payPalAPIObj = $payPalObj;
      
-			$this->detailsSaleId = 0;
 			$this->salesFor = '';
 			
 			$this->DoSalesSearch();

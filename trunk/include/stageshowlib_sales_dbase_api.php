@@ -537,6 +537,22 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$sqlCmd = ' AND ';
 			}
 			
+			if (isset($sqlFilters['searchtext']))
+			{
+				$searchFields = array('saleEMail', 'saleFirstName', 'saleLastName');
+				
+				$sqlWhere .= $sqlCmd.'(';
+				$sqlOr = '';				
+				foreach ($searchFields as $searchField)
+				{
+					$sqlWhere .= $sqlOr;
+					$sqlWhere .= $this->DBTables->Sales.'.'.$searchField.' LIKE "'.$sqlFilters['searchtext'].'"';
+					$sqlOr = ' OR ';
+				}
+				$sqlWhere .= ')';
+				$sqlCmd = ' AND ';
+			}
+			
 			return $sqlWhere;
 		}
 		
@@ -844,6 +860,25 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 		}
 		
+		function GetAllSalesList($sqlFilters = null)
+		{
+			$sqlFilters['groupBy'] = 'saleID';
+			$sqlFilters['orderBy'] = $this->DBTables->Sales.'.saleID DESC';
+			return $this->GetSalesList($sqlFilters);
+		}
+
+		function SearchSalesList($searchtext)
+		{
+			$sqlFilters['searchtext'] = '%'.$searchtext.'%';
+			return $this->GetAllSalesList($sqlFilters);
+		}						
+		
+		function GetSale($saleID)
+		{
+			$sqlFilters['saleID'] = $saleID;
+			return $this->GetSalesList($sqlFilters);
+		}
+				
 		function GetSalesList($sqlFilters)
 		{
 			$selectFields  = $this->GetSalesQueryFields($sqlFilters);

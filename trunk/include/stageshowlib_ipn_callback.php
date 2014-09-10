@@ -98,9 +98,9 @@ if (!class_exists('IPNNotifyClass'))
 			return iconv($this->charset, "UTF-8", $HTTPParam);
 		}
 
-		function __construct($stageShowDBaseClass, $callerPath)
+		function __construct($targetDBaseClass, $callerPath)
 		{
-			$ourDBaseObj = new $stageShowDBaseClass($callerPath);
+			$ourDBaseObj = new $targetDBaseClass($callerPath);
 			$this->notifyDBaseObj = $ourDBaseObj;
 
 			$LogIPNCallFile = 'LastIPNCall.txt';
