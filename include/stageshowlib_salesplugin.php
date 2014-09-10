@@ -48,7 +48,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function __construct()
 		{
-			$this->myDomain = $this->myDBaseObj->get_domain();
+			$myDBaseObj = $this->myDBaseObj;
+			
+			$this->myDomain = $myDBaseObj->get_domain();
 							
 			if (!isset($this->cssDomain)) $this->cssDomain = $this->myDomain;
 			if (!isset($this->cssBaseID)) $this->cssBaseID = $this->cssDomain.'-shop';
@@ -89,6 +91,17 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 
 			// FUNCTIONALITY: Main - Add ShortCode for client "front end"
 			add_shortcode($this->shortcode, array(&$this, 'OutputContent_OnlineStore'));
+			
+			if ($myDBaseObj->getDbgOption('Dev_ShowGET'))
+			{
+				echo "<br>".'$_GET'."<br>\n";
+				print_r($_GET);
+			}
+			if ($myDBaseObj->getDbgOption('Dev_ShowPOST'))
+			{
+				echo "<br>".'$_POST'."<br>\n";
+				print_r($_POST);
+			}		
 		}
 		
 		function GetOurURL()

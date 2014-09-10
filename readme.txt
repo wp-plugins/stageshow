@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 4.0
+Stable tag: 4.0.1
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,6 +187,11 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 4.0.1 (10/09/2014) =
+* Bug Fix: Invalid Comment line in stageshow.css blocks loading of stagehsow-seats.css
+* Bug Fix: Cannot see seats in Box-Office seat selection Page (stageshow-seats.css not loaded)
+* Added sample CSS for Box-Office button colours to stageshow-custom.css
 
 = 4.0 (07/09/2014) =
 * Bug Fix: Error on OFX Export with no sales

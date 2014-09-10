@@ -38,3 +38,30 @@ td.stageshow-boxoffice-separator
 	display: none;
 }
 
+/* Change the colours of the Box Office Buttons */
+.stageshow-boxoffice-add input,
+.stageshow-trolley-checkout #selectseats,
+.stageshow-boxoffice-layout #seatsselected,
+.stageshow-trolley-checkout #checkout
+{
+	background: none repeat scroll 0 0 #FFC0FF;
+}
+
+/* Change the colours of the Box Office Buttons when they have the focus */
+.stageshow-boxoffice-add input:focus,
+.stageshow-trolley-checkout #selectseats:focus,
+.stageshow-boxoffice-layout #seatsselected:focus,
+.stageshow-trolley-checkout #checkout:focus
+{
+	background: none repeat scroll 0 0 #FF40FF;
+}
+
+/* Change the colours of the Box Office Buttons when they have a mouseover */
+.stageshow-boxoffice-add input:hover,
+.stageshow-trolley-checkout #selectseats:hover,
+.stageshow-boxoffice-layout #seatsselected:hover,
+.stageshow-trolley-checkout #checkout:hover
+{
+	background: none repeat scroll 0 0 #FF40FF;
+}
+
