@@ -448,6 +448,22 @@ if (!class_exists('StageShowSalesPluginClass'))
 			echo "</tr>\n";
 		}
 				
+		function GetButtonPostID($buttonID)
+		{
+			$postID = parent::GetButtonPostID($buttonID);
+			switch ($buttonID)
+			{
+				case 'checkout':
+					if (defined('STAGESHOW_CHECKOUTBUTTON_URL'))
+					{
+						$postID .='_x';
+					}
+					break;
+			}
+			
+			return $postID;
+		}
+				
 		function GetButtonTypeDef($buttonID, $buttonName = '', $buttonType = 'submit')
 		{
 			$buttonTypeDef = '';
@@ -476,7 +492,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 			if ($buttonTypeDef == '')
 			{
-				$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName);
+				$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, $buttonType);
 			}
 
 			$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);

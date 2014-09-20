@@ -58,6 +58,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		const STAGESHOWLIB_FROMTROLLEY = true;
 		const STAGESHOWLIB_NOTFROMTROLLEY = false;
 		
+		const PAYPAL_CHECKOUTSTYLE_STANDARD = 1;
+		const PAYPAL_CHECKOUTSTYLE_EXPRESS = 2;
+		const PAYPAL_CHECKOUTSTYLE_BOTH = 3;
+		
 		var		$PayPalURL;			//  URL for PayPal Payment Requests
 		var		$PayPalVerifyURL;	//  URL for PayPal Verify IPN Requests
 		
@@ -107,6 +111,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$this->adminOptions['CheckoutTimeout'] = PAYPAL_APILIB_CHECKOUT_TIMEOUT_DEFAULT;
 			}
 			
+			if (!isset($this->adminOptions['PayPalCheckoutType']))
+			{
+				$this->adminOptions['PayPalCheckoutType'] = self::PAYPAL_CHECKOUTSTYLE_STANDARD;
+			}
+			
       		$this->saveOptions();      
 			
 			// FUNCTIONALITY: DBase - On upgrade ... Add any database fields
@@ -152,11 +161,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $isConfigured;
 		}
 				
-		function CanEditPayPalSettings()
-		{					
-			return true;
-		}
-		
 		function getImagesURL()
 		{
 			if (defined('STAGESHOWLIB_IMAGESURL'))
@@ -233,6 +237,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if (!isset($this->payPalAPIObj))
 			{
 				$this->payPalAPIObj = new PayPalButtonsAPIClass(__FILE__);
+				if ($this->getDbgOption('Dev_ShowPayPalAPI'))
+				{
+					$this->payPalAPIObj->EnableDebug();
+				}
+				$this->LoginPayPalAPI();
 			}
 
 			if ($saveToDB)
@@ -258,6 +267,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			{
 				$this->PayPalVerifyURL = $this->PayPalURL;
 			}				
+		}
+		
+		function LoginPayPalAPI()
+		{
+			$this->payPalAPIObj->SetLoginParams(
+				$this->adminOptions['PayPalAPIUser'], 
+				$this->adminOptions['PayPalAPIPwd'], 
+				$this->adminOptions['PayPalAPISig']);
+			$this->payPalAPIObj->SetTestMode(false);
 		}
 		
 		static function FormatDateForAdminDisplay($dateInDB)
@@ -479,6 +497,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						saleTxnId VARCHAR('.PAYPAL_APILIB_PPSALETXNID_TEXTLEN.') NOT NULL,
 						saleStatus VARCHAR('.PAYPAL_APILIB_PPSALESTATUS_TEXTLEN.'),
 						saleNoteToSeller TEXT,
+						salePPExpToken VARCHAR('.PAYPAL_APILIB_PPEXPTOKEN_TEXTLEN.') NOT NULL DEFAULT "",
 					';
 					break;
 			}
@@ -906,7 +925,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			$sql .= $this->GetOptsSQL($sqlFilters);
 			
-			// Get results ... but supress debug output until AddSaleFields has been called
+			// Get results ... but suppress debug output until AddSaleFields has been called
 			$salesListArray = $this->get_results($sql, false);			
 			$this->AddSaleFields($salesListArray);
 			
@@ -1279,6 +1298,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					if (isset($results['saleNoteToSeller']))
 					{
 						$saleVals['saleNoteToSeller'] = $results['saleNoteToSeller'];
+					}
+									
+					if (isset($results['salePPExpToken']))
+					{
+						$saleVals['salePPExpToken'] = $results['salePPExpToken'];
 					}
 									
 					$saleID = $this->AddSale($saleDateTime, $saleVals);

@@ -114,6 +114,14 @@ define('STAGESHOW_DATETIME_BOXOFFICE_FORMAT', 'd-m-Y H:i');
 define('STAGESHOWLIB_IMAGESURL', 'http://asite.com/images/');
 
 /* --------------------------------------------------------------------------------
+	STAGESHOW_PAYPALEXPRESSBUTTON_URL
+	
+	The URL of the "Checkout with PayPal" button
+	
+-------------------------------------------------------------------------------- */
+define('STAGESHOW_PAYPALEXPRESSBUTTON_URL', 'https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif');		
+
+/* --------------------------------------------------------------------------------
 	STAGESHOWLIB_NOTETOSELLER_ROWS
 	
 	This value specifies the number of Rows in the "Message to Sender" text entry

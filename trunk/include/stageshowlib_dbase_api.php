@@ -322,16 +322,12 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function ShowSQL($sql, $values = null)
 		{			
-			if ($this->getDbgOption('Dev_ShowSQL') <= 0)
-				return;
-			
-			if (function_exists('wp_get_current_user')) 
+			if (!$this->isDbgOptionSet('Dev_ShowSQL'))
 			{
-				if (!current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
-				return;
+				return;				
 			}
-
-			if ($this->getDbgOption('Dev_ShowCallStack'))
+			
+			if ($this->isDbgOptionSet('Dev_ShowCallStack'))
 			{
 				StageShowLibUtilsClass::ShowCallStack();
 			}
@@ -726,7 +722,26 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function isDbgOptionSet($optionID)
 		{
-			return $this->isOptionSet($optionID, StageShowLibDBaseClass::DEBUG_SETTING);
+			$rtnVal = $this->isOptionSet($optionID, StageShowLibDBaseClass::DEBUG_SETTING);
+			if ($rtnVal)
+			{
+				switch ($optionID)
+				{
+					case 'Dev_ShowGET';
+					case 'Dev_ShowPOST';
+					case 'Dev_ShowSQL';
+					case 'Dev_DBOutput';
+					case 'Dev_ShowTrolley';
+						$rtnVal = $this->isSysAdmin();
+						break;
+						
+					default:
+						break;
+				}
+				
+			}
+			
+			return $rtnVal;
 		}
 		
 		function isOptionSet($optionID, $optionClass = StageShowLibDBaseClass::ADMIN_SETTING)
@@ -747,6 +762,16 @@ if (!class_exists('StageShowLibDBaseClass'))
 			
 			update_option($this->opts['CfgOptionsID'], $this->adminOptions);
 			update_option($this->opts['DbgOptionsID'], $this->dbgOptions);
+		}
+		
+		function isSysAdmin()
+		{
+			if (!function_exists('wp_get_current_user')) 
+			{
+				return false;
+			}
+	
+			return (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN));
 		}
 		
 		function createDB($dropTable = false)

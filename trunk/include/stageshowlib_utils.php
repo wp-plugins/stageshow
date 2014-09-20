@@ -110,6 +110,33 @@ if (!class_exists('StageShowLibUtilsClass'))
 			closedir($dir);
 		}
 		
+		static function MakeUniqueCopy($filePath, $srcFile)
+		{
+			$path_parts = pathinfo($filePath.$srcFile);
+			
+			if (!file_exists($filePath.$srcFile))
+			{
+				$filePath .= $path_parts['extension'].'/';
+			}
+			
+			if (!file_exists($filePath.$srcFile))
+			{
+				return $srcFile;
+			}
+			
+			for ($fileIndex = 1; $fileIndex<1000; $fileIndex++)
+			{
+				$dstFile = $path_parts['filename'].'-'.$fileIndex.'.'.$path_parts['extension'];
+				if (!file_exists($filePath.$dstFile))
+				{
+					copy($filePath.$srcFile, $filePath.$dstFile);
+					return $dstFile;
+				}
+			}
+			
+			return $srcFile;
+		}
+		
 		static function deleteDir($dir)
 		{
 			if (substr($dir, strlen($dir)-1, 1) != '/')
