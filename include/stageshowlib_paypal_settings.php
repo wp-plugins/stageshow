@@ -30,13 +30,8 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 		
 	class PayPalSettingsAdminListClass extends StageShowLibAdminListClass // Define class
 	{	
-		const TABLEPARAM_PAYPALLOCK = 'PayPalLock';
-		const TABLEPARAM_PAYPALEDIT = 'NoPayPalLock';	// This is a dummy entry when PAYPALLOCK is not required
-		
 		function __construct($env, $editMode = true) //constructor
 		{			
-			$this->blockPayPalEdit = $env['BlockPayPalEdit'];
-			
 			if (!isset($this->IncludeAPI))
 				$this->IncludeAPI = true;
 			
@@ -85,13 +80,13 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 			$rowDefs = array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Account EMail',                   StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPIEMail',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_EMAIL_TEXTLEN,       StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Merchant ID',                     StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalMerchantID',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_MERCHANTID_TEXTLEN,  StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, StageShowLibTableClass::TABLEPARAM_BLOCKBLANK => true, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Timeout',                StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutTimeout',       StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALEDIT => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_CHECKOUT_TIMEOUT_TEXTLEN,    StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_CHECKOUT_TIMEOUT_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Currency',                        StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalCurrency',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, self::TABLEPARAM_PAYPALEDIT => true, StageShowLibTableClass::TABLEPARAM_ITEMS => $currSelect, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Timeout',                StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutTimeout',       StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_CHECKOUT_TIMEOUT_TEXTLEN,    StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_CHECKOUT_TIMEOUT_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Currency',                        StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalCurrency',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $currSelect, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'PayPal Header Image File',        StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalHeaderImageFile', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_DIR => $paypalUploadImagesPath, StageShowLibTableClass::TABLEPARAM_EXTN => 'gif,jpeg,jpg,png', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'EMail Logo Image File',           StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalLogoImageFile',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_DIR => $paypalUploadImagesPath, StageShowLibTableClass::TABLEPARAM_EXTN => 'gif,jpeg,jpg,png', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Image URLs',                      StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalImagesUseSSL',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Enable SSL', StageShowLibTableClass::TABLEPARAM_DEFAULT => false ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Complete URL',           StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutCompleteURL',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALEDIT => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Cancelled URL',          StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutCancelledURL',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   self::TABLEPARAM_PAYPALEDIT => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Complete URL',           StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutCompleteURL',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Cancelled URL',          StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutCancelledURL',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
 			);
 			
 			if ($this->IncludeAPI)
@@ -102,29 +97,21 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'API Signature',                   StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPISig',          StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPLOGIN_SIG_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPLOGIN_EDITLEN, StageShowLibTableClass::TABLEPARAM_AFTER => 'PayPalAPIPwd',  ),
 				));				
 			}
+
+if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT'))
+{
+				$checkoutSelector = array(
+					StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_STANDARD.'|PayPal Standard Checkout', 
+					StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_EXPRESS.'|PayPal Express Checkout', 
+					StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_BOTH.'|PayPal Standard and Express Checkouts'
+					);
+				$rowDefs = self::MergeSettings($rowDefs, array(
+					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Type',		           StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalCheckoutType',    StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $checkoutSelector, StageShowLibTableClass::TABLEPARAM_AFTER => 'PayPalAPISig',)
+				));				
+}
 			
 			$rowDefs = self::MergeSettings(parent::GetDetailsRowsDefinition(), $rowDefs);
 			
-			// FUNCTIONALITY: Settings - PayPal settings Read-only once Prices configured
-			if (isset($this->blockPayPalEdit) && $this->blockPayPalEdit)
-			{				
-				foreach ($rowDefs as $rowKey => $rowDef)
-				{
-					if (!isset($rowDef[self::TABLEPARAM_PAYPALLOCK]))
-						continue;
-						
-					switch ($rowDef[StageShowLibTableClass::TABLEPARAM_TYPE])
-					{
-						case StageShowLibTableClass::TABLEENTRY_TEXT:
-						case StageShowLibTableClass::TABLEENTRY_TEXTBOX:
-						case StageShowLibTableClass::TABLEENTRY_SELECT:
-							//Block Editing if PayPal entries are locked .....
-							$rowDefs[$rowKey][StageShowLibTableClass::TABLEPARAM_TYPE] =  StageShowLibTableClass::TABLEENTRY_READONLY;
-							break;
-					}
-				}
-			}
-				
 			return $rowDefs;
 		}		
 				
@@ -152,14 +139,7 @@ if (!class_exists('PayPalSettingsAdminClass'))
 	{
 		function __construct($env) //constructor	
 		{
-			$this->myDBaseObj = $env['DBaseObj'];	// Copy here because CanEditPayPalSettings() may uses it ...
-			
-			if (!$this->myDBaseObj->getDbgOption('Dev_DisablepayPalLock'))
-				$this->blockPayPalEdit = !$this->myDBaseObj->CanEditPayPalSettings();
-			else
-				$this->blockPayPalEdit = false;
-			
-			$env['BlockPayPalEdit'] = $this->blockPayPalEdit;
+			$this->myDBaseObj = $env['DBaseObj'];
 			
 			// Call base constructor
 			parent::__construct($env);			
@@ -179,14 +159,6 @@ if (!class_exists('PayPalSettingsAdminClass'))
 				$this->CheckAdminReferer();
 				
 				$PayPalAPIChanged = false;
-
-				if (isset($_POST['errormsglive']))
-				{
-					if ($this->blockPayPalEdit)
-					{
-						$SettingsUpdateMsg = __('Plugin Entries already created - Paypal Login details cannot be changed.', $this->myDomain);
-					}
-				}
 
 				if ($SettingsUpdateMsg === '')
 				{

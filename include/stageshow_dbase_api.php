@@ -218,7 +218,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$sql .= $sqlOpts.$dbField[0].' ';
 			}
 			
-			if ($this->getDbgOption('Dev_ShowDBOutput'))
+			if ($this->isDbgOptionSet('Dev_ShowDBOutput'))
 			{
 				$this->get_results('SELECT * '.$sql);
 			}
@@ -264,7 +264,7 @@ if (!class_exists('StageShowDBaseClass'))
 				$sql .= 'AND '.$condition.' ';
 			}
 			
-			if ($this->getDbgOption('Dev_ShowDBOutput'))
+			if ($this->isDbgOptionSet('Dev_ShowDBOutput'))
 			{
 				$this->get_results('SELECT * '.$sql);
 			}
@@ -1028,12 +1028,6 @@ if (!class_exists('StageShowDBaseClass'))
 			return "OK";							
 		}
 		
-		function CanEditPayPalSettings()
-		{					
-			$results = $this->GetAllShowsList();		
-			return (count($results) == 0);			
-		}
-		
 		function GetActivePerformancesList()
 		{
 			$selectFields  = '*';
@@ -1588,12 +1582,12 @@ if (!class_exists('StageShowDBaseClass'))
 			if (isset($sqlFilters['addTicketFee']))
 			{
 				$sqlJoin .= " LEFT JOIN (";
-				$sqlJoin .= "SELECT wp_sshow_sales.saleID";
+				$sqlJoin .= "SELECT ".STAGESHOW_SALES_TABLE.".saleID";
 				$sqlJoin .= ", SUM(ticketQty) AS saleTotalQty ";
-				$sqlJoin .= "FROM wp_sshow_sales JOIN wp_sshow_tickets ON wp_sshow_tickets.saleID=wp_sshow_sales.saleID ";
-				$sqlJoin .= "JOIN wp_sshow_prices ON wp_sshow_prices.priceID=wp_sshow_tickets.priceID ";
-				$sqlJoin .= "GROUP BY wp_sshow_sales.saleID";
-				$sqlJoin .= ") AS totals ON wp_sshow_sales.saleID = totals.saleID ";
+				$sqlJoin .= "FROM ".STAGESHOW_SALES_TABLE." JOIN ".STAGESHOW_TICKETS_TABLE." ON ".STAGESHOW_TICKETS_TABLE.".saleID=".STAGESHOW_SALES_TABLE.".saleID ";
+				$sqlJoin .= "JOIN ".STAGESHOW_PRICES_TABLE." ON ".STAGESHOW_PRICES_TABLE.".priceID=".STAGESHOW_TICKETS_TABLE.".priceID ";
+				$sqlJoin .= "GROUP BY ".STAGESHOW_SALES_TABLE.".saleID";
+				$sqlJoin .= ") AS totals ON ".STAGESHOW_SALES_TABLE.".saleID = totals.saleID ";
 			}
 			
 			return $sqlJoin;

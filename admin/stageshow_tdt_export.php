@@ -356,10 +356,15 @@ function VerifyTxnId()
 				verifyResult += "</tr>\n"; 
 			}
 			
+			var ticketPaid;
+			
+			ticketPaid  = parseFloat(ticketDataArray[columnFields["ticketPaid"]]);
+			ticketPaid += parseFloat(ticketDataArray[columnFields["ticketCharge"]]);
+			
 			verifyResult += "<tr>"; 
 			verifyResult += "<td class=col_ticketName>" + ticketDataArray[columnFields["ticketName"]] + "</td>"; 
 			verifyResult += "<td class=col_ticketType>" + ticketDataArray[columnFields["ticketType"]] + "</td>"; 
-			verifyResult += "<td class=col_ticketprice>" + "TBD" + "</td>"; 
+			verifyResult += "<td class=col_ticketprice>" + ticketPaid + "</td>"; 
 			verifyResult += "<td class=col_ticketQty>" + ticketDataArray[columnFields["ticketQty"]] + "</td>\n"; 
 			verifyResult += "</tr>\n"; 
 		}

@@ -29,6 +29,11 @@ if (defined('STAGESHOWLIB_TRACK_INCLUDES_FILE'))
 if( !class_exists( 'WP_Http' ) )
 	include_once( ABSPATH . WPINC. '/class-http.php' );
 
+if (file_exists('stageshowlib_utils.php')) 
+{
+	include_once( 'stageshowlib_utils.php' );
+}
+
 // Definitions for API Interface Functions
 if (!class_exists('PayPalAPIClass')) 
 {
@@ -66,6 +71,7 @@ if (!class_exists('PayPalAPIClass'))
 	define('PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN',64);	
 	define('PAYPAL_APILIB_PPSALETXNID_TEXTLEN',20);
 	define('PAYPAL_APILIB_PPSALESTATUS_TEXTLEN',20);
+	define('PAYPAL_APILIB_PPEXPTOKEN_TEXTLEN',20);
 
 	define('PAYPAL_APILIB_PPSALENAME_EDITLEN',80);
 	define('PAYPAL_APILIB_PPSALEEMAIL_EDITLEN',80);
@@ -129,10 +135,22 @@ if (!class_exists('PayPalAPIClass'))
 		{
 			if ((strlen( $this->APIusername ) == 0) || ( strlen( $this->APIpassword ) == 0 ) || ( strlen( $this->APIsignature ) == 0 ))
 			{
+				if ($this->DebugMode)
+				{
+					echo "--------------------------------------<br>\n";
+					echo "API Access Error: API UserName/Pasword Undefined<br>\n";
+					echo "<br>\n";
+				}
 				return false;
 			}
 			if (strlen( $this->APIEndPoint ) == 0)
 			{
+				if ($this->DebugMode)
+				{
+					echo "--------------------------------------<br>\n";
+					echo "API Access Error: APIEndPoint Undefined<br>\n";
+					echo "<br>\n";
+				}
 				return false;
 			}
 			return true;
@@ -209,8 +227,15 @@ if (!class_exists('PayPalAPIClass'))
 				{
 					echo "--------------------------------------<br>\n";
 					echo "APIResponses:<br>\n";
-					Print_r($response['APIResponses']);
-					echo "<br>\n";
+					if (!class_exists('StageShowLibUtilsClass')) 
+					{
+						StageShowLibUtilsClass::print_r($response['APIResponses'], 'response[APIResponses]');
+					}
+					else
+					{
+						Print_r($response['APIResponses']);
+						echo "<br>\n";
+					}
 				}
 				if (isset($response['APIResponses']['ACK']))
 				{
@@ -316,7 +341,61 @@ if (!class_exists('PayPalAPIClass'))
 			}
 			return $response;			
 		}
-		
+
+		function SetExpressCheckout($saleTotal, $logoURL, $headerURL)
+		{
+			$boxofficeURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			$siteurl = get_option('siteurl');
+
+			// Check that the PayPal login parameters have been set
+			if (!$this->IsConfigured())
+				return;	// Cannot Execute - API Not Configured
+				
+			$this->InitAPICallParams('SetExpressCheckout');
+			$this->AddAPIParam('PAYMENTREQUEST_0_AMT', $saleTotal);
+			$this->AddAPIParam('PAYMENTREQUEST_0_CURRENCYCODE', $this->PayPalCurrency);
+			$this->AddAPIParam('PAYMENTREQUEST_0_PAYMENTACTION', 'Sale');
+			$this->AddAPIParam('RETURNURL', $boxofficeURL."?ppexp=ok");
+			$this->AddAPIParam('CANCELURL', $boxofficeURL."?ppexp=cancel");
+			
+			if ($logoURL != '')
+			{
+				$this->AddAPIParam('LOGOIMG', $logoURL);
+			}
+			
+			if ($headerURL != '')
+			{
+				$this->AddAPIParam('HDRIMG', $headerURL);
+			}
+			
+			return $this->APIAction('SetExpressCheckout ');
+		}
+
+		function GetExpressCheckoutDetails($token)
+		{
+			// Check that the PayPal login parameters have been set
+			if (!$this->IsConfigured())
+				return;	// Cannot Execute - API Not Configured
+				
+			$this->InitAPICallParams('GetExpressCheckoutDetails');
+			$this->AddAPIParam('TOKEN', $token);
+			
+			return $this->APIAction('GetExpressCheckoutDetails ');
+		}
+
+		function DoExpressCheckoutPayment($token, $payerID)
+		{
+			// Check that the PayPal login parameters have been set
+			if (!$this->IsConfigured())
+				return;	// Cannot Execute - API Not Configured
+				
+			$this->InitAPICallParams('DoExpressCheckoutPayment');
+			$this->AddAPIParam('TOKEN', $token);
+			$this->AddAPIParam('PAYERID', $payerID);
+			
+			return $this->APIAction('DoExpressCheckoutPayment ');
+		} 
+
 		function GetTransactions($fromDate, $toDate = '')
 		{
 			// Check that the PayPal login parameters have been set

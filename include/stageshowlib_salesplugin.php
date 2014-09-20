@@ -91,17 +91,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 
 			// FUNCTIONALITY: Main - Add ShortCode for client "front end"
 			add_shortcode($this->shortcode, array(&$this, 'OutputContent_OnlineStore'));
-			
-			if ($myDBaseObj->getDbgOption('Dev_ShowGET'))
-			{
-				echo "<br>".'$_GET'."<br>\n";
-				print_r($_GET);
-			}
-			if ($myDBaseObj->getDbgOption('Dev_ShowPOST'))
-			{
-				echo "<br>".'$_POST'."<br>\n";
-				print_r($_POST);
-			}		
 		}
 		
 		function GetOurURL()
@@ -488,6 +477,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return 0;
 		}
 				
+		function GetButtonPostID($buttonID)
+		{
+			return $this->GetButtonID($buttonID);
+		}
+				
 		function GetButtonID($buttonID)
 		{
 			if (defined('RUNSTAGESHOWDEMO'))
@@ -538,8 +532,28 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function OutputContent_OnlineCheckoutButton($cartContents)
 		{
-			$buttonType = $this->GetButtonTypeDef('checkout');
-			echo '<input '.$buttonType.' value="'.__('Checkout', $this->myDomain).'"/>'."\n";
+			$checkoutSelector = $this->myDBaseObj->getOption('PayPalCheckoutType');
+			$secure_connection = !empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != 'off');
+			
+			if ( (!$secure_connection) 
+			  && ($checkoutSelector != StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_STANDARD)
+			  && (!current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) )
+			{
+				// PayPal Express is only allowed on secure connections
+				$checkoutSelector = StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_STANDARD;
+				echo "\n<!-- ******* PayPal Express Disabled: Not on secure connection ******* -->\n";
+			}
+			
+			if ($checkoutSelector != StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_EXPRESS)
+			{
+				$buttonType = $this->GetButtonTypeDef('checkout');
+				echo '<input '.$buttonType.' value="'.__('Checkout', $this->myDomain).'"/>'."\n";
+			}
+if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_STANDARD))
+{
+			$buttonType = $this->GetButtonTypeDef('paypalexpress');
+			echo '<input '.$buttonType.' value="'.__('PayPal Express', $this->myDomain).'"/>'."\n";
+}
 		}
 		
 		function GetTrolleyContents()
@@ -1072,10 +1086,60 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			// Process checkout request for Integrated Trolley
 			// This function must be called before any output as it redirects to PayPal if successful
-			$buttonID  = $this->GetButtonID('checkout');
-			if (isset($_POST[$buttonID]))
+			$myDBaseObj = $this->myDBaseObj;				
+			
+			if ($myDBaseObj->isDbgOptionSet('Dev_ShowGET'))
 			{
-				$myDBaseObj = $this->myDBaseObj;
+				StageShowLibUtilsClass::print_r($_GET, '$_GET');
+			}
+			if ($myDBaseObj->isDbgOptionSet('Dev_ShowPOST'))
+			{
+				StageShowLibUtilsClass::print_r($_POST, '$_POST');
+			}		
+			
+			if (isset($_GET['ppexp']))
+			{
+				switch ($_GET['ppexp'])
+				{
+					case 'ok':
+						// Get PayPal Express token from POST data
+						$token = stripslashes($_GET['token']);
+						
+						// Get sale record from DB
+						$saleRecord = $myDBaseObj->GetSaleByToken($token);
+						
+						$pprslt = $myDBaseObj->PP_GetExpressCheckoutDetails($token);
+						if ($pprslt->status != 'OK')
+						{
+							$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
+							$this->checkoutMsg .= __('Error getting purchaser details from PayPal', $this->myDomain);
+							return;						
+						}
+						
+						$pprslt->saleDetails['saleID'] = $saleRecord[0]->saleID;						
+						$saleID = $myDBaseObj->UpdateSale($pprslt->saleDetails);
+
+						// Call DoExpressCheckoutPayment
+						
+						return;
+						
+					case 'cancel':
+						//TODO if it goes wrong ...!
+						
+						break;
+					
+					default:
+						break;
+				}
+			}
+
+			$checkout = '';
+			if (isset($_POST[$this->GetButtonPostID('paypalexpress')])) $checkout = 'paypalexpress';
+			if (isset($_POST[$this->GetButtonPostID('checkout')])) $checkout = 'checkout';
+
+			if ($checkout != '')
+			{
+				$expressMode = ($checkout == 'paypalexpress');
 				
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
 				if (isset($checkoutRslt->checkoutMsg)) 
@@ -1091,42 +1155,59 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					return;						
 				}
 				
-				$checkoutRslt->paypalParams['image_url'] = $myDBaseObj->getImageURL('PayPalLogoImageFile');
-				$checkoutRslt->paypalParams['cpp_header_image'] = $myDBaseObj->getImageURL('PayPalHeaderImageFile');
-				$checkoutRslt->paypalParams['no_shipping'] = '2';
+				$paypalURL = PayPalAPIClass::GetPayPalURL(false);
 				
-				// Use Merchant ID if it is defined
-				if ($myDBaseObj->isOptionSet('PayPalMerchantID'))
+				if ($expressMode)
 				{
-					$checkoutRslt->paypalParams['business'] = $myDBaseObj->adminOptions['PayPalMerchantID'];	// Can use adminOptions['PayPalAPIEMail']
+					$pprslt = $this->myDBaseObj->PP_SetExpressCheckout($checkoutRslt->totalDue);
+					if ($pprslt->status != 'OK')
+					{
+						$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
+						$this->checkoutMsg .= __('Error getting token from PayPal', $this->myDomain);
+						return;						
+					}
+					
+					// Log PayPal Express token with sale 
+					$checkoutRslt->saleDetails['salePPExpToken'] = $pprslt->token;
+					
+					$paypalURL = add_query_arg('cmd', '_express-checkout', $paypalURL);
+					$paypalURL = add_query_arg('token', $pprslt->token, $paypalURL);
 				}
 				else
 				{
-					$checkoutRslt->paypalParams['business'] = $myDBaseObj->adminOptions['PayPalAPIEMail'];	// Can use adminOptions['PayPalAPIEMail']
-				}
-				$checkoutRslt->paypalParams['currency_code'] = $myDBaseObj->adminOptions['PayPalCurrency'];
-				$checkoutRslt->paypalParams['cmd'] = '_cart';
-				$checkoutRslt->paypalParams['upload'] = '1';
-				
-				if ($myDBaseObj->adminOptions['CheckoutCompleteURL'] != '')
-				{
-					$checkoutRslt->paypalParams['rm'] = '2';
-					$checkoutRslt->paypalParams['return'] = $myDBaseObj->adminOptions['CheckoutCompleteURL'];
-				}
-				
-				if ($myDBaseObj->adminOptions['CheckoutCancelledURL'] != '')
-				{
-					$checkoutRslt->paypalParams['cancel_return'] = $myDBaseObj->adminOptions['CheckoutCancelledURL'];
-				}
+					$logoURL = $myDBaseObj->getImageURL('PayPalLogoImageFile');
+					$headerURL = $myDBaseObj->getImageURL('PayPalHeaderImageFile');
+
+					$checkoutRslt->paypalParams['image_url'] = $logoURL;
+					$checkoutRslt->paypalParams['cpp_header_image'] = $headerURL;
+					$checkoutRslt->paypalParams['no_shipping'] = '2';
 					
-				$checkoutRslt->paypalParams['notify_url'] = $myDBaseObj->PayPalNotifyURL;
-			
-				$paypalURL = PayPalAPIClass::GetPayPalURL(false);
-				//$paypalURL = 'http://www.paypal.com/cgi-bin/webscr';
+					// Use Merchant ID if it is defined
+					if ($myDBaseObj->isOptionSet('PayPalMerchantID'))
+					{
+						$checkoutRslt->paypalParams['business'] = $myDBaseObj->adminOptions['PayPalMerchantID'];	// Can use adminOptions['PayPalAPIEMail']
+					}
+					else
+					{
+						$checkoutRslt->paypalParams['business'] = $myDBaseObj->adminOptions['PayPalAPIEMail'];	// Can use adminOptions['PayPalAPIEMail']
+					}
+					$checkoutRslt->paypalParams['currency_code'] = $myDBaseObj->adminOptions['PayPalCurrency'];
+					$checkoutRslt->paypalParams['cmd'] = '_cart';
+					$checkoutRslt->paypalParams['upload'] = '1';
+					
+					if ($myDBaseObj->adminOptions['CheckoutCompleteURL'] != '')
+					{
+						$checkoutRslt->paypalParams['rm'] = '2';
+						$checkoutRslt->paypalParams['return'] = $myDBaseObj->adminOptions['CheckoutCompleteURL'];
+					}
+					
+					if ($myDBaseObj->adminOptions['CheckoutCancelledURL'] != '')
+					{
+						$checkoutRslt->paypalParams['cancel_return'] = $myDBaseObj->adminOptions['CheckoutCancelledURL'];
+					}
+						
+					$checkoutRslt->paypalParams['notify_url'] = $myDBaseObj->PayPalNotifyURL;
 				
-				$paypalMethod = 'GET';				
-				if ($paypalMethod == 'GET')
-				{
 					foreach ($checkoutRslt->paypalParams as $paypalArg => $paypalParam)
 						$paypalURL = add_query_arg($paypalArg, urlencode($paypalParam), $paypalURL);
 					$checkoutRslt->paypalParams = array();					

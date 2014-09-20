@@ -147,6 +147,7 @@ div.stageshow-trolley input
 td.stageshow-trolley-checkout input
 {
 	border: none;
+	vertical-align: top;
 }
 
 #saleDonation

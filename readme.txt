@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 4.0.1
+Stable tag: 4.0.2
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,6 +187,13 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 4.0.2 (20/09/2014) =
+* Bug Fix: Non-default WP DB table prefix produces empty TDT download 
+* Bug Fix: Offline Validator fails with non-default WP DB table prefix  
+* Added "Ticket Paid" values to Offline Validator results
+* Automatically creates copy of stageshow-custom.css when selected in settings
+* Automatically creates copy of stageshow-custom.js when selected in settings
 
 = 4.0.1 (10/09/2014) =
 * Bug Fix: Invalid Comment line in stageshow.css blocks loading of stagehsow-seats.css
