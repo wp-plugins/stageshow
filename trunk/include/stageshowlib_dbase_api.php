@@ -2,7 +2,7 @@
 /* 
 Description: Core Library Database Access functions
 
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,6 +52,19 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function __construct($opts = null) //constructor		
 		{
+			if ( defined('STAGESHOWLIB_DEVELOPER') )
+			{
+				$_SESSION['stageshowlib_dbg'] = STAGESHOWLIB_DEVELOPER;
+			}
+			
+			if ( isset($_REQUEST['dbg']) )
+			{
+				if ($_REQUEST['dbg'] != '')			
+					$_SESSION['stageshowlib_dbg'] = $_REQUEST['dbg'];
+				else
+					unset($_SESSION['stageshowlib_dbg']);
+			}
+
 			$this->opts = $opts;
 			$this->getOptions();
 			
@@ -634,6 +647,22 @@ if (!class_exists('StageShowLibDBaseClass'))
 				foreach ($currOptions as $key => $option)
 					$ourOptions[$key] = $option;
 			}
+
+			if (isset($_SESSION['stageshowlib_dbg']))
+			{
+				$sessionDbg = $_SESSION['stageshowlib_dbg'];
+				
+				$this->dbgOptions['Dev_ShowTrolley'] = true;
+				if ($this->isSysAdmin())
+				{
+					$this->dbgOptions['Dev_ShowSQL'] = true;
+					$this->dbgOptions['Dev_ShowDBOutput'] = true;
+					$this->dbgOptions['Dev_ShowCallStack'] = true;
+					$this->dbgOptions['Dev_ShowGET'] = true;
+					$this->dbgOptions['Dev_ShowPOST'] = true;
+					//$this->dbgOptions['Dev_ShowSESSION'] = true;					
+				}
+			}
 			
 			if (defined('RUNSTAGESHOWDEMO'))
 			{				
@@ -729,6 +758,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 				{
 					case 'Dev_ShowGET';
 					case 'Dev_ShowPOST';
+					case 'Dev_ShowSESSION':
 					case 'Dev_ShowSQL';
 					case 'Dev_DBOutput';
 					case 'Dev_ShowTrolley';
@@ -762,6 +792,22 @@ if (!class_exists('StageShowLibDBaseClass'))
 			
 			update_option($this->opts['CfgOptionsID'], $this->adminOptions);
 			update_option($this->opts['DbgOptionsID'], $this->dbgOptions);
+		}
+		
+		function dev_ShowTrolley()
+		{
+			$rtnVal = false;
+			
+			if ($this->isDbgOptionSet('Dev_ShowTrolley') || isset($_GET['RTD_Trolley']))
+			{
+				if ($this->getDbgOption('Dev_ShowCallStack') || isset($_GET['RTD_CallStack']))
+				{
+					StageShowLibUtilsClass::ShowCallStack();
+				}
+				$rtnVal = true;
+			}
+			
+			return $rtnVal;
 		}
 		
 		function isSysAdmin()

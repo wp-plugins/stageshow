@@ -1,7 +1,7 @@
 /* 
 Description: StageShow Runtime Style Sheet
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -136,6 +136,7 @@ div.stageshow-trolley table
 div.stageshow-trolley td
 {
 	text-align: center;
+	vertical-align: middle;
 }
 
 div.stageshow-trolley input
@@ -147,7 +148,21 @@ div.stageshow-trolley input
 td.stageshow-trolley-checkout input
 {
 	border: none;
-	vertical-align: top;
+	vertical-align: middle;
+}
+
+td.stageshow-trolley-checkout image
+{
+	border: none;
+	padding-top: 0;
+	padding-bottom: 0;
+	vertical-align: middle;
+}
+
+td.stageshow-trolley-remove input[type="image"]
+{
+	padding: 0 0 0 0;
+	border: none;
 }
 
 #saleDonation

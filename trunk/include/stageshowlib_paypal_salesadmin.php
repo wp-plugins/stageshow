@@ -2,7 +2,7 @@
 /* 
 Description: Code for Sales Admin Page
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -495,7 +495,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			{
 				case StageShowLibAdminListClass::BULKACTION_DELETE:		
 					if ($this->errorCount > 0)
-						$actionMsg = $this->errorCount . ' ' . _n("sale Entry does not exist in Database", "Sale Entries do not exist in Database", $this->errorCount, $this->myDomain);
+						$actionMsg = $this->errorCount . ' ' . _n("Sale Entry does not exist in Database", "Sale Entries do not exist in Database", $this->errorCount, $this->myDomain);
 					else if ($actionCount > 0)		
 						$actionMsg = $actionCount . ' ' . _n("Sale has been deleted", "Sales have been deleted", $actionCount, $this->myDomain);
 					else

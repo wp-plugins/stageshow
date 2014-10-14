@@ -2,7 +2,7 @@
 /* 
 Description: Core Library Database Access functions
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -892,6 +892,34 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $this->GetAllSalesList($sqlFilters);
 		}						
 		
+		function AddPendingSaleItem(&$saleDetails, $itemName, $itemAmt)
+		{
+			if ($itemAmt <= 0) return 0;
+			
+			$itemNo = count($saleDetails);
+			
+			$saleDetails[$itemNo] = new stdClass();
+			$saleDetails[$itemNo]->ticketName = $itemName;
+			$saleDetails[$itemNo]->ticketQty = 1;
+			$saleDetails[$itemNo]->ticketPaid = $itemAmt;
+			$saleDetails[$itemNo]->ticketType = '';
+			
+			return $itemNo;
+		}						
+		
+		function GetPendingSale($saleID)
+		{
+			$saleDetails = $this->GetSale($saleID);
+			
+			if (count($saleDetails) > 0)
+			{
+				$this->AddPendingSaleItem($saleDetails, __('Booking Fee', $this->get_Domain()), $saleDetails[0]->saleTransactionFee);
+				$this->AddPendingSaleItem($saleDetails, __('Donation', $this->get_Domain()), $saleDetails[0]->saleDonation);
+			}
+			
+			return $saleDetails;
+		}						
+		
 		function GetSale($saleID)
 		{
 			$sqlFilters['saleID'] = $saleID;
@@ -927,7 +955,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			// Get results ... but suppress debug output until AddSaleFields has been called
 			$salesListArray = $this->get_results($sql, false);			
-			$this->AddSaleFields($salesListArray);
+			if (!isset($sqlFilters['addTicketFee']))
+			{
+				$this->AddSaleFields($salesListArray);				
+			}
 			
 			$this->show_results($salesListArray);
 					

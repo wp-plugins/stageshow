@@ -2,7 +2,7 @@
 /* 
 Description: StageShow Plugin Top Level Code
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,6 +61,15 @@ define('STAGESHOW_CHECKOUTBUTTON_URL', 'wp-content/plugins/stageshowgold/images/
 define('STAGESHOW_REMOVEBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Remove.gif');
 define('STAGESHOW_RESERVEBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Reserve.gif');
 define('STAGESHOW_SELECTSEATSBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_SelectSeats.gif');
+define('STAGESHOW_CONFIRMANDPAYBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_CommandAndPay.gif');
+
+/* --------------------------------------------------------------------------------
+	STAGESHOW_PAYPALEXPRESSBUTTON_URL
+	
+	The URL of the "Checkout with PayPal" button
+	
+-------------------------------------------------------------------------------- */
+define('STAGESHOW_PAYPALEXPRESSBUTTON_URL', 'https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif');		
 
 /*
 ------------------------------------------------------------------------------------------------
@@ -114,14 +123,6 @@ define('STAGESHOW_DATETIME_BOXOFFICE_FORMAT', 'd-m-Y H:i');
 define('STAGESHOWLIB_IMAGESURL', 'http://asite.com/images/');
 
 /* --------------------------------------------------------------------------------
-	STAGESHOW_PAYPALEXPRESSBUTTON_URL
-	
-	The URL of the "Checkout with PayPal" button
-	
--------------------------------------------------------------------------------- */
-define('STAGESHOW_PAYPALEXPRESSBUTTON_URL', 'https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif');		
-
-/* --------------------------------------------------------------------------------
 	STAGESHOWLIB_NOTETOSELLER_ROWS
 	
 	This value specifies the number of Rows in the "Message to Sender" text entry
@@ -129,5 +130,21 @@ define('STAGESHOW_PAYPALEXPRESSBUTTON_URL', 'https://www.paypal.com/en_US/i/btn/
 	
 -------------------------------------------------------------------------------- */
 define('STAGESHOWLIB_NOTETOSELLER_ROWS', 5);
+
+/*
+------------------------------------------------------------------------------------------------
+	STAGESHOW_VERIFYLOG_DUPLICATEACTION
+	
+	This value determines what action will be taken on attempting to verify a sale that has been
+	previously verified.
+	'ignore' - The previous verification is ignored
+	'hide'   - Only the place & date/time of the first verification are shown
+	default  - Both Ticket Details and Verification Details are shown
+	
+------------------------------------------------------------------------------------------------
+*/
+
+define('STAGESHOW_VERIFYLOG_DUPLICATEACTION', 'ignore');
+define('STAGESHOW_VERIFYLOG_DUPLICATEACTION', 'hide');
 
 ?>

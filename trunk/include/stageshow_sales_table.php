@@ -2,7 +2,7 @@
 /* 
 Description: Code for Sales Page
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 			return array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show',        StageShowLibTableClass::TABLEPARAM_ID => 'showName',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Performance', StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Ticket Type', StageShowLibTableClass::TABLEPARAM_ID => 'ticketType',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatTicketType', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Ticket Type', StageShowLibTableClass::TABLEPARAM_ID => 'priceType',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatTicketType', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Price',       StageShowLibTableClass::TABLEPARAM_ID => 'priceValue',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),						
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Quantity',    StageShowLibTableClass::TABLEPARAM_ID => 'ticketQty',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => 4, ),						
 			);
@@ -152,10 +152,8 @@ if (!class_exists('StageShowSalesAdminVerifyListClass'))
 		function GetMainRowsDefinition()
 		{
 			return array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Location',      StageShowLibTableClass::TABLEPARAM_ID => 'verifyLocation',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Date and Time', StageShowLibTableClass::TABLEPARAM_ID => 'verifyDateTime',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show',          StageShowLibTableClass::TABLEPARAM_ID => 'showName',         StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Performance',   StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Location',               StageShowLibTableClass::TABLEPARAM_ID => 'verifyLocation',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Verified Date and Time', StageShowLibTableClass::TABLEPARAM_ID => 'verifyDateTime',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW, ),
 			);
 		}		
 				

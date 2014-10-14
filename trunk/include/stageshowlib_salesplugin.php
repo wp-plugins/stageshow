@@ -2,7 +2,7 @@
 /*
 Description: Core Library Generic Base Class for Sales Plugins
 
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -277,6 +277,18 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		function OutputContent_OnlineStoreFooter()
 		{
 		}
+
+		function OutputContent_OnlineStoreMessages()
+		{
+			if (isset($this->checkoutMsg))
+			{
+				if (!isset($this->checkoutMsgClass))
+				{
+					$this->checkoutMsgClass = $this->cssDomain.'-error error';
+				}
+				echo '<div id="message" class="'.$this->checkoutMsgClass.'">'.$this->checkoutMsg.'</div>';					
+			}				
+		}
 		
 		function OutputContent_GetAtts( $atts )
 		{
@@ -302,18 +314,30 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			// Remove any incomplete Checkouts
 			$myDBaseObj->PurgePendingSales();
 			
-			$outputContent  = "\n<!-- $pluginID Plugin Code - Starts Here -->\n";
+			$outputContent  = "\n<!-- \n";
+			$outputContent .= "$pluginID Plugin Code - Starts Here\n";
+			if (is_array($atts))
+			{
+				foreach ($atts as $attID => $att)
+				{
+					$outputContent .= "$attID=$att \n";			
+				}
+			}
+			$outputContent .= "--> \n";
+
 			$outputContent .= '<form></form>'."\n";		// Insulate StageShow from unterminated form tags
 			
 			$actionURL = $this->GetOurURL();
+			$actionURL = remove_query_arg('ppexp', $actionURL);
+			
 			$outputContent .= '<form id=trolley method="post" action="'.$actionURL.'">'."\n";				
 			$outputContent .= $myDBaseObj->GetWPNonceField();
 				 
 			if (isset($this->editpage))
 			{
 				$outputContent .= '<input type="hidden" name="editpage" value="'.$this->editpage.'"/>'."\n";				
-			}
-		
+			}		
+			
 			
 			ob_start();			
 			$hasActiveTrolley = $this->OnlineStore_HandleTrolley();
@@ -330,6 +354,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$boxofficeContent = ob_get_contents();
 			ob_end_clean();
 			
+			$this->OutputContent_OnlineStoreMessages();
+			
 			if ($myDBaseObj->getOption('ProductsAfterTrolley'))
 			{
 				$outputContent .= $trolleyContent.$boxofficeContent;
@@ -345,7 +371,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			
 			if (!$hasActiveTrolley)
 			{
-				$boxofficeURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+				$boxofficeURL = StageShowLibUtilsClass::GetPageURL();
 				if ($myDBaseObj->getOption('boxofficeURL') != $boxofficeURL)
 				{
 					$myDBaseObj->adminOptions['boxofficeURL'] = $boxofficeURL;
@@ -397,12 +423,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$oddPage = !$oddPage;
 					
 				$addSaleItemParams = '';
-/*				
-				{
-					$addSaleItemURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-					$addSaleItemParams = ' action="'.$addSaleItemURL.'"';
-				}
-*/
+				
 				echo '
 					<tr class="'.$rowClass.'">
 					<td class="'.$this->cssBaseID.'-data">
@@ -447,7 +468,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['ref'].'">'.$this->colID['ref'].'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['price'].'">'.$this->colID['price'].'</td>'."\n";
 			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['qty'].'">'.$this->colID['qty'].'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
+			if (!$this->saleConfirmationMode)
+				echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
 			echo "</tr>\n";
 			
 			$this->trolleyHeaderCols = 5;	// Count of the number of columns in the header
@@ -508,26 +530,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 		function OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent='')
 		{
-			if (isset($_REQUEST['_wpnonce']))
-			{
-				$wpNonce = $_REQUEST['_wpnonce'];
-			}
-			else
-			{
-				$myDBaseObj = $this->myDBaseObj;
-				$wpNonce = $myDBaseObj->GetWPNonce();
-			}
-			
-			if ($removeLinkContent == '')
-			{
-				$removeLinkContent = __('Remove', $this->myDomain);
-			}
-			$removeLineURL = $this->GetOurURL();
-			$removeLineURL  = add_query_arg('editpage', 'tickets', $removeLineURL);
-			$removeLineURL  = add_query_arg('remove', $cartIndex, $removeLineURL);
-			$removeLineURL  = add_query_arg('_wpnonce', $wpNonce, $removeLineURL);
-			$removeButton = '<a href="' . $removeLineURL . '">'.$removeLinkContent.'</a>';
-			return $removeButton;
+			$buttonName = 'RemoveTicketSale'.'_'.$cartIndex;
+			$buttonType = $this->GetButtonTypeDef('remove', $buttonName);
+			echo "<input $buttonType $removeLinkContent".' value="'.__('Remove', $this->myDomain).'"/>'."\n";
 		}
 		
 		function OutputContent_OnlineCheckoutButton($cartContents)
@@ -543,17 +548,13 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$checkoutSelector = StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_STANDARD;
 				echo "\n<!-- ******* PayPal Express Disabled: Not on secure connection ******* -->\n";
 			}
-			
 			if ($checkoutSelector != StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_EXPRESS)
 			{
 				$buttonType = $this->GetButtonTypeDef('checkout');
 				echo '<input '.$buttonType.' value="'.__('Checkout', $this->myDomain).'"/>'."\n";
 			}
-if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_STANDARD))
-{
-			$buttonType = $this->GetButtonTypeDef('paypalexpress');
-			echo '<input '.$buttonType.' value="'.__('PayPal Express', $this->myDomain).'"/>'."\n";
-}
+			
+			return $checkoutSelector;
 		}
 		
 		function GetTrolleyContents()
@@ -570,12 +571,8 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 				$cartContents->saleNoteToSeller = '';
 			}
 			
-			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
+			if ($this->myDBaseObj->dev_ShowTrolley())
 			{
-				if ($this->myDBaseObj->getDbgOption('Dev_ShowCallStack'))
-				{
-					StageShowLibUtilsClass::ShowCallStack();
-				}
 				StageShowLibUtilsClass::print_r($cartContents, 'Get cartContents ('.$this->trolleyid.')');
 			}
 			
@@ -618,12 +615,8 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 		
 		function SaveTrolleyContents($cartContents)
 		{
-			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
+			if ($this->myDBaseObj->dev_ShowTrolley())
 			{
-				if ($this->myDBaseObj->getDbgOption('Dev_ShowCallStack'))
-				{
-					StageShowLibUtilsClass::ShowCallStack();
-				}
 				StageShowLibUtilsClass::print_r($cartContents, 'Save cartContents ('.$this->trolleyid.')');
 			}
 			
@@ -649,7 +642,7 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 		
 		function ClearTrolleyContents()
 		{
-			if ($this->myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
+			if ($this->myDBaseObj->dev_ShowTrolley())
 			{
 				echo 'CLEAR cartContents ('.$this->trolleyid.") <br>\n";
 			}
@@ -665,16 +658,7 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 			$this->DoneSalesTrolley = true;
 				
 			$myDBaseObj = $this->myDBaseObj;
-			
-			if (isset($this->checkoutMsg))
-			{
-				if (!isset($this->checkoutMsgClass))
-				{
-					$this->checkoutMsgClass = $this->cssDomain.'-error error';
-				}
-				echo '<div id="message" class="'.$this->checkoutMsgClass.'">'.$this->checkoutMsg.'</div>';					
-			}
-				
+
 			$cartContents = $this->GetTrolleyContents();
 			
 			return $this->OnlineStore_HandleTrolleyButtons($cartContents);
@@ -758,7 +742,6 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 			if ($itemID > 0)
 			{
 				// Get the product ID from posted data
-				//$ticketType = $_POST['os0'];
 				$reqQty = $_POST['quantity_'.$itemID];
 
 				// Interogate the database to confirm that the item exists
@@ -796,10 +779,6 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 				$this->SaveTrolleyContents($cartContents);
 			}
 			
-			$hiddenTags  = "\n";
-		
-			$doneHeader = false;
-
 			if (isset($_GET['remove']))
 			{
 				$itemID = $_GET['remove'];
@@ -812,7 +791,19 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 				$this->SaveTrolleyContents($cartContents);
 			}
 				
+			$doneHeader = $this->OnlineStore_OutputTrolley($cartContents);
+			return $doneHeader;			
+		}
+		
+		function OnlineStore_OutputTrolley($cartContents)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			$doneHeader = false;
 			$runningTotal = 0;		
+			$hiddenTags  = "\n";
+					
+			$this->saleConfirmationMode = isset($cartContents->confirmSaleMode);				
 			
 			if (isset($this->editpage))
 			{
@@ -847,7 +838,13 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 				$priceEntry = $priceEntries[0];
 				if (!$doneHeader)
 				{
-					$trolleyHeading = $this->adminPageActive ? __('Selected Seats', $this->myDomain) : __('Your Shopping Trolley', $this->myDomain);
+					if ($this->saleConfirmationMode)
+						$trolleyHeading = __('Your Order Details', $this->myDomain);
+					else if ($this->adminPageActive)
+						$trolleyHeading = __('Selected Seats', $this->myDomain);
+					else
+						$trolleyHeading = __('Your Shopping Trolley', $this->myDomain);
+						
 					echo '<div class="'.$this->cssTrolleyBaseID.'-header"><h2>'."$trolleyHeading</h2></div>\n";
 					if ( ($checkoutNotePosn == 'header') && ($checkoutNote != '') )
 					{
@@ -869,17 +866,21 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 					
 				$runningTotal += $this->OutputContent_OnlineTrolleyRow($priceEntry, $cartEntry);
 					
-				if (!isset($this->cart_ReadOnly))
+				if (!$this->saleConfirmationMode)
 				{
-					$removeLinkContent = $this->OutputContent_OnlineRemoveButton($cartIndex);
+					echo '<td class="'.$this->cssTrolleyBaseID.'-remove">'."\n";
+					if (!isset($this->cart_ReadOnly))
+					{
+						$removeLinkContent = $this->OutputContent_OnlineRemoveButton($cartIndex);
+					}
+					else
+					{
+						$removeLinkContent = '&nbsp;';
+					}	
+					echo $removeLinkContent.'</td>'."\n";
+					
+					echo "</tr>\n";					
 				}
-				else
-				{
-					$removeLinkContent = '&nbsp;';
-				}	
-				echo '<td class="'.$this->cssTrolleyBaseID.'-remove">'.$removeLinkContent.'</td>'."\n";
-				
-				echo "</tr>\n";
 					
 				$hiddenTags .= '<input type="hidden" name="id'.$cartIndex.'" value="'.$itemID.'"/>'."\n";
 				$hiddenTags .= '<input type="hidden" name="qty'.$cartIndex.'" value="'.$qty.'"/>'."\n";
@@ -901,7 +902,8 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 				echo '</td>'."\n";
 				echo '<td>&nbsp;</td>'."\n";
 				echo '<td class="'.$this->cssTrolleyBaseID.'-total" id="'.$this->cssTrolleyBaseID.'-totalval" name="'.$this->cssTrolleyBaseID.'-totalval">'.$trolleyTotal.'</td>'."\n";
-				echo '<td>&nbsp;</td>'."\n";
+				if (!$this->saleConfirmationMode)
+					echo '<td>&nbsp;</td>'."\n";
 				echo "</tr>\n";
 				
 				if ( ($checkoutNotePosn == 'above') && ($checkoutNote != '') )
@@ -991,7 +993,7 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 			$rslt->totalDue = 0;
 								
 			$cartContents = $this->GetTrolleyContents();
-			if ($myDBaseObj->isDbgOptionSet('Dev_ShowTrolley'))
+			if ($this->myDBaseObj->dev_ShowTrolley())
 			{
 				StageShowLibUtilsClass::print_r($cartContents, 'cartContents');
 			}
@@ -1088,6 +1090,17 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 			// This function must be called before any output as it redirects to PayPal if successful
 			$myDBaseObj = $this->myDBaseObj;				
 			
+			if (isset($_SESSION['PPEXP_POST']))
+			{
+				// Arguements from PayPal passed via SESSION Variables
+				$ppexpCallbackArgs = unserialize($_SESSION['PPEXP_POST']);
+				foreach ($ppexpCallbackArgs as $argID => $argVal)
+				{
+					$_GET[$argID] = $argVal;
+					$_REQUEST[$argID] = $argVal;
+				}
+				unset($_SESSION['PPEXP_POST']);
+			}
 			if ($myDBaseObj->isDbgOptionSet('Dev_ShowGET'))
 			{
 				StageShowLibUtilsClass::print_r($_GET, '$_GET');
@@ -1096,43 +1109,11 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 			{
 				StageShowLibUtilsClass::print_r($_POST, '$_POST');
 			}		
-			
-			if (isset($_GET['ppexp']))
+			if ($myDBaseObj->isDbgOptionSet('Dev_ShowSESSION'))
 			{
-				switch ($_GET['ppexp'])
-				{
-					case 'ok':
-						// Get PayPal Express token from POST data
-						$token = stripslashes($_GET['token']);
-						
-						// Get sale record from DB
-						$saleRecord = $myDBaseObj->GetSaleByToken($token);
-						
-						$pprslt = $myDBaseObj->PP_GetExpressCheckoutDetails($token);
-						if ($pprslt->status != 'OK')
-						{
-							$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
-							$this->checkoutMsg .= __('Error getting purchaser details from PayPal', $this->myDomain);
-							return;						
-						}
-						
-						$pprslt->saleDetails['saleID'] = $saleRecord[0]->saleID;						
-						$saleID = $myDBaseObj->UpdateSale($pprslt->saleDetails);
-
-						// Call DoExpressCheckoutPayment
-						
-						return;
-						
-					case 'cancel':
-						//TODO if it goes wrong ...!
-						
-						break;
-					
-					default:
-						break;
-				}
-			}
-
+				StageShowLibUtilsClass::print_r($_SESSION, '$_SESSION');
+			}		
+			
 			$checkout = '';
 			if (isset($_POST[$this->GetButtonPostID('paypalexpress')])) $checkout = 'paypalexpress';
 			if (isset($_POST[$this->GetButtonPostID('checkout')])) $checkout = 'checkout';
@@ -1159,18 +1140,28 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 				
 				if ($expressMode)
 				{
-					$pprslt = $this->myDBaseObj->PP_SetExpressCheckout($checkoutRslt->totalDue);
+					$pprslt = $this->myDBaseObj->PP_SetExpressCheckout($checkoutRslt);
 					if ($pprslt->status != 'OK')
 					{
-						$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
-						$this->checkoutMsg .= __('Error getting token from PayPal', $this->myDomain);
+						$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - SetExpressCheckout returned Error<br>';
+						if (isset($pprslt->errMsg))
+							$this->checkoutMsg .= $pprslt->errMsg;
+						else
+							$this->checkoutMsg .= __('Could not get token from PayPal', $this->myDomain);
 						return;						
 					}
 					
 					// Log PayPal Express token with sale 
 					$checkoutRslt->saleDetails['salePPExpToken'] = $pprslt->token;
-					
-					$paypalURL = add_query_arg('cmd', '_express-checkout', $paypalURL);
+										
+					if (defined('STAGESHOWLIB_EXPRESSCHECKOUT_JSURL'))
+					{
+						$paypalURL = 'https://www.paypal.com/incontext';
+					}
+					else
+					{
+						$paypalURL = add_query_arg('cmd', '_express-checkout', $paypalURL);
+					}
 					$paypalURL = add_query_arg('token', $pprslt->token, $paypalURL);
 				}
 				else
@@ -1253,6 +1244,12 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT') && ($checkoutSelector != StageSho
 					}
 					else 
 					{
+						if (isset($_GET['RTD_BlockPayPal']))
+						{
+							$paypalURLParams = explode('&', $paypalURL);
+							StageShowLibUtilsClass::print_r($paypalURLParams, 'paypalURLParams');
+							exit;
+						}
 						header( 'Location: '.$paypalURL ) ;
 						exit;
 					}

@@ -2,7 +2,7 @@
 /* 
 Description: Code for Table Management Class
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -731,7 +731,7 @@ function StageShowLib_getCheckboxesCount(elem)
 		
 		function GetCurrentURL() 
 		{			
-			$currentURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			$currentURL = StageShowLibUtilsClass::GetPageURL();
 			$currentURL = $this->myDBaseObj->AddParamAdminReferer($this->caller, $currentURL);
 			return $currentURL;
 		}
@@ -1112,7 +1112,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 
 		function OutputFilterLinks($results, $rowFilter = '')
 		{
-			$current_url = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			$current_url = StageShowLibUtilsClass::GetPageURL();
 			$current_url = remove_query_arg( 'filter', $current_url);
 			$current_url = remove_query_arg( 'paged', $current_url);
 				

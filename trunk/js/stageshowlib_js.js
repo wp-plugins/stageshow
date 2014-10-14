@@ -34,11 +34,12 @@ function StageShowLib_OnChangeDonation(obj)
 	var subTotal = subTotalObj.value;
 	
 	var newTotalVal = parseFloat(subTotal);
-	newTotalVal += Math.abs(saleDonation);
-	
+	newTotalVal += saleDonation;
+	newTotalVal += 0.00001; /* To force rounding error ... then it is corrected below */
+		 	
 	var newTotal = newTotalVal.toString();
 
-	var origDps = StageShowLib_NumberOfDps(subTotal);	
+	var origDps = StageShowLib_NumberOfDps(subTotal);
 	var newDps = StageShowLib_NumberOfDps(newTotal);
 	while (newDps < origDps)
 	{
@@ -47,6 +48,12 @@ function StageShowLib_OnChangeDonation(obj)
 		newDps++;
 	}
 
+	if (newDps > origDps)
+	{
+		/* Limit the number of decimal points */
+		newTotal = newTotal.substr(0, newTotal.length + origDps - newDps);
+	}
+	
 	finalTotalObj.innerHTML = newTotal;
 }
 

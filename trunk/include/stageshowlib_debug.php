@@ -2,7 +2,7 @@
 /* 
 Description: Code for Managing Prices Configuration
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,9 +61,10 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			$testOptionDefs = array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show $_GET',        StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowGET',          StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowGET', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show $_POST',       StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowPOST',         StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowPOST', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show $_SESSION',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowSESSION',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowSESSION', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show EMail Msgs',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowEMailMsgs',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowEMailMsgs', ),				
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show SQL',          StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowSQL',          StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowSQL', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Output',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBOutput',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowDBOutput', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show EMail Msgs',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowEMailMsgs',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowEMailMsgs', ),				
 			);
 			
 			return $testOptionDefs;

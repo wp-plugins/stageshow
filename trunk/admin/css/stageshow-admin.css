@@ -1,7 +1,7 @@
 /* 
 Description: StageShow Admin Style Sheet
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -304,6 +304,12 @@ div.stageshow-boxoffice td
 .stageshow-boxoffice-available
 {
 	text-align: right !important;
+}
+
+.stageshow-boxoffice-add input
+{
+	border-width: 0px !important;
+	box-shadow: none !important;
 }
 
 .stageshow-trolley-checkout

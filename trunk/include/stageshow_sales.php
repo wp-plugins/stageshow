@@ -2,7 +2,7 @@
 /* 
 Description: StageShow Plugin Top Level Code
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-require_once 'include/stageshow_dbase_api.php';      
+require_once 'stageshow_dbase_api.php';      
       
-include 'include/stageshowlib_salesplugin.php';
+include 'stageshowlib_salesplugin.php';
 	
 if (!class_exists('StageShowSalesPluginClass')) 
 {
@@ -278,13 +278,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $ParamsOK;
 		}
 		
-		function GetOnlineStoreElemTagId($id, $result)
-		{
-			$id  = parent::GetOnlineStoreElemTagId($id, $result);
-//			$id .= '_' . $result->perfID;
-			return $id;
-		}
-
 		function OutputContent_OnlineStoreTitle($result)
 		{
 			echo '<h2>'.$result->showName."</h2>\n";					
@@ -444,7 +437,8 @@ if (!class_exists('StageShowSalesPluginClass'))
 			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['ref'].'">'.$this->colID['ref'].'</td>'."\n";
 			$this->trolleyHeaderCols += $this->OutputContent_OnlineTrolleyDetailsHeaders();
 			echo '<td class="'.$this->cssTrolleyBaseID.'-'.$this->cssColID['price'].'">'.$this->colID['price'].'</td>'."\n";
-			echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
+			if (!$this->saleConfirmationMode)
+				echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
 			echo "</tr>\n";
 		}
 				
@@ -467,33 +461,51 @@ if (!class_exists('StageShowSalesPluginClass'))
 		function GetButtonTypeDef($buttonID, $buttonName = '', $buttonType = 'submit')
 		{
 			$buttonTypeDef = '';
+			$buttonSrc = '';
 			
 			switch ($buttonID)
 			{
 				case 'add':
 					if (defined('STAGESHOW_ADDBUTTON_URL'))
 					{
-						$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, 'image');
-						$buttonTypeDef .= ' src="'.STAGESHOW_ADDBUTTON_URL.'"';
+						$buttonType = 'image';
+						$buttonSrc = ' src="'.STAGESHOW_ADDBUTTON_URL.'"';
 					}
 					break;
 					
 				case 'checkout':
 					if (defined('STAGESHOW_CHECKOUTBUTTON_URL'))
 					{
-						$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, 'image');
-						$buttonTypeDef .= ' src="'.STAGESHOW_CHECKOUTBUTTON_URL.'"';
+						$buttonType = 'image';
+						$buttonSrc = ' src="'.STAGESHOW_CHECKOUTBUTTON_URL.'"';
 					}
 					break;
 					
+				case 'remove':
+					if (defined('STAGESHOW_REMOVEBUTTON_URL') && (STAGESHOW_REMOVEBUTTON_URL != ''))
+					{
+						$buttonType = 'image';
+						$buttonSrc = ' src="'.STAGESHOW_REMOVEBUTTON_URL.'"';							
+					}
+					break;
+					
+				case 'confirm':
+					if (defined('STAGESHOW_CONFIRMBUTTON_URL') && (STAGESHOW_CONFIRMBUTTON_URL != ''))
+					{
+						$buttonType = 'image';
+						$buttonSrc = ' src="'.STAGESHOW_CONFIRMBUTTON_URL.'"';							
+					}
+					break;
+				
 				default:
 					break;					
 			}
 			
 			if ($buttonTypeDef == '')
 			{
-				$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, $buttonType);
+				$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, $buttonType);				
 			}
+			$buttonTypeDef .= $buttonSrc;
 
 			$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
 			$buttonTypeDef .= ' onClick="'.$onClickHandler.'(this)"';
@@ -501,40 +513,22 @@ if (!class_exists('StageShowSalesPluginClass'))
 			return $buttonTypeDef;
 		}
 				
-		function OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent='')
-		{
-			$removeLinkText = __('Remove', $this->myDomain);	
-			if (!defined('STAGESHOW_REMOVEBUTTON_URL'))
-			{
-				$removeLinkContent = parent::OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent);
-			}
-			else if (STAGESHOW_REMOVEBUTTON_URL != '')
-			{
-				$removeLinkContent = '<img alt='.$removeLinkText.' src="'.STAGESHOW_REMOVEBUTTON_URL.'">';
-				$removeLinkContent = parent::OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent);
-			}
-			else
-			{
-				$buttonName = 'RemoveTicketSale_'.$cartIndex;
-				$buttonType = $this->GetButtonTypeDef('remove', $buttonName);
-				$removeLinkContent =  '<input class="stageshow-boxoffice-button button-primary" '.$buttonType.' value="'.$removeLinkText.'"/>';
-			}
-
-			return $removeLinkContent;
-		}
-		
 		function OutputContent_OnlineCheckoutButton($cartContents)
 		{
 			if ($this->adminPageActive)
 			{
 				echo '<input class="stageshow-boxoffice-button button-primary" type="submit" name="'.$this->GetButtonID('editbuyer').'" value="'.__('Next', $this->myDomain).'"/>'."\n";
-				return;
+				return '';
 			}
 			
-			if ($this->myDBaseObj->PayPalConfigured())
+			$checkoutSelector = '';
+			if (!$this->myDBaseObj->PayPalConfigured())
 			{
-				parent::OutputContent_OnlineCheckoutButton($cartContents);
+				return '';
 			}
+			
+			$checkoutSelector = parent::OutputContent_OnlineCheckoutButton($cartContents);				
+			return $checkoutSelector; 
 		}
 		
 		function OutputContent_OnlineTrolleyDetailsCols($priceEntry, $cartEntry)

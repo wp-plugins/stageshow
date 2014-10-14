@@ -11,7 +11,12 @@ if (defined('STAGESHOW_FOLDER'))
 	return;
 }
 
-$siteurl = get_option('siteurl');
+if (!isset($siteurl)) $siteurl = get_option('siteurl');
+if (is_ssl())
+	$siteurl = str_replace('http://', 'https://', $siteurl);
+else
+	$siteurl = str_replace('https://', 'http://', $siteurl);
+
 define('STAGESHOW_FOLDER', dirname(plugin_basename(__FILE__)));
 define('STAGESHOW_URL', $siteurl.'/wp-content/plugins/' . STAGESHOW_FOLDER .'/');
 define('STAGESHOW_UPLOADS_URL', $siteurl.'/wp-content/uploads/' . STAGESHOW_FOLDER .'/');

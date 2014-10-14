@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 4.0.2
+Stable tag: 4.1
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -188,9 +188,29 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
+= 4.1 (13/10/2014) =
+Bug Fix: Adding Tickets for same date-time and Ticket Type always adds entry already in Trolley
+Bug Fix: Sites on Secure Server have incorrect URL for admin page filters
+Bug Fix: Sites on Secure Server have incorrect URL for Box-Office reports on Overview
+Bug Fix: Performance Expiry Date not used to determine active Performances by Verification Check
+Bug Fix: Overview Sales values calculated incorrectly for Group tickets
+Added Spanish Translation
+Added details on updating translations to help
+Remove buttons on Trolley changed from links to submit button (in a &lt;form$gt;)
+Removed box shadow from Add buttons
+Added Sale Verification fields to TDT ticket download
+Added option for PayPal Express Checkout (StageShowGold)
+Added Verify Fields to TDT Downloads
+
+= 4.0.2.1 (27/09/2014) =
+* Sale Verification code moved to separate class (StageShowSaleValidateClass)
+* Added stageshow_direct_validate.php - Direct Sale Verifier (StageShowGold)
+* Added Spanish Translation
+
 = 4.0.2 (20/09/2014) =
 * Bug Fix: Non-default WP DB table prefix produces empty TDT download 
 * Bug Fix: Offline Validator fails with non-default WP DB table prefix  
+* Bug Fix: Checkout button with image fails to redirect to PayPal on Firefox/IE but OK with Chrome
 * Added "Ticket Paid" values to Offline Validator results
 * Automatically creates copy of stageshow-custom.css when selected in settings
 * Automatically creates copy of stageshow-custom.js when selected in settings
