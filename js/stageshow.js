@@ -178,3 +178,11 @@ function stageshow_OnClickCheckout(obj)
   		stageshowCustom_OnClickCheckout(obj); 
 	}
 }
+
+function stageshow_OnClickRemove(obj)
+{
+	if (typeof stageshowCustom_OnClickRemove == 'function') 
+	{ 
+  		stageshowCustom_OnClickRemove(obj); 
+	}
+}

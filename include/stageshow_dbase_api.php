@@ -2,7 +2,7 @@
 /* 
 Description: StageShow Plugin Database Access functions
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -159,13 +159,24 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function upgradeDB()
 		{
-			
 			// Call upgradeDB() in base class
 			parent::upgradeDB();
 			
 			// Remove priceRef field
 			$this->RemovePriceRefsField();
-					
+
+			if ($this->IfColumnExists(STAGESHOW_TICKETS_TABLE, 'ticketName'))
+			{
+				// "ticketName" column never populated - removed
+				$this->deleteColumn(STAGESHOW_TICKETS_TABLE, 'ticketName');				
+			}
+
+			if ($this->IfColumnExists(STAGESHOW_TICKETS_TABLE, 'ticketType'))
+			{
+				// "ticketType" column never populated - removed
+				$this->deleteColumn(STAGESHOW_TICKETS_TABLE, 'ticketType');				
+			}
+
 			// FUNCTIONALITY: DBase - On upgrade ... Add administrator capabilities
 			// Add administrator capabilities
 			$adminRole = get_role('administrator');
@@ -459,12 +470,9 @@ if (!class_exists('StageShowDBaseClass'))
 					break;
 					
 				case STAGESHOW_TICKETS_TABLE:
-					$ticketNameLen = STAGESHOW_SHOWNAME_TEXTLEN + strlen(STAGESHOW_TICKETNAME_DIVIDER) + STAGESHOW_DATETIME_TEXTLEN;
 					$sql .= '
 						saleID INT UNSIGNED NOT NULL,
 						priceID INT UNSIGNED NOT NULL,
-						ticketName VARCHAR('.$ticketNameLen.') NOT NULL DEFAULT "",
-						ticketType VARCHAR('.STAGESHOW_PRICETYPE_TEXTLEN.') NOT NULL DEFAULT "",
 						ticketQty INT NOT NULL,
 						ticketPaid DECIMAL(9,2) NOT NULL DEFAULT 0.0,
 						ticketSeat TEXT,
@@ -585,6 +593,11 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function AddSamplePrice($perfRef, $priceType, $priceValue = STAGESHOW_PRICE_UNKNOWN, $visibility = STAGESHOW_VISIBILITY_PUBLIC)
 		{
+			if (defined('STAGESHOW_SAMPLEPRICE_DIVIDER'))
+			{
+				$priceValue = $priceValue/STAGESHOW_SAMPLEPRICE_DIVIDER;
+				$priceValue = number_format($priceValue+0.01, 2);
+			}
 			$perfID = $this->perfIDs[$perfRef];
 			$priceID = $this->AddPrice($perfID, $priceType, $priceValue, $visibility);
 			
@@ -1595,19 +1608,19 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function GetWhereSQL($sqlFilters)
 		{
+			if (isset($sqlFilters['activePerfs']))
+			{
+				$timeNow = current_time('mysql');
+				$sqlWhere = ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime>"'.$timeNow.'" ';
+				return $sqlWhere;
+			}
+			
 			$sqlWhere = parent::GetWhereSQL($sqlFilters);
 			$sqlCmd = ($sqlWhere === '') ? ' WHERE ' : ' AND ';
 			
 			if (isset($sqlFilters['priceID']))
 			{
 				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceID="'.$sqlFilters['priceID'].'"';
-				$sqlCmd = ' AND ';
-			}
-			
-			if (isset($sqlFilters['activePerfs']))
-			{
-				$timeNow = current_time('mysql');
-				$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime>"'.$timeNow.'" ';
 				$sqlCmd = ' AND ';
 			}
 			

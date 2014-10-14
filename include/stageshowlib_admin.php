@@ -2,7 +2,7 @@
 /* 
 Description: Core Library Admin Page functions
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -162,10 +162,13 @@ if (!class_exists('StageShowLibAdminClass'))
 
 			$this->ProcessActionButtons();
 			
-			$iconID = 'icon-'.$this->myDomain;
-			echo '
-				<div id="'.$iconID.'" class="icon32"></div>
-				<h2>'.$myDBaseObj->get_name().' - '.__($this->pageTitle, $this->myDomain).'</h2>'."\n";
+			if ($this->pageTitle != '')
+			{
+				$iconID = 'icon-'.$this->myDomain;
+				echo '
+					<div id="'.$iconID.'" class="icon32"></div>
+					<h2>'.$myDBaseObj->get_name().' - '.__($this->pageTitle, $this->myDomain).'</h2>'."\n";				
+			}
 				
 			echo "
 <script>

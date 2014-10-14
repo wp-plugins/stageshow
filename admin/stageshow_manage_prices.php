@@ -2,7 +2,7 @@
 /* 
 Description: Code for Managing Prices Configuration
 
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

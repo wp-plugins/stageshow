@@ -2,7 +2,7 @@
 /* 
 Description: General Utilities Code
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,6 +38,12 @@ if (!class_exists('StageShowLibUtilsClass'))
 			// HTTP escapes ', " and / 
 			// This function will return the array element with escape sequences removed
 			return stripslashes(self::GetArrayElement($reqArray, $elementId));
+		}
+		
+		static function GetPageURL() 
+		{			
+			$currentURL = ( is_ssl() ? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			return $currentURL;
 		}
 		
 		static function GetArrayElement($reqArray, $elementId, $defaultValue = '')

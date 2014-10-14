@@ -2,7 +2,7 @@
 /* 
 Description: StageShow Plugin Top Level Code
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-include 'stageshow_sales.php';
+include 'include/stageshow_sales.php';
 	
 if (!class_exists('StageShowPluginClass')) 
 {
@@ -197,8 +197,6 @@ if (!class_exists('StageShowPluginClass'))
 			
 			// Get plugin version number
 			wp_update_plugins();
-
-			// TODO - Detect changes to plugin version number			
 		}
 
  		function OutputMetaTag()
@@ -418,7 +416,7 @@ if (!class_exists('StageShowPluginClass'))
 			if ($this->myDBaseObj->getOption('UseNoteToSeller'))
 			{
 				$rowsDef = '';
-				$noteToSeller = $cartContents->saleNoteToSeller;	// 'TODO - Get User Note';
+				$noteToSeller = $cartContents->saleNoteToSeller;
 				
 				$formHTML .=  '
 				<tr class="stageshow-boxoffice-formRow">
@@ -615,8 +613,10 @@ if (!class_exists('StageShowPluginClass'))
 					if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php') ) 
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));
 
-					if ( file_exists(STAGESHOW_ADMIN_PATH.'stageshow_debug.php') )
+					if ( isset($_SESSION['stageshowlib_dbg']) || isset($_REQUEST['dbg']) )
+					{
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEBUG', $this->myDomain), __('DEBUG', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEBUG, array(&$this, 'printAdminPage'));
+					}
 				}
 			}	
 			

@@ -2,7 +2,7 @@
 /* 
 Description: Code for Admin Tools
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@ include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 if ( file_exists(STAGESHOW_INCLUDE_PATH.'stageshowlib_test_emailsale.php') ) 
 	include STAGESHOW_INCLUDE_PATH.'stageshowlib_test_emailsale.php'; 
  
+include STAGESHOW_INCLUDE_PATH.'stageshow_salevalidate.php'; 
+ 
 if (!class_exists('StageShowToolsAdminClass')) 
 {
 	class StageShowToolsAdminClass extends StageShowLibAdminClass // Define class
@@ -33,14 +35,10 @@ if (!class_exists('StageShowToolsAdminClass'))
 		function __construct($env) //constructor	
 		{
 			$this->pageTitle = 'Tools';
+			$this->adminClassPrefix = $env['PluginObj']->adminClassPrefix;
 			
 			// Call base constructor
 			parent::__construct($env);
-		}
-		
-		function CreateToolsAdminDetailsListObject($env, $editMode = false)
-		{
-			return new StageShowSalesAdminDetailsListClass($env, $editMode);	
 		}
 		
 		function ProcessActionButtons()
@@ -62,59 +60,28 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php
 		}
 
-		function GetValidatePerformanceSelect($perfID = 0)
+		function OutputExportFormatOptions()
 		{
-			$myDBaseObj = $this->myDBaseObj;
-			
-			if ($perfID > 0)
-			{
-				$perfsList = $myDBaseObj->GetPerformancesListByPerfID($perfID);
-				$perfRecord = $perfsList[0];
-				$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
-				$perfName = $perfRecord->showName.' - '.$perfDateTime;
-				$hiddenTags  = '<input type="hidden" name="perfID" id="perfID" value="'.$perfID.'"/>'."\n";
-				$html = $perfName.$hiddenTags."\n";
-			}
-			else
-			{
-				// Get performances list for all shows
-				$perfsList = $myDBaseObj->GetActivePerformancesList();
-			
-				$selected = ' selected="" ';
-				
-				$html = '<select name="perfID" id="perfID">'."\n";
-				
-				foreach ($perfsList as $perfRecord)
-				{
-					$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
-					$perfName = $perfRecord->showName.' - '.$perfDateTime;
-					//$selected = ($perfID == $perfRecord->perfID) ? ' selected=""' : '';
-					$html .= '<option value="'.$perfRecord->perfID.'"'.$selected.' >'.$perfName.'</option>'."\n";
-					$selected = '';
-				}
-				
-				$perfName = __("All Performances", $myDBaseObj->get_domain() );
-				//$selected = ($perfID == 0) ? ' selected=""' : '';
-				$html .= '<option value="0"'.$selected.' >'.$perfName.'</option>'."\n";
-				
-				$html .= '</select>'."\n";
-			}
-						
-			return $html;			
+?>	
+	<option value="tdt" selected="selected"><?php _e('Tab Delimited Text', $this->myDomain); ?> </option>
+<?php
 		}
 		
-		function Tools_Validate()
+		function OutputExportOptions()
 		{
-												
-	  		// FUNCTIONALITY: Tools - Online Sale Validator
-			$myDBaseObj = $this->myDBaseObj;
-
-			$TxnId = '';
+?>
+<script type="text/javascript">
+	function stageshow_updateExportOptions(obj)
+	{
+	}
+</script>
+<?php
+		}
+		
+		function Tools_Export()
+		{
+			$actionURL = STAGESHOW_ADMIN_URL.STAGESHOW_FOLDER.'_export.php';
 				
-			StageShowLibUtilsClass::Output_Javascript_SetFocus("TxnId");
-				
-			$perfID = isset($_POST['perfID']) ? $_POST['perfID'] : 0;
-	
 ?>
 <script type="text/javascript">
 	function stageshow_onSelectExportType(obj)
@@ -156,207 +123,7 @@ if (!class_exists('StageShowToolsAdminClass'))
 		else
 			downloadButton.style.visibility = 'hidden';
 	}
-
-	function stageshow_TxnIdValid()
-	{
-		/* Block Validation requests if TxnId is blank */
-		txnidElem = document.getElementById("TxnId");
-		txnid = txnidElem.value;
-		return (txnid.length > 0);
-	}
 </script>
-<h3><?php _e('Validate Sale', $this->myDomain); ?></h3>
-<form method="post">
-		<?php $this->WPNonceField(); ?>
-		<table class="stageshow-form-table">
-			<?php
-			if ($myDBaseObj->GetLocation() !== '')
-			{
-				$TerminalLocation = $myDBaseObj->GetLocation();
-				echo "
-					<tr>
-						<td>".__('Location / Computer ID', $myDBaseObj->get_domain())."&nbsp;</td>
-						<td>$TerminalLocation</td>
-					</tr>
-					<tr>
-						<td>".__('Performance', $myDBaseObj->get_domain())."</td>
-						<td>".$this->GetValidatePerformanceSelect($perfID)."</td>
-					</tr>
-					";				
-			}
-?>
-			<tr>
-		<td><?php _e('Transaction ID', $this->myDomain); ?></td>
-				<td>
-			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
-						</td>
-			</tr>
-			<?php
-			if(isset($_POST['validatesalebutton']))
-			{
-				$env = StageShowLibAdminBaseClass::getEnv($this);					
-				$this->ValidateSale($env, $perfID);
-			}
-?>
-		</table>
-		<p>
-			<p class="submit">
-<input class="button-secondary" onclick="return stageshow_TxnIdValid()" type="submit" name="validatesalebutton" value="<?php _e('Validate', $this->myDomain) ?>"/>
-					</form>
-<?php
-		}
-
-		function LogValidation($env, $saleID, $perfID = 0)
-		{
-			return true;
-		}
-
-		function ValidateSale($env, $perfID)
-		{
-			$saleID = 0;
-				 
-			$myDBaseObj = $this->myDBaseObj;
-				 
-			$this->CheckAdminReferer();
-
-			$TxnId = trim(stripslashes($_POST['TxnId']));
-			
-			$validateMsg = 'Sale Validation (Transaction ID: '.$TxnId.') - ';
-			
-			if (strlen($TxnId) == 0) return 0;
-			
-			$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
-				
-			$entryCount = count($results);
-			if ($entryCount == 0)
-			{
-				$validateMsg .= __('No matching record', $this->myDomain);
-				echo '<tr><td colspan="2"><div id="message" class="error stageshow-validate-notfound"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-				return 0;
-			}
-				
-			$saleID = $results[0]->saleID;
-		 
-			// Check that it is for selected performance
-			if ($perfID != 0)
-			{
-				$matchingSales = 0;
-				for ($index = 0; $index<$entryCount; $index++)	
-				{
-					if ($results[$index]->perfID != $perfID)
-					{
-						unset($results[$index]);
-					}
-					else
-					{
-						$matchingSales++;
-						if ($matchingSales == 1)
-						{
-							$salerecord = $results[$index];							
-						}								
-					}
-				}						
-			}
-			else
-			{
-				$matchingSales = $entryCount;								
-				$salerecord = $results[0];
-			}
-			
-			if ($matchingSales == 0)
-			{
-				$validateMsg .= __('Wrong Performance', $this->myDomain);
-				$msgClass = 'stageshow-validate-wrongperf error alert';
-				echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-				
-				$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
-				$salesList = $this->CreateToolsAdminDetailsListObject($env);		
-							
-				echo '<tr><td colspan="2">'."\n";
-				$salesList->OutputList($results);	
-				echo "</td></tr>\n";
-						 
-				return 0;	
-			}		
-				
-			if (!$this->LogValidation($env, $saleID, $perfID))
-			{
-				$validateMsg .= __('Already Verified', $this->myDomain);
-				echo '<tr><td colspan="2"><div id="message" class="error stageshow-validate-duplicated"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-				return 0;	
-			}
-			
-			$validateMsg .= __('Matching record found', $this->myDomain);
-			switch($salerecord->saleStatus)
-			{
-				case PAYPAL_APILIB_SALESTATUS_COMPLETED:
-					$msgClass = 'stageshow-validate-ok updated ok';
-					break;
-						
-				case STAGESHOW_SALESTATUS_RESERVED:
-					$msgClass = 'stageshow-validate-reserved error alert';
-					$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
-					break;
-						
-				default:
-					$msgClass = 'stageshow-validate-unknown error';
-					$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
-					break;
-						
-			}
-				
-			echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-				
-			echo '<tr><td>'.__('Sale Status', $this->myDomain).':</td><td>'.__($salerecord->saleStatus, $this->myDomain).'</td></tr>'."\n";
-			if ($salerecord->saleStatus == STAGESHOW_SALESTATUS_RESERVED)
-			{
-				echo '<tr><td>'.__('Total Due', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
-			}
-			else
-			{
-				if ($salerecord->saleTransactionFee > 0)
-				{
-					echo '<tr><td>'.__('Booking Fee', $this->myDomain).':</td><td>'.$salerecord->saleTransactionFee.'</td></tr>'."\n";
-				}
-				if ($salerecord->saleDonation > 0)
-				{
-					echo '<tr><td>'.__('Donation', $this->myDomain).':</td><td>'.$salerecord->saleDonation.'</td></tr>'."\n";
-				}
-				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->saleDonation.'</td></tr>'."\n";
-			}
-			
-			$salesList = $this->CreateToolsAdminDetailsListObject($env);		
-						
-			echo '<tr><td colspan="2">'."\n";
-			$salesList->OutputList($results);	
-			echo "</td></tr>\n";
-						 
-			return $saleID;
-		}
-		
-		function OutputExportFormatOptions()
-		{
-?>	
-	<option value="tdt" selected="selected"><?php _e('Tab Delimited Text', $this->myDomain); ?> </option>
-<?php
-		}
-		
-		function OutputExportOptions()
-		{
-?>
-<script type="text/javascript">
-	function stageshow_updateExportOptions(obj)
-	{
-	}
-</script>
-<?php
-		}
-		
-		function Tools_Export()
-		{
-			$actionURL = STAGESHOW_ADMIN_URL.STAGESHOW_FOLDER.'_export.php';
-				
-?>
 <h3><?php _e('Export', $this->myDomain); ?></h3>
 <p><?php _e('Export to a "TAB Separated Values" format file on your computer.', $this->myDomain); ?></p>
 <p><?php _e('This format can be imported to many applications including spreadsheets and databases.', $this->myDomain); ?></p>
@@ -401,6 +168,12 @@ if (!class_exists('StageShowToolsAdminClass'))
 <?php
 		}
 		
+		function Tools_Validate()
+		{
+			$classId = $this->adminClassPrefix.'SaleValidateClass';
+			new $classId($this->env);
+		}
+				
 	}
 }
 

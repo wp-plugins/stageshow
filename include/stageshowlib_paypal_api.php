@@ -2,7 +2,7 @@
 /*
 Description: PayPal API Functions
 
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,8 @@ if (!class_exists('PayPalAPIClass'))
 	define('PAYPAL_APILIB_SALESTATUS_COMPLETED', 'Completed');
 	define('PAYPAL_APILIB_SALESTATUS_PENDING', 'Pending');
 	define('PAYPAL_APILIB_SALESTATUS_CHECKOUT', 'Checkout');
-		
+	define('PAYPAL_APILIB_SALESTATUS_PENDINGPPEXP', 'PendingPPExp');
+			
 	define('PAYPAL_APILIB_PPLOGIN_MERCHANTID_TEXTLEN', 65);
 	define('PAYPAL_APILIB_PPLOGIN_USER_TEXTLEN', 127);
 	define('PAYPAL_APILIB_PPLOGIN_PWD_TEXTLEN', 65);
@@ -131,29 +132,30 @@ if (!class_exists('PayPalAPIClass'))
 			$this->URLParamsArray = null;
 		}
 		
-		function IsConfigured()
+		function IsAPIConfigured(&$apiStatus)
 		{
+			$apiStatus = '';
 			if ((strlen( $this->APIusername ) == 0) || ( strlen( $this->APIpassword ) == 0 ) || ( strlen( $this->APIsignature ) == 0 ))
 			{
-				if ($this->DebugMode)
-				{
-					echo "--------------------------------------<br>\n";
-					echo "API Access Error: API UserName/Pasword Undefined<br>\n";
-					echo "<br>\n";
-				}
-				return false;
+				$apiStatus = "API UserName/Pasword Undefined";
 			}
-			if (strlen( $this->APIEndPoint ) == 0)
+			else if (strlen( $this->APIEndPoint ) == 0)
 			{
-				if ($this->DebugMode)
-				{
-					echo "--------------------------------------<br>\n";
-					echo "API Access Error: APIEndPoint Undefined<br>\n";
-					echo "<br>\n";
-				}
-				return false;
+				$apiStatus = "APIEndPoint Undefined";
 			}
-			return true;
+			else
+			{
+				return true;
+			}
+
+			if (($this->DebugMode) && ($apiStatus != ''))
+			{
+				echo "--------------------------------------<br>\n";
+				echo "API Access Error: $apiStatus<br>\n";
+				echo "<br>\n";
+			}
+			
+			return false;
 		}
 		
 		function SetLoginParams($username, $password, $signature, $currency = PAYPAL_APILIB_DEFAULT_CURRENCY, $email = '')		
@@ -239,9 +241,9 @@ if (!class_exists('PayPalAPIClass'))
 				}
 				if (isset($response['APIResponses']['ACK']))
 				{
+					$this->APIResponses = $response['APIResponses'];				
 					if ($response['APIResponses']['ACK'] == 'Success')
 					{
-						$this->APIResponses = $response['APIResponses'];				
 						$this->APIStatusMsg = 'OK';
 					}
 					else
@@ -305,7 +307,7 @@ if (!class_exists('PayPalAPIClass'))
 			{
 				echo 'ERROR: API Signature not specified<br>\n';
 			}
-			$this->AddAPIParam('VERSION', '64.0');
+			$this->AddAPIParam('VERSION', '65.1');
 			$this->AddAPIParam('METHOD', $methodID);
 			$this->ButtonVarCount = 0;
 		}
@@ -342,21 +344,41 @@ if (!class_exists('PayPalAPIClass'))
 			return $response;			
 		}
 
-		function SetExpressCheckout($saleTotal, $logoURL, $headerURL)
+		function SetExpressCheckout($saleTotal, $salesDetails, $logoURL, $headerURL = '')
 		{
-			$boxofficeURL = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-			$siteurl = get_option('siteurl');
+			$boxofficeURL = StageShowLibUtilsClass::GetPageURL();
+			$pluginFolder = basename(dirname(dirname(__FILE__)));
+
+			$ppexpCallbackURL = get_option('siteurl');
+			$ppexpCallbackURL .= '/wp-content/plugins/' . $pluginFolder .'/stageshow_ppexp_callback.php';
+			$ppexpCallbackURL = add_query_arg('url', urlencode($boxofficeURL), $ppexpCallbackURL);
 
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return;	// Cannot Execute - API Not Configured
+			if (!$this->IsAPIConfigured($apiStatus))
+				return $apiStatus;	// Cannot Execute - API Not Configured
 				
 			$this->InitAPICallParams('SetExpressCheckout');
-			$this->AddAPIParam('PAYMENTREQUEST_0_AMT', $saleTotal);
+			$this->AddAPIParam('RETURNURL', $ppexpCallbackURL."&ppexp=ok");
+			$this->AddAPIParam('CANCELURL', $ppexpCallbackURL."&ppexp=cancel");
 			$this->AddAPIParam('PAYMENTREQUEST_0_CURRENCYCODE', $this->PayPalCurrency);
+			$this->AddAPIParam('PAYMENTREQUEST_0_AMT', $saleTotal);
+			$this->AddAPIParam('PAYMENTREQUEST_0_ITEMAMT', $saleTotal);
+			$this->AddAPIParam('PAYMENTREQUEST_0_TAXAMT', 0);
+			$this->AddAPIParam('PAYMENTREQUEST_0_DESC', 'Tickets');
 			$this->AddAPIParam('PAYMENTREQUEST_0_PAYMENTACTION', 'Sale');
-			$this->AddAPIParam('RETURNURL', $boxofficeURL."?ppexp=ok");
-			$this->AddAPIParam('CANCELURL', $boxofficeURL."?ppexp=cancel");
+			
+			$itemNo = 0;
+			foreach ($salesDetails as $sale)
+			{
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_ITEMCATEGORY'.$itemNo, isset($sale->category) ? $sale->category : 'Physical');
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_NAME'.$itemNo, $sale->name);
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_NUMBER'.$itemNo, $itemNo);
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_QTY'.$itemNo, $sale->qty);
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_TAXAMT'.$itemNo, 0);
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_AMT'.$itemNo, $sale->amt);
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_DESC'.$itemNo, 'Download');
+				$itemNo++;							
+			}
 			
 			if ($logoURL != '')
 			{
@@ -374,8 +396,8 @@ if (!class_exists('PayPalAPIClass'))
 		function GetExpressCheckoutDetails($token)
 		{
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return;	// Cannot Execute - API Not Configured
+			if (!$this->IsAPIConfigured($apiStatus))
+				return $apiStatus;	// Cannot Execute - API Not Configured
 				
 			$this->InitAPICallParams('GetExpressCheckoutDetails');
 			$this->AddAPIParam('TOKEN', $token);
@@ -383,15 +405,31 @@ if (!class_exists('PayPalAPIClass'))
 			return $this->APIAction('GetExpressCheckoutDetails ');
 		}
 
-		function DoExpressCheckoutPayment($token, $payerID)
+		function DoExpressCheckoutPayment($token, $payerID, $items)
 		{
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return;	// Cannot Execute - API Not Configured
+			if (!$this->IsAPIConfigured($apiStatus))
+				return $apiStatus;	// Cannot Execute - API Not Configured
 				
 			$this->InitAPICallParams('DoExpressCheckoutPayment');
 			$this->AddAPIParam('TOKEN', $token);
-			$this->AddAPIParam('PAYERID', $payerID);
+			$this->AddAPIParam('PAYERID', $payerID);			
+			$this->AddAPIParam('PAYMENTREQUEST_0_NOTIFYURL', STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
+			$this->AddAPIParam('PAYMENTREQUEST_0_CURRENCYCODE', $this->PayPalCurrency);
+			$this->AddAPIParam('PAYMENTREQUEST_0_PAYMENTACTION', 'Sale');
+			
+			$amt = 0;
+			$itemNo = 0;
+			foreach($items as $item)
+			{
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_NAME'.$itemNo, $item->name);
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_QTY'.$itemNo, $item->qty);
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_AMT'.$itemNo, $item->amt);
+				$this->AddAPIParam('L_PAYMENTREQUEST_0_ITEMCATEGORY'.$itemNo, 'Digital');
+				$amt += ($item->qty * $item->amt);
+				$itemNo++;
+			}
+			$this->AddAPIParam('PAYMENTREQUEST_0_AMT', $amt);
 			
 			return $this->APIAction('DoExpressCheckoutPayment ');
 		} 
@@ -399,8 +437,8 @@ if (!class_exists('PayPalAPIClass'))
 		function GetTransactions($fromDate, $toDate = '')
 		{
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return;	// Cannot Execute - API Not Configured
+			if (!$this->IsAPIConfigured($apiStatus))
+				return $apiStatus;	// Cannot Execute - API Not Configured
 				
 			$this->InitAPICallParams('TransactionSearch');
 			$this->AddAPIParam('STARTDATE', $fromDate);
@@ -414,8 +452,8 @@ if (!class_exists('PayPalAPIClass'))
 		function GetTransaction($txnId)
 		{
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return;	// Cannot Execute - API Not Configured
+			if (!$this->IsAPIConfigured($apiStatus))
+				return $apiStatus;	// Cannot Execute - API Not Configured
 				
 			// Search for Transaction on PayPal
 			$this->Reset();
@@ -427,8 +465,8 @@ if (!class_exists('PayPalAPIClass'))
 		function RefundTransaction($txnId, $amt = PAYPAL_APILIB_REFUNDALL)
 		{
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
-				return;	// Cannot Execute - API Not Configured
+			if (!$this->IsAPIConfigured($apiStatus))
+				return $apiStatus;	// Cannot Execute - API Not Configured
 				
 			// Search for Transaction on PayPal
 			$this->Reset();
@@ -564,7 +602,7 @@ if (!class_exists('PayPalButtonsAPIClass'))
 		{
 			$hostedButtonID = '';
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
+			if (!$this->IsAPIConfigured($apiStatus))
 				return PayPalButtonsAPIClass::PAYPAL_APILIB_CREATEBUTTON_NOLOGIN;	// Cannot Create Button - API Not Configured
 			// Create a "Hosted" button on PayPal ... with basic settings
 			$this->Reset();
@@ -579,7 +617,7 @@ if (!class_exists('PayPalButtonsAPIClass'))
 		function DeleteButton($hostedButtonID)
 		{
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())	
+			if (!$this->IsAPIConfigured($apiStatus))	
 			return;		// Cannot Delete Button - API Not Configured
 			if (strlen($hostedButtonID) == 0)
 				return;		// Cannot Delete Button - Zero Length Button ID
@@ -592,7 +630,7 @@ if (!class_exists('PayPalButtonsAPIClass'))
 		function GetButton($hostedButtonID)
 		{
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
+			if (!$this->IsAPIConfigured($apiStatus))
 				return 'ERROR';	// Cannot Get Button Details - API Not Configured 
 			if (strlen($hostedButtonID) == 0)
 				return 'ERROR';	// Cannot Get Button Details - Zero Length Button ID 
@@ -605,7 +643,7 @@ if (!class_exists('PayPalButtonsAPIClass'))
 		function UpdateButton($hostedButtonID, $description, $reference, $optPrices, $optIDs = '')
 		{
 			// Check that the PayPal login parameters have been set
-			if (!$this->IsConfigured())
+			if (!$this->IsAPIConfigured($apiStatus))
 				return;	// Cannot Update Button - API Not Configured 
 			if (strlen($hostedButtonID) == 0)
 				return;	// Cannot Update Button - Zero Length Button ID 

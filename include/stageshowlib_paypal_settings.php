@@ -2,7 +2,7 @@
 /* 
 Description: Code for Managing PayPal Settings
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -98,8 +98,8 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 				));				
 			}
 
-if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT'))
-{
+			if (isset($this->env['ppexp']))
+			{
 				$checkoutSelector = array(
 					StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_STANDARD.'|PayPal Standard Checkout', 
 					StageShowLibSalesDBaseClass::PAYPAL_CHECKOUTSTYLE_EXPRESS.'|PayPal Express Checkout', 
@@ -108,7 +108,7 @@ if (defined('STAGESHOW_ALLOW_EXPRESSCHECKOUT'))
 				$rowDefs = self::MergeSettings($rowDefs, array(
 					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Type',		           StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalCheckoutType',    StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $checkoutSelector, StageShowLibTableClass::TABLEPARAM_AFTER => 'PayPalAPISig',)
 				));				
-}
+			}
 			
 			$rowDefs = self::MergeSettings(parent::GetDetailsRowsDefinition(), $rowDefs);
 			

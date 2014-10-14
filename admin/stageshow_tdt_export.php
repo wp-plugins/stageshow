@@ -2,7 +2,7 @@
 /* 
 Description: Code for Data Export functionality
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -134,10 +134,8 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 				'ticketID'           => __('Ticket ID', $this->myDomain),
 				'ticketCharge'       => __('Ticket Charge', $this->myDomain),
 				'ticketFee'          => __('Ticket Fee', $this->myDomain),
-				'ticketName'         => __('Ticket Name', $this->myDomain),
 				'ticketPaid'         => __('Ticket Paid', $this->myDomain),
 				'ticketQty'          => __('Ticket Qty', $this->myDomain),
-				'ticketType'         => __('Ticket Type', $this->myDomain),
 				'verifyDateTime'     => __('Verify Date & Time', $this->myDomain),
 				'verifyID'           => __('Verify ID', $this->myDomain),
 				'verifyLocation'     => __('Verify Location', $this->myDomain),

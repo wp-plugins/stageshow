@@ -2,7 +2,7 @@
 /* 
 Description: Core Library EMail API functions
  
-Copyright 2012 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@ Copyright 2012 Malcolm Shergold
 
 */
 
-require_once ABSPATH . WPINC . '/class-phpmailer.php';
-require_once ABSPATH . WPINC . '/class-smtp.php';
-		
 if (!class_exists('StageShowLibMailer')) 
 {
+	require_once ABSPATH . WPINC . '/class-phpmailer.php';
+	require_once ABSPATH . WPINC . '/class-smtp.php';
+			
 	class StageShowLibMailer extends PHPMailer
 	{
 		function PreSend()
