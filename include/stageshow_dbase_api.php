@@ -596,7 +596,7 @@ if (!class_exists('StageShowDBaseClass'))
 			if (defined('STAGESHOW_SAMPLEPRICE_DIVIDER'))
 			{
 				$priceValue = $priceValue/STAGESHOW_SAMPLEPRICE_DIVIDER;
-				$priceValue = number_format($priceValue+0.01, 2);
+				$priceValue = number_format($priceValue, 2);
 			}
 			$perfID = $this->perfIDs[$perfRef];
 			$priceID = $this->AddPrice($perfID, $priceType, $priceValue, $visibility);
@@ -660,18 +660,18 @@ if (!class_exists('StageShowDBaseClass'))
 				$saleEMail = 'other@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 0.60, 'SQP4KMTNIEXGS5ZBU', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 'SQP4KMTNIEXGS5ZBU', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 					'1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
-				$this->AddSaleItem($saleID, $this->priceID_S1_P3_CHILD, 4, STAGESHOW_PRICE_S1_P3_CHILD);
-				$this->AddSaleItem($saleID, $this->priceID_S1_P3_ADULT, 1, STAGESHOW_PRICE_S1_P3_ADULT);
+				$this->AddSampleSaleItem($saleID, $this->priceID_S1_P3_CHILD, 4, STAGESHOW_PRICE_S1_P3_CHILD);
+				$this->AddSampleSaleItem($saleID, $this->priceID_S1_P3_ADULT, 1, STAGESHOW_PRICE_S1_P3_ADULT);
 				
 				$saleEMail = 'mybrother@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 				$total2 = (4 * STAGESHOW_PRICE_S1_P1_ALL);
-				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, $total2, 1.01, '1S34QJHTK9AAQGGVG', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, $total2, '1S34QJHTK9AAQGGVG', PAYPAL_APILIB_SALESTATUS_COMPLETED,
 					'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
-				$this->AddSaleItem($saleID, $this->priceID_S1_P1_ALL, 4, STAGESHOW_PRICE_S1_P1_ALL);
+				$this->AddSampleSaleItem($saleID, $this->priceID_S1_P1_ALL, 4, STAGESHOW_PRICE_S1_P1_ALL);
 				
 				$timeStamp = current_time('timestamp');
 				if (defined('STAGESHOW_EXTRA_SAMPLE_SALES'))
@@ -683,9 +683,9 @@ if (!class_exists('StageShowDBaseClass'))
 						$saleFirstName = 'Sample'.$sampleSaleNo;
 						$saleLastName = 'Buyer'.$sampleSaleNo;
 						$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
-						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 0.62, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
+						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
 						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
-						$this->AddSaleItem($saleID, $this->priceID_S1_P3_ADULT, 3, STAGESHOW_PRICE_S1_P3_ADULT);
+						$this->AddSampleSaleItem($saleID, $this->priceID_S1_P3_ADULT, 3, STAGESHOW_PRICE_S1_P3_ADULT);
 						$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
 					}
 				}
@@ -1724,7 +1724,31 @@ if (!class_exists('StageShowDBaseClass'))
 			$sqlOpts = parent::GetOptsSQL($sqlFilters, $sqlOpts);
 			return $sqlOpts;
 		}
+		
+		// Add Sale - Address details are optional
+		function AddSampleSale($saleDateTime, $saleFirstName, $saleLastName, $saleEMail, $salePaid, $saleTxnId, $saleStatus, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry, $salePPPhone = '')
+		{
+			$salePaid += $this->GetTransactionFee();
+			if (defined('STAGESHOW_SAMPLEPRICE_DIVIDER'))
+			{
+				$salePaid = $salePaid/STAGESHOW_SAMPLEPRICE_DIVIDER;
+			}
+			$salePaid = number_format($salePaid, 2);
+			
+			return parent::AddSampleSale($saleDateTime, $saleFirstName, $saleLastName, $saleEMail, $salePaid, $saleTxnId, $saleStatus, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry, $salePPPhone);
+		}
 				
+		function AddSampleSaleItem($saleID, $stockID, $qty, $paid, $saleExtras = array())
+		{
+			if (defined('STAGESHOW_SAMPLEPRICE_DIVIDER'))
+			{
+				$paid = $paid/STAGESHOW_SAMPLEPRICE_DIVIDER;
+				$paid = number_format($paid, 2);
+			}
+			
+			return parent::AddSaleItem($saleID, $stockID, $qty, $paid, $saleExtras);
+		}
+		
 // ----------------------------------------------------------------------
 //
 //			Start of GENERIC SALES functions

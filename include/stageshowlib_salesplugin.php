@@ -249,7 +249,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						
 					case STAGESHOWLIB_STATE_DOWNLOAD:
 					default:
-						$storeRowHTML .= '<input type="hidden" name="quantity" value="1"/>1'."\n";
+						$quantityTagId = $this->GetOnlineStoreElemTagId('quantity', $result); 
+						$storeRowHTML .= '<input type="hidden" name="'.$quantityTagId.'" value="1"/>1'."\n";
 						break;
 				}
 				
@@ -532,7 +533,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			$buttonName = 'RemoveTicketSale'.'_'.$cartIndex;
 			$buttonType = $this->GetButtonTypeDef('remove', $buttonName);
-			echo "<input $buttonType $removeLinkContent".' value="'.__('Remove', $this->myDomain).'"/>'."\n";
+			echo '<input class="stageshow-boxoffice-button button-secondary" '."$buttonType $removeLinkContent".' value="'.__('Remove', $this->myDomain).'"/>'."\n";
 		}
 		
 		function OutputContent_OnlineCheckoutButton($cartContents)
@@ -1244,7 +1245,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					}
 					else 
 					{
-						if (isset($_GET['RTD_BlockPayPal']))
+						if (isset($_SESSION['stageshowlib_debug_blockpaypal']))
 						{
 							$paypalURLParams = explode('&', $paypalURL);
 							StageShowLibUtilsClass::print_r($paypalURLParams, 'paypalURLParams');

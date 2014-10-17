@@ -52,6 +52,29 @@ if (!class_exists('StageShowLibExportAdminClass'))
 			return array();
 		}
 			
+		function SelectFields($dbFields)
+		{
+			$fieldNames = $this->GetFields();
+					
+			if ($dbFields != '')
+			{
+				$validDbFields = explode(',', $dbFields);
+				$ourFieldNames = array();				
+				foreach ($validDbFields as $validDbField)
+				{
+					$ourFieldNames[$validDbField] = $fieldNames[$validDbField];
+				}
+				$fieldNames = $ourFieldNames;
+			}
+			
+			return $fieldNames;
+		}
+			
+		function DecodeField($fieldID, $fieldVal, $dbEntry)
+		{
+			return $fieldVal;
+		}
+			
 		function header($content)
 		{
 			if ( $this->myDBaseObj->isDbgOptionSet('Dev_ShowSQL')
@@ -70,31 +93,10 @@ if (!class_exists('StageShowLibExportAdminClass'))
 
 		function exportDB($dbList, $exportHTML = false)
 		{
+			$doneHeader = false;
 			$header = '';
-			
-			foreach($dbList as $dbEntry)
-			{
-				foreach ($dbEntry as $key => $option)
-				{
-					if (!$exportHTML && isset($this->fieldNames[$key]))
-					{
-						if ($this->fieldNames[$key] == '')
-							continue;
-						$header .= $this->fieldNames[$key];
-					}
-					else
-						$header .= $key;
-					$header .= "\t";
-				}
-				if ($exportHTML) 
-				{
-					$header = '"'.$header.'",';
-				}
-				$header .= "\n";
-				break;
-			}
-			
 			$line = '';
+			
 			foreach($dbList as $dbEntry)
 			{
 				if ($exportHTML) 
@@ -102,18 +104,46 @@ if (!class_exists('StageShowLibExportAdminClass'))
 				
 				foreach ($dbEntry as $key => $option)
 				{
+					if (!isset($this->fieldNames[$key]))
+						continue;
+						
+					if ($this->fieldNames[$key] == '')
+						continue;
+								
+					if (!$doneHeader)
+					{
+						if (!$exportHTML && isset($this->fieldNames[$key]))
+						{
+							if ($this->fieldNames[$key] == '')
+								continue;
+							$header .= $this->fieldNames[$key];
+						}
+						else
+							$header .= $key;
+						$header .= "\t";
+					}
+				
 					$option = str_replace("\r\n",",",$option);	
 					$option = str_replace("\r",",",$option);	
 					$option = str_replace("\n",",",$option);	// Remove any CRs in the db entry ... i.e. in Address Fields
 					
+					$option = $this->DecodeField($key, $option, $dbEntry);
 					$line .= "$option\t";
 				}
+				
+				$doneHeader = true;
 				
 				if ($exportHTML) 
 					$line .= '",';
 				$line .= "\n";
 			}
 			
+			if ($exportHTML) 
+			{
+				$header = '"'.$header.'",';
+			}
+			$header .= "\n";
+
 			echo $header.$line;
 		}
 

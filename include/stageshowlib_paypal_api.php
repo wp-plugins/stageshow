@@ -229,7 +229,7 @@ if (!class_exists('PayPalAPIClass'))
 				{
 					echo "--------------------------------------<br>\n";
 					echo "APIResponses:<br>\n";
-					if (!class_exists('StageShowLibUtilsClass')) 
+					if (class_exists('StageShowLibUtilsClass')) 
 					{
 						StageShowLibUtilsClass::print_r($response['APIResponses'], 'response[APIResponses]');
 					}

@@ -605,8 +605,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		// Add Sale - Address details are optional
-		function AddSampleSale($saleDateTime, $saleFirstName, $saleLastName, $saleEMail, $salePaid, $saleFee, $saleTxnId, $saleStatus, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry, $salePPPhone = '')
+		function AddSampleSale($saleDateTime, $saleFirstName, $saleLastName, $saleEMail, $salePaid, $saleTxnId, $saleStatus, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry, $salePPPhone = '')
 		{
+			$saleFee = number_format(0.20 + ($salePaid * 3.4/100), 2);
+			
 			$salesVals['salePPName'] = trim($saleFirstName & ' ' & $saleLastName);
 			$salesVals['salePPStreet'] = $salePPStreet;
 			$salesVals['salePPCity'] = $salePPCity;
@@ -781,6 +783,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql .= 'WHERE s.saleStatus IS NULL';
 			 
 			$this->query($sql);
+		}
+		
+		function AddSampleSaleItem($saleID, $stockID, $qty, $paid, $saleExtras = array())
+		{
+			return $this->AddSaleItem($saleID, $stockID, $qty, $paid, $saleExtras);
 		}
 		
 		function AddSaleItem($saleID, $stockID, $qty, $paid, $saleExtras = array())
