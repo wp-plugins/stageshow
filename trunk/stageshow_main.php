@@ -613,7 +613,7 @@ if (!class_exists('StageShowPluginClass'))
 					if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php') ) 
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));
 
-					if ( isset($_SESSION['stageshowlib_dbg']) || isset($_REQUEST['dbg']) )
+					if ( isset($_SESSION['stageshowlib_debug_menu']) )
 					{
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEBUG', $this->myDomain), __('DEBUG', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEBUG, array(&$this, 'printAdminPage'));
 					}

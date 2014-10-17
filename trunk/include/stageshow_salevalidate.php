@@ -232,56 +232,51 @@ if (!class_exists('StageShowSaleValidateClass'))
 				$msgClass = 'stageshow-validate-wrongperf error alert';
 				echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
 				
-				//$results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
-				
-				$classPrefix = str_replace('DBaseClass', '', STAGESHOW_DBASE_CLASS);
-				$classId = $classPrefix.'SalesAdminDetailsListClass';
-				$salesList = new $classId($env);	
-							
-				echo '<tr><td colspan="2">'."\n";
-				$salesList->OutputList($ticketsList);	
-				echo "</td></tr>\n";
-						 
-				return 0;	
+				$results = $ticketsList;
+				$saleID = 0;
+				$salerecord = $results[0];
 			}	
-			
-			$perfID = $salerecord->perfID;
-			$alreadyValidated = !$this->LogValidation($env, $saleID, $perfID) && (STAGESHOW_VERIFYLOG_DUPLICATEACTION != 'ignore');
-			if ( $alreadyValidated )
-			{
-				$validateMsg .= __('Already Verified', $this->myDomain);
-				$msgClass = "error stageshow-validate-duplicated";
-			}
 			else
 			{
-				$validateMsg .= __('Matching record found', $this->myDomain);
-				switch($salerecord->saleStatus)
+				$perfID = $salerecord->perfID;
+				$alreadyValidated = !$this->LogValidation($env, $saleID, $perfID) && (STAGESHOW_VERIFYLOG_DUPLICATEACTION != 'ignore');
+				if ( $alreadyValidated )
 				{
-					case PAYPAL_APILIB_SALESTATUS_COMPLETED:
-						$msgClass = 'stageshow-validate-ok updated ok';
-						break;
-							
-					case STAGESHOW_SALESTATUS_RESERVED:
-						$msgClass = 'stageshow-validate-reserved error alert';
-						$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
-						break;
-							
-					default:
-						$msgClass = 'stageshow-validate-unknown error';
-						$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
-						break;
-							
+					$validateMsg .= __('Already Verified', $this->myDomain);
+					$msgClass = "error stageshow-validate-duplicated";
 				}
-			}
+				else
+				{
+					$validateMsg .= __('Matching record found', $this->myDomain);
+					switch($salerecord->saleStatus)
+					{
+						case PAYPAL_APILIB_SALESTATUS_COMPLETED:
+							$msgClass = 'stageshow-validate-ok updated ok';
+							break;
+								
+						case STAGESHOW_SALESTATUS_RESERVED:
+							$msgClass = 'stageshow-validate-reserved error alert';
+							$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
+							break;
+								
+						default:
+							$msgClass = 'stageshow-validate-unknown error';
+							$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
+							break;
+								
+					}
+				}
+					
+				echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
 				
-			echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-			
-			if ($alreadyValidated)
-			{
-				if (STAGESHOW_VERIFYLOG_DUPLICATEACTION == 'hide')
-					return 0;					
-			}	
-			
+				if ($alreadyValidated)
+				{
+					if (STAGESHOW_VERIFYLOG_DUPLICATEACTION == 'hide')
+						return 0;					
+				}	
+				
+			}
+			echo '<tr><td>'.__('Name', $this->myDomain).':</td><td>'.$salerecord->saleFirstName.' '.$salerecord->saleLastName.'</td></tr>'."\n";
 			echo '<tr><td>'.__('Sale Status', $this->myDomain).':</td><td>'.__($salerecord->saleStatus, $this->myDomain).'</td></tr>'."\n";
 			if ($salerecord->saleStatus == STAGESHOW_SALESTATUS_RESERVED)
 			{
@@ -289,6 +284,7 @@ if (!class_exists('StageShowSaleValidateClass'))
 			}
 			else
 			{
+/*
 				if ($salerecord->saleTransactionFee > 0)
 				{
 					echo '<tr><td>'.__('Booking Fee', $this->myDomain).':</td><td>'.$salerecord->saleTransactionFee.'</td></tr>'."\n";
@@ -297,9 +293,10 @@ if (!class_exists('StageShowSaleValidateClass'))
 				{
 					echo '<tr><td>'.__('Donation', $this->myDomain).':</td><td>'.$salerecord->saleDonation.'</td></tr>'."\n";
 				}
-				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->saleDonation.'</td></tr>'."\n";
-			}
-			
+				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+*/
+			}				
+
 			$classPrefix = str_replace('DBaseClass', '', STAGESHOW_DBASE_CLASS);
 			$classId = $classPrefix.'SalesAdminDetailsListClass';
 			$salesList = new $classId($env);	

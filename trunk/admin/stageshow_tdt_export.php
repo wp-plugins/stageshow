@@ -30,13 +30,13 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 		{
 			parent::__construct($myDBaseObj);
 			
-			$this->fieldNames = $this->GetFields();
-	
 	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
 			if ( isset( $_POST['downloadexport'] ) )
 			{
 				if ( isset( $_POST['download'] ) ) 
 				{
+					$this->fieldNames = $this->GetFields();
+	
 					$showID = 0;
 					$perfID = 0;
 					if (isset($_POST['export_showid']))
@@ -64,7 +64,7 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 						case 'tickets':
 								$this->fileName = 'stageshow-tickets';
 								$this->output_downloadHeader('text/tab-separated-values');
-								$this->export_tickets(false, $showID, $perfID);
+								$this->export_tickets($showID, $perfID);
 								break;          
 
 						case 'summary':
@@ -77,12 +77,15 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 			}
 			else if ( isset( $_POST['downloadvalidator'] ) )
 			{
+				$validatorFields = 'saleTxnId,saleStatus,saleFirstName,saleLastName,showName,perfDateTime,priceType,zoneRef,ticketSeat,ticketQty,priceNoOfSeats,ticketPaid,ticketFee,ticketCharge,saleDateTime,perfRef,verifyLocation,verifyDateTime';
+				$this->fieldNames = $this->SelectFields($validatorFields);
+	
 				$this->fileName = 'stageshowValidator';
-				$this->fileExtn = 'html';
+				$this->fileExtn = 'html';			
 				
 				$this->output_downloadHeader('text/html');
 				$this->output_htmlhead();
-				$this->export_tickets(true);
+				$this->export_validator();
 				$this->output_endhtmlhead();
 				$this->ouput_downloadFooter(true);
 			}
@@ -144,6 +147,16 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 			return array_merge(parent::GetFields(), $fieldNames);
 		}
 			
+		function GetValidatorTableFields()
+		{			
+			return array (
+				'showName' => 'show',
+				'perfDateTime' => 'performance',
+				'priceType' => 'type',
+				'ticketQty' => 'qty',
+			);
+		}
+
 		function output_htmlhead()
 		{
 			echo '<html>
@@ -167,6 +180,11 @@ if (!class_exists('StageShowTDTExportAdminClass'))
 }	
 
 td.col_show
+{
+	width: 400px;
+}
+
+td.col_performance
 {
 	width: 400px;
 }
@@ -227,10 +245,21 @@ td.col_show
 			$this->exportDB($this->myDBaseObj->GetShowsSettings());
 		}
 
-		function export_tickets($exportHTML=false, $showID=0, $perfID=0)
+		function export_tickets($showID, $perfID)
 		{			
-			if ($exportHTML)
-				echo 'var ticketDataList = new Array
+			if ($showID !=0)
+				$sqlFilters['showID'] = $showID;
+					
+			if ($perfID !=0)
+				$sqlFilters['perfID'] = $perfID;
+				
+			$sqlFilters['addTicketFee'] = true;
+			$this->exportDB($this->myDBaseObj->GetSalesList($sqlFilters));
+		}
+
+		function export_validator($showID=0, $perfID=0)
+		{			
+			echo 'var ticketDataList = new Array
 (
 ';
 
@@ -241,9 +270,9 @@ td.col_show
 				$sqlFilters['perfID'] = $perfID;
 				
 			$sqlFilters['addTicketFee'] = true;
-			$this->exportDB($this->myDBaseObj->GetSalesList($sqlFilters), $exportHTML);
-			if (!$exportHTML)
-				return;
+			$this->exportDB($this->myDBaseObj->GetSalesList($sqlFilters), true);
+			
+			$tableFields = $this->GetValidatorTableFields();
 			
 			echo '				
 "");
@@ -339,31 +368,34 @@ function VerifyTxnId()
 				verifyResult += "<table>";
 				
 				verifyResult += "<tr><td>'.__("TxnId", $this->myDomain).':</td><td>" + ourTxnId + "</td></tr>\n"; 
-				verifyResult += "<tr><td>'.__("Name", $this->myDomain).':</td><td>" + ticketDataArray[columnFields["saleName"]] + "</td></tr>\n"; 
-				verifyResult += "<tr><td>'.__("EMail", $this->myDomain).':</td><td>" + ticketDataArray[columnFields["saleEMail"]] + "</td></tr>\n"; 
+				verifyResult += "<tr><td>'.__("Name", $this->myDomain).':</td><td>" + ticketDataArray[columnFields["saleFirstName"]] + " " + ticketDataArray[columnFields["saleLastName"]] + "</td></tr>\n"; 
 				verifyResult += "<tr><td>'.__("Date & Time", $this->myDomain).':</td><td>" + ticketDataArray[columnFields["saleDateTime"]] + "</td></tr>\n"; 
 				
 				verifyResult += "</table><br><table class=table_verify>\n"; 
 				
 				verifyResult += "<tr>"; 
-				verifyResult += "<th class=col_show>'.__("Show", $this->myDomain).'</th>"; 
-				verifyResult += "<th class=col_type>'.__("Type", $this->myDomain).'</th>"; 
-				verifyResult += "<th class=col_price>'.__("Price", $this->myDomain).'</th>"; 
-				verifyResult += "<th class=col_qty>'.__("Quantity", $this->myDomain).'</th>"; 
-				
+';			
+			foreach ($tableFields as $tableField => $tableClass)
+			{
+				$colClass = 'col_'.$tableClass;
+				$colTitle = $this->fieldNames[$tableField];
+				echo '
+				verifyResult += "<th class='.$colClass.'>'.__($colTitle, $this->myDomain).'</th>";';
+			}
+echo '				 				
 				verifyResult += "</tr>\n"; 
 			}
 			
-			var ticketPaid;
-			
-			ticketPaid  = parseFloat(ticketDataArray[columnFields["ticketPaid"]]);
-			ticketPaid += parseFloat(ticketDataArray[columnFields["ticketCharge"]]);
-			
 			verifyResult += "<tr>"; 
-			verifyResult += "<td class=col_ticketName>" + ticketDataArray[columnFields["ticketName"]] + "</td>"; 
-			verifyResult += "<td class=col_ticketType>" + ticketDataArray[columnFields["ticketType"]] + "</td>"; 
-			verifyResult += "<td class=col_ticketprice>" + ticketPaid + "</td>"; 
-			verifyResult += "<td class=col_ticketQty>" + ticketDataArray[columnFields["ticketQty"]] + "</td>\n"; 
+';			
+			foreach ($tableFields as $tableField => $tableClass)
+			{
+				$colClass = 'ticket_'.$tableClass;
+				$colTitle = $this->fieldNames[$tableField];
+				echo '
+			verifyResult += "<td class='.$colClass.'>" + ticketDataArray[columnFields["'.$tableField.'"]] + "</td>"; ';
+			}
+echo '				 				
 			verifyResult += "</tr>\n"; 
 		}
 	}

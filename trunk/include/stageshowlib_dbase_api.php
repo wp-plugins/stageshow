@@ -54,15 +54,31 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			if ( defined('STAGESHOWLIB_DEVELOPER') )
 			{
-				$_SESSION['stageshowlib_dbg'] = STAGESHOWLIB_DEVELOPER;
+				if ( !isset($_REQUEST['debugmodes']) )
+					$_REQUEST['debugmodes'] = STAGESHOWLIB_DEVELOPER;
 			}
 			
-			if ( isset($_REQUEST['dbg']) )
+			if ( isset($_REQUEST['debugmodes']) )
 			{
-				if ($_REQUEST['dbg'] != '')			
-					$_SESSION['stageshowlib_dbg'] = $_REQUEST['dbg'];
+				if ($_REQUEST['debugmodes'] != '')
+				{
+					$debugModes = explode(',', $_REQUEST['debugmodes']);
+					foreach ($debugModes as $debugMode)
+					{
+						$debugMode = strtolower('stageshowlib_debug_'.$debugMode);
+						$_SESSION[$debugMode] = true;
+					}
+				}			
 				else
-					unset($_SESSION['stageshowlib_dbg']);
+				{
+					$len = strlen('stageshowlib_debug_');
+					foreach ($_SESSION as $key => $debugMode)
+					{
+						if (substr($key, 0, $len) != 'stageshowlib_debug_')
+							continue;
+						unset($_SESSION[$key]);
+					}
+				}
 			}
 
 			$this->opts = $opts;
@@ -648,22 +664,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 					$ourOptions[$key] = $option;
 			}
 
-			if (isset($_SESSION['stageshowlib_dbg']))
-			{
-				$sessionDbg = $_SESSION['stageshowlib_dbg'];
-				
-				$this->dbgOptions['Dev_ShowTrolley'] = true;
-				if ($this->isSysAdmin())
-				{
-					$this->dbgOptions['Dev_ShowSQL'] = true;
-					$this->dbgOptions['Dev_ShowDBOutput'] = true;
-					$this->dbgOptions['Dev_ShowCallStack'] = true;
-					$this->dbgOptions['Dev_ShowGET'] = true;
-					$this->dbgOptions['Dev_ShowPOST'] = true;
-					//$this->dbgOptions['Dev_ShowSESSION'] = true;					
-				}
-			}
-			
 			if (defined('RUNSTAGESHOWDEMO'))
 			{				
 				global $current_user;
@@ -798,9 +798,9 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			$rtnVal = false;
 			
-			if ($this->isDbgOptionSet('Dev_ShowTrolley') || isset($_GET['RTD_Trolley']))
+			if ($this->isDbgOptionSet('Dev_ShowTrolley') || isset($_SESSION['stageshowlib_debug_trolley']))
 			{
-				if ($this->getDbgOption('Dev_ShowCallStack') || isset($_GET['RTD_CallStack']))
+				if ($this->getDbgOption('Dev_ShowCallStack') || isset($_SESSION['stageshowlib_debug_stack']))
 				{
 					StageShowLibUtilsClass::ShowCallStack();
 				}

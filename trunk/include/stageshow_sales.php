@@ -507,8 +507,11 @@ if (!class_exists('StageShowSalesPluginClass'))
 			}
 			$buttonTypeDef .= $buttonSrc;
 
-			$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
-			$buttonTypeDef .= ' onClick="'.$onClickHandler.'(this)"';
+			if (!$this->adminPageActive)
+			{
+				$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
+				$buttonTypeDef .= ' onClick="'.$onClickHandler.'(this)"';				
+			}
 			
 			return $buttonTypeDef;
 		}
