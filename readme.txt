@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 4.1.2
+Stable tag: 4.2
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -59,6 +59,7 @@ Additional Features in StageShowGold (available <a href="http://corondeck.co.uk/
 
 * Allocated Seating
 * Custom Seating Layouts
+* PayPal Express Checkout
 
 == Installation ==
 
@@ -188,30 +189,44 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
-= 4.0.2 (17/10/2014) =
-Bug Fix: Purchaser Name, Show and Performance missing on Offline Validator
-Bug Fix: Added Seats to Offline Validator (StageShowGold)
-Bug Fix: Seats not decoded in TDT export file (StageShowGold)
-EMail Address and Prices removed from Offline Validator
-Removed redundant Shopping Trolley onClick handlers on admin pages
-Added class to Remove button on admin page
+= 4.2 (11/11/2014) =
+* Bug Fix: Logs folder path permissions should be 600
+* Bug Fix: Paragraph tag before Validate button should not have a class
+* Buf Fix: Exported Seating Template opens in browser (stageShowGold)
+* Optimisation: activate() function called twice on first activation
+* Optimisation: PayPalImagesUseSSL option used before definition
+* Optimisation: Ticket authentication response improved using JQuery 
+* Added additional barcode type (Code 128)
+* Added contributors list to Overview Page
+* Logs folder path default changed to "logs"
+* Added JQuery loader
+* Copies DB Access defines to wp-config-db.php in uploads folder
+* Added translation for Seating Plans Buttons
+
+= 4.1.2 (17/10/2014) =
+* Bug Fix: Purchaser Name, Show and Performance missing on Offline Validator
+* Bug Fix: Added Seats to Offline Validator (StageShowGold)
+* Bug Fix: Seats not decoded in TDT export file (StageShowGold)
+* EMail Address and Prices removed from Offline Validator
+* Removed redundant Shopping Trolley onClick handlers on admin pages
+* Added class to Remove button on admin page
 
 = 4.1.1 (15/10/2014) =
-Bug Fix: Phantom PayPal button and Next button inoperative when editing sales (StageShowGold)
+* Bug Fix: Phantom PayPal button and Next button inoperative when editing sales (StageShowGold)
 
 = 4.1 (13/10/2014) =
-Bug Fix: Adding Tickets for same date-time and Ticket Type always adds entry already in Trolley
-Bug Fix: Sites on Secure Server have incorrect URL for admin page filters
-Bug Fix: Sites on Secure Server have incorrect URL for Box-Office reports on Overview
-Bug Fix: Performance Expiry Date not used to determine active Performances by Verification Check
-Bug Fix: Overview Sales values calculated incorrectly for Group tickets
-Added Spanish Translation
-Added details on updating translations to help
-Remove buttons on Trolley changed from links to submit button (in a &lt;form$gt;)
-Removed box shadow from Add buttons
-Added Sale Verification fields to TDT ticket download
-Added option for PayPal Express Checkout (StageShowGold)
-Added Verify Fields to TDT Downloads
+* Bug Fix: Adding Tickets for same date-time and Ticket Type always adds entry already in Trolley
+* Bug Fix: Sites on Secure Server have incorrect URL for admin page filters
+* Bug Fix: Sites on Secure Server have incorrect URL for Box-Office reports on Overview
+* Bug Fix: Performance Expiry Date not used to determine active Performances by Verification Check
+* Bug Fix: Overview Sales values calculated incorrectly for Group tickets
+* Added Spanish Translation
+* Added details on updating translations to help
+* Remove buttons on Trolley changed from links to submit button (in a &lt;form$gt;)
+* Removed box shadow from Add buttons
+* Added Sale Verification fields to TDT ticket download
+* Added option for PayPal Express Checkout (StageShowGold)
+* Added Verify Fields to TDT Downloads
 
 = 4.0.2.1 (27/09/2014) =
 * Sale Verification code moved to separate class (StageShowSaleValidateClass)

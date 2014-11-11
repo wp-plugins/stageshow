@@ -167,7 +167,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				return STAGESHOWLIB_IMAGESURL;
 				
 			$siteurl = get_option('siteurl');
-			if ($this->adminOptions['PayPalImagesUseSSL'])
+			if ($this->isOptionSet('PayPalImagesUseSSL'))
 			{
 				$siteurl = str_replace('http', 'https', $siteurl);
 			}
@@ -276,15 +276,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$this->adminOptions['PayPalAPIPwd'], 
 				$this->adminOptions['PayPalAPISig']);
 			$this->payPalAPIObj->SetTestMode(false);
-		}
-		
-		static function FormatDateForAdminDisplay($dateInDB)
-		{
-			// Convert time string to UNIX timestamp
-			$timestamp = strtotime( $dateInDB );
-			
-			// Get Time & Date formatted for display to user
-			return date(STAGESHOWLIB_DATETIME_ADMIN_FORMAT, $timestamp);
 		}
 		
 		static function FormatDateForDisplay($dateInDB)
@@ -414,7 +405,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			echo  '<strong>'.__('Plugin', $this->get_domain()).':</strong> '.$this->get_name()."$mode<br>\n";			
 			echo  '<strong>'.__('Version', $this->get_domain()).':</strong> '.$this->get_version()."<br>\n";			
 			echo  '<strong>'.__('Timezone', $this->get_domain()).':</strong> '.$timezone."<br>\n";			
-			
+
+			$this->ShowDebugModes();
 		}
 		
 		function UseTestPayPalSettings($testSettings)
@@ -1009,7 +1001,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return false;					
 		}
 		
-		function FormatEMailField($tag, $field, $saleDetails)
+		function FormatEMailField($tag, $field, &$saleDetails)
 		{
 			if ($tag =='[saleName]')
 			{

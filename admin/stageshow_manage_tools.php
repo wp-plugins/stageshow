@@ -167,13 +167,16 @@ if (!class_exists('StageShowToolsAdminClass'))
 </form>
 <?php
 		}
-		
+
 		function Tools_Validate()
 		{
+			$dbCredsPath = WP_CONTENT_DIR . '/uploads/'.STAGESHOW_FOLDER.'/wp-config-db.php';			
+			$this->myDBaseObj->SaveDBCredentials($dbCredsPath);
+			
 			$classId = $this->adminClassPrefix.'SaleValidateClass';
 			new $classId($this->env);
 		}
-				
+
 	}
 }
 

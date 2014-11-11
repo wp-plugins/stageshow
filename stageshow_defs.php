@@ -2,9 +2,9 @@
 
 if (defined('STAGESHOW_FOLDER')) 
 {
-	if (STAGESHOW_FOLDER != dirname(plugin_basename(__FILE__)))
+	if (STAGESHOW_FOLDER != basename(dirname(__FILE__)))
 	{
-		echo "ERROR Activating ".dirname(plugin_basename(__FILE__))."<br>\n";
+		echo "ERROR Activating ".basename(dirname(__FILE__))."<br>\n";
 		echo "Deactivate ".STAGESHOW_FOLDER." First<br>\n";
 		die;
 	}
@@ -17,11 +17,18 @@ if (is_ssl())
 else
 	$siteurl = str_replace('https://', 'http://', $siteurl);
 
-define('STAGESHOW_FOLDER', dirname(plugin_basename(__FILE__)));
+define('STAGESHOW_FOLDER', basename(dirname(__FILE__)));
 define('STAGESHOW_URL', $siteurl.'/wp-content/plugins/' . STAGESHOW_FOLDER .'/');
 define('STAGESHOW_UPLOADS_URL', $siteurl.'/wp-content/uploads/' . STAGESHOW_FOLDER .'/');
 define('STAGESHOW_ADMIN_URL', STAGESHOW_URL . 'admin/');
 define('STAGESHOW_ADMIN_IMAGES_URL', STAGESHOW_ADMIN_URL . 'images/');
+
+if (STAGESHOW_FOLDER == 'stageshowgold')
+	define('STAGESHOW_PLUGIN_NAME', 'StageShowGold');
+else if (STAGESHOW_FOLDER == 'stageshowplus')
+	define('STAGESHOW_PLUGIN_NAME', 'StageShowPlus');
+else if (STAGESHOW_FOLDER == 'stageshow')
+	define('STAGESHOW_PLUGIN_NAME', 'StageShow');
 
 if (!defined('STAGESHOW_STYLESHEET_URL'))
 	define('STAGESHOW_STYLESHEET_URL', STAGESHOW_URL.'css/stageshow.css');
@@ -80,6 +87,16 @@ if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
 {
 	define('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT',STAGESHOW_DATETIME_BOXOFFICE_FORMAT);
 }
+
+/*
+------------------------------------------------------------------------
+	This section contains definitions that are usually set by
+	Wordpress, but are set here when included by JQuery callbacks.
+------------------------------------------------------------------------
+*/
+
+if (!defined('WP_CONTENT_DIR'))
+	define ('WP_CONTENT_DIR', dirname(dirname(STAGESHOW_FILE_PATH)));
 
 /*
 ------------------------------------------------------------------------

@@ -28,6 +28,9 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 	define('PAYPAL_APILIB_URL_TEXTLEN',110);
 	define('PAYPAL_APILIB_URL_EDITLEN',80);
 		
+	define('PAYPAL_APILIB_FILEPATH_TEXTLEN',255);
+	define('PAYPAL_APILIB_FILEPATH_EDITLEN', 95);
+
 	class PayPalSettingsAdminListClass extends StageShowLibAdminListClass // Define class
 	{	
 		function __construct($env, $editMode = true) //constructor
@@ -58,6 +61,7 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 			
 			$rowDefs = array(			
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'PayPal',       StageShowLibTableClass::TABLEPARAM_ID => 'paypal-settings-tab', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Advanced',      StageShowLibTableClass::TABLEPARAM_ID => 'advanced-settings-tab',  /* StageShowLibTableClass::TABLEPARAM_AFTER => 'general-settings-tab', */ ),				
 			);
 			
 			return $rowDefs;
@@ -87,6 +91,8 @@ if (!class_exists('PayPalSettingsAdminListClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Image URLs',                      StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalImagesUseSSL',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Enable SSL', StageShowLibTableClass::TABLEPARAM_DEFAULT => false ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Complete URL',           StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutCompleteURL',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Cancelled URL',          StageShowLibTableClass::TABLEPARAM_TAB => 'paypal-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'CheckoutCancelledURL',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_URL_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_URL_EDITLEN,  ),
+
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log Files Folder Path',           StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab', StageShowLibTableClass::TABLEPARAM_ID => 'LogsFolderPath',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_FILEPATH_TEXTLEN, StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_FILEPATH_EDITLEN, ),				
 			);
 			
 			if ($this->IncludeAPI)
@@ -210,7 +216,7 @@ if (!class_exists('PayPalSettingsAdminClass'))
 					$LogsFolderValid = is_dir($LogsFolder);
 					if (!$LogsFolderValid)
 					{
-						mkdir($LogsFolder, 0644, TRUE);
+						mkdir($LogsFolder, 0600, TRUE);
 						$LogsFolderValid = is_dir($LogsFolder);
 					}
 					

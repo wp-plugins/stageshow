@@ -1,6 +1,6 @@
 <?php
 /* 
-Description: Code for Data Export functionality
+Description: Code for TBD
  
 Copyright 2014 Malcolm Shergold
 
@@ -20,25 +20,20 @@ Copyright 2014 Malcolm Shergold
 
 */
 
-include '../include/stageshowlib_export.php';
+include "stageshowlib_nowp_funcs.php";
 
-if (!class_exists('StageShowFileExportAdminClass')) 
+global $siteurl;
+$siteurl = ( is_ssl() ? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+$endURL = strpos($siteurl, '/wp-content');
+if ($endURL == false)
 {
-	class StageShowFileExportAdminClass extends StageShowLibExportAdminClass  // Define class
-	{
-		function __construct($myDBaseObj, $fileName, $html) //constructor	
-		{
-			parent::__construct($myDBaseObj);
-			
-			$this->fileExtn = pathinfo($fileName, PATHINFO_EXTENSION);
-			$this->fileName = substr($fileName, 0, (-1)-strlen($this->fileExtn));
-			
-	  		// FUNCTIONALITY: Export File
-			$this->Export('text/html', 'utf-8', $html);
-		}
-
-
-	}
+	$endURL = strrpos($siteurl, '/');
 }
+$siteurl = substr($siteurl, 0, $endURL);
+
+include '..\stageshow_defs.php';
+include WP_CONTENT_DIR.'/uploads/'.STAGESHOW_FOLDER.'/wp-config-db.php';			
+include "stageshowlib_nowp_dbase.php";
+
 
 ?>

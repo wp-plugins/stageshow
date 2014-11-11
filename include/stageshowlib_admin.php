@@ -94,10 +94,8 @@ if (!class_exists('StageShowLibAdminClass'))
 			$myPluginObj = $this->myPluginObj;
 			$myDBaseObj  = $this->myDBaseObj;
 			
-			$this->editingRecord = false;
-			
-			$callerFolders = explode("/", plugin_basename($this->caller));
-			$this->pluginName = $callerFolders[0];
+			$this->editingRecord = false;			
+			$this->pluginName = basename(dirname($this->caller));
 			
 			if (!isset($this->pageTitle)) $this->pageTitle = "***  pageTitle Undefined ***";
 			
@@ -128,6 +126,7 @@ if (!class_exists('StageShowLibAdminClass'))
 				$actionError = false;
 				foreach($_POST['rowSelect'] as $recordId)
 				{
+					if (!is_numeric($recordId)) break;
 					$actionError |= $this->DoBulkPreAction($bulkAction, $recordId);
 				}
 						
@@ -136,6 +135,7 @@ if (!class_exists('StageShowLibAdminClass'))
 				{
 					foreach($_POST['rowSelect'] as $recordId)
 					{
+						if (!is_numeric($recordId)) break;
 						if ($this->DoBulkAction($bulkAction, $recordId))
 						{
 							$actionCount++;
@@ -170,21 +170,6 @@ if (!class_exists('StageShowLibAdminClass'))
 					<h2>'.$myDBaseObj->get_name().' - '.__($this->pageTitle, $this->myDomain).'</h2>'."\n";				
 			}
 				
-			echo "
-<script>
-
-function StageShowLib_HideElement(obj)
-{
-	// Get the header 'Tab' Element					
-	tabElem = document.getElementById(obj.id);
-	
-	// Hide the settings row
-	tabElem.style.display = 'none';
-}
-
-</script>
-			";
-			
 			$this->Output_MainPage($this->adminMsg !== '');
 			
 			echo '</div>';

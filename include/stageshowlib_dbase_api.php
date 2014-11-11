@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 require_once "stageshowlib_utils.php";
+require_once "stageshowlib_dbase_base.php";
 
 if (!class_exists('StageShowLibDBaseClass'))
 {
@@ -29,7 +30,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 	
 	define('STAGESHOWLIB_CAPABILITY_SYSADMIN', 'manage_options');
 
-	class StageShowLibDBaseClass // Define class
+	class StageShowLibDBaseClass extends StageShowLibGenericDBaseClass // Define class
 	{
 		const MYSQL_DATE_FORMAT = 'Y-m-d';
 		const MYSQL_TIME_FORMAT = 'H:i:s';
@@ -42,6 +43,8 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		const ADMIN_SETTING = 1;
 		const DEBUG_SETTING = 2;
+		
+		const SessionDebugPrefix = 'stageshowlib_debug_';
 		
 		var $optionsID;
 		
@@ -65,18 +68,27 @@ if (!class_exists('StageShowLibDBaseClass'))
 					$debugModes = explode(',', $_REQUEST['debugmodes']);
 					foreach ($debugModes as $debugMode)
 					{
-						$debugMode = strtolower('stageshowlib_debug_'.$debugMode);
-						$_SESSION[$debugMode] = true;
+						switch ($debugMode)
+						{
+							case 'menu':
+							case 'trolley':
+							case 'stack':
+							case 'blockpaypal':
+								$debugMode = strtolower(self::SessionDebugPrefix.$debugMode);
+								$_SESSION[$debugMode] = true;
+								break;
+							
+							default:
+								break;
+						}
 					}
 				}			
 				else
 				{
-					$len = strlen('stageshowlib_debug_');
-					foreach ($_SESSION as $key => $debugMode)
+					$debugFlagsArray = $this->getDebugFlagsArray();
+					foreach ($debugFlagsArray as $debugMode)
 					{
-						if (substr($key, 0, $len) != 'stageshowlib_debug_')
-							continue;
-						unset($_SESSION[$key]);
+						unset($_SESSION[$debugMode]);
 					}
 				}
 			}
@@ -95,6 +107,20 @@ if (!class_exists('StageShowLibDBaseClass'))
 
 	    function uninstall()
 	    {
+		}
+		
+		function getDebugFlagsArray()
+		{
+			$debugFlagsArray = array();
+			
+			$len = strlen(self::SessionDebugPrefix);
+			foreach ($_SESSION as $key => $debugMode)
+			{
+				if (substr($key, 0, $len) != self::SessionDebugPrefix)
+					continue;
+				$debugFlagsArray[] = $key;
+			}
+			return $debugFlagsArray;
 		}
 		
 		function getTablePrefix()
@@ -267,10 +293,11 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if ($currentVersion === $lastVersion)
 				return false;
 			
-			// Save current version to options
+			// Save current version to options			
 			$this->adminOptions['LastVersion'] = $currentVersion;
 			$this->saveOptions();
-			return true;
+			
+			return ($lastVersion != '');
 		}
 		
 		function get_pluginInfo($att = '')
@@ -349,25 +376,29 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $this->get_pluginInfo('PluginURI');
 		}
 		
-		function ShowSQL($sql, $values = null)
-		{			
-			if (!$this->isDbgOptionSet('Dev_ShowSQL'))
+		function ShowDebugModes()
+		{
+			$debugFlagsArray = $this->getDebugFlagsArray();
+			asort($debugFlagsArray);
+			if (count($debugFlagsArray) > 0)
 			{
-				return;				
-			}
-			
-			if ($this->isDbgOptionSet('Dev_ShowCallStack'))
-			{
-				StageShowLibUtilsClass::ShowCallStack();
-			}
-			
-			$sql = str_replace("\n", "<br>\n", $sql);
-			echo "<br>$sql<br>\n";
-			if (isset($values))
-			{
-				print_r($values);
+				echo  '<strong>'.__('Session Debug Modes', $this->get_domain()).':</strong> ';	
+				$comma = '';		
+				foreach ($debugFlagsArray as $debugMode)
+				{
+					$debugMode = str_replace(self::SessionDebugPrefix, '', $debugMode);
+					echo "$comma$debugMode";
+					$comma = ', ';
+				}
 				echo "<br>\n";
+				$hasDebug = true;			
 			}
+			else
+			{
+				$hasDebug = false;			
+			}
+			
+			return $hasDebug;
 		}
 		
 		function createDBTable($table_name, $tableIndex, $dropTable = false)
@@ -498,123 +529,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return count($results > 0);
 		}
 		
-		function get_results($sql, $debugOutAllowed = true, $sqlFilters = array())
-		{
-			global $wpdb;
-			
-			if (defined('RUNSTAGESHOWDEMO'))
-			{
-				$sql = $this->SQLForDemo($sql);
-			}	
-			
-			$this->ShowSQL($sql);
-			$results = $wpdb->get_results($sql);
-			if ($debugOutAllowed) $this->show_results($results);
-			
-			return $results;
-		}
-		
-		function show_results($results)
-		{
-			if ($this->getDbgOption('Dev_ShowDBOutput') != 1)
-				return;
-				
-			if (function_exists('wp_get_current_user'))
-			{
-				if (!current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
-					return;				
-			}
-				
-			echo "<br>Database Results:<br>\n";
-			for ($i = 0; $i < count($results); $i++)
-				echo "Array[$i] = " . print_r($results[$i], true) . "<br>\n";
-		}
-		
-		function SQLForDemo($sql)
-		{
-			if (!defined('RUNSTAGESHOWDEMO'))
-				return $sql;
-			
-			if (strpos($sql, 'loginID') !== false)
-				return $sql;
-				
-			$sqlDemo = $sql;
-				
-			// First get the command type (first word) ...
-			if (preg_match('/(\w*)/', $sql, $matches) == 0) 
-			{
-				return $sql;
-			}
-			
-			$sqlCmd = $matches[0];
-			
-			switch ($sqlCmd)
-			{
-				case 'SELECT':
-				case 'DELETE':
-					// SELECT query .... add the loginID to the query
-					//$posnStart  = strrpos($sqlDemo, ' FROM ');
-					$posnStart = 0;
-					preg_match('/FROM\s*([a-zA-Z_]*)\s*([a-z_]*)/', $sqlDemo, $matches, 0, $posnStart);
-					//TODO - Remove - echo "<br>";print_r($matches);echo "<br>";
-					
-					if ( (count($matches) > 2) && (strlen(trim($matches[2])) > 0) )
-						$tableName = $matches[2];
-					else
-						$tableName = $matches[1];
-										
-					$where = ' WHERE '.$tableName.'.loginID = "'.$this->loginID.'" ';
-					
-					if (strpos($sqlDemo, 'WHERE') !== false)
-					{
-						$sqlDemo = str_replace("WHERE", "$where AND", $sqlDemo);
-					}
-					else if (strpos($sqlDemo, 'GROUP BY') !== false)
-					{
-						$sqlDemo = str_replace("GROUP BY", "$where GROUP BY", $sqlDemo);
-					}
-					else if (strpos($sqlDemo, 'ORDER BY') !== false)
-					{
-						$sqlDemo = str_replace("ORDER BY", "$where ORDER BY", $sqlDemo);
-					}
-					else
-					{
-						$sqlDemo .= $where;
-					}
-					break;
-				
-				case 'UPDATE':
-					// SELECT query .... add the loginID to the query
-					$where = ' WHERE loginID = "'.$this->loginID.'" ';
-					
-					if (strpos($sqlDemo, 'WHERE') !== false)
-					{
-						$sqlDemo = str_replace("WHERE", "$where AND", $sqlDemo);
-					}
-					break;
-				
-				case 'INSERT':
-					$sqlDemo = preg_replace('/\(/', '(loginID, ', $sqlDemo, 1);
-					$sqlDemo = str_replace('VALUES(', 'VALUES("'.$this->loginID.'", ', $sqlDemo);
-					break;
-				
-				case 'LOCK':
-				case 'UNLOCK':
-					return $sql;
-				
-				case 'SHOW':
-					return $sql;
-			}
-								
-			if ($sqlDemo === $sql)
-			{
-				echo "<br><strong>ERROR: SQL not processed for DEMO mode: </strong><br>SQL: $sql<br>\n";
-				die;				
-			}
-			
-			return $sqlDemo;
-		}
-		
 		//Returns an array of admin options
 		function getOptions($childOptions = array(), $saveToDB = true)
 		{
@@ -645,7 +559,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 				
 				'EMailTemplatePath' => '',
 				
-				'LogsFolderPath' => '../logs',
+				'LogsFolderPath' => 'logs',
 				'PageLength' => STAGESHOWLIB_EVENTS_PER_PAGE,
 				
 				'Unused_EndOfList' => ''
@@ -824,6 +738,58 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 		}
 		
+		function SaveDBCredentials($credsPath, $defines = '')
+		{
+			$dbCreds = DB_NAME."-".DB_USER."-".DB_PASSWORD."-".DB_HOST;
+			
+			global $table_prefix;			
+			if ($table_prefix != '')
+				$dbCreds .= '-'.$table_prefix;
+					
+			if (file_exists($credsPath))
+			{
+				include $credsPath;
+				if ($dbCreds == DB_CREDS)
+					return false;
+			}
+			
+			include 'stageshowlib_logfile.php';
+			
+			$phpText = '<'."?php
+	
+	if (!defined('DB_NAME'))
+	{
+		// ** MySQL settings - Local Test Site ** //
+		/** The name of the database for WordPress */
+		define('DB_NAME', '".DB_NAME."');
+
+		/** MySQL database username */
+		define('DB_USER', '".DB_USER."');
+
+		/** MySQL database password */
+		define('DB_PASSWORD', '".DB_PASSWORD."');
+
+		/** MySQL hostname */
+		define('DB_HOST', '".DB_HOST."');		
+	}
+	
+	/** Composite of all DB Credentials - Used to check if they have changed ... */
+	define('DB_CREDS', '".$dbCreds."');
+	";
+			
+			if ($table_prefix != '')
+			{
+				$phpText .= '
+	$table_prefix = "'.$table_prefix.'";
+				';				
+			}
+
+			$phpText .= $defines;
+
+			$phpText .= "\n".'?'.'>'."\n";
+			
+			$this->LogToFile($credsPath, $phpText, StageShowLibLogFileClass::ForWriting);
+		}
 	}
 }
 

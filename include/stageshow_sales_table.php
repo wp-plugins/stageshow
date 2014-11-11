@@ -79,6 +79,8 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{
+			$this->tabHeadClass = "stageshow_tl8";
+			
 			// Call base constructor
 			parent::__construct($env, $editMode);
 		}
@@ -132,6 +134,8 @@ if (!class_exists('StageShowSalesAdminVerifyListClass'))
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{
+			$this->tabHeadClass = "stageshow_tl8";
+			
 			// Call base constructor
 			parent::__construct($env, $editMode);
 			

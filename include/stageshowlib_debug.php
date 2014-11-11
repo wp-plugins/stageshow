@@ -132,6 +132,9 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 		<h3>Debug Settings</h3>
 		<table class="stageshow-form-table">
 <?php	
+		if ($myDBaseObj->ShowDebugModes())
+			echo '<br>';
+		
 		$optDefs = $this->GetOptionsDefs();
 		$count = 0;
 

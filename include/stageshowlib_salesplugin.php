@@ -226,7 +226,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				<table cellspacing="0">
 					<tr>
 						<td class="'.$this->cssBaseID.'-'.$this->cssColID['datetime'].'">'.$result->stockName.'</td>
-						<td class="'.$this->cssBaseID.'-'.$this->cssColID['type'].'">'.$result->stockRef.'</td>
+						<td class="'.$this->cssBaseID.'-'.$this->cssColID['ref'].'">'.$result->stockRef.'</td>
 						<td class="'.$this->cssBaseID.'-price">'.$itemPrice.'</td>
 						<td class="'.$this->cssBaseID.'-qty">
 				';
