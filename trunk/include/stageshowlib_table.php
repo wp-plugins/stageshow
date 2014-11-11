@@ -130,6 +130,9 @@ if (!class_exists('StageShowLibTableClass'))
 			if (!isset($this->myDomain) || ($this->myDomain == ''))
 				$this->myDomain = basename(dirname(dirname(__FILE__)));
 			
+			if (!isset($this->tabHeadClass))
+				$this->tabHeadClass = "mjstab-tab-inactive";
+				
 			$this->tableType = $newTableType;
 			switch ($this->tableType)
 			{
@@ -423,7 +426,7 @@ if (!class_exists('StageShowLibTableClass'))
 		function Output_ColHeader()
 		{
 			$addSeparator = false;
-			$tabParam = ' class=mjstab-tab-inactive';
+			$tabParam = ' class="'.$this->tabHeadClass.'"';
 			
 			$width = 100/count($this->mergedColumns);
 						
@@ -992,8 +995,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			
 			$this->enableFilter = true;
 			
-			$callerFolders = explode("/", plugin_basename($this->caller));
-			$this->pluginName = $callerFolders[0];
+			$this->pluginName = basename(dirname($this->caller));
 
 			$tableClass = $this->myDBaseObj->get_domain().'-widefat';			
 			$this->tableTags = 'class="'.$tableClass.' widefat" cellspacing="0"';
@@ -1004,7 +1006,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 				$this->SetRowsPerPage(STAGESHOWLIB_EVENTS_PER_PAGE);
 				
 			$this->useTHTags = true;
-			$this->showDBIds = $this->myDBaseObj->getDbgOption('Dev_ShowDBIds');					
+			$this->showDBIds = $this->myDBaseObj->isDbgOptionSet('Dev_ShowDBIds');					
 			$this->lastCBId = '';
 			
 			$this->defaultFilterIndex = 0;	
@@ -1546,7 +1548,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 				$colClassList = '';
 				for ($c=1; $c<$this->maxCol; $c++)
 					$colClassList .= ',';
-				
+
 				if ($this->moreText != '')
 				{
 					$buttonText = $showOptions ? $this->lessText : $this->moreText;				
@@ -1769,11 +1771,19 @@ if (!class_exists('StageShowLibAdminListClass'))
 
 		function OutputList($results, $updateFailed = false)
 		{
-			if (count($results) == 0) return;
-			
-			$tableId = $this->GetTableID($results[0]);
-			
-			$this->OutputJavascript();
+			if (count($results) == 0) 
+			{
+				if (!isset($this->blankTableClass))
+					return;
+				$tableId = $this->GetTableID(null);
+				$this->tableTags = str_replace('class="', 'class="'.$this->blankTableClass.' ', $this->tableTags);
+			}
+			else
+			{
+				$tableId = $this->GetTableID($results[0]);
+				
+				$this->OutputJavascript();		
+			}
 			
 			$headerColumns = array();
 			foreach ($this->columnDefs as $column)

@@ -41,8 +41,4 @@ $myDBaseObj->uninstall();
 delete_option($myDBaseObj->StageshowOptionsName);
 delete_option($myDBaseObj->StageshowDbgoptionsName);
 
-// Output debug message
-//$debugMsg .= "Uninstall complete!\r\n";
-//$myDBaseObj->LogToFile(__DIR__.'\..\debug.log', $debugMsg, $myDBaseObj->ForAppending);
-
 ?>

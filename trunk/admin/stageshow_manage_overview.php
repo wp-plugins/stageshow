@@ -22,6 +22,9 @@ Copyright 2014 Malcolm Shergold
 
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
+if (file_exists(STAGESHOW_INCLUDE_PATH.'stageshow_contributors.php'))
+	include STAGESHOW_INCLUDE_PATH.'stageshow_contributors.php';
+
 if (!class_exists('StageShowOverviewAdminListClass')) 
 {
 	class StageShowOverviewAdminListClass extends StageShowLibSalesAdminListClass // Define class
@@ -189,6 +192,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			$this->Output_TrolleyAndShortcodesHelp();
 			$this->Output_UpdateServerHelp();
 			$this->Output_UpdateInfo();
+			$this->Output_Contributors();
 		}
 		
 		
@@ -236,7 +240,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 	<h2><?php _e('Help', $this->myDomain); ?></h2>
 <?php
 			$help_url  = get_option('siteurl');
-			$pluginID  = basename(dirname(dirname(__FILE__)));		
+			$pluginID  = STAGESHOW_FOLDER;		
 			$help_url .= '/wp-content/plugins/'.$pluginID.'/docs/StageShowHelp.pdf';
 			
 			echo __('User Guide is Available', $this->myDomain).' <a href="'.$help_url.'">'.__('Here', $this->myDomain).'</a> (PDF)<br>';
@@ -258,6 +262,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 		{
 			// FUNCTIONALITY: Overview - Show Help for Shortcode(s))
 ?>
+			<div class="stageshow-overview-info">
 			<table class="widefat" cellspacing="0">
 				<thead>
 					<tr>
@@ -272,15 +277,42 @@ if (!class_exists('StageShowOverviewAdminClass'))
 					</tr>
 				</tbody>
 			</table>
+			</div>
 <?php
 		}
 
+		function Output_Contributors()
+		{
+			echo '<br><h2>'.__("Contributors", $this->myDomain)."</h2>\n";
+			
+?>
+<div class="stageshow-overview-info">
+<table class="widefat" cellspacing="0">
+<thead><tr class="stageshow-overview"><th>Name</th><th>Contribution</th><th>URL</th></tr></thead>
+<tbody>
+<?php
+			$contributorsList = StageShowContributorsClass::GetContributors();
+			foreach ($contributorsList as $contributor)
+			{
+				echo '<tr>';
+				echo '<td>'.$contributor->name.'</td>';
+				echo '<td>'.$contributor->contribution.'</td>';
+				echo '<td>'.$contributor->url.'</td>';
+				echo '</tr>';
+			}
+?>
+</tbody>
+</table>
+</div>
+<?php
+		}
+		
 		function Output_UpdateServerHelp()
 		{
 			// FUNCTIONALITY: Overview - Output Update Server 
 			if (defined('STAGESHOW_INFO_SERVER_URL'))
 			{
-				$msg = "<strong>Using Custom Update Server - Root URL=".STAGESHOW_INFO_SERVER_URL."<br>\n";
+				$msg = "<strong>Using Custom Update Server</strong> - Root URL=".STAGESHOW_INFO_SERVER_URL."<br>\n";
 				echo '<br><div id="cust-update-error" class="error inline" onclick=ShowOrHideSubmenu(this) ><p>'.$msg.'</p></div>';
 			}			
 		}

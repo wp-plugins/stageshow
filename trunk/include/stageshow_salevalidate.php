@@ -19,6 +19,8 @@ Copyright 2014 Malcolm Shergold
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
+
+include STAGESHOW_INCLUDE_PATH.'stageshow_validate_api.php';
 	
 if (!class_exists('StageShowSaleValidateClass')) 
 {
@@ -28,15 +30,28 @@ if (!class_exists('StageShowSaleValidateClass'))
 	if (!defined('STAGESHOW_VERIFYLOG_DUPLICATEACTION')) 
 		define('STAGESHOW_VERIFYLOG_DUPLICATEACTION', '');
 
+	include STAGESHOW_INCLUDE_PATH.'stageshowlib_admin.php';
+	
 	class StageShowSaleValidateClass extends StageShowLibAdminClass
 	{
+		var $TL8Strings = array();
+		
 		function __construct($env, $inForm = false) //constructor	
 		{	
 			$this->pageTitle = '';	// Supress warning message
 			
-			parent::__construct($env);
+			$myDomain = $env['Domain'];
+			
+			$this->StoreTranslatedText('All Performances', __('All Performances', $myDomain));
+			$this->StoreTranslatedText('Already Verified', __('Already Verified', $myDomain));
+			$this->StoreTranslatedText('Matching record found', __('Matching record found', $myDomain));
+			$this->StoreTranslatedText('No matching record', __('No matching record', $myDomain));
+			$this->StoreTranslatedText('Sale Status', __('Sale Status', $myDomain));
+			$this->StoreTranslatedText('Sale Validation', __('Sale Validation', $myDomain));
+			$this->StoreTranslatedText('Transaction ID', __('Transaction ID', $myDomain));
+			$this->StoreTranslatedText('Wrong Performance', __('Wrong Performance', $myDomain));
 
-			$this->myDBaseObj = $env['DBaseObj'];
+			parent::__construct($env);
 		}
 		
 		function ProcessActionButtons()
@@ -56,7 +71,7 @@ if (!class_exists('StageShowSaleValidateClass'))
 			{
 				$perfsList = $myDBaseObj->GetPerformancesListByPerfID($perfID);
 				$perfRecord = $perfsList[0];
-				$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
+				$perfDateTime = StageShowLibGenericDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
 				$perfName = $perfRecord->showName.' - '.$perfDateTime;
 				$hiddenTags  = '<input type="hidden" name="perfID" id="perfID" value="'.$perfID.'"/>'."\n";
 				$html = $perfName.$hiddenTags."\n";
@@ -72,7 +87,7 @@ if (!class_exists('StageShowSaleValidateClass'))
 				
 				foreach ($perfsList as $perfRecord)
 				{
-					$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
+					$perfDateTime = StageShowLibGenericDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
 					$perfName = $perfRecord->showName.' - '.$perfDateTime;
 					//$selected = ($perfID == $perfRecord->perfID) ? ' selected=""' : '';
 					$html .= '<option value="'.$perfRecord->perfID.'"'.$selected.' >'.$perfName.'</option>'."\n";
@@ -89,89 +104,208 @@ if (!class_exists('StageShowSaleValidateClass'))
 			return $html;			
 		}
 		
-		function Tools_Validate()
+		function StoreTranslatedText($text, $translation)
 		{
-												
+			if ($text != $translation)
+			{
+				$this->TL8Strings[$text] = $translation;				
+			}
+		}
+		
+		function TranslatedText($text, $unused)
+		{
+			if (isset($this->TL8Strings[$text]))
+			{
+				$TL8text = $this->TL8Strings[$text];
+			}
+			else
+			{
+				$TL8text = __($text, $this->myDomain);
+			}
+			$id = 'label_'.str_replace(' ', '_', $text);
+			
+			return $TL8text.'<input type="hidden" name="'.$id.'" id="'.$id.'" value="'.$TL8text.'" />';
+		}
+		
+		function Tools_Validate()
+		{												
 	  		// FUNCTIONALITY: Tools - Online Sale Validator
 			$myDBaseObj = $this->myDBaseObj;
 
+			$this->WPNonceField(); 
+			
+			echo "<h3>".__('Validate Sale', $this->myDomain)."</h3>";
+			
+			$this->ValidateSaleForm();
+		}
+				
+		function ValidateSaleForm()
+		{
+			$myDBaseObj = $this->myDBaseObj;
+			
 			$TxnId = '';
-				
-			StageShowLibUtilsClass::Output_Javascript_SetFocus("TxnId");
-				
-			$perfID = isset($_POST['perfID']) ? $_POST['perfID'] : 0;
-	
+			$perfID = isset($_REQUEST['perfID']) ? $_REQUEST['perfID'] : 0;
+			if (!is_numeric($perfID)) return;
+			
 			$actionURL = StageShowLibUtilsClass::GetPageURL();
 			
-			if (isset($_GET['auth']))
-			{
-				$authId = $_GET['auth'];
-				$actionURL = str_replace("auth=$authId", '', $actionURL);
-				$actionURL = str_replace(".php?&", ".php?", $actionURL);
-				$actionURL = str_replace("&&", "&", $actionURL);
-			}
-			else if (isset($_POST['auth']))
-				$authId = $_POST['auth'];
-			else
-				$authId = '';
-				
 ?>
-<script type="text/javascript">
-	function stageshow_TxnIdValid()
-	{
-		/* Block Validation requests if TxnId is blank */
-		txnidElem = document.getElementById("TxnId");
-		txnid = txnidElem.value;
-		return (txnid.length > 0);
-	}
-</script>
-<h3><?php _e('Validate Sale', $this->myDomain); ?></h3>
-<form method="post" target="_self" action="<?php echo $actionURL; ?>">
+<!--<form method="post" target="_self" action="<?php echo $actionURL; ?>">-->
+<div id="stageshow-validate-table">
 <?php 
-			$this->WPNonceField(); 
-			echo '<input type="hidden" name="auth" value="'.$authId.'"/>'."\n";
 			echo '
 <table class="stageshow-form-table">
 ';		
-			if ($myDBaseObj->GetLocation() !== '')
+			$TerminalLocation = isset($_POST['location']) ? $_POST['location'] : $myDBaseObj->GetLocation();
+			if ($TerminalLocation !== '')
 			{
-				$TerminalLocation = $myDBaseObj->GetLocation();
-				echo "
+				echo '
 					<tr>
-						<td>".__('Location / Computer ID', $myDBaseObj->get_domain())."&nbsp;</td>
-						<td>$TerminalLocation</td>
+						<td class="stageshow_tl8" id="label_Location">'.__("Location / Computer ID", $myDBaseObj->get_domain()).'&nbsp;</td>
+						<td id="value_Location">'.$TerminalLocation.'</td>
 					</tr>
 					<tr>
-						<td>".__('Performance', $myDBaseObj->get_domain())."</td>
-						<td>".$this->GetValidatePerformanceSelect($perfID)."</td>
+						<td class="stageshow_tl8" id="label_Performance">'.__("Performance", $myDBaseObj->get_domain()).'</td>
+						<td id="value_Performance">'.$this->GetValidatePerformanceSelect($perfID).'</td>
 					</tr>
-					";				
+					';				
 			}
 ?>
 			<tr>
-		<td><?php _e('Transaction ID', $this->myDomain); ?></td>
-				<td>
-			<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
-						</td>
+				<td class="stageshow_tl8" id="label_Transaction_ID"><?php _e('Transaction ID', $this->myDomain); ?></td>
+				<td id="value_Transaction_ID">
+					<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
+					&nbsp;
+					<input class="button-primary" onclick="stageshow_onclick_validate()" type="button" name="jqueryvalidatebutton" id="jqueryvalidatebutton" value="Validate"/>
+				</td>
 			</tr>
 			<?php
+			$jQueryURL = STAGESHOW_URL."include/stageshow_jquery_validate.php";
+
+			echo '
+			<script>
+
+				jQuery(document).ready(
+					function()
+					{
+					    jQuery("#TxnId").keypress(function(e)
+					    {
+					      if(e.keyCode==13)
+					      	stageshow_onclick_validate();
+					    });
+					    
+						jQuery("#jqueryvalidatebutton").prop("disabled", false);	
+					    jQuery("#TxnId").focus();
+					}
+				);
+
+				function stageshow_onclick_validate()
+				{
+					/* Get input values from form */
+					var TxnId = jQuery("#TxnId").val();
+					var perfID = jQuery("#perfID").val();
+					var location = jQuery("#value_Location").html();
+					
+					if (TxnId.length <= 0) return;
+		
+					/* Disable the button and input box .... this will be replaced when the page refreshes */					
+					jQuery("#TxnId").prop("disabled", true);	
+					jQuery("#jqueryvalidatebutton").prop("disabled", true);	
+											
+					/* Get translated label text strings */
+					var labels = [];
+					var tl8 = [];
+					
+';
+					
+			foreach ($this->TL8Strings as $id => $text)
+			{
+	        	echo 'tl8[tl8.length] = "'.$id.'";'."\n";
+	        	echo 'tl8[tl8.length] = "'.$text.'";'."\n";
+			}
+			
+			echo '
+				  	jQuery("#stageshow-validate-table").find(".stageshow_tl8").each
+				  	(
+					  	function() 
+					  	{
+					  		{
+	        					labels[labels.length] = "#"+this.id;				
+	        					labels[labels.length] = this.textContent;				
+							}
+							
+	   					}
+   					);
+					
+					/* Get Validation Result from Server */
+					var url = "'.$jQueryURL.'";
+				    jQuery.post(url,
+					    {
+					      TxnId: TxnId,
+					      perfID: perfID,
+					      location: location,
+					      validatesalebutton: true,
+					      jquery: "true"
+					    },
+					    function(data,status)
+					    {
+							divElem = jQuery("#stageshow-validate-table");
+							divElem.html(data);
+							
+							/* Move .updated and .error alert boxes. Do not move boxes designed to be inline. */
+							/* Code copied from wp-admin\js\common.js */
+							/*
+							jQuery("div.wrap h2:first").nextAll("div.updated, div.error").addClass("below-h2");
+							jQuery("div.updated, div.error").not(".below-h2, .inline").insertAfter( $("div.wrap h2:first") );
+							*/
+							
+							for (var index=0; index<labels.length; index +=2)
+							{
+								jQuery(labels[index]).text(labels[index+1]);
+							}
+							
+							/* Apply translations to any message */
+							messageElem = jQuery(".stageshow-validate-message");
+							messageHtml = messageElem.html();
+							for (var index=0; index<tl8.length; index +=2)
+							{
+								messageHtml = messageHtml.replace(tl8[index], tl8[index+1]);
+							}
+							messageElem.html(messageHtml);
+							
+							jQuery("#TxnId").prop("disabled", false);	
+							jQuery("#jqueryvalidatebutton").prop("disabled", false);	
+					    	jQuery("#TxnId").focus();
+					    }
+				    );
+				    
+				}
+			</script>
+			';
+			
 			if(isset($_POST['validatesalebutton']))
 			{
-				$env = StageShowLibAdminBaseClass::getEnv($this);					
-				$this->ValidateSale($env, $perfID);
+				$this->ValidateSale($this->env, $perfID);
 			}
-?>
-		</table>
-		<p>
-			<p class="submit">
-<input class="button-secondary" onclick="return stageshow_TxnIdValid()" type="submit" name="validatesalebutton" value="<?php _e('Validate', $this->myDomain) ?>"/>
-					</form>
-<?php
+			else
+			{
+				echo $this->SaleSummaryTable($this->env, array());
+				echo $this->ShowValidation($this->env);	
+			}
+			echo '
+			</table>
+			</div>
+			<!--</form>-->
+			';
 		}
 
-		function LogValidation($env, $saleID, $perfID = 0)
+		function ShowValidation($env, $saleID = 0, $perfID = 0)
 		{
-			return true;
+			return '';
+		}
+		
+		function LogValidation($saleID, $perfID = 0)
+		{
 		}
 
 		function ValidateSale($env, $perfID)
@@ -180,11 +314,19 @@ if (!class_exists('StageShowSaleValidateClass'))
 				 
 			$myDBaseObj = $this->myDBaseObj;
 				 
-			$this->CheckAdminReferer();
+			$myDBaseObj->CheckAdminReferer();
 
-			$TxnId = trim(stripslashes($_POST['TxnId']));
+			$TxnId = trim(stripslashes($_REQUEST['TxnId']));
+			if (!ctype_alnum($TxnId)) return 0;
 			
-			$validateMsg = 'Sale Validation (Transaction ID: '.$TxnId.') - ';
+			$verifyMessageHTML = '';
+			$saleDetailsHTML = '';
+			$ticketsListTableHTML = '';
+			$validatedMessageHTML = '';
+			
+			$validateMsg = $this->TranslatedText('Sale Validation', $this->myDomain).' ('.$this->TranslatedText('Transaction ID', $this->myDomain).': '.$TxnId.') - ';
+			$msgClass = '';
+			$showDetails = true;
 			
 			if (strlen($TxnId) == 0) return 0;
 			
@@ -193,119 +335,142 @@ if (!class_exists('StageShowSaleValidateClass'))
 			$entryCount = count($results);
 			if ($entryCount == 0)
 			{
-				$validateMsg .= __('No matching record', $this->myDomain);
-				echo '<tr><td colspan="2"><div id="message" class="error stageshow-validate-notfound"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-				return 0;
-			}
-				
-			$saleID = $results[0]->saleID;
-		 
-			// Check that it is for selected performance
-			if ($perfID != 0)
-			{
-				$matchingSales = 0;
-				for ($index = 0; $index<$entryCount; $index++)	
-				{
-					if ($results[$index]->perfID != $perfID)
-					{
-						unset($results[$index]);
-					}
-					else
-					{
-						$matchingSales++;
-						if ($matchingSales == 1)
-						{
-							$salerecord = $results[$index];							
-						}								
-					}
-				}						
-			}
-			else
-			{
-				$matchingSales = $entryCount;								
-				$salerecord = $results[0];
-			}
-			
-			if ($matchingSales == 0)
-			{
-				$validateMsg .= __('Wrong Performance', $this->myDomain);
-				$msgClass = 'stageshow-validate-wrongperf error alert';
-				echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
-				
-				$results = $ticketsList;
+				$validateMsg .= $this->TranslatedText('No matching record', $this->myDomain);
+				$msgClass = 'stageshow-validate-notfound';				
 				$saleID = 0;
-				$salerecord = $results[0];
-			}	
+			}
 			else
 			{
-				$perfID = $salerecord->perfID;
-				$alreadyValidated = !$this->LogValidation($env, $saleID, $perfID) && (STAGESHOW_VERIFYLOG_DUPLICATEACTION != 'ignore');
-				if ( $alreadyValidated )
+				$saleID = $results[0]->saleID;
+			 
+				// Check that it is for selected performance
+				if ($perfID != 0)
 				{
-					$validateMsg .= __('Already Verified', $this->myDomain);
-					$msgClass = "error stageshow-validate-duplicated";
+					$matchingSales = 0;
+					for ($index = 0; $index<$entryCount; $index++)	
+					{
+						if ($results[$index]->perfID != $perfID)
+						{
+							unset($results[$index]);
+						}
+						else
+						{
+							$matchingSales++;
+							if ($matchingSales == 1)
+							{
+								$salerecord = $results[$index];							
+							}								
+						}
+					}						
 				}
 				else
 				{
-					$validateMsg .= __('Matching record found', $this->myDomain);
-					switch($salerecord->saleStatus)
-					{
-						case PAYPAL_APILIB_SALESTATUS_COMPLETED:
-							$msgClass = 'stageshow-validate-ok updated ok';
-							break;
-								
-						case STAGESHOW_SALESTATUS_RESERVED:
-							$msgClass = 'stageshow-validate-reserved error alert';
-							$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
-							break;
-								
-						default:
-							$msgClass = 'stageshow-validate-unknown error';
-							$validateMsg .= ' - '.__('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
-							break;
-								
-					}
+					$matchingSales = $entryCount;								
+					$salerecord = $results[0];
 				}
-					
-				echo '<tr><td colspan="2"><div id="message" class="'.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
 				
-				if ($alreadyValidated)
+				if ($matchingSales == 0)
 				{
-					if (STAGESHOW_VERIFYLOG_DUPLICATEACTION == 'hide')
-						return 0;					
+					$validateMsg .= $this->TranslatedText('Wrong Performance', $this->myDomain);
+					$msgClass = 'stageshow-validate-wrongperf error alert';
+					
+					$results = $ticketsList;
+					$saleID = 0;
+					$salerecord = $results[0];
 				}	
-				
+				else
+				{
+					$perfID = $salerecord->perfID;
+					$validatedMessageHTML = $this->ShowValidation($env, $saleID, $perfID);
+					if (($validatedMessageHTML != '') && (STAGESHOW_VERIFYLOG_DUPLICATEACTION != 'ignore'))
+					{
+						$validateMsg .= $this->TranslatedText('Already Verified', $this->myDomain);
+						$msgClass = "error stageshow-validate-duplicated";
+
+						if (STAGESHOW_VERIFYLOG_DUPLICATEACTION == 'hide')
+							$showDetails = false;					
+					}
+					else
+					{
+						$this->LogValidation($saleID, $perfID);
+						
+						$validateMsg .= $this->TranslatedText('Matching record found', $this->myDomain);
+						switch($salerecord->saleStatus)
+						{
+							case PAYPAL_APILIB_SALESTATUS_COMPLETED:
+								$msgClass = 'stageshow-validate-ok updated ok';
+								break;
+									
+							case STAGESHOW_SALESTATUS_RESERVED:
+								$msgClass = 'stageshow-validate-reserved error alert';
+								$validateMsg .= ' - '.$this->TranslatedText('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
+								break;
+									
+							default:
+								$msgClass = 'stageshow-validate-unknown error';
+								$validateMsg .= ' - '.$this->TranslatedText('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
+								break;
+									
+						}
+					}
+				}	
 			}
-			echo '<tr><td>'.__('Name', $this->myDomain).':</td><td>'.$salerecord->saleFirstName.' '.$salerecord->saleLastName.'</td></tr>'."\n";
-			echo '<tr><td>'.__('Sale Status', $this->myDomain).':</td><td>'.__($salerecord->saleStatus, $this->myDomain).'</td></tr>'."\n";
-			if ($salerecord->saleStatus == STAGESHOW_SALESTATUS_RESERVED)
+			
+					
+			$verifyMessageHTML = '<tr><td colspan="2"><div id="message" class="inline stageshow-validate-message '.$msgClass.'"><p>'.$validateMsg.'</p></div></td></tr>'."\n";
+			
+			$ticketsListTableHTML = $this->SaleSummaryTable($env, $results);
+				
+			if ($ticketsListTableHTML == '')
 			{
-				echo '<tr><td>'.__('Total Due', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
+				$validatedMessageHTML = $this->ShowValidation($env);	
+			}
+			
+			echo "<table class='stageshow-validate-results'>\n";
+			echo $verifyMessageHTML;
+			echo $saleDetailsHTML;
+			echo $ticketsListTableHTML;
+			echo $validatedMessageHTML;
+			echo "</table>\n";
+						 
+			return $saleID;
+		}
+		
+		function SaleSummaryTable($env, $results)
+		{
+			if (count($results)>0)
+			{
+				$salerecord = $results[0];
+				$ticketsListTableHTML = '<tr><td class="stageshow_tl8" id="label_Name">'.__('Name', $this->myDomain).':</td><td id="value_Name">'.$salerecord->saleFirstName.' '.$salerecord->saleLastName.'</td></tr>'."\n";
+				$ticketsListTableHTML .= '<tr><td class="stageshow_tl8" id="label_Sale_Status">'.__('Sale Status', $this->myDomain).':</td><td id="value_Sale_Status">'.__($salerecord->saleStatus, $this->myDomain).'</td></tr>'."\n";
 			}
 			else
 			{
-/*
-				if ($salerecord->saleTransactionFee > 0)
-				{
-					echo '<tr><td>'.__('Booking Fee', $this->myDomain).':</td><td>'.$salerecord->saleTransactionFee.'</td></tr>'."\n";
-				}
-				if ($salerecord->saleDonation > 0)
-				{
-					echo '<tr><td>'.__('Donation', $this->myDomain).':</td><td>'.$salerecord->saleDonation.'</td></tr>'."\n";
-				}
-				echo '<tr><td>'.__('Total Paid', $this->myDomain).':</td><td>'.$salerecord->salePaid.'</td></tr>'."\n";
-*/
-			}				
+				$ticketsListTableHTML = '<tr class="stageshow-hidden-table"><td class="stageshow_tl8" id="label_Name">'.__('Name', $this->myDomain).':</td><td></td></tr>'."\n";
+				$ticketsListTableHTML .= '<tr class="stageshow-hidden-table"><td class="stageshow_tl8" id="label_Sale_Status">'.__('Sale Status', $this->myDomain).':</td><td></td></tr>'."\n";
+			}
+			
+			if ((count($results)>0) && ($salerecord->saleStatus == STAGESHOW_SALESTATUS_RESERVED))
+			{
+				$ticketsListTableHTML .= '<tr><td class="stageshow_tl8" id="label_Total_Due">'.__('Total Due', $this->myDomain).':</td><td id="value_Total_Due">'.$salerecord->salePaid.'</td></tr>'."\n";
+			}
+			else
+			{
+				$ticketsListTableHTML .= '<tr class="stageshow-hidden-table"><td class="stageshow_tl8" id="label_Total_Due">'.__('Total Due', $this->myDomain).':</td><td></td></tr>'."\n";
+			}
 
-			$classPrefix = str_replace('DBaseClass', '', STAGESHOW_DBASE_CLASS);
-			$classId = $classPrefix.'SalesAdminDetailsListClass';
-			$salesList = new $classId($env);	
+			ob_start();
+			$classId = STAGESHOW_PLUGIN_NAME.'SalesAdminDetailsListClass';
+			$salesList = new $classId($env);
+			$salesList->blankTableClass = "stageshow-hidden-table";	
 						
 			echo '<tr><td colspan="2">'."\n";
 			$salesList->OutputList($results);	
-			echo "</td></tr>\n";
-						 
-			return $saleID;
+			echo "</td></tr>\n";				
+			$ticketsListTableHTML .= ob_get_contents();
+			ob_end_clean();
+			
+			return $ticketsListTableHTML;
 		}
 		
 	}

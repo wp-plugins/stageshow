@@ -1,13 +1,8 @@
 <?php
 /* 
-Plugin Name: StageShow
-Plugin URI: http://www.corondeck.co.uk/StageShow/
-Version: 4.2
-Author: Malcolm Shergold
-Author URI: http://www.corondeck.co.uk
-Description: A Wordpress Plugin to sell theatre tickets online
+Description: Code for TBD
  
-Copyright 2013 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,24 +13,50 @@ Copyright 2013 Malcolm Shergold
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-if (defined('IPN_CALLBACK'))
+function is_ssl() 
 {
-	if (IPN_CALLBACK != 'STAGESHOW_VARIANT')
-		return;
+	if ( isset($_SERVER['HTTPS']) ) 
+	{
+		if ( 'on' == strtolower($_SERVER['HTTPS']) )
+			return true;
+		if ( '1' == $_SERVER['HTTPS'] )
+			return true;
+	} 
+	elseif ( isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] ) ) 
+	{
+		return true;
+	}
+	return false;
 }
 
-define('STAGESHOW_CODE_PREFIX', 'stageshow');
+function __($text, $domain = 'default')
+{
+	return $text;
+}
 
-include 'stageshow_defs.php';
-include 'stageshow_main.php';
+function _e($text, $domain = 'default')
+{
+	echo __($text, $domain);
+}
 
-new StageShowPluginClass(__FILE__);
-		
+function current_time( $type, $gmt = 0 ) 
+{
+	switch ($type)
+	{
+		case 'mysql': 
+			return date('Y-m-d H:i:s');
+		case 'timestamp': 
+			return date('U');
+		default:
+			return '';
+	}
+}
+
 ?>

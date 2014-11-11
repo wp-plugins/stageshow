@@ -27,6 +27,7 @@ if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
 	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
 
 include 'stageshowlib_sales_dbase_api.php';      
+include STAGESHOW_FOLDER.'_validate_api.php';
 
 if (!class_exists('StageShowDBaseClass')) 
 {
@@ -125,16 +126,20 @@ if (!class_exists('StageShowDBaseClass'))
 			
 			$opts = array (
 				'Caller'             => $caller,
-				'PluginFolder'       => dirname(plugin_basename(dirname(__FILE__))),
+				'PluginFolder'       => STAGESHOW_FOLDER,
 				'DownloadFilePath'   => '/wp-content/plugins/stageshow/stageshow_download.php',
 				'CfgOptionsID'       => $StageshowOptionsName,
 				'DbgOptionsID'       => $StageshowDbgoptionsName,
 			);			
-			
+
 			// Call base constructor
 			parent::__construct($opts);
 			
-			$this->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);			
+			$this->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);	
+			
+			$valDBClass = STAGESHOW_PLUGIN_NAME.'ValidateDBaseClass';
+			$this->valDBObj = new $valDBClass();
+			
 		}
 		
 		function getTablePrefix()
@@ -553,6 +558,29 @@ if (!class_exists('StageShowDBaseClass'))
 			{
 				$this->createDBTable(STAGESHOW_DEMOLOG_TABLE, 'demologID', $dropTable);
 			}
+		}
+		
+		function SaveDBCredentials($credsPath, $defines = '')
+		{
+			$defines = "
+	if (!defined('STAGESHOW_TABLE_PREFIX'))
+	{
+	define('PAYPAL_APILIB_SALESTATUS_COMPLETED', '".PAYPAL_APILIB_SALESTATUS_COMPLETED."');
+	define('PAYPAL_APILIB_SALESTATUS_PENDING', '".PAYPAL_APILIB_SALESTATUS_PENDING."');
+	define('PAYPAL_APILIB_SALESTATUS_CHECKOUT', '".PAYPAL_APILIB_SALESTATUS_PENDINGPPEXP."');
+	define('PAYPAL_APILIB_SALESTATUS_PENDINGPPEXP', '".PAYPAL_APILIB_SALESTATUS_PENDINGPPEXP."');
+	define('STAGESHOW_SALESTATUS_RESERVED', '".STAGESHOW_SALESTATUS_RESERVED."');
+	
+	define('STAGESHOW_TABLE_PREFIX', '".STAGESHOW_TABLE_PREFIX."');
+	define('STAGESHOW_SHOWS_TABLE', '".STAGESHOW_SHOWS_TABLE."');
+	define('STAGESHOW_PERFORMANCES_TABLE', '".STAGESHOW_PERFORMANCES_TABLE."');
+	define('STAGESHOW_PRICES_TABLE', '".STAGESHOW_PRICES_TABLE."');
+	define('STAGESHOW_SALES_TABLE', '".STAGESHOW_SALES_TABLE."');
+	define('STAGESHOW_TICKETS_TABLE', '".STAGESHOW_TICKETS_TABLE."');" . $defines ."			
+	}
+";
+							
+			parent::SaveDBCredentials($credsPath, $defines);
     	}
         
 		function DBField($fieldName)
@@ -606,11 +634,24 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function InTestMode()
 		{
-			if (!$this->testModeEnabled) return false;
+			if (!isset($this->testModeEnabled)) return false;
 			
 			if (!function_exists('wp_get_current_user')) return false;
 			
 			return current_user_can(STAGESHOW_CAPABILITY_DEVUSER);
+		}
+		
+		function Sample_strtotime($time)
+		{ 
+			if (defined('STAGESHOW_SAMPLE_BASETIME'))
+			{
+				$now = strtotime(STAGESHOW_SAMPLE_BASETIME);				
+			}
+			else
+			{
+				$now = time();				
+			}
+			return strtotime($time, $now);
 		}
 		
 		function CreateSample($sampleDepth = 0)
@@ -620,10 +661,10 @@ if (!class_exists('StageShowDBaseClass'))
 			//if ($this->InTestMode()) $showName1 .= " (".StageShowLibUtilsClass::GetSiteID().")";
 
 			// Sample dates to reflect current date/time
-			$showTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+28 days"))." 20:00";
-			$showTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+29 days"))." 20:00";
-			$showTime3 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 14:30";
-			$showTime4 = date(self::STAGESHOW_DATE_FORMAT, strtotime("+30 days"))." 20:00";
+			$showTime1 = date(self::STAGESHOW_DATE_FORMAT, $this->Sample_strtotime("+28 days"))." 20:00";
+			$showTime2 = date(self::STAGESHOW_DATE_FORMAT, $this->Sample_strtotime("+29 days"))." 20:00";
+			$showTime3 = date(self::STAGESHOW_DATE_FORMAT, $this->Sample_strtotime("+30 days"))." 14:30";
+			$showTime4 = date(self::STAGESHOW_DATE_FORMAT, $this->Sample_strtotime("+30 days"))." 20:00";
 			// Populate table
 			$this->sample_showID1 = $this->AddShow($showName1);
 			$statusMsg = '';
@@ -655,8 +696,8 @@ if (!class_exists('StageShowDBaseClass'))
 			if (!$this->isDbgOptionSet('Dev_NoSampleSales') && ($sampleDepth < 1))
 			{
 				// Add some ticket sales
-				$saleTime1 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-4 days"))." 17:32:47";
-				$saleTime2 = date(self::STAGESHOW_DATE_FORMAT, strtotime("-3 days"))." 10:14:51";
+				$saleTime1 = date(self::STAGESHOW_DATE_FORMAT, $this->Sample_strtotime("-4 days"))." 17:32:47";
+				$saleTime2 = date(self::STAGESHOW_DATE_FORMAT, $this->Sample_strtotime("-3 days"))." 10:14:51";
 				$saleEMail = 'other@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
@@ -686,7 +727,7 @@ if (!class_exists('StageShowDBaseClass'))
 						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
 						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
 						$this->AddSampleSaleItem($saleID, $this->priceID_S1_P3_ADULT, 3, STAGESHOW_PRICE_S1_P3_ADULT);
-						$timeStamp = strtotime("+1 hour +7 seconds", $timeStamp);
+						$timeStamp = $this->Sample_strtotime("+1 hour +7 seconds", $timeStamp);
 					}
 				}
 			}
@@ -1040,28 +1081,12 @@ if (!class_exists('StageShowDBaseClass'))
 			$this->query($sql);	
 			return "OK";							
 		}
-		
+
 		function GetActivePerformancesList()
 		{
-			$selectFields  = '*';
-			$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
-			
-			$sqlFilters['activePerfs'] = true;
-			
-			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
-			$sql .= " LEFT JOIN ".STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
-			
-			// Add SQL filter(s)
-			$sql .= $this->GetWhereSQL($sqlFilters);
-			$sql .= $this->GetOptsSQL($sqlFilters);
-			
-			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
-			
-			$perfsListArray = $this->get_results($sql);
-
-			return $perfsListArray;
+			return $this->valDBObj->GetActivePerformancesList();
 		}
-				
+
 		function GetAllPerformancesList()
 		{
 			return $this->GetPerformancesList();
@@ -1608,13 +1633,6 @@ if (!class_exists('StageShowDBaseClass'))
 		
 		function GetWhereSQL($sqlFilters)
 		{
-			if (isset($sqlFilters['activePerfs']))
-			{
-				$timeNow = current_time('mysql');
-				$sqlWhere = ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime>"'.$timeNow.'" ';
-				return $sqlWhere;
-			}
-			
 			$sqlWhere = parent::GetWhereSQL($sqlFilters);
 			$sqlCmd = ($sqlWhere === '') ? ' WHERE ' : ' AND ';
 			
@@ -2091,7 +2109,39 @@ if (!class_exists('StageShowDBaseClass'))
 			unset($this->showJoined);
 		}			
 		
-		function FormatEMailField($tag, $field, $saleDetails)
+		function AddEMailFields($EMailTemplate, $saleDetails)
+		{
+			// Add any email fields that are not in the sale record ...
+			if (defined('STAGESHOWLIB_DATE_BOXOFFICE_FORMAT'))
+			{
+				$dateFormat = STAGESHOWLIB_DATE_BOXOFFICE_FORMAT;
+			}
+			else
+			{
+				// Use Wordpress Date Format
+				$dateFormat = get_option( 'date_format' );				
+			}
+
+			if (defined('STAGESHOWLIB_TIME_BOXOFFICE_FORMAT'))
+			{
+				$timeFormat = STAGESHOWLIB_TIME_BOXOFFICE_FORMAT;				
+			}
+			else
+			{
+				// Use Wordpress Time Format
+				$timeFormat = get_option( 'time_format' );				
+			}
+					
+			$timestamp = strtotime($saleDetails->perfDateTime);
+			$saleDetails->perfDate = date($dateFormat, $timestamp);
+			$saleDetails->perfTime = date($timeFormat, $timestamp);
+			
+			$eMailFields = parent::AddEMailFields($EMailTemplate, $saleDetails);
+			
+			return $eMailFields;
+		}
+		
+		function FormatEMailField($tag, $field, &$saleDetails)
 		{
 			if ($tag =='[ticketSeat]') 
 				return '';

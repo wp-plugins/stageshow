@@ -42,7 +42,10 @@ if (!class_exists('StageShowPluginClass'))
 			
 			$myDBaseObj = $this->CreateDBClass($caller);
 			
-			$myDBaseObj->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
+			if (defined('STAGESHOW_ALLOW_TESTMODE'))
+			{
+				$myDBaseObj->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
+			}
 			$this->myDBaseObj = $myDBaseObj;
 					
 			parent::__construct();
@@ -183,17 +186,9 @@ if (!class_exists('StageShowPluginClass'))
 			$myDBaseObj->init($this->env['caller']);
 			
 		    $domain = 'stageshow';
-			
-	  		// FUNCTIONALITY: Runtime - Load custom language file in core language folder
-		    // The "plugin_locale" filter is also used in load_plugin_textdomain()
-		    $locale = apply_filters('plugin_locale', get_locale(), 'stageshow');
-			$subFolder = '/';	// '/stageshow/';
-			$langFilePath = WP_LANG_DIR.$subFolder.$domain.'-'.$locale.'.mo';
-		    load_textdomain($domain, $langFilePath);
-	
-	  		// FUNCTIONALITY: Runtime - Load common language files
-			$langRelPath = STAGESHOW_LANG_RELPATH;
-			load_plugin_textdomain($domain, false, $langRelPath);
+		    
+	  		// FUNCTIONALITY: Runtime - Load StageShow custom language file
+			load_plugin_textdomain($domain, false, STAGESHOW_LANG_RELPATH);
 			
 			// Get plugin version number
 			wp_update_plugins();
@@ -289,8 +284,8 @@ if (!class_exists('StageShowPluginClass'))
 					break;	
 					
 				case STAGESHOW_MENUPAGE_DEVTEST:
-					include STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php';   
-					new StageShowDevCallerClass($this->env);
+					include STAGESHOW_TEST_PATH.'stageshowlib_devtestcaller.php';   
+					new StageShowLibDevCallerClass($this->env);
 					break;
 							
 				case STAGESHOW_MENUPAGE_DEBUG:
@@ -305,6 +300,8 @@ if (!class_exists('StageShowPluginClass'))
 			// Add our own Javascript
 			wp_enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', __FILE__ ));
 			wp_enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ));
+
+			wp_enqueue_script('jquery');
 		}	
 		
 		function load_admin_styles()
@@ -610,7 +607,7 @@ if (!class_exists('StageShowPluginClass'))
 				if (!$myDBaseObj->getDbgOption('Dev_DisableTestMenus') 
 				  && current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN) )
 				{
-					if ( file_exists(STAGESHOW_TEST_PATH.'stageshow_devtestcaller.php') ) 
+					if ( file_exists(STAGESHOW_TEST_PATH.'stageshowlib_devtestcaller.php') ) 
 						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));
 
 					if ( isset($_SESSION['stageshowlib_debug_menu']) )

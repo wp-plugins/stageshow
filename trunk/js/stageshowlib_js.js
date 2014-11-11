@@ -73,3 +73,11 @@ function StageShowLib_NumberOfDps(price)
 	return dpLen;
 }
 
+function StageShowLib_HideElement(obj)
+{
+	// Get the header 'Tab' Element					
+	tabElem = document.getElementById(obj.id);
+	
+	// Hide the settings row
+	tabElem.style.display = 'none';
+}

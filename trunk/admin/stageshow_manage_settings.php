@@ -65,8 +65,7 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 			$this->isTabbedOutput = true;
 			
 			$rowDefs = array(			
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'General',    StageShowLibTableClass::TABLEPARAM_ID => 'general-settings-tab', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Advanced',      StageShowLibTableClass::TABLEPARAM_ID => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_AFTER => 'general-settings-tab',  ),				
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'General',    StageShowLibTableClass::TABLEPARAM_ID => 'general-settings-tab', StageShowLibTableClass::TABLEPARAM_AFTER => 'paypal-settings-tab', ),
 			);
 			
 			$rowDefs = $this->MergeSettings(parent::GetMainRowsDefinition(), $rowDefs);
@@ -75,7 +74,7 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 		
 		function GetDetailsRowsDefinition()
 		{
-			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
+			$pluginID = STAGESHOW_FOLDER;	// Library files should be in 'include' folder			
 			$templatePath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/emails/';
 			
 			$checkoutNoteOptions = array(
@@ -103,7 +102,7 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Seats Available',                 StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',  StageShowLibTableClass::TABLEPARAM_ID => 'ShowSeatsAvailable',    StageShowLibTableClass::TABLEPARAM_TYPE => self::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Show Seats Available on Box Office',  StageShowLibTableClass::TABLEPARAM_DEFAULT => false ),
 			);
 			
-			$rowDefs = $this->MergeSettings(parent::GetDetailsRowsDefinition(), $rowDefs);
+			$rowDefs = $this->MergeSettings($rowDefs, parent::GetDetailsRowsDefinition());
 			return $rowDefs;
 		}
 		

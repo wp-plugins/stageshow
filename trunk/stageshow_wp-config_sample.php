@@ -102,7 +102,7 @@ define('STAGESHOW_BOXOFFICE_ALLDATES', 'true');
 	Box-Office Output Date & Time Format
 	
 	This value must comply with the specification for the "format" parameter
-	of the PHP date function. COnsult the PHP documentation for details.
+	of the PHP date function. Consult the PHP documentation for details.
 	
 	Some typical values and the corresponding output are as follows:
 								
