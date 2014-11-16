@@ -22,9 +22,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
-if (!class_exists('StageShowPerformancesAdminListClass'))
+if (!class_exists('StageShowWPOrgPerformancesAdminListClass'))
 {
-	class StageShowPerformancesAdminListClass extends StageShowLibSalesAdminListClass // Define class
+	class StageShowWPOrgPerformancesAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -111,9 +111,9 @@ if (!class_exists('StageShowPerformancesAdminListClass'))
 
 include STAGESHOW_INCLUDE_PATH . 'stageshowlib_admin.php';
 
-if (!class_exists('StageShowPerformancesAdminClass'))
+if (!class_exists('StageShowWPOrgPerformancesAdminClass'))
 {
-	class StageShowPerformancesAdminClass extends StageShowLibAdminClass // Define class
+	class StageShowWPOrgPerformancesAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env) //constructor	
 		{
@@ -267,7 +267,7 @@ if (!class_exists('StageShowPerformancesAdminClass'))
 				$showID = $_POST['showID'];
 				
 				$statusMsg = '';
-				$newPerfID = $myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowDBaseClass::MYSQL_DATETIME_FORMAT, current_time('timestamp')));
+				$newPerfID = $myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowWPOrgDBaseClass::MYSQL_DATETIME_FORMAT, current_time('timestamp')));
 				
 				$statusMsgClass = ($newPerfID > 0) ? 'updated' : 'error';
 				echo '<div id="message" class="' . $statusMsgClass . '"><p>' . $statusMsg . '</p></div>';

@@ -9,11 +9,25 @@ You must be a registered user to use this software
 
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_dbase_base.php';
 
-if (!class_exists('StageShowValidateDBaseClass')) 
+if (!class_exists('StageShowWPOrgValidateDBaseClass')) 
 {
-	class StageShowValidateDBaseClass extends StageShowLibGenericDBaseClass
+	class StageShowWPOrgValidateDBaseClass extends StageShowLibGenericDBaseClass
 	{
-		
+		function GetLoginID()
+		{
+			if (!defined('CORONDECK_RUNASDEMO'))
+				return '';
+
+			if (isset($this->loginID))
+				return $this->loginID;
+			
+			if (isset($_REQUEST['loginID']))
+			{
+				$this->loginID = $_REQUEST['loginID'];
+			}
+			return $this->loginID;			
+		}
+				
 		function get_domain()
 		{
 			// This function returns a default profile (for translations)

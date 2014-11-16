@@ -22,9 +22,9 @@ Copyright 2014 Malcolm Shergold
 
 include 'include/stageshow_sales.php';
 	
-if (!class_exists('StageShowPluginClass')) 
+if (!class_exists('StageShowWPOrgPluginClass')) 
 {
-	class StageShowPluginClass extends StageShowSalesPluginClass 
+	class StageShowWPOrgPluginClass extends StageShowWPOrgSalesPluginClass 
 	{
 		var $ourPluginName;
 		var $myDBaseObj;
@@ -65,7 +65,7 @@ if (!class_exists('StageShowPluginClass'))
 			
 			$this->myDBaseObj->pluginSlug = 'stageshow';
 			$this->adminClassFilePrefix = 'stageshow';
-			$this->adminClassPrefix = 'StageShow';
+			$this->adminClassPrefix = 'StageShowWPOrg';
 			
 			$this->env = array(
 			    'caller' => $caller,
@@ -80,7 +80,7 @@ if (!class_exists('StageShowPluginClass'))
 			//$this->pluginName = $myDBaseObj->get_name();
 			
 			//Actions
-			add_action('admin_menu', array(&$this, 'StageShow_ap'));
+			add_action('admin_menu', array(&$this, 'GenerateMenus'));
 		  
 			add_action('init', array(&$this, 'init'));
 		  
@@ -94,7 +94,7 @@ if (!class_exists('StageShowPluginClass'))
 		
 		function CreateDBClass($caller)
 		{					
-			return new StageShowDBaseClass($caller);		
+			return new StageShowWPOrgDBaseClass($caller);		
 		}
 		
 		function load_user_styles() 
@@ -209,9 +209,14 @@ if (!class_exists('StageShowPluginClass'))
 		
 		function CreateSample($sampleDepth = 0)
 		{
+			include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_sample_dbase.php'; 
+				
 			$myDBaseObj = $this->myDBaseObj;
 			$this->saveStageshowOptions();
-			$myDBaseObj->CreateSample($sampleDepth);
+			
+			$sampleClassId = STAGESHOW_PLUGIN_NAME.'SampleDBaseClass';
+			$sampleClassObj = new $sampleClassId($myDBaseObj);
+			$sampleClassObj->CreateSample($sampleDepth);
 		}
 		
 		function printAdminPage() 
@@ -290,7 +295,7 @@ if (!class_exists('StageShowPluginClass'))
 							
 				case STAGESHOW_MENUPAGE_DEBUG:
 		      		include STAGESHOW_ADMIN_PATH.'stageshow_debug.php';    
-					new StageShowDebugAdminClass($this->env);
+					new StageShowWPOrgDebugAdminClass($this->env);
 					break;							
 			}
 		}//End function printAdminPage()	
@@ -535,7 +540,7 @@ if (!class_exists('StageShowPluginClass'))
 			return $saleID;
 		}
 		
-		function StageShow_ap() 
+		function GenerateMenus() 
 		{
 			$myDBaseObj = $this->myDBaseObj;		
 			
@@ -620,6 +625,6 @@ if (!class_exists('StageShowPluginClass'))
 		}
 		
 	}
-} //End Class StageShowPluginClass
+}
 
 ?>

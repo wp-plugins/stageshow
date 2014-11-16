@@ -31,7 +31,7 @@ if (!class_exists('PayPalSimulator'))
 			if ($saleId > 0)
 			{
 				$actionHTML = '';
-				if (!defined('RUNSTAGESHOWDEMO'))
+				if (!defined('CORONDECK_RUNASDEMO'))
 				{
 					$notifyURL = $this->myDBaseObj->PayPalNotifyURL;
 					if ($notifyURL == '')
@@ -232,7 +232,7 @@ if (!class_exists('PayPalSimulator'))
 					</td>
 				</tr>
 			';
-			if (!defined('RUNSTAGESHOWDEMO'))
+			if (!defined('CORONDECK_RUNASDEMO'))
 			{
 				$actionsHTML .= '
 				<tr class="paypalsim_formRow">

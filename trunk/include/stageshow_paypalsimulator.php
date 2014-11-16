@@ -2,9 +2,9 @@
 
 include 'stageshowlib_paypalsimulator.php';
 
-if (!class_exists('StageShowPayPalSimulator')) 
+if (!class_exists('StageShowWPOrgPayPalSimulator')) 
 {
-	class StageShowPayPalSimulator extends PayPalSimulator
+	class StageShowWPOrgPayPalSimulator extends PayPalSimulator
 	{
 		function __construct($notifyDBaseClass, $saleId = 0) 
 		{

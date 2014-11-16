@@ -45,7 +45,6 @@ define('PAYPAL_APILIB_PPSALETXNID_TEXTLEN',20);
 
 include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_salevalidate.php'; 
 include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_validate_api.php';      
-include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_validate_list.php';      
 
 //StageShowLibUtilsClass::print_r($_POST, '$_POST');
 $DBClass = STAGESHOW_PLUGIN_NAME.'ValidateDBaseClass';

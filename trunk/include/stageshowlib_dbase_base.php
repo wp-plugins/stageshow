@@ -28,6 +28,34 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 	{
 		// This class does nothing when running under WP
 		// Overload this class with DB access functions for non-WP access
+		function __construct() //constructor		
+		{
+			$this->GetLoginID();
+		}	
+		
+		function GetLoginID()
+		{
+			if (!defined('CORONDECK_RUNASDEMO'))
+				return '';
+				
+			if (isset($this->loginID))
+				return $this->loginID;
+				
+			if (!function_exists('get_currentuserinfo'))
+			{
+				require_once( ABSPATH . WPINC . '/pluggable.php' );
+			}
+			global $current_user;
+				
+      		get_currentuserinfo();
+
+			if (isset($current_user->user_login))
+				$this->loginID = $current_user->user_login;	
+			else
+				$this->loginID = '';
+							
+			return $this->loginID;
+		}
 		
 		function ShowSQL($sql, $values = null)
 		{			
@@ -54,7 +82,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 		{
 			global $wpdb;
 			
-			if (defined('RUNSTAGESHOWDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))
 			{
 				$sql = $this->SQLForDemo($sql);
 			}	
@@ -78,7 +106,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 		{
 			global $wpdb;
 			
-			if (defined('RUNSTAGESHOWDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))
 			{
 				$sql = $this->SQLForDemo($sql);
 			}	
@@ -108,7 +136,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 		
 		function SQLForDemo($sql)
 		{
-			if (!defined('RUNSTAGESHOWDEMO'))
+			if (!defined('CORONDECK_RUNASDEMO'))
 				return $sql;
 			
 			if (strpos($sql, 'loginID') !== false)
@@ -174,6 +202,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 					$sqlDemo = str_replace('VALUES(', 'VALUES("'.$this->loginID.'", ', $sqlDemo);
 					break;
 				
+				case 'ALTER':
 				case 'LOCK':
 				case 'UNLOCK':
 					return $sql;

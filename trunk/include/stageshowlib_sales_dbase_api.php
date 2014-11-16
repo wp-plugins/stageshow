@@ -366,7 +366,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function PayPalConfigured($APIOptional = false)
 		{
-			if (!defined('RUNSTAGESHOWDEMO'))
+			if (!defined('CORONDECK_RUNASDEMO'))
 			{
 				// Check that PayPal is Configured
 				
@@ -401,7 +401,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				echo '<div id="message" class="error"><p>'.$statusMsg.'</p></div>';
 			}
 			
-			$mode = (defined('RUNSTAGESHOWDEMO')) ? ' (Demo Mode)' : ''; 
+			$mode = (defined('CORONDECK_RUNASDEMO')) ? ' (Demo Mode)' : ''; 
 			echo  '<strong>'.__('Plugin', $this->get_domain()).':</strong> '.$this->get_name()."$mode<br>\n";			
 			echo  '<strong>'.__('Version', $this->get_domain()).':</strong> '.$this->get_version()."<br>\n";			
 			echo  '<strong>'.__('Timezone', $this->get_domain()).':</strong> '.$timezone."<br>\n";			
@@ -594,33 +594,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 			
 			return $sqlOpts;
-		}
-		
-		// Add Sale - Address details are optional
-		function AddSampleSale($saleDateTime, $saleFirstName, $saleLastName, $saleEMail, $salePaid, $saleTxnId, $saleStatus, $salePPStreet, $salePPCity, $salePPState, $salePPZip, $salePPCountry, $salePPPhone = '')
-		{
-			$saleFee = number_format(0.20 + ($salePaid * 3.4/100), 2);
-			
-			$salesVals['salePPName'] = trim($saleFirstName & ' ' & $saleLastName);
-			$salesVals['salePPStreet'] = $salePPStreet;
-			$salesVals['salePPCity'] = $salePPCity;
-			$salesVals['salePPState'] = $salePPState;
-			$salesVals['salePPZip'] = $salePPZip;
-			$salesVals['salePPCountry'] = $salePPCountry;				
-			$salesVals['salePPPhone'] = $salePPPhone;				
-			
-			$salesVals['saleFirstName'] = $saleFirstName;
-			$salesVals['saleLastName'] = $saleLastName;
-			$salesVals['saleEMail'] = $saleEMail;
-			$salesVals['salePaid'] = $salePaid;
-			$salesVals['saleFee'] = $saleFee;
-			$salesVals['saleTxnId'] = $saleTxnId;
-			$salesVals['saleStatus'] = $saleStatus;
-			
-			$salesVals['saleTransactionFee'] = $this->GetTransactionFee();
-			$salesVals['saleDonation'] = 0;
-			
-			return $this->AddSale($saleDateTime, $salesVals);
 		}
 		
 		function AddSale($saleDateTime = '', $salesVals = array())

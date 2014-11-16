@@ -22,9 +22,9 @@ Copyright 2014 Malcolm Shergold
 
 include '../include/stageshowlib_export.php';
 
-if (!class_exists('StageShowTDTExportAdminClass')) 
+if (!class_exists('StageShowWPOrgTDTExportAdminClass')) 
 {
-	class StageShowTDTExportAdminClass extends StageShowLibExportAdminClass  // Define class
+	class StageShowWPOrgTDTExportAdminClass extends StageShowLibExportAdminClass  // Define class
 	{
 		function __construct($myDBaseObj) //constructor	
 		{

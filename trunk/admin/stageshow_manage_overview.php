@@ -25,9 +25,9 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 if (file_exists(STAGESHOW_INCLUDE_PATH.'stageshow_contributors.php'))
 	include STAGESHOW_INCLUDE_PATH.'stageshow_contributors.php';
 
-if (!class_exists('StageShowOverviewAdminListClass')) 
+if (!class_exists('StageShowWPOrgOverviewAdminListClass')) 
 {
-	class StageShowOverviewAdminListClass extends StageShowLibSalesAdminListClass // Define class
+	class StageShowWPOrgOverviewAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{		
 		function __construct($env) //constructor
 		{
@@ -86,7 +86,7 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 		{		
 			// FUNCTIONALITY: Overview - Output Peforrmances List
 			$env = $this->env;
-			$salesList = new StageShowOverviewAdminDetailsListClass($env, $this->editMode);	
+			$salesList = new StageShowWPOrgOverviewAdminDetailsListClass($env, $this->editMode);	
 			
 			// Set Rows per page to disable paging used on main page
 			$salesList->enableFilter = false;
@@ -121,9 +121,9 @@ if (!class_exists('StageShowOverviewAdminListClass'))
 	}
 }
 
-if (!class_exists('StageShowOverviewAdminDetailsListClass')) 
+if (!class_exists('StageShowWPOrgOverviewAdminDetailsListClass')) 
 {
-	class StageShowOverviewAdminDetailsListClass extends StageShowLibSalesAdminListClass // Define class
+	class StageShowWPOrgOverviewAdminDetailsListClass extends StageShowLibSalesAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{
@@ -160,9 +160,9 @@ if (!class_exists('StageShowOverviewAdminDetailsListClass'))
 
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_admin.php';      
 
-if (!class_exists('StageShowOverviewAdminClass')) 
+if (!class_exists('StageShowWPOrgOverviewAdminClass')) 
 {
-	class StageShowOverviewAdminClass extends StageShowLibAdminClass // Define class
+	class StageShowWPOrgOverviewAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env)
 		{
@@ -188,7 +188,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 		{
 			// Stage Show Overview HTML Output - Start 
 			$this->Output_Overview();
-			$this->Output_StageShowHelp();
+			$this->Output_Help();
 			$this->Output_TrolleyAndShortcodesHelp();
 			$this->Output_UpdateServerHelp();
 			$this->Output_UpdateInfo();
@@ -232,7 +232,7 @@ if (!class_exists('StageShowOverviewAdminClass'))
 			}
 		}
 		
-		function Output_StageShowHelp()
+		function Output_Help()
 		{
 			$myDBaseObj = $this->myDBaseObj;
 ?>
@@ -291,7 +291,8 @@ if (!class_exists('StageShowOverviewAdminClass'))
 <thead><tr class="stageshow-overview"><th>Name</th><th>Contribution</th><th>URL</th></tr></thead>
 <tbody>
 <?php
-			$contributorsList = StageShowContributorsClass::GetContributors();
+			$contributorsObj = new StageShowWPOrgContributorsClass();
+			$contributorsList = $contributorsObj->GetContributors();
 			foreach ($contributorsList as $contributor)
 			{
 				echo '<tr>';

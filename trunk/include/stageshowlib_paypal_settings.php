@@ -170,7 +170,7 @@ if (!class_exists('PayPalSettingsAdminClass'))
 				{
 					if ($this->IsOptionChanged($myDBaseObj->adminOptions, 'PayPalAPIUser','PayPalAPIPwd','PayPalAPISig') || isset($_POST['errormsglive']))
 					{
-						if (defined('RUNSTAGESHOWDEMO'))
+						if (defined('CORONDECK_RUNASDEMO'))
 						{
 							// NO Verification in DEMO mode
 							$PayPalAPIChanged = true;

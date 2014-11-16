@@ -28,9 +28,9 @@ if ( file_exists(STAGESHOW_INCLUDE_PATH.'stageshowlib_test_emailsale.php') )
  
 include STAGESHOW_INCLUDE_PATH.'stageshow_salevalidate.php'; 
  
-if (!class_exists('StageShowToolsAdminClass')) 
+if (!class_exists('StageShowWPOrgToolsAdminClass')) 
 {
-	class StageShowToolsAdminClass extends StageShowLibAdminClass // Define class
+	class StageShowWPOrgToolsAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env) //constructor	
 		{

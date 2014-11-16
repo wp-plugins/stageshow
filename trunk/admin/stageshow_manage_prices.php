@@ -22,9 +22,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
-if (!class_exists('StageShowPricesAdminListClass'))
+if (!class_exists('StageShowWPOrgPricesAdminListClass'))
 {
-	class StageShowPricesAdminListClass extends StageShowLibSalesAdminListClass // Define class
+	class StageShowWPOrgPricesAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -94,9 +94,9 @@ if (!class_exists('StageShowPricesAdminListClass'))
 
 include STAGESHOW_INCLUDE_PATH . 'stageshowlib_admin.php';
 
-if (!class_exists('StageShowPricesAdminClass'))
+if (!class_exists('StageShowWPOrgPricesAdminClass'))
 {
-	class StageShowPricesAdminClass extends StageShowLibAdminClass // Define class
+	class StageShowWPOrgPricesAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env) //constructor	
 		{
@@ -362,7 +362,7 @@ if (!class_exists('StageShowPricesAdminClass'))
 			echo '<select name="perfID">'."\n";
 			foreach ($perfsList as $perfRecord)
 			{
-				$perfDateTime = StageShowDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
+				$perfDateTime = StageShowWPOrgDBaseClass::FormatDateForAdminDisplay($perfRecord->perfDateTime).'&nbsp;&nbsp;';
 				$perfID = $perfRecord->perfID;
 				echo "<option value=\"$perfID\">$perfDateTime</option>\n";
 			}
