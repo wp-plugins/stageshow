@@ -22,9 +22,9 @@ Copyright 2014 Malcolm Shergold
 
 include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 
-if (!class_exists('StageShowSalesAdminClass')) 
+if (!class_exists('StageShowWPOrgSalesAdminClass')) 
 {
-	class StageShowSalesAdminClass extends PayPalSalesAdminClass // Define class
+	class StageShowWPOrgSalesAdminClass extends PayPalSalesAdminClass // Define class
 	{		
 		function __construct($env)
 		{
@@ -44,7 +44,7 @@ if (!class_exists('StageShowSalesAdminClass'))
 		
 		function GetItemDesc($pricesEntry)
 		{
-			return StageShowDBaseClass::FormatDateForDisplay($pricesEntry->perfDateTime).' - '.$pricesEntry->priceType;
+			return StageShowWPOrgDBaseClass::FormatDateForDisplay($pricesEntry->perfDateTime).' - '.$pricesEntry->priceType;
 		}
 		
 		function GetStockID($pricesEntry)

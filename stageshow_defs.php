@@ -28,7 +28,7 @@ if (STAGESHOW_FOLDER == 'stageshowgold')
 else if (STAGESHOW_FOLDER == 'stageshowplus')
 	define('STAGESHOW_PLUGIN_NAME', 'StageShowPlus');
 else if (STAGESHOW_FOLDER == 'stageshow')
-	define('STAGESHOW_PLUGIN_NAME', 'StageShow');
+	define('STAGESHOW_PLUGIN_NAME', 'StageShowWPOrg');
 
 if (!defined('STAGESHOW_STYLESHEET_URL'))
 	define('STAGESHOW_STYLESHEET_URL', STAGESHOW_URL.'css/stageshow.css');

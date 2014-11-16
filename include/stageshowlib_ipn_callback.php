@@ -114,7 +114,7 @@ if (!class_exists('IPNNotifyClass'))
 				
 			$this->LogMessage = '';
 
-			if (defined('RUNSTAGESHOWDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))
 			{
 				$this->displayIPNs = true;
 				$this->skipIPNServer = true;

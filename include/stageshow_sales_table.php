@@ -23,9 +23,9 @@ Copyright 2014 Malcolm Shergold
 include 'stageshowlib_table.php';
 include 'stageshowlib_paypal_salesadmin.php';      
 
-if (!class_exists('StageShowSalesAdminListClass')) 
+if (!class_exists('StageShowWPOrgSalesAdminListClass')) 
 {
-	class StageShowSalesAdminListClass extends StageShowLibPayPalSalesAdminListClass // Define class
+	class StageShowWPOrgSalesAdminListClass extends StageShowLibPayPalSalesAdminListClass // Define class
 	{		
 		var	$salesList;
 		
@@ -67,15 +67,15 @@ if (!class_exists('StageShowSalesAdminListClass'))
 		
 		function CreateSalesAdminDetailsListObject($env, $editMode = false)
 		{
-			return new StageShowSalesAdminDetailsListClass($env, $editMode);	
+			return new StageShowWPOrgSalesAdminDetailsListClass($env, $editMode);	
 		}
 		
 	}
 }
 
-if (!class_exists('StageShowSalesAdminDetailsListClass')) 
+if (!class_exists('StageShowWPOrgSalesAdminDetailsListClass')) 
 {
-	class StageShowSalesAdminDetailsListClass extends PayPalSalesDetailsAdminClass // Define class
+	class StageShowWPOrgSalesAdminDetailsListClass extends PayPalSalesDetailsAdminClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{
@@ -128,9 +128,9 @@ if (!class_exists('StageShowSalesAdminDetailsListClass'))
 	}
 }
 
-if (!class_exists('StageShowSalesAdminVerifyListClass')) 
+if (!class_exists('StageShowWPOrgSalesAdminVerifyListClass')) 
 {
-	class StageShowSalesAdminVerifyListClass extends StageShowLibAdminListClass // Define class
+	class StageShowWPOrgSalesAdminVerifyListClass extends StageShowLibAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{

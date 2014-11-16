@@ -22,7 +22,7 @@ Copyright 2014 Malcolm Shergold
 
 include STAGESHOW_INCLUDE_PATH.'stageshow_validate_api.php';
 	
-if (!class_exists('StageShowSaleValidateClass')) 
+if (!class_exists('StageShowWPOrgSaleValidateClass')) 
 {
 	if (!defined('STAGESHOWLIB_TESTSALES_LIMIT')) 
 		define('STAGESHOWLIB_TESTSALES_LIMIT', 20);
@@ -32,7 +32,7 @@ if (!class_exists('StageShowSaleValidateClass'))
 
 	include STAGESHOW_INCLUDE_PATH.'stageshowlib_admin.php';
 	
-	class StageShowSaleValidateClass extends StageShowLibAdminClass
+	class StageShowWPOrgSaleValidateClass extends StageShowLibAdminClass
 	{
 		var $TL8Strings = array();
 		
@@ -224,6 +224,13 @@ if (!class_exists('StageShowSaleValidateClass'))
 	        	echo 'tl8[tl8.length] = "'.$text.'";'."\n";
 			}
 			
+			$postParams = '';
+			if (defined('CORONDECK_RUNASDEMO'))
+			{
+				$postParams = '
+					loginID: "'.$this->myDBaseObj->loginID.'",';
+			}
+					
 			echo '
 				  	jQuery("#stageshow-validate-table").find(".stageshow_tl8").each
 				  	(
@@ -243,7 +250,7 @@ if (!class_exists('StageShowSaleValidateClass'))
 					    {
 					      TxnId: TxnId,
 					      perfID: perfID,
-					      location: location,
+					      location: location,'.$postParams.'
 					      validatesalebutton: true,
 					      jquery: "true"
 					    },
@@ -283,7 +290,7 @@ if (!class_exists('StageShowSaleValidateClass'))
 			</script>
 			';
 			
-			if(isset($_POST['validatesalebutton']))
+			if(isset($_REQUEST['validatesalebutton']))
 			{
 				$this->ValidateSale($this->env, $perfID);
 			}

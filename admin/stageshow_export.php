@@ -33,7 +33,7 @@ if ( isset( $_POST['download'] ) )
 	{
 		case 'tdt':
 			include 'stageshow_tdt_export.php';      
-			new StageShowTDTExportAdminClass(new $stageShowDBaseClass(__FILE__));
+			new StageShowWPOrgTDTExportAdminClass(new $stageShowDBaseClass(__FILE__));
 			break;
 	}
 } 

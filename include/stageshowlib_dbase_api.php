@@ -93,13 +93,10 @@ if (!class_exists('StageShowLibDBaseClass'))
 				}
 			}
 
+			parent::__construct($opts);
+			
 			$this->opts = $opts;
 			$this->getOptions();
-			
-			if (defined('RUNSTAGESHOWDEMO'))
-			{
-				$this->GetLoginID();
-			}
 			
 			$dbPrefix = $this->getTablePrefix();
 			$this->DBTables = $this->getTableNames($dbPrefix);
@@ -245,23 +242,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 		function HasSettings()
 		{
 			return false;
-		}
-		
-		function GetLoginID()
-		{
-			if (isset($this->loginID))
-				return $this->loginID;
-				
-			if (!function_exists('get_currentuserinfo'))
-			{
-				require_once( ABSPATH . WPINC . '/pluggable.php' );
-			}
-			global $current_user;
-				
-      		get_currentuserinfo();
-
-			$this->loginID = $current_user->user_login;
-			return $this->loginID;
 		}
 		
 		function DeleteCapability($capID)
@@ -420,7 +400,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			$sql = "";
 			
-			if (defined('RUNSTAGESHOWDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))
 			{
 				$sql = '
 					loginID VARCHAR(50) NOT NULL DEFAULT "",';
@@ -465,7 +445,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			global $wpdb;
 			
-			if (defined('RUNSTAGESHOWDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))
 			{
 				$sql = $this->SQLForDemo($sql);
 			}	
@@ -578,7 +558,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 					$ourOptions[$key] = $option;
 			}
 
-			if (defined('RUNSTAGESHOWDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))
 			{				
 				global $current_user;
 				get_currentuserinfo();

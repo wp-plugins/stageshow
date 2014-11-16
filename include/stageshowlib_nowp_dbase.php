@@ -100,8 +100,16 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 				return null;
 			}
 			
-			$rslts = mysqli_fetch_all($mysqlRslt, MYSQLI_ASSOC);
-			
+			// TODO - Remove redundant code
+			// Fetch rows one at a time
+			$rowNo = 0;
+			$rslts = array();
+			while ($row=mysqli_fetch_array($mysqlRslt, MYSQL_ASSOC))
+			{
+				$rslts[$rowNo] = $row;
+				$rowNo++;
+			}
+
 			// Free result set
 			mysqli_free_result($mysqlRslt);
 

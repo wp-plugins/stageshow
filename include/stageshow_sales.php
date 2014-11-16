@@ -24,9 +24,9 @@ require_once 'stageshow_dbase_api.php';
       
 include 'stageshowlib_salesplugin.php';
 	
-if (!class_exists('StageShowSalesPluginClass')) 
+if (!class_exists('StageShowWPOrgSalesPluginClass')) 
 {
-	class StageShowSalesPluginClass extends StageShowLibSalesPluginBaseClass 
+	class StageShowWPOrgSalesPluginClass extends StageShowLibSalesPluginBaseClass 
 	{
 		function __construct()
 		{
@@ -36,7 +36,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 			{
 				$this->shortcode = STAGESHOW_SHORTCODE;
 			}
-			elseif (defined('RUNSTAGESHOWDEMO'))
+			elseif (defined('CORONDECK_RUNASDEMO'))
 			{
 				$this->shortcode = str_replace('stage', 's', STAGESHOW_DIR_NAME).'-boxoffice';
 			}
@@ -82,7 +82,7 @@ if (!class_exists('StageShowSalesPluginClass'))
 				include 'include/stageshow_paypalsimulator.php';
 				
 				ob_start();
-				new StageShowPayPalSimulator(STAGESHOW_DBASE_CLASS, $this->demosale);
+				new StageShowWPOrgPayPalSimulator(STAGESHOW_DBASE_CLASS, $this->demosale);
 				$simulatorOutput = ob_get_contents();
 				ob_end_clean();
 
@@ -732,6 +732,6 @@ if (!class_exists('StageShowSalesPluginClass'))
 			
 		
 	}
-} //End Class StageShowSalesPluginClass
+}
 
 ?>

@@ -78,7 +78,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				else
 					$this->trolleyid = $this->myDomain.'_cart_obj';
 					
-				if (defined('RUNSTAGESHOWDEMO'))
+				if (defined('CORONDECK_RUNASDEMO'))
 				{
 					$this->trolleyid = $this->myDBaseObj->get_name().'_cart_obj';
 					$this->trolleyid .= '_'.$this->myDBaseObj->loginID;
@@ -507,7 +507,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 		function GetButtonID($buttonID)
 		{
-			if (defined('RUNSTAGESHOWDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))
 			{
 				$pluginID = $this->myDBaseObj->get_name();
 				$buttonID .= '_'.$pluginID;
@@ -632,7 +632,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			else
 				$this->trolleyid = $this->myDomain.'_saleedit_';
 					
-			if (defined('RUNSTAGESHOWDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))
 			{
 				$this->trolleyid = $this->myDBaseObj->get_name().'_saleedit_';
 				$this->trolleyid .= '_'.$this->myDBaseObj->loginID;
@@ -1229,7 +1229,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
   				{
 					$this->ClearTrolleyContents();
 				
-					if (defined('RUNSTAGESHOWDEMO'))
+					if (defined('CORONDECK_RUNASDEMO'))
 					{
 						$this->demosale = $saleId;
 						$this->pageMode = self::PAGEMODE_DEMOSALE;

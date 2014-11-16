@@ -21,9 +21,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
-if (!class_exists('StageShowShowsAdminListClass'))
+if (!class_exists('StageShowWPOrgShowsAdminListClass'))
 {
-	class StageShowShowsAdminListClass extends StageShowLibSalesAdminListClass // Define class
+	class StageShowWPOrgShowsAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{
 		var $updateFailed;
 		
@@ -79,9 +79,9 @@ if (!class_exists('StageShowShowsAdminListClass'))
 
 include STAGESHOW_INCLUDE_PATH . 'stageshowlib_admin.php';
 
-if (!class_exists('StageShowShowsAdminClass'))
+if (!class_exists('StageShowWPOrgShowsAdminClass'))
 {
-	class StageShowShowsAdminClass extends StageShowLibAdminClass // Define class
+	class StageShowWPOrgShowsAdminClass extends StageShowLibAdminClass // Define class
 	{
 		function __construct($env) //constructor	
 		{

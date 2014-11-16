@@ -720,6 +720,6 @@ if (!class_exists('PayPalButtonsAPIClass'))
 			return ($this->APIStatusMsg === 'OK');
 		}
 	}
-}	//End Class PayPalAPIClass
+}
 
 ?>

@@ -22,7 +22,7 @@ Copyright 2014 Malcolm Shergold
 
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_paypal_settings.php';
 
-if (!class_exists('StageShowSettingsAdminListClass')) 
+if (!class_exists('StageShowWPOrgSettingsAdminListClass')) 
 {
 	define('STAGESHOW_ORGANISATIONID_TEXTLEN',60);
 	define('STAGESHOW_MAIL_TEXTLEN',127);
@@ -30,7 +30,7 @@ if (!class_exists('StageShowSettingsAdminListClass'))
 	define('STAGESHOW_ORGANISATIONID_EDITLEN',60);
 	define('STAGESHOW_MAIL_EDITLEN', 60);
 	
-	class StageShowSettingsAdminListClass extends PayPalSettingsAdminListClass // Define class
+	class StageShowWPOrgSettingsAdminListClass extends PayPalSettingsAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{	
@@ -127,9 +127,9 @@ window.onload = stageshow_OnSettingsLoad;
 	}
 }
 		
-if (!class_exists('StageShowSettingsAdminClass')) 
+if (!class_exists('StageShowWPOrgSettingsAdminClass')) 
 {
-	class StageShowSettingsAdminClass extends PayPalSettingsAdminClass // Define class
+	class StageShowWPOrgSettingsAdminClass extends PayPalSettingsAdminClass // Define class
 	{		
 		function __construct($env)
 		{

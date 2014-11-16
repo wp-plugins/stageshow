@@ -22,9 +22,9 @@ Copyright 2014 Malcolm Shergold
 	
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_debug.php';      
 
-if (!class_exists('StageShowDebugAdminClass')) 
+if (!class_exists('StageShowWPOrgDebugAdminClass')) 
 {
-	class StageShowDebugAdminClass extends StageShowLibDebugSettingsClass // Define class
+	class StageShowWPOrgDebugAdminClass extends StageShowLibDebugSettingsClass // Define class
 	{
 		function GetOptionsDefs()
 		{

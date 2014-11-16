@@ -1,8 +1,8 @@
 <?php
 
-if (!class_exists('StageShowContributorsClass')) 
+if (!class_exists('StageShowWPOrgContributorsClass')) 
 {
-	class StageShowContributorsClass
+	class StageShowWPOrgContributorsClass
 	{
 		static function GetContributors()
 		{
