@@ -1,6 +1,6 @@
 <?php
 /* 
-Plugin Name: StageShowWPOrg
+Plugin Name: StageShow
 Plugin URI: http://www.corondeck.co.uk/StageShow/WPOrg
 Version: 4.2.2
 Author: Malcolm Shergold
