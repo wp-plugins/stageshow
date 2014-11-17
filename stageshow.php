@@ -1,8 +1,8 @@
 <?php
 /* 
-Plugin Name: StageShow
-Plugin URI: http://www.corondeck.co.uk/StageShow/
-Version: 4.2.1
+Plugin Name: StageShowWPOrg
+Plugin URI: http://www.corondeck.co.uk/StageShow/WPOrg
+Version: 4.2.2
 Author: Malcolm Shergold
 Author URI: http://www.corondeck.co.uk
 Description: A Wordpress Plugin to sell theatre tickets online
@@ -36,6 +36,6 @@ define('STAGESHOW_CODE_PREFIX', 'stageshow');
 include 'stageshow_defs.php';
 include 'stageshow_main.php';
 
-new StageShowPluginClass(__FILE__);
+new StageShowWPOrgPluginClass(__FILE__);
 		
 ?>
