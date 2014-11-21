@@ -21,6 +21,7 @@ Copyright 2014 Malcolm Shergold
 */
 
 include STAGESHOW_INCLUDE_PATH.'stageshow_validate_api.php';
+include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 	
 if (!class_exists('StageShowWPOrgSaleValidateClass')) 
 {
