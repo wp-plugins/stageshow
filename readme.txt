@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 4.2.2
+Stable tag: 4.2.3
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -188,6 +188,9 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 4.2.3 (20/11/2014) =
+* Bug Fix: Ticket Validator Failure (StageShow & StageShowPlus)
 
 = 4.2.2 (17/11/2014) =
 * Bug Fix: StageShowPluginClass undefined (since 4.2.1)
