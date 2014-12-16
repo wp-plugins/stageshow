@@ -172,6 +172,29 @@ td.stageshow-trolley-remove input[type="image"]
 
 /* --------------------------------------------------------------------------- */
 /*                                                                             */
+/*                  StageShow Checkout Details Styles                          */
+/*                                                                             */
+/* --------------------------------------------------------------------------- */
+
+div.stageshow-checkoutdetails table,
+div.stageshow-checkoutdetails tr,
+div.stageshow-checkoutdetails td
+{
+	border-width: 0px;
+	padding: 0px 0px 5px 0px;
+}
+
+div.stageshow-checkoutdetails tr
+{
+}
+
+td.stageshow-checkoutdetails-value input
+{
+	width: 100%;
+}
+
+/* --------------------------------------------------------------------------- */
+/*                                                                             */
 /*                   StageShow Run-time Error Styles                           */
 /*                                                                             */
 /* --------------------------------------------------------------------------- */

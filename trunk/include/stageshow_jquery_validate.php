@@ -41,8 +41,6 @@ if (!defined('StageShowLibAdminClass'))
 	}
 }
 
-define('PAYPAL_APILIB_PPSALETXNID_TEXTLEN',20);
-
 include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_salevalidate.php'; 
 include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_validate_api.php';      
 

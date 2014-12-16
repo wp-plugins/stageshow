@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, e-commerce, events, pages, payments, paypal, posts, theater, theatre, tickets, user
 Requires at least: 3.0
-Tested up to: 4.0
-Stable tag: 4.2.3
+Tested up to: 4.1
+Stable tag: 4.3
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -189,6 +189,17 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
+= 4.3 (16/12/2014) =
+* Bug Fix: Ticket Quantities Breakdown and Ticket Name Columns missing in TDT export
+* Buf Fix: Uninstall Plugin failure
+* Bug Fix: HTML special characters in shortcode atts not decoded
+* Added "PayFast" Payment Gateway (StageShowPlus)
+* Added Debug Output option to Send EMail Test 
+* Added "Bcc to Admin" option to Send EMail Test 
+* Added Anchor Tag for Top of Shopping Trolley to Box-Office output
+* Added Anchor Tags for Top of Each Show to Box-Office output
+* Added shortcode anchor argument
+
 = 4.2.3 (20/11/2014) =
 * Bug Fix: Ticket Validator Failure (StageShow & StageShowPlus)
 
@@ -202,7 +213,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 = 4.2 (11/11/2014) =
 * Bug Fix: Logs folder path permissions should be 600
 * Bug Fix: Paragraph tag before Validate button should not have a class
-* Buf Fix: Exported Seating Template opens in browser (stageShowGold)
+* Buf Fix: Exported Seating Template opens in browser (StageShowGold)
 * Optimisation: activate() function called twice on first activation
 * Optimisation: PayPalImagesUseSSL option used before definition
 * Optimisation: Ticket authentication response improved using JQuery 

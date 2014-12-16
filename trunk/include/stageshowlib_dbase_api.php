@@ -20,6 +20,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
+if(!isset($_SESSION)) 
+{
+	// MJS - SC Mod - Register to use SESSIONS
+	session_start();
+}	
+
 require_once "stageshowlib_utils.php";
 require_once "stageshowlib_dbase_base.php";
 
@@ -71,9 +77,10 @@ if (!class_exists('StageShowLibDBaseClass'))
 						switch ($debugMode)
 						{
 							case 'menu':
+							case 'test':
 							case 'trolley':
 							case 'stack':
-							case 'blockpaypal':
+							case 'blockgateway':
 								$debugMode = strtolower(self::SessionDebugPrefix.$debugMode);
 								$_SESSION[$debugMode] = true;
 								break;
@@ -314,26 +321,16 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return isset($this->pluginInfo[$att]) ? $this->pluginInfo[$att] : '';
 		}
 		
-		function GetURL($optionURL)
-		{
-			// If URL contains a : treat is as an absolute URL
-			if (strpos($optionURL, ':') !== false)
-				$rtnVal = $optionURL;
-			else if (strpos($optionURL, '{pluginpath}') !== false)
-			{
-				$pluginName = basename(dirname(dirname(__FILE__)));
-				$rtnVal = str_replace('{pluginpath}', WP_PLUGIN_URL.'/'.$pluginName, $optionURL);
-			}
-			else
-				$rtnVal = get_site_url().'/'.$optionURL;
-			return $rtnVal;
-		}
-						
 		function get_domain()
 		{
 			// This function returns a default profile (for translations)
 			// Descendant classes can override this if required)
 			return basename(dirname(dirname(__FILE__)));
+		}
+		
+		function get_pluginName()
+		{
+			return $this->get_name();
 		}
 		
 		function get_name()
@@ -426,7 +423,14 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return ( $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name );			
 		}
 		
-		function _real_escape($string) 
+		static function GetSafeString($paramId, $defaultVal = '')
+		{
+			$rtnVal = StageShowLibHTTPIO::GetRequestedString($paramId, $defaultVal);
+			$rtnVal = self::_real_escape($rtnVal);
+			return $rtnVal;
+		}
+		
+		static function _real_escape($string) 
 		{
 			global $wpdb;
 			return $wpdb->_real_escape($string);
@@ -558,7 +562,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 					$ourOptions[$key] = $option;
 			}
 
-			if (defined('CORONDECK_RUNASDEMO'))
+			if (defined('CORONDECK_RUNASDEMO'))	// Set AdminID and EMail to current user
 			{				
 				global $current_user;
 				get_currentuserinfo();

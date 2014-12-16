@@ -288,7 +288,7 @@ if (!class_exists('StageShowWPOrgPerformancesAdminClass'))
 			$showLists = $myDBaseObj->GetAllShowsList();
 			if (count($showLists) == 0)
 			{
-				// FUNCTIONALITY: Performances - Show Link to Settings page if PayPal settings required
+				// FUNCTIONALITY: Performances - Show Link to Settings page if Payment Gateway settings required
 				if ($myDBaseObj->CheckIsConfigured())
 				{
 					$showsPageURL = get_option('siteurl') . '/wp-admin/admin.php?page=' . STAGESHOW_MENUPAGE_SHOWS;

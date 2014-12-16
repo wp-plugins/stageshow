@@ -8,6 +8,7 @@ You must be a registered user to use this software
 */
 
 include STAGESHOW_INCLUDE_PATH.'stageshowlib_dbase_base.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_gatewaybase.php';
 
 if (!class_exists('StageShowWPOrgValidateDBaseClass')) 
 {

@@ -175,7 +175,7 @@ if (!class_exists('StageShowWPOrgShowsAdminClass'))
 			$myPluginObj = $this->myPluginObj;
 			$myDBaseObj = $this->myDBaseObj;
 			
-			// FUNCTIONALITY: Shows - Show Link to Settings page if PayPal settings required
+			// FUNCTIONALITY: Shows - Show Link to Settings page if Payment Gateway settings required
 			if (!$myDBaseObj->CheckIsConfigured())
 				return;
 			

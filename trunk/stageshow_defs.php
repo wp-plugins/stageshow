@@ -24,7 +24,10 @@ define('STAGESHOW_ADMIN_URL', STAGESHOW_URL . 'admin/');
 define('STAGESHOW_ADMIN_IMAGES_URL', STAGESHOW_ADMIN_URL . 'images/');
 
 if (STAGESHOW_FOLDER == 'stageshowgold')
+{	
 	define('STAGESHOW_PLUGIN_NAME', 'StageShowGold');
+	define('STAGESHOWLIB_PPEXP_ENABLE', 'true');
+}
 else if (STAGESHOW_FOLDER == 'stageshowplus')
 	define('STAGESHOW_PLUGIN_NAME', 'StageShowPlus');
 else if (STAGESHOW_FOLDER == 'stageshow')
@@ -32,9 +35,6 @@ else if (STAGESHOW_FOLDER == 'stageshow')
 
 if (!defined('STAGESHOW_STYLESHEET_URL'))
 	define('STAGESHOW_STYLESHEET_URL', STAGESHOW_URL.'css/stageshow.css');
-
-if (!defined('STAGESHOW_PAYPAL_IPN_NOTIFY_URL'))
-	define('STAGESHOW_PAYPAL_IPN_NOTIFY_URL', STAGESHOW_URL.'stageshow_ipn_callback.php');
 
 define('STAGESHOW_FILE_PATH', dirname(__FILE__).'/');
 define('STAGESHOW_DIR_NAME', basename(STAGESHOW_FILE_PATH));
@@ -120,5 +120,5 @@ if (!defined('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH'))
 
 if (!defined('STAGESHOWLIB_DATETIME_ADMIN_FORMAT'))
 	define('STAGESHOWLIB_DATETIME_ADMIN_FORMAT', 'Y-m-d H:i');
-				
+
 ?>

@@ -145,7 +145,7 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$TxnId = '';
-			$perfID = isset($_REQUEST['perfID']) ? $_REQUEST['perfID'] : 0;
+			$perfID = isset($_REQUEST['perfID']) ? $_REQUEST['perfID'] : 0;	
 			if (!is_numeric($perfID)) return;
 			
 			$actionURL = StageShowLibUtilsClass::GetPageURL();
@@ -157,7 +157,7 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 			echo '
 <table class="stageshow-form-table">
 ';		
-			$TerminalLocation = isset($_POST['location']) ? $_POST['location'] : $myDBaseObj->GetLocation();
+			$TerminalLocation = isset($_POST['location']) ? $_POST['location'] : $myDBaseObj->GetLocation();	// TODO: Check for SQLi
 			if ($TerminalLocation !== '')
 			{
 				echo '
@@ -175,7 +175,7 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 			<tr>
 				<td class="stageshow_tl8" id="label_Transaction_ID"><?php _e('Transaction ID', $this->myDomain); ?></td>
 				<td id="value_Transaction_ID">
-					<input type="text" maxlength="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN; ?>" size="<?php echo PAYPAL_APILIB_PPSALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
+					<input type="text" maxlength="<?php echo PAYMENT_API_SALETXNID_TEXTLEN; ?>" size="<?php echo PAYMENT_API_SALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
 					&nbsp;
 					<input class="button-primary" onclick="stageshow_onclick_validate()" type="button" name="jqueryvalidatebutton" id="jqueryvalidatebutton" value="Validate"/>
 				</td>
@@ -405,7 +405,7 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 						$validateMsg .= $this->TranslatedText('Matching record found', $this->myDomain);
 						switch($salerecord->saleStatus)
 						{
-							case PAYPAL_APILIB_SALESTATUS_COMPLETED:
+							case PAYMENT_API_SALESTATUS_COMPLETED:
 								$msgClass = 'stageshow-validate-ok updated ok';
 								break;
 									

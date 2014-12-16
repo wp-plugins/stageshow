@@ -100,13 +100,6 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 					$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
 					$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_ID];
 					$settingValue = trim(StageShowLibUtilsClass::GetHTTPElement($_POST,$ctrlId));
-					
-					if (isset($optDef[StageShowLibTableClass::TABLEPARAM_FUNC]))
-					{
-						$functionId = $optDef[StageShowLibTableClass::TABLEPARAM_FUNC];
-						$content = $this->$functionId($settingValue, $myDBaseObj->dbgOptions[$settingId]);
-					}
-					
 					$myDBaseObj->dbgOptions[$settingId] = $settingValue;
 				}
 					

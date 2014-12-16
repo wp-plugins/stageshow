@@ -69,6 +69,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 				'id'    => '',
 				'perf'  => '',
 				'count' => '',
+				'anchor' => '',
 				'style' => 'normal' 
 			), $atts );
         
@@ -79,31 +80,33 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 		{
 			if ($this->pageMode == self::PAGEMODE_DEMOSALE)
 			{
-				include 'include/stageshow_paypalsimulator.php';
+				include 'include/stageshow_gatewaysimulator.php';
 				
 				ob_start();
-				new StageShowWPOrgPayPalSimulator(STAGESHOW_DBASE_CLASS, $this->demosale);
+				new StageShowGatewaySimulator(STAGESHOW_DBASE_CLASS, $this->demosale);
 				$simulatorOutput = ob_get_contents();
 				ob_end_clean();
 
 				return $simulatorOutput;
 			}
 			
-			if (isset($_POST['SUBMIT_simulatePayPal']))
+			if (isset($_POST['SUBMIT_simulateGateway']))
 			{
 				// Save Form values for next time
-				$paramIDs = $_POST['paramIDs'];
+				$paramIDs = $_POST['paramIDs'];	// TODO: Check for SQLi
 				$paramsList = explode(',', $paramIDs);
 				foreach ($paramsList as $tagName)
 				{
-					$paramVal = $_POST[$tagName];					
+					$paramVal = $_POST[$tagName];						// TODO: Check for SQLi
 					$sessionVar = 'StageShowSim_'.$tagName;
 					$_SESSION[$sessionVar] = $paramVal;
 				}
 				$this->myDBaseObj->saveOptions();
 				
 				ob_start();		// "Soak up" any output
-				include 'stageshow_ipn_callback.php';
+				$gatewayType = $this->myDBaseObj->gatewayObj->GetType();
+				$callbackFile = 'include/stageshowlib_/'.$gatewayType.'_callback.php';
+				echo $callbackFile;
 				$simulatorOutput = ob_get_contents();
 				ob_end_clean();
 				$saleStatus = 'DEMO MODE: Sale Completed';
@@ -152,7 +155,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 				return;
 				
 			$url = $this->myDBaseObj ->get_pluginURI();
-			$name = $this->myDBaseObj ->get_name();
+			$name = $this->myDBaseObj ->get_pluginName();
 			$weblink = __('Driven by').' <a target="_blank" href="'.$url.'">'.$name.'</a>';
 			echo '<div class="stageshow-boxoffice-weblink">'.$weblink.'</div>'."\n";
 		}
@@ -173,7 +176,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 
-			$showID = $atts['id'];
+			$showID = htmlspecialchars_decode($atts['id']);
 								
 			if ($showID !== '')
 			{
@@ -280,6 +283,20 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 		
 		function OutputContent_OnlineStoreTitle($result)
 		{
+			$showNameAnchor = '';
+			$nameLen = strlen($result->showName);
+			for ($i=0; $i<$nameLen; $i++)
+			{
+				$nxtChar = $result->showName[$i];
+				if ($nxtChar == ' ')
+					$nxtChar = '_';
+				elseif (!ctype_alnum ($nxtChar))
+					continue;
+					
+				$showNameAnchor .= $nxtChar;				
+			}
+			$this->OutputContent_Anchor($showNameAnchor);
+			
 			echo '<h2>'.$result->showName."</h2>\n";					
 
 			if (isset($result->showNote) && ($result->showNote !== ''))
@@ -474,6 +491,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 					break;
 					
 				case 'checkout':
+				case 'checkoutdetails':
 					if (defined('STAGESHOW_CHECKOUTBUTTON_URL'))
 					{
 						$buttonType = 'image';
@@ -510,7 +528,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 			if (!$this->adminPageActive)
 			{
 				$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
-				$buttonTypeDef .= ' onClick="'.$onClickHandler.'(this)"';				
+				$buttonTypeDef .= ' onClick="return '.$onClickHandler.'(this)"';				
 			}
 			
 			return $buttonTypeDef;
@@ -525,7 +543,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 			}
 			
 			$checkoutSelector = '';
-			if (!$this->myDBaseObj->PayPalConfigured())
+			if (!$this->myDBaseObj->SettingsConfigured())
 			{
 				return '';
 			}
@@ -640,10 +658,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 				
 				$paramCount++;
 				
-				$rslt->paypalParams['item_name_'.$paramCount] = $name;
-				$rslt->paypalParams['amount_'.$paramCount] = $amount;
-				$rslt->paypalParams['quantity_'.$paramCount] = 1;
-				$rslt->paypalParams['shipping_'.$paramCount] = 0;	
+				$this->myDBaseObj->gatewayObj->AddItem($name, $amount, 1, 0);
 				
 				$rslt->saleDetails[$detailID] = $amount;			
 			}

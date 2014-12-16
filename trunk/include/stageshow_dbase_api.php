@@ -103,31 +103,30 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 		
 		function __construct($caller) //constructor	
 		{
-			$StageshowDbgoptionsName = STAGESHOW_DIR_NAME.'dbgsettings';
+			$this->StageshowDbgoptionsName = STAGESHOW_DIR_NAME.'dbgsettings';
 			
 			// Options DB Field - In DEMO Mode make unique for each user, and Plugin type
 			if (defined('CORONDECK_RUNASDEMO'))
 			{
-				$StageshowOptionsName  = STAGESHOW_DIR_NAME.'settings_';
+				$this->StageshowOptionsName  = STAGESHOW_DIR_NAME.'settings_';
 			}
 			else
 			{
-				$StageshowOptionsName = 'stageshowsettings';
+				$this->StageshowOptionsName = 'stageshowsettings';
 			}
 			
 			$opts = array (
 				'Caller'             => $caller,
+				'Domain'             => 'stageshow',
 				'PluginFolder'       => STAGESHOW_FOLDER,
 				'DownloadFilePath'   => '/wp-content/plugins/stageshow/stageshow_download.php',
-				'CfgOptionsID'       => $StageshowOptionsName,
-				'DbgOptionsID'       => $StageshowDbgoptionsName,
+				'CfgOptionsID'       => $this->StageshowOptionsName,
+				'DbgOptionsID'       => $this->StageshowDbgoptionsName,
 			);			
 
 			// Call base constructor
 			parent::__construct($opts);
-			
-			$this->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);	
-			
+
 			if (defined('CORONDECK_RUNASDEMO'))
 			{
 				$_REQUEST['loginID'] = $this->GetLoginID();
@@ -554,10 +553,10 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$defines = "
 	if (!defined('STAGESHOW_TABLE_PREFIX'))
 	{
-	define('PAYPAL_APILIB_SALESTATUS_COMPLETED', '".PAYPAL_APILIB_SALESTATUS_COMPLETED."');
-	define('PAYPAL_APILIB_SALESTATUS_PENDING', '".PAYPAL_APILIB_SALESTATUS_PENDING."');
-	define('PAYPAL_APILIB_SALESTATUS_CHECKOUT', '".PAYPAL_APILIB_SALESTATUS_PENDINGPPEXP."');
-	define('PAYPAL_APILIB_SALESTATUS_PENDINGPPEXP', '".PAYPAL_APILIB_SALESTATUS_PENDINGPPEXP."');
+	define('PAYMENT_API_SALESTATUS_COMPLETED', '".PAYMENT_API_SALESTATUS_COMPLETED."');
+	define('PAYMENT_API_SALESTATUS_PENDING', '".PAYMENT_API_SALESTATUS_PENDING."');
+	define('PAYMENT_API_SALESTATUS_CHECKOUT', '".PAYMENT_API_SALESTATUS_PENDINGPPEXP."');
+	define('PAYMENT_API_SALESTATUS_PENDINGPPEXP', '".PAYMENT_API_SALESTATUS_PENDINGPPEXP."');
 	define('STAGESHOW_SALESTATUS_RESERVED', '".STAGESHOW_SALESTATUS_RESERVED."');
 	
 	define('STAGESHOW_TABLE_PREFIX', '".STAGESHOW_TABLE_PREFIX."');
@@ -601,8 +600,10 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 
 		function InTestMode()
 		{
-			if (!isset($this->testModeEnabled)) return false;
+			if (!isset($_SESSION['stageshowlib_debug_test'])) return false;
 			
+			if (!file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php')) return false;
+
 			if (!function_exists('wp_get_current_user')) return false;
 			
 			return current_user_can(STAGESHOW_CAPABILITY_DEVUSER);
@@ -633,7 +634,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$shows = $this->GetShowsList($showID);
 			$showName = $shows[0]->showName;
 		
-			// PayPal button(s) created - Add performance to database					
+			// Add performance to database					
 			// Give performance unique Ref - Check what default reference IDs already exist in database
 			$perfID = $this->AddPerformance($showID, $perfState, $perfDateTime, $perfRef, $perfSeats);
 			if ($perfID == 0)
@@ -772,7 +773,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 		
 		function UpdateSettings($result, $tableId, $settingId, $indexId, $index)
 		{
-			$newVal = $_POST[$settingId.$index];
+			$newVal = $_POST[$settingId.$index];	// TODO: Check for SQLi
 			if ($newVal == $result->$settingId)
 				return;
 				
@@ -873,11 +874,11 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			}
 			else
 			{
-				$sql  = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
+				$sql  = 'SELECT showID, showName FROM '.STAGESHOW_SHOWS_TABLE;
 				$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showName="'.$showName.'"';
-				
+
 				$showsEntries = $this->get_results($sql);
-				$showID = (count($showsEntries) > 0) ? $showsEntries[0]->showID : 0;				
+				$showID = (count($showsEntries) > 0) ? $showsEntries[0]->showID : 0;
 			}
 			
 			return $showID;
@@ -1647,7 +1648,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			// totalQty may not include Pending sales (i.e. saleStatus=Checkout)) - add it here!
 			$sql  = '  SUM(ticketQty) AS totalQty ';
 			
-			$statusOptions  = '(saleStatus="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'")';
+			$statusOptions  = '(saleStatus="'.PAYMENT_API_SALESTATUS_COMPLETED.'")';
 			$statusOptions .= ' OR ';
 			$statusOptions .= '(saleStatus="'.STAGESHOW_SALESTATUS_RESERVED.'")';
 			$sql .= ', SUM(IF('.$statusOptions.', priceValue * ticketQty, 0)) AS soldValue ';

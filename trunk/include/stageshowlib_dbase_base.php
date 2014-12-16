@@ -35,7 +35,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 		
 		function GetLoginID()
 		{
-			if (!defined('CORONDECK_RUNASDEMO'))
+			if (!defined('CORONDECK_RUNASDEMO'))	// Get Current User ID in Demo mode
 				return '';
 				
 			if (isset($this->loginID))
@@ -125,7 +125,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 				
 			if (function_exists('wp_get_current_user'))
 			{
-				if (!current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
+				if (!current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN) && !current_user_can(STAGESHOW_CAPABILITY_DEVUSER))
 					return;				
 			}
 				

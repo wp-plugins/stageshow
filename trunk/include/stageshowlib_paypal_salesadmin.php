@@ -89,7 +89,7 @@ if (!class_exists('StageShowLibPayPalSalesAdminListClass'))
 		function GetStatusOptions()
 		{
 			return array(
-				PAYPAL_APILIB_SALESTATUS_COMPLETED.'|'.__('Completed', $this->myDomain),
+				PAYMENT_API_SALESTATUS_COMPLETED.'|'.__('Completed', $this->myDomain),
 				);
 		}	
 		
@@ -100,28 +100,29 @@ if (!class_exists('StageShowLibPayPalSalesAdminListClass'))
 		
 		function GetDetailsRowsDefinition()
 		{
-			// FUNCTIONALITY: Sales - Use PAYPAL_APILIB_******* consts if defined
-			$address = defined('PAYPAL_APILIB_STREET_LABEL')  ? PAYPAL_APILIB_STREET_LABEL  : __('Address', $this->myDomain);
-			$city    = defined('PAYPAL_APILIB_CITY_LABEL')    ? PAYPAL_APILIB_CITY_LABEL    : __('Town/City', $this->myDomain);
-			$state   = defined('PAYPAL_APILIB_STATE_LABEL')   ? PAYPAL_APILIB_STATE_LABEL   : __('County', $this->myDomain);
-			$zip     = defined('PAYPAL_APILIB_ZIP_LABEL')     ? PAYPAL_APILIB_ZIP_LABEL     : __('Postcode', $this->myDomain);
-			$country = defined('PAYPAL_APILIB_COUNTRY_LABEL') ? PAYPAL_APILIB_COUNTRY_LABEL : __('Country', $this->myDomain);
-			$phone   = defined('PAYPAL_APILIB_PHONE_LABEL')   ? PAYPAL_APILIB_PHONE_LABEL   : __('Phone', $this->myDomain);
+			// FUNCTIONALITY: Sales - Use Payment Gateway consts if defined
+			$address = defined('PAYMENT_API_STREET_LABEL')  ? PAYMENT_API_STREET_LABEL  : __('Address', $this->myDomain);
+			$city    = defined('PAYMENT_API_CITY_LABEL')    ? PAYMENT_API_CITY_LABEL    : __('Town/City', $this->myDomain);
+			$state   = defined('PAYMENT_API_STATE_LABEL')   ? PAYMENT_API_STATE_LABEL   : __('County', $this->myDomain);
+			$zip     = defined('PAYMENT_API_ZIP_LABEL')     ? PAYMENT_API_ZIP_LABEL     : __('Postcode', $this->myDomain);
+			$country = defined('PAYMENT_API_COUNTRY_LABEL') ? PAYMENT_API_COUNTRY_LABEL : __('Country', $this->myDomain);
+			$phone   = defined('PAYMENT_API_PHONE_LABEL')   ? PAYMENT_API_PHONE_LABEL   : __('Phone', $this->myDomain);
 			
 			$statusOptions = $this->GetStatusOptions();
 			
+			$gatewayName = $this->myDBaseObj->gatewayObj->GetName();
 			$ourOptions = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'First Name',	             StageShowLibTableClass::TABLEPARAM_ID => 'saleFirstName', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Last Name',	             StageShowLibTableClass::TABLEPARAM_ID => 'saleLastName',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'EMail',	                 StageShowLibTableClass::TABLEPARAM_ID => 'saleEMail',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN,     StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEEMAIL_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => $address,	                 StageShowLibTableClass::TABLEPARAM_ID => 'salePPStreet',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN,  StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTREET_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => $city,	                     StageShowLibTableClass::TABLEPARAM_ID => 'salePPCity',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN,    StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCITY_EDITLEN, ),			
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => $state,	                     StageShowLibTableClass::TABLEPARAM_ID => 'salePPState',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN,   StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPSTATE_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => $zip,                        StageShowLibTableClass::TABLEPARAM_ID => 'salePPZip',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN,     StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPZIP_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => $country,                    StageShowLibTableClass::TABLEPARAM_ID => 'salePPCountry', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN, StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPCOUNTRY_EDITLEN, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => $phone,                      StageShowLibTableClass::TABLEPARAM_ID => 'salePPPhone',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN,   StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALEPPPHONE_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'First Name',	             StageShowLibTableClass::TABLEPARAM_ID => 'saleFirstName', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALENAME_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALENAME_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Last Name',	             StageShowLibTableClass::TABLEPARAM_ID => 'saleLastName',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALENAME_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALENAME_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'EMail',	                 StageShowLibTableClass::TABLEPARAM_ID => 'saleEMail',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEEMAIL_TEXTLEN,     StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEEMAIL_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $address,	                 StageShowLibTableClass::TABLEPARAM_ID => 'salePPStreet',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPSTREET_TEXTLEN,  StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPSTREET_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $city,	                     StageShowLibTableClass::TABLEPARAM_ID => 'salePPCity',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPCITY_TEXTLEN,    StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPCITY_EDITLEN, ),			
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $state,	                     StageShowLibTableClass::TABLEPARAM_ID => 'salePPState',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPSTATE_TEXTLEN,   StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPSTATE_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $zip,                        StageShowLibTableClass::TABLEPARAM_ID => 'salePPZip',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPZIP_TEXTLEN,     StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPZIP_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $country,                    StageShowLibTableClass::TABLEPARAM_ID => 'salePPCountry', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPCOUNTRY_TEXTLEN, StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPCOUNTRY_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $phone,                      StageShowLibTableClass::TABLEPARAM_ID => 'salePPPhone',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPPHONE_TEXTLEN,   StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPPHONE_EDITLEN, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Total Paid/Due',            StageShowLibTableClass::TABLEPARAM_ID => 'salePaid',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'PayPal Fees',               StageShowLibTableClass::TABLEPARAM_ID => 'saleFee',       StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => $gatewayName.' Fees',        StageShowLibTableClass::TABLEPARAM_ID => 'saleFee',       StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Transaction Date & Time',   StageShowLibTableClass::TABLEPARAM_ID => 'saleDateTime',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Transaction ID',            StageShowLibTableClass::TABLEPARAM_ID => 'saleTxnId',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),						
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Status',                    StageShowLibTableClass::TABLEPARAM_ID => 'saleStatus',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $statusOptions),						
@@ -135,7 +136,7 @@ if (!class_exists('StageShowLibPayPalSalesAdminListClass'))
 		function GetDetailsRowsFooter()
 		{
 			$ourOptions = array(
-				array(StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_FUNCTION, StageShowLibTableClass::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
+				array(StageShowLibTableClass::TABLEPARAM_ID => 'saleDetails', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_FUNCTION, StageShowLibTableClass::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
 			);
 			
 			$ourOptions = self::MergeSettings(parent::GetDetailsRowsFooter(), $ourOptions);
@@ -240,7 +241,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 	class PayPalSalesAdminClass extends StageShowLibAdminClass // Define class
 	{		
 		var $results;
-		var $payPalAPIObj;
 		var $saleQtyInputID;
 		
 		function __construct($env) //constructor	
@@ -259,7 +259,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function DoSalesSearch()
 		{
-			if (isset($_POST['searchsalesbutton']) && ($_POST['searchsalesbutton'] != ''))
+			if (isset($_POST['searchsalesbutton']) && ($_POST['searchsalesbutton'] != ''))	// TODO: Check for SQLi
 			{
 				$this->searchsalestext = $_POST['searchsalestext'];
 			}
@@ -287,10 +287,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		{
 			$myPluginObj = $this->myPluginObj;
 			$myDBaseObj = $this->myDBaseObj;				
-			$payPalObj = $myDBaseObj->payPalAPIObj;
 				
- 			$this->payPalAPIObj = $payPalObj;
-     
 			$this->salesFor = '';
 			
 			$this->DoSalesSearch();
@@ -299,7 +296,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			{
 				$this->CheckAdminReferer();
 				
-				$this->emailSaleId = $_POST['id'];
+				$this->emailSaleId = StageShowLibHTTPIO::GetRequestedInt('id');
 				$myDBaseObj->EMailSale($this->emailSaleId);
 			}
 			
@@ -318,7 +315,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 		{
 			$myPluginObj = $this->myPluginObj;
 			$myDBaseObj = $this->myDBaseObj;				
-			$payPalObj = $myDBaseObj->payPalAPIObj;
 			
 			$myDBaseObj->PurgePendingSales();
 					
@@ -400,7 +396,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function OuputSearchSalesButton()
 		{
-			echo '<div class="'.$this->myDomain.'-searchsales"><input type="text" maxlength="'.PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN.'" size="20" name="searchsalestext" id="searchsaletext" value="" autocomplete="off" />'."\n";
+			echo '<div class="'.$this->myDomain.'-searchsales"><input type="text" maxlength="'.PAYMENT_API_SALEEMAIL_TEXTLEN.'" size="20" name="searchsalestext" id="searchsaletext" value="" autocomplete="off" />'."\n";
 			$this->OutputButton("searchsalesbutton", __("Search Sales", $this->myDomain));					
 			echo '</div>'."\n";
 		}
@@ -464,12 +460,14 @@ if (!class_exists('PayPalSalesAdminClass'))
 			switch ($bulkAction)
 			{
 				case StageShowLibAdminListClass::BULKACTION_DELETE:
-				default:
 					// FUNCTIONALITY: Price Plans - Bulk Action Delete - Check Plan Exists
 					$saleResults = $this->myDBaseObj->GetSale($recordId);
 					if (count($saleResults) == 0)
 						$this->errorCount++;
 					return ($this->errorCount > 0);
+					
+				default:
+					break;
 			}
 			
 			return false;
@@ -482,6 +480,9 @@ if (!class_exists('PayPalSalesAdminClass'))
 				case StageShowLibAdminListClass::BULKACTION_DELETE:		
 					$this->myDBaseObj->DeleteSale($recordId);
 					return true;
+					
+				default:
+					break;
 			}
 				
 			return false;
@@ -500,6 +501,9 @@ if (!class_exists('PayPalSalesAdminClass'))
 						$actionMsg = $actionCount . ' ' . _n("Sale has been deleted", "Sales have been deleted", $actionCount, $this->myDomain);
 					else
 						$actionMsg =  __("Nothing to Delete", $this->myDomain);
+					break;
+					
+				default:
 					break;
 			}
 			

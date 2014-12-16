@@ -80,7 +80,7 @@ if (!class_exists('StageShowWPOrgSampleDBaseClass'))
 				$saleEMail = 'other@someemail.co.zz';
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
-				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 'SQP4KMTNIEXGS5ZBU', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime1, 'A.N.', 'Other', $saleEMail, 12.00, 'SQP4KMTNIEXGS5ZBU', PAYMENT_API_SALESTATUS_COMPLETED,
 					'1 The Street', 'Somewhere', 'Bigshire', 'BG1 5AT', 'UK');
 				$this->AddSampleSaleItem($saleID, $this->priceID_S1_P3_CHILD, 4, STAGESHOW_PRICE_S1_P3_CHILD);
 				$this->AddSampleSaleItem($saleID, $this->priceID_S1_P3_ADULT, 1, STAGESHOW_PRICE_S1_P3_ADULT);
@@ -89,7 +89,7 @@ if (!class_exists('StageShowWPOrgSampleDBaseClass'))
 				if (defined('STAGESHOW_SAMPLE_EMAIL'))
 					$saleEMail = STAGESHOW_SAMPLE_EMAIL;
 				$total2 = (4 * STAGESHOW_PRICE_S1_P1_ALL);
-				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, $total2, '1S34QJHTK9AAQGGVG', PAYPAL_APILIB_SALESTATUS_COMPLETED,
+				$saleID = $this->AddSampleSale($saleTime2, 'M.Y.', 'Brother', $saleEMail, $total2, '1S34QJHTK9AAQGGVG', PAYMENT_API_SALESTATUS_COMPLETED,
 					'The Bungalow', 'Otherplace', 'Littleshire', 'LI1 9ZZ', 'UK');
 				$this->AddSampleSaleItem($saleID, $this->priceID_S1_P1_ALL, 4, STAGESHOW_PRICE_S1_P1_ALL);
 				
@@ -103,7 +103,7 @@ if (!class_exists('StageShowWPOrgSampleDBaseClass'))
 						$saleFirstName = 'Sample'.$sampleSaleNo;
 						$saleLastName = 'Buyer'.$sampleSaleNo;
 						$saleEMail = 'extrasale'.$sampleSaleNo.'@sample.org.uk';
-						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 'TXNID_'.$sampleSaleNo, PAYPAL_APILIB_SALESTATUS_COMPLETED,
+						$saleID = $this->AddSampleSale($saleDate, $saleFirstName, $saleLastName, $saleEMail, 12.50, 'TXNID_'.$sampleSaleNo, PAYMENT_API_SALESTATUS_COMPLETED,
 						'Almost', 'Anywhere', 'Very Rural', 'Tinyshire', 'TN55 8XX', 'UK');
 						$this->AddSampleSaleItem($saleID, $this->priceID_S1_P3_ADULT, 3, STAGESHOW_PRICE_S1_P3_ADULT);
 						$timeStamp = $this->Sample_strtotime("+1 hour +7 seconds", $timeStamp);
