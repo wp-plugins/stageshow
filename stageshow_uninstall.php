@@ -33,8 +33,6 @@ include STAGESHOW_INCLUDE_PATH.'stageshow_dbase_api.php';
 $stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
 $myDBaseObj = new $stageShowDBaseClass(__FILE__);
 
-$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
-
 $myDBaseObj->uninstall();
 
 // FUNCTIONALITY: Uninstall - Delete StageShow entries from Wordpress options 

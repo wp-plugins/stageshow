@@ -167,7 +167,7 @@ if (!class_exists('StageShowLibAdminClass'))
 				$iconID = 'icon-'.$this->myDomain;
 				echo '
 					<div id="'.$iconID.'" class="icon32"></div>
-					<h2>'.$myDBaseObj->get_name().' - '.__($this->pageTitle, $this->myDomain).'</h2>'."\n";				
+					<h2>'.$myDBaseObj->get_pluginName().' - '.__($this->pageTitle, $this->myDomain).'</h2>'."\n";				
 			}
 				
 			$this->Output_MainPage($this->adminMsg !== '');
@@ -183,25 +183,13 @@ if (!class_exists('StageShowLibAdminClass'))
 			return true;
 		}
 
-		static function IsOptionChanged($adminOptions, $optionID1, $optionID2 = '', $optionID3 = '')
+		static function IsOptionChanged($adminOptions, $optionID)
 		{
-			if (isset($_POST[$optionID1]) && (trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID1)) !== trim($_POST[$optionID1])))
+			if (isset($_POST[$optionID]) && (trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID)) !== trim($_POST[$optionID])))	// TODO: Check for SQLi
 			{
 				return true;
 			}
-			
-			if ($optionID2 === '') return false;			
-			if (isset($_POST[$optionID2]) && (trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID2)) !== trim($_POST[$optionID2])))
-			{
-				return true;
-			}
-			
-			if ($optionID3 === '') return false;			
-			if (isset($_POST[$optionID3]) && (trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID3)) !== trim($_POST[$optionID3])))
-			{
-				return true;
-			}
-			
+						
 			return false;
 		}
 		
@@ -215,7 +203,7 @@ if (!class_exists('StageShowLibAdminClass'))
 				if (!isset($_POST[$settingId.$index])) 
 					continue;
 					
-				$newVal = $_POST[$settingId.$index];
+				$newVal = $_POST[$settingId.$index];	// TODO: Check for SQLi
 				if ($newVal != $result->$settingId)
 				{
 					$this->myDBaseObj->UpdateSettings($result, $dbOpts['Table'], $settingId, $dbOpts['Index'], $index);					
@@ -317,7 +305,7 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 					$this->Reload();		
 					
 					echo '<div id="message" class="error"><p>'.$SettingsUpdateMsg.'</p></div>';
-					echo '<div id="message" class="error"><p>'.__('Paypal settings have NOT been saved.', $this->myDomain).'</p></div>';
+					echo '<div id="message" class="error"><p>'.__('Settings have NOT been saved.', $this->myDomain).'</p></div>';
 				}
 			}
 			
@@ -328,7 +316,7 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 			$myPluginObj = $this->myPluginObj;
 			$myDBaseObj = $this->myDBaseObj;
 			
-			// PayPal Settings HTML Output - Start 
+			// Settings HTML Output - Start 
 			
 			$formClass = $this->myDomain.'-admin-form';
 			echo '<div class="'.$formClass.'">'."\n";
@@ -347,10 +335,14 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 			else
 			{
 				$this->adminListObj->OutputList($results, $updateFailed);
+				
+				if (!isset($this->adminListObj->editMode) || ($this->adminListObj->editMode))
+				{
+					if (count($results) > 0)
+						$this->OutputButton("savechanges", __("Save Changes", $this->myDomain), "button-primary");				
+				}
 			}
 			
-			if (count($results) > 0)
-				$this->OutputButton("savechanges", __("Save Changes", $this->myDomain), "button-primary");
 ?>
 	</form>
 	</div>
@@ -385,13 +377,13 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 							// Text Settings are "Trimmed"
 							$controlId = $settingOption[StageShowLibTableClass::TABLEPARAM_ID];
 							if (isset($_POST[$controlId]))
-								$dbObj->adminOptions[$controlId] = trim(stripslashes($_POST[$controlId]));
+								$dbObj->adminOptions[$controlId] = trim(stripslashes($_POST[$controlId]));	// TODO: Check for SQLi
 							break;
 						
 						default:
 							$controlId = $settingOption[StageShowLibTableClass::TABLEPARAM_ID];
 							if (isset($_POST[$controlId]))
-								$dbObj->adminOptions[$controlId] = stripslashes($_POST[$controlId]);
+								$dbObj->adminOptions[$controlId] = stripslashes($_POST[$controlId]);	// TODO: Check for SQLi
 							break;
 					}
 				}	

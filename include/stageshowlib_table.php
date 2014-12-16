@@ -199,6 +199,11 @@ if (!class_exists('StageShowLibTableClass'))
 			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetMainRowsDefinition');
 		}
 		
+		function CanShowDetailsRow($result, $fieldName)
+		{
+			return true;
+		}
+		
 		function GetDetailsRowsDefinition()
 		{
 			return array();
@@ -1260,6 +1265,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 			
 			if (!$editMode)
 			{
+				echo '<input type="hidden" '.$controlIdDef.' value="'.$controlValue.'"/>'."\n";
+
 				switch ($settingType)
 				{
 					case self::TABLEENTRY_SELECT:
@@ -1278,7 +1285,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					case self::TABLEENTRY_COOKIE:
 						$settingType = self::TABLEENTRY_VIEW;
 						break;						
-				}
+				}				
 			}
 				
 			switch ($settingType)
@@ -1308,14 +1315,22 @@ if (!class_exists('StageShowLibAdminListClass'))
 					break;
 
 				case self::TABLEENTRY_SELECT:
-					$editControl  = '<select '.$controlIdDef.$onChange.'>'."\n";
 					$selectOptsArray = self::GetSelectOptsArray($settingOption);
-					foreach ($selectOptsArray as $selectOptValue => $selectOptText)
+					if (count($selectOptsArray)>1)
 					{
-						$selected = ($controlValue == $selectOptValue) ? ' selected=""' : '';
-						$editControl .= '<option value="'.$selectOptValue.'"'.$selected.' >'.$selectOptText."&nbsp;</option>\n";
+						$editControl  = '<select '.$controlIdDef.$onChange.'>'."\n";
+						foreach ($selectOptsArray as $selectOptValue => $selectOptText)
+						{
+							$selected = ($controlValue == $selectOptValue) ? ' selected=""' : '';
+							$editControl .= '<option value="'.$selectOptValue.'"'.$selected.' >'.$selectOptText."&nbsp;</option>\n";
+						}
+						$editControl .= '</select>'."\n";	
 					}
-					$editControl .= '</select>'."\n";
+					else
+					{
+						$editControl  = $this->GetSelectOptsText($settingOption, $controlValue);
+						$editControl .=  '<input type="hidden" '.$controlIdDef.' value="'.$controlValue.'"/>';					
+					}
 					break;
 
 				case self::TABLEENTRY_CHECKBOX:
@@ -1398,7 +1413,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 						if ($this->updateFailed && isset($_POST[$columnId.$recId]))
 						{
 							// Error updating values - Get value(s) from form controls
-							$currVal = stripslashes($_POST[$columnId.$recId]);
+							$currVal = stripslashes($_POST[$columnId.$recId]);	// TODO: Check for SQLi
 						}
 						else
 						{
@@ -1571,6 +1586,9 @@ if (!class_exists('StageShowLibAdminListClass'))
 				$hiddenRows = "<table class=$tableId-table width=\"100%\">\n";
 				foreach ($this->detailsRowsDef as $option)
 				{
+					if (isset($option[self::TABLEPARAM_ID]) && !$this->CanShowDetailsRow($result, $option[self::TABLEPARAM_ID]))
+						continue;
+						
 					if (isset($option[self::TABLEPARAM_LABEL]))
 						$optionLabel = __($option[self::TABLEPARAM_LABEL], $this->myDomain);						
 						

@@ -2,6 +2,8 @@
 
 function stageshow_OnSettingsLoad()
 {
+	/* Get Disabled GatewaysList */
+	
 	var selectedTabId = stageshow_GetURLParam('tab');
 	if (selectedTabId != '')
 	{		
@@ -25,6 +27,11 @@ function stageshow_OnSettingsLoad()
 		focusElem = document.getElementById(selectedItemId);
 		focusElem.focus();
 	}
+}
+
+function stageshow_ClickGateway()
+{
+	stageshow_SelectTab('gateway-settings-tab');
 }
 
 function stageshow_ClickHeader(obj)
@@ -65,7 +72,29 @@ function stageshow_SelectTab(selectedTabID)
 
 function stageshow_ShowOrHideTab(tabID, selectedTabID)
 {
-	var headerElem, tabElem, pageElem, tabWidth;
+	var headerElem, tabElem, pageElem, tabWidth, rowstyle;
+	
+	selectedGatewayTag = '';
+	if (tabID == selectedTabID)
+	{
+		// Show the matching settings rows
+		rowstyle = '';
+		
+		gatewayElem = document.getElementById('GatewaySelected');
+		if (gatewayElem)
+		{
+			var gatewayId = gatewayElem.value;
+			gatewayParts = gatewayId.split('_');
+			gatewayBase = gatewayParts[0];
+			selectedGatewayTag = '-tab-'+gatewayBase+'-row';
+		}
+	}
+	else
+	{
+		// Hide the matching settings rows
+		rowstyle = 'none';
+	}
+	
 	
 	// Get the header 'Tab' Element					
 	tabElem = document.getElementById(tabID);
@@ -74,26 +103,35 @@ function stageshow_ShowOrHideTab(tabID, selectedTabID)
 	pageElem = document.getElementById('recordoptions');
 
 	// Get all <tr> entries for this TabID and hide/show them as required
-	for (i=1; i<100; i++)
+	var tabElements = pageElem.getElementsByTagName("tr");
+	for(var i = 0; i < tabElements.length; i++) 
 	{
-		// Get the Body Element	
-		rowElemID = tabID +'-row' + i;				
-		rowElem = document.getElementById(rowElemID);
-		if (rowElem == null) 
-			break;
-			
-		if (tabID == selectedTabID)
-		{
-			// Show the settings row
-			rowElem.style.display = '';
-		}
-		else
-		{
-			// Hide the settings row
-			rowElem.style.display = 'none';
-		}
-	}
-	
+		rowElem = tabElements[i];
+		id = rowElem.id;
+		
+   		if (id.indexOf('-settings-tab') > 0) 
+    	{
+		    if (id.indexOf(tabID) == 0) 
+		    {
+		    	if ( (id.indexOf('-tab-') > 0) && (id.indexOf('-tab-row') < 0) )
+		    	{
+		    		if (selectedGatewayTag != '')
+			    	{
+			    		/* Must be a Gateway specific entry */
+				    	if (id.indexOf(selectedGatewayTag) < 0)
+				    	{
+							rowElem.style.display = 'none';		
+							continue;		
+						}		
+					}			
+				}
+				
+				// Show or Hide the settings row
+				rowElem.style.display = rowstyle;				
+			}
+	    }
+    }
+
 	if (tabID == selectedTabID)
 	{
 		// Make the font weight normal and background Grey

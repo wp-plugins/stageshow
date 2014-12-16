@@ -27,7 +27,6 @@ if(!isset($_SESSION))
 }	
 
 include 'stageshowlib_dbase_api.php';      
-include 'stageshowlib_paypal_api.php';   
 include 'stageshowlib_email_api.php';   
 
 if (!class_exists('StageShowLibSalesDBaseClass')) 
@@ -37,8 +36,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		StageShowLibSalesDBaseClass
 	---------------------------------------------------------------------------------
 	
-	This class provides database functionality to capture PayPal sales data and support
-	Instant Payment Notification (IPN).
+	This class provides database functionality to capture sales data and support
+	Payment Notification
 	*/
 	
 	if (!defined('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE'))
@@ -58,21 +57,73 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		const STAGESHOWLIB_FROMTROLLEY = true;
 		const STAGESHOWLIB_NOTFROMTROLLEY = false;
 		
-		const PAYPAL_CHECKOUTSTYLE_STANDARD = 1;
-		const PAYPAL_CHECKOUTSTYLE_EXPRESS = 2;
-		const PAYPAL_CHECKOUTSTYLE_BOTH = 3;
+		const STAGESHOWLIB_CHECKOUTSTYLE_STANDARD = 1;
+		const STAGESHOWLIB_CHECKOUTSTYLE_EXPRESS = 2;
+		const STAGESHOWLIB_CHECKOUTSTYLE_STANDARD_AND_EXPRESS = 3;
 		
-		var		$PayPalURL;			//  URL for PayPal Payment Requests
-		var		$PayPalVerifyURL;	//  URL for PayPal Verify IPN Requests
+		var 	$GatewayID = '';
+		var		$GatewayName = '';
 		
 		function __construct($opts)		//constructor		
 		{
+			$currOptions = get_option($opts['CfgOptionsID']);
+					
+			$gatewayUpdated = true;
+			$opts['DBaseObj'] = $this;
+			if (isset($currOptions['GatewaySelected']))
+			{
+				$gatewayID = $currOptions['GatewaySelected'];	
+				if ($this->AddGateway($opts, $gatewayID))
+				{
+					$gatewayUpdated = false;
+				}
+				else
+				{
+					$gatewayID = $currOptions['GatewaySelected'];					
+				}
+			}
+			if ($gatewayUpdated)
+			{
+				$gatewayID = $this->GetDefaultGateway();
+				if ($this->AddGateway($opts, $gatewayID))
+				{
+					$currOptions['GatewaySelected'] = $gatewayID;
+				}
+				else
+				{
+					$currOptions['GatewaySelected'] = '';
+				}
+				update_option($opts['CfgOptionsID'], $currOptions);
+			}
+
 			parent::__construct($opts);
 						
 			if (!isset($this->emailObjClass))
 				$this->emailObjClass = 'StageShowLibEMailAPIClass';
+				
 		}
 
+    	function GetDefaultGateway()
+    	{
+    		return 'paypal';
+		}
+		
+		function AddGateway($opts, $gatewayID)
+		{
+			$this->GatewayID = $gatewayID;
+			
+			$gatewayFile = 'stageshowlib_'.$this->GatewayID.'_gateway.php'; 
+			if (!file_exists(dirname(__FILE__).'/'.$gatewayFile)) return false;
+
+			$gatewayClass = 'StageShowLib_'.$this->GatewayID.'_GatewayClass'; 
+			
+			include $gatewayFile;      						// i.e. stageshowlib_paypal_api.php
+			$this->gatewayObj = new $gatewayClass($opts); 	// i.e. StageShowLib_paypal_GatewayClass
+			
+			$this->GatewayName = $this->gatewayObj->GetName();
+			return true;
+		}
+		
 		function SplitSaleNameField()
 		{
 			if (!$this->IfColumnExists($this->DBTables->Sales, 'saleName'))
@@ -108,12 +159,12 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			if (!isset($this->adminOptions['CheckoutTimeout']))
 			{
-				$this->adminOptions['CheckoutTimeout'] = PAYPAL_APILIB_CHECKOUT_TIMEOUT_DEFAULT;
+				$this->adminOptions['CheckoutTimeout'] = PAYMENT_API_CHECKOUT_TIMEOUT_DEFAULT;
 			}
 			
 			if (!isset($this->adminOptions['PayPalCheckoutType']))
 			{
-				$this->adminOptions['PayPalCheckoutType'] = self::PAYPAL_CHECKOUTSTYLE_STANDARD;
+				$this->adminOptions['PayPalCheckoutType'] = self::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
 			}
 			
       		$this->saveOptions();      
@@ -151,10 +202,12 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if (!$isConfigured)
 			{
 				$settingsPageId = basename(dirname($this->opts['Caller']))."_settings";
+				$gatewayName = $this->gatewayObj->GetName();
+				$myDomain = $this->get_domain();
 				
 				$settingsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.$settingsPageId;
-				$settingsPageURL .= '&tab=PayPal_Settings';
-				$actionMsg = __('Set PayPal Settings First - <a href='.$settingsPageURL.'>Here</a>');
+				$settingsPageURL .= '&tab=gateway-settings';
+				$actionMsg = __('Set', $myDomain).' '.$gatewayName.' '.__('Payment Gateway Settings First', $myDomain).' - <a href='.$settingsPageURL.'>'.__('Here', $myDomain).'</a>';
 				echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';				
 			}
 			
@@ -185,14 +238,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function getOptions($childOptions = array(), $saveToDB = true) 
 		{
 			$ourOptions = array(
-				'PayPalCurrency' => PAYPAL_APILIB_DEFAULT_CURRENCY,
-				        
-				'PayPalMerchantID' => '',
-				'PayPalAPIUser' => '',
-				'PayPalAPISig' => '',
-				'PayPalAPIPwd' => '',
-				'PayPalAPIEMail' => '',
-				        
 				'CheckoutCompleteURL' => '',        
 				'CheckoutCancelledURL' => '',
 				          
@@ -210,12 +255,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'Unused_EndOfList' => ''
 			);
 			
+			$ourOptions = array_merge($this->gatewayObj->Gateway_GetOptions(), $ourOptions);
+			
 			$ourOptions = array_merge($ourOptions, $childOptions);
 			
 			$currOptions = parent::getOptions($ourOptions, false);
-			
-			if ($currOptions['PayPalCurrency'] == '')
-				$currOptions['PayPalCurrency'] = PAYPAL_APILIB_DEFAULT_CURRENCY;
 			
 			// PayPalLogoImageURL option has been changed to PayPalLogoImageFile
 			if (isset($currOptions['PayPalLogoImageURL']))
@@ -232,52 +276,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 				
 			$this->adminOptions = $currOptions;
-			
-			// Create PayPalAPIClass object here (if required) after Trolley type is known
-			if (!isset($this->payPalAPIObj))
-			{
-				$this->payPalAPIObj = new PayPalButtonsAPIClass(__FILE__);
-				if ($this->getDbgOption('Dev_ShowPayPalAPI'))
-				{
-					$this->payPalAPIObj->EnableDebug();
-				}
-				$this->LoginPayPalAPI();
-			}
+
+			$this->gatewayObj->LoginGatewayAPI($this->adminOptions, $this->dbgOptions);
 
 			if ($saveToDB)
 				$this->saveOptions();
 				
 			return $currOptions;
 		}
-		
-		// Saves the admin options to the PayPal object(s)
-		function setPayPalCredentials($OurIPNListener) 
-		{
-			$useLocalIPNServer = $this->isDbgOptionSet('Dev_IPNLocalServer');
-			
-			$this->PayPalNotifyURL = $OurIPNListener;							
-			$this->PayPalURL = PayPalAPIClass::GetPayPalURL(false);
 
-			// URL for Plugin code to verify PayPal IPNs
-			if ($useLocalIPNServer)
-			{
-				$this->PayPalVerifyURL = $this->GetURL('{pluginpath}\test\paypal_VerifyIPNTest.php');	
-			}
-			else
-			{
-				$this->PayPalVerifyURL = $this->PayPalURL;
-			}				
-		}
-		
-		function LoginPayPalAPI()
-		{
-			$this->payPalAPIObj->SetLoginParams(
-				$this->adminOptions['PayPalAPIUser'], 
-				$this->adminOptions['PayPalAPIPwd'], 
-				$this->adminOptions['PayPalAPISig']);
-			$this->payPalAPIObj->SetTestMode(false);
-		}
-		
 		static function FormatDateForDisplay($dateInDB)
 		{
 			// Convert time string to UNIX timestamp
@@ -303,49 +310,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $dateAndTime;
 		}
 		
-		static function GetCurrencyTable()
-		{
-			return array( 
-				array('Name' => 'Australian Dollars ',  'Currency' => 'AUD', 'Symbol' => '&#36;',        'Char' => 'A$', 'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Brazilian Real ',      'Currency' => 'BRL', 'Symbol' => 'R&#36;',       'Char' => 'R$', 'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Canadian Dollars ',    'Currency' => 'CAD', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Czech Koruna ',        'Currency' => 'CZK', 'Symbol' => '&#75;&#269;',  'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Danish Krone ',        'Currency' => 'DKK', 'Symbol' => 'kr',           'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Euros ',               'Currency' => 'EUR', 'Symbol' => '&#8364;',      'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Hong Kong Dollar ',    'Currency' => 'HKD', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Hungarian Forint ',    'Currency' => 'HUF', 'Symbol' => 'Ft',           'Char' => '',   'Position' => 'Left', 'Format' => '%d'),
-				array('Name' => 'Israeli Shekel ',      'Currency' => 'ILS', 'Symbol' => '&#x20aa;',     'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Mexican Peso ',        'Currency' => 'MXN', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'New Zealand Dollar ',  'Currency' => 'NZD', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Norwegian Krone ',     'Currency' => 'NOK', 'Symbol' => 'kr',           'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Philippine Pesos ',    'Currency' => 'PHP', 'Symbol' => 'P',            'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Polish Zloty ',        'Currency' => 'PLN', 'Symbol' => '&#122;&#322;', 'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Pounds Sterling ',     'Currency' => 'GBP', 'Symbol' => '&#x20a4;',     'Char' => '£',  'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Singapore Dollar ',    'Currency' => 'SGD', 'Symbol' => 'S&#36;',       'Char' => 'S$', 'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Swedish Krona ',       'Currency' => 'SEK', 'Symbol' => 'kr',           'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Swiss Franc ',         'Currency' => 'CHF', 'Symbol' => 'CHF',          'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Taiwan New Dollars ',  'Currency' => 'TWD', 'Symbol' => 'NT&#36;',      'Char' => 'NT$','Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Thai Baht ',           'Currency' => 'THB', 'Symbol' => '&#xe3f;',      'Char' => '',   'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'U.S. Dollars ',        'Currency' => 'USD', 'Symbol' => '&#36;',        'Char' => '$',  'Position' => 'Left', 'Format' => '%01.2f'),
-				array('Name' => 'Yen ',                 'Currency' => 'JYP', 'Symbol' => '&#xa5;',       'Char' => '',   'Position' => 'Left', 'Format' => '%d'),
-			);
-		}
-		
-		static function GetCurrencyDef($currency)
-		{
-			$currencyTable = self::GetCurrencyTable();
-			
-			foreach ($currencyTable as $currencyDef)
-			{
-				if ($currencyDef['Currency'] == $currency)
-				{
-					return $currencyDef;
-				}
-			}
-			
-			return null;
-		}
-		
 		function FormatCurrency($amount, $asHTML = true)
 		{
 			$currencyText = sprintf($this->adminOptions['CurrencyFormat'], $amount);
@@ -364,31 +328,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $currencyText;
 		}
 		
-		function PayPalConfigured($APIOptional = false)
-		{
-			if (!defined('CORONDECK_RUNASDEMO'))
-			{
-				// Check that PayPal is Configured
-				
-				// Must have EITHER PayPalMerchantID or PayPalAPIEMail
-				if (!$this->isOptionSet('PayPalMerchantID') && !$this->isOptionSet('PayPalAPIEMail'))
-					return false;
-				
-				// Either All of PayPalAPIUser, PayPalAPIPwd and PayPalAPISig must be defined or none of them
-				$ApiOptsCount = 0;
-				if ($this->isOptionSet('PayPalAPIUser')) $ApiOptsCount++;
-				if ($this->isOptionSet('PayPalAPIPwd')) $ApiOptsCount++;
-				if ($this->isOptionSet('PayPalAPISig')) $ApiOptsCount++;
-				if (($ApiOptsCount != 0) && ($ApiOptsCount != 3))
-					return false;					
-			}
-				
-			return true;				
-		}
-		
 		function SettingsConfigured()
 		{
-			return $this->PayPalConfigured();
+			return $this->gatewayObj->IsGatewayConfigured($this->adminOptions);
 		}
 		
 		function Output_PluginHelp()
@@ -402,11 +344,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 			
 			$mode = (defined('CORONDECK_RUNASDEMO')) ? ' (Demo Mode)' : ''; 
-			echo  '<strong>'.__('Plugin', $this->get_domain()).':</strong> '.$this->get_name()."$mode<br>\n";			
+			echo  '<strong>'.__('Plugin', $this->get_domain()).':</strong> '.$this->get_pluginName()."$mode<br>\n";			
 			echo  '<strong>'.__('Version', $this->get_domain()).':</strong> '.$this->get_version()."<br>\n";			
+			echo  '<strong>'.__('Gateway', $this->get_domain()).':</strong> '.$this->GatewayName."<br>\n";			
 			echo  '<strong>'.__('Timezone', $this->get_domain()).':</strong> '.$timezone."<br>\n";			
 
-			$this->ShowDebugModes();
+			if (!$this->isDbgOptionSet('Dev_DisableTestMenus'))
+				$this->ShowDebugModes();
 		}
 		
 		function UseTestPayPalSettings($testSettings)
@@ -433,7 +377,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if (isset($newOptions['PayPalCurrency']))
 			{
 				$currency = $newOptions['PayPalCurrency'];			
-				$currencyDef = StageShowLibSalesDBaseClass::GetCurrencyDef($currency);
+				$currencyDef = $this->gatewayObj->GetCurrencyDef($currency);
 				
 				if (isset($currencyDef['Symbol']))
 				{
@@ -472,24 +416,24 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					$sql .= '
 						saleCheckoutTime DATETIME,
 						saleDateTime DATETIME NOT NULL,
-						saleFirstName VARCHAR('.PAYPAL_APILIB_PPSALENAME_TEXTLEN.') NOT NULL,
-						saleLastName VARCHAR('.PAYPAL_APILIB_PPSALENAME_TEXTLEN.') NOT NULL,
-						saleEMail VARCHAR('.PAYPAL_APILIB_PPSALEEMAIL_TEXTLEN.') NOT NULL,
-						salePPName VARCHAR('.PAYPAL_APILIB_PPSALEPPNAME_TEXTLEN.'),
-						salePPStreet VARCHAR('.PAYPAL_APILIB_PPSALEPPSTREET_TEXTLEN.'),
-						salePPCity VARCHAR('.PAYPAL_APILIB_PPSALEPPCITY_TEXTLEN.'),
-						salePPState VARCHAR('.PAYPAL_APILIB_PPSALEPPSTATE_TEXTLEN.'),
-						salePPZip VARCHAR('.PAYPAL_APILIB_PPSALEPPZIP_TEXTLEN.'),
-						salePPCountry VARCHAR('.PAYPAL_APILIB_PPSALEPPCOUNTRY_TEXTLEN.'),
-						salePPPhone VARCHAR('.PAYPAL_APILIB_PPSALEPPPHONE_TEXTLEN.'),
+						saleFirstName VARCHAR('.PAYMENT_API_SALENAME_TEXTLEN.') NOT NULL,
+						saleLastName VARCHAR('.PAYMENT_API_SALENAME_TEXTLEN.') NOT NULL,
+						saleEMail VARCHAR('.PAYMENT_API_SALEEMAIL_TEXTLEN.') NOT NULL,
+						salePPName VARCHAR('.PAYMENT_API_SALEPPNAME_TEXTLEN.'),
+						salePPStreet VARCHAR('.PAYMENT_API_SALEPPSTREET_TEXTLEN.'),
+						salePPCity VARCHAR('.PAYMENT_API_SALEPPCITY_TEXTLEN.'),
+						salePPState VARCHAR('.PAYMENT_API_SALEPPSTATE_TEXTLEN.'),
+						salePPZip VARCHAR('.PAYMENT_API_SALEPPZIP_TEXTLEN.'),
+						salePPCountry VARCHAR('.PAYMENT_API_SALEPPCOUNTRY_TEXTLEN.'),
+						salePPPhone VARCHAR('.PAYMENT_API_SALEPPPHONE_TEXTLEN.'),
 						salePaid DECIMAL(9,2) NOT NULL,
 						saleDonation DECIMAL(9,2) NOT NULL DEFAULT 0,
 						saleTransactionFee DECIMAL(9,2) NOT NULL DEFAULT 0,
 						saleFee DECIMAL(9,2) NOT NULL,
-						saleTxnId VARCHAR('.PAYPAL_APILIB_PPSALETXNID_TEXTLEN.') NOT NULL,
-						saleStatus VARCHAR('.PAYPAL_APILIB_PPSALESTATUS_TEXTLEN.'),
+						saleTxnId VARCHAR('.PAYMENT_API_SALETXNID_TEXTLEN.') NOT NULL,
+						saleStatus VARCHAR('.PAYMENT_API_SALESTATUS_TEXTLEN.'),
 						saleNoteToSeller TEXT,
-						salePPExpToken VARCHAR('.PAYPAL_APILIB_PPEXPTOKEN_TEXTLEN.') NOT NULL DEFAULT "",
+						salePPExpToken VARCHAR('.PAYMENT_API_EXPTOKEN_TEXTLEN.') NOT NULL DEFAULT "",
 					';
 					break;
 			}
@@ -607,7 +551,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					continue;
 					
 				$sqlFields .= ', '.$fieldID;
-				$sqlValues .= ', "'.$fieldVal.'"';
+				$sqlValues .= ', "'.self::_real_escape($fieldVal).'"';
 			}
 			$sqlFields .= ')';
 			$sqlValues .= ')';
@@ -665,7 +609,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$fieldValue = $salesVals->$fieldName;
 				
 				$sqlFields .= ', '.$fieldName;
-				$sqlValues .= ', "'.$fieldValue.'"';
+				$sqlValues .= ', "'.self::_real_escape($fieldValue).'"';
 			}
 			$sqlFields .= ')';
 			$sqlValues .= ')';
@@ -700,13 +644,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				{
 					if (!isset($results->$fieldName))
 						continue;
-					$fieldValue = $results->$fieldName;
+					$fieldValue = self::_real_escape($results->$fieldName);
 				}
 				else
 				{
 					if (!isset($results[$fieldName]))
 						continue;
-					$fieldValue = $results[$fieldName];
+					$fieldValue = self::_real_escape($results[$fieldName]);
 				}
 					
 				$sql .= $fieldSep.$fieldName.'="'.$fieldValue.'"';
@@ -738,7 +682,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$limitDateTime = date(StageShowLibDBaseClass::MYSQL_DATETIME_FORMAT, current_time( 'timestamp' ) - $timeout);
 			
 			$sql  = 'DELETE FROM '.$this->DBTables->Sales;
-			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleStatus="'.PAYPAL_APILIB_SALESTATUS_CHECKOUT.'"';
+			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleStatus="'.PAYMENT_API_SALESTATUS_CHECKOUT.'"';
 			$sql .= ' AND   '.$this->DBTables->Sales.'.saleCheckoutTime < "'.$limitDateTime.'"';
 			
 			$this->query($sql);
@@ -1114,7 +1058,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			if ($hfile != 0)
 			{
 				$fileLen = filesize($Filepath);
-				$fileContents = fread($hfile, $fileLen);
+				if ($fileLen > 0)
+					$fileContents = fread($hfile, $fileLen);
+				else
+					$fileContents = '';
 				fclose($hfile);
 			}
 			else
@@ -1280,33 +1227,29 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					$saleDateTime = current_time('mysql'); 
 					
 					$saleVals['saleCheckoutTime'] = $saleDateTime;
-					$saleVals['saleStatus'] = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
+					$saleVals['saleStatus'] = PAYMENT_API_SALESTATUS_CHECKOUT;
 				
 					// Add empty values for fields that do not have a default value
-					$saleVals['saleFirstName'] = '';	
-					$saleVals['saleLastName'] = '';	
-					$saleVals['saleEMail'] = '';
+					$saleVals['saleFirstName'] = isset($results['saleFirstName']) ? $results['saleFirstName'] : '';
+					$saleVals['saleLastName']  = isset($results['saleLastName']) ? $results['saleLastName'] : '';
+					$saleVals['saleEMail']     = isset($results['saleEMail']) ? $results['saleEMail'] : '';
+					
+					// Add values for fields that are entered by user
+					if (isset($results['salePPStreet']))    $saleVals['salePPStreet'] = $results['salePPStreet'];
+					if (isset($results['salePPCity']))      $saleVals['salePPCity'] = $results['salePPCity'];
+					if (isset($results['salePPState']))     $saleVals['salePPState'] = $results['salePPState'];
+					if (isset($results['salePPZip']))       $saleVals['salePPZip'] = $results['salePPZip'];
+					if (isset($results['salePPCountry']))   $saleVals['salePPCountry'] = $results['salePPCountry'];
+					if (isset($results['salePPPhone']))     $saleVals['salePPPhone'] = $results['salePPPhone'];
+					
 					$saleVals['saleTxnid'] = '';
 
 					$saleVals['salePaid'] = '0.0';
 					$saleVals['saleFee'] = '0.0';
-					if (isset($results['saleTransactionfee']))
-					{
-						$saleVals['saleTransactionFee'] = $results['saleTransactionfee'];
-					}
-					if (isset($results['saleDonation']))
-					{
-						$saleVals['saleDonation'] = $results['saleDonation'];
-					}
-					if (isset($results['saleNoteToSeller']))
-					{
-						$saleVals['saleNoteToSeller'] = $results['saleNoteToSeller'];
-					}
-									
-					if (isset($results['salePPExpToken']))
-					{
-						$saleVals['salePPExpToken'] = $results['salePPExpToken'];
-					}
+					if (isset($results['saleTransactionfee']))  $saleVals['saleTransactionFee'] = $results['saleTransactionfee'];
+					if (isset($results['saleDonation']))        $saleVals['saleDonation'] = $results['saleDonation'];
+					if (isset($results['saleNoteToSeller']))	$saleVals['saleNoteToSeller'] = $results['saleNoteToSeller'];
+					if (isset($results['salePPExpToken']))      $saleVals['salePPExpToken'] = $results['salePPExpToken'];
 									
 					$saleID = $this->AddSale($saleDateTime, $saleVals);
 
@@ -1438,7 +1381,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$method = ($urlParams == '') ? 'GET' : 'POST';			
 			}
 			
-			$HTTPResponse = PayPalAPIClass::HTTPAction($url, $urlParams, $method, $redirect);
+			$HTTPResponse = StageShowLibGatewayBaseClass::HTTPAction($url, $urlParams, $method, $redirect);
 			if ($this->getDbgOption('Dev_ShowMiscDebug') == 1)
 			{
 				echo "HTTPRequest Called<br>";

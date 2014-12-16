@@ -37,18 +37,15 @@ if (!class_exists('StageShowWPOrgTDTExportAdminClass'))
 				{
 					$this->fieldNames = $this->GetFields();
 	
-					$showID = 0;
-					$perfID = 0;
-					if (isset($_POST['export_showid']))
+					$perfID = 0;					
+					$showID = StageShowLibHTTPIO::GetRequestedInt('export_showid', 0);
+					if ($showID != 0) 
 					{
-						$showID = $_POST['export_showid'];
-						if (($showID != 0) && isset($_POST['export_perfid']))
+						$showAndperfID = StageShowLibHTTPIO::GetRequestedInt('export_perfid', 0);
+						if ($showAndperfID != 0)
 						{
-							if ($_POST['export_perfid'] != "0")
-							{
-								$showAndperfID = explode('-', $_POST['export_perfid']);
-								$perfID = $showAndperfID[1];
-							}
+							$showAndperfIDParts = explode('.', $showAndperfID);
+							$perfID = $showAndperfIDParts[1];
 						}
 					}
 					
@@ -95,6 +92,7 @@ if (!class_exists('StageShowWPOrgTDTExportAdminClass'))
 
 		function GetFields()
 		{	
+			$gatewayName = $this->myDBaseObj->gatewayObj->GetName();
 			$fieldNames = array(
 				'perfDateTime'       => __('Performance Date & Time', $this->myDomain),
 				'perfID'             => __('Performance ID', $this->myDomain),
@@ -111,7 +109,7 @@ if (!class_exists('StageShowWPOrgTDTExportAdminClass'))
 				'saleDateTime'       => __('Date & Time', $this->myDomain),
 				'saleEMail'          => __('Sale EMail', $this->myDomain),
 				'saleTransactionFee' => __('Booking Fee', $this->myDomain),
-				'saleFee'            => __('PayPal Fees', $this->myDomain),
+				'saleFee'            => $gatewayName.' '.__('Fees', $this->myDomain),
 				'saleDonation'       => __('Donation', $this->myDomain),
 				'saleID'             => __('Sale ID', $this->myDomain),
 				'saleFirstName'      => __('First Name', $this->myDomain),
@@ -427,7 +425,17 @@ echo '
 
 			// Get list of ticket types for all shows
 			$typesList = $this->myDBaseObj->GetAllTicketTypes();
-					
+			
+			// Add ticket name to array created by GetFields()
+			$this->fieldNames = array_merge($this->fieldNames, array('ticketName' => __('Ticket Name', $this->myDomain)));
+			
+			// Add custom ticket type name to array created by GetFields()
+			foreach ($typesList as $typeRec)	
+			{
+				$typeName = $typeRec->priceType;
+				$this->fieldNames = array_merge($this->fieldNames, array($typeName => $typeName));
+			}
+			
 			$showLists = $this->myDBaseObj->GetAllShowsList();
 			foreach ($showLists as $showEntry)
 			{
@@ -442,7 +450,6 @@ echo '
 
 					// Get all sales for this performance
 					$salesList = $this->myDBaseObj->GetTicketsListByPerfID($perfsList->perfID);
-					
 					$lastSaleID = 0;
 					
 					foreach ($salesList as $thisSale)
@@ -486,7 +493,7 @@ echo '
 					}
 				}
 			}
-			
+	
 			$this->exportDB($accumList);
 		}
 	}

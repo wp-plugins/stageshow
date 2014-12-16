@@ -42,10 +42,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			
 			$myDBaseObj = $this->CreateDBClass($caller);
 			
-			if (defined('STAGESHOW_ALLOW_TESTMODE'))
-			{
-				$myDBaseObj->testModeEnabled = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
-			}
 			$this->myDBaseObj = $myDBaseObj;
 					
 			parent::__construct();
@@ -77,7 +73,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			$this->getStageshowOptions();
 			
 			$myDBaseObj = $this->myDBaseObj;
-			//$this->pluginName = $myDBaseObj->get_name();
 			
 			//Actions
 			add_action('admin_menu', array(&$this, 'GenerateMenus'));
@@ -107,9 +102,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		function getStageshowOptions() 
 		{
 			$myDBaseObj = $this->myDBaseObj;
-			
-			$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
-			
 			return $myDBaseObj->adminOptions;
 		}
 		// Saves the admin options to the options data table
@@ -117,7 +109,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		function saveStageshowOptions()
 		{
 			$myDBaseObj = $this->myDBaseObj;
-			$myDBaseObj->setPayPalCredentials(STAGESHOW_PAYPAL_IPN_NOTIFY_URL);
 			$myDBaseObj->saveOptions();
 		}
 		
@@ -140,6 +131,8 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			
 			// Bump the activation counter
 			$myDBaseObj->adminOptions['ActivationCount']++;
+			
+			$myDBaseObj->adminOptions['TestModeEnabled'] = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
 			
 			$LogsFolder = ABSPATH . '/' . $myDBaseObj->adminOptions['LogsFolderPath'];
 			if (!is_dir($LogsFolder))
@@ -200,7 +193,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			
 	  		// FUNCTIONALITY: Runtime - Output StageShow Meta Tag
 			// Get Version Number
-			$pluginID = $myDBaseObj->get_name();
+			$pluginID = $myDBaseObj->get_pluginName();
 			$pluginVer = $myDBaseObj->get_version();
 			$boxofficeURL = $myDBaseObj->getOption('boxofficeURL');
 			
@@ -335,7 +328,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 					if (!current_user_can(STAGESHOW_CAPABILITY_ADMINUSER))
 						return;
 					
-					$saleId = (isset($_POST['id'])) ? $saleId = $_POST['id'] : 0;
+					$saleId = StageShowLibHTTPIO::GetRequestedInt('id', 0);
 					echo '<input type="hidden" name="id" value="'.$saleId.'"/>'."\n";
 						
 					$this->OutputContent_OnlinePurchaserDetails();
@@ -393,7 +386,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			{
 				// Output Select Status Drop-down Dialogue
 				$saleStatus = isset($cartContents->saleStatus) ? $cartContents->saleStatus : '';
-				$selectCompleted = ($saleStatus == PAYPAL_APILIB_SALESTATUS_COMPLETED) ? 'selected=true ' : '';
+				$selectCompleted = ($saleStatus == PAYMENT_API_SALESTATUS_COMPLETED) ? 'selected=true ' : '';
 				$selectReserved  = ($saleStatus == STAGESHOW_SALESTATUS_RESERVED) ? 'selected=true ' : '';
 				
 				$formHTML .=  '
@@ -401,7 +394,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 					<td class="stageshow-boxoffice-formFieldID">'.__('Status', $this->myDomain).':&nbsp;</td>
 					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
 				<select id="saleStatus" name="saleStatus">
-					<option value="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'" '.$selectCompleted.'>'.__('Completed', $this->myDomain).'&nbsp;</option>
+					<option value="'.PAYMENT_API_SALESTATUS_COMPLETED.'" '.$selectCompleted.'>'.__('Completed', $this->myDomain).'&nbsp;</option>
 					<option value="'.STAGESHOW_SALESTATUS_RESERVED.'" '.$selectReserved.'>'.__('Reserved', $this->myDomain).'&nbsp;</option>
 				</select>
 					</td>
@@ -411,7 +404,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			else
 			{
 				$formHTML .= '
-				<input type="hidden" id="saleStatus" name="saleStatus" value="'.PAYPAL_APILIB_SALESTATUS_COMPLETED.'"/>
+				<input type="hidden" id="saleStatus" name="saleStatus" value="'.PAYMENT_API_SALESTATUS_COMPLETED.'"/>
 				';
 			}
 			
@@ -448,7 +441,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			$formHTML .= "<div>\n";			
 			
 			// Now Output all PayPal tags as edit boxes
-			//$formHTML .= $this->PayPalTags($this->myDBaseObj->opts['CfgOptionsID'], false);
+			//$formHTML .= $this->GatewayTags($this->myDBaseObj->opts['CfgOptionsID'], false);
 			
 			echo $formHTML;
 			return $formHTML;
@@ -461,7 +454,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			if (isset($_POST['id']))
 			{
 				// Get Current DB Entry
-				$saleID = $_POST['id'];
+				$saleID = StageShowLibHTTPIO::GetRequestedInt('id');
 				$saleEntries = $myDBaseObj->GetSale($saleID);				
 			}
 			else
@@ -501,13 +494,13 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 					}
 				
 					$cartContents->saleTxnId = 'MAN-'.time();				
-					//$cartContents->saleStatus = PAYPAL_APILIB_SALESTATUS_COMPLETED;			
+					//$cartContents->saleStatus = PAYMENT_API_SALESTATUS_COMPLETED;			
 					$cartContents->salePPName = $cartContents->saleFirstName.''.$cartContents->saleLastName;
 					$cartContents->salePaid = $runningTotal;				
 					$cartContents->saleFee = 0.0;
 					
 					//$saleVals['saleCheckoutTime'] = $saleDateTime;
-					//$saleVals['saleStatus'] = PAYPAL_APILIB_SALESTATUS_CHECKOUT;
+					//$saleVals['saleStatus'] = PAYMENT_API_SALESTATUS_CHECKOUT;
 					
 					$saleID = $myDBaseObj->Ex_AddSale($saleDateTime, $cartContents);
 				}
@@ -578,7 +571,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			
 			if (isset($adminCap) && function_exists('add_menu_page')) 
 			{
-				$ourPluginName = $myDBaseObj->get_name();
+				$ourPluginName = $myDBaseObj->get_pluginName();
 				
 				$icon_url = STAGESHOW_ADMIN_IMAGES_URL.'stageshow16grey.png';
 				add_menu_page($ourPluginName, $ourPluginName, $adminCap, STAGESHOW_MENUPAGE_ADMINMENU, array(&$this, 'printAdminPage'), $icon_url);
@@ -604,16 +597,21 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 				add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Settings', $this->myDomain), __('Settings', $this->myDomain),    $viewSettingsCap,                   STAGESHOW_MENUPAGE_SETTINGS,     array(&$this, 'printAdminPage'));
 
 				// Show test menu if stageshow_testsettings.php is present
-				if ($myDBaseObj->InTestMode() && current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
+				if ($myDBaseObj->InTestMode() && current_user_can(STAGESHOW_CAPABILITY_DEVUSER))
 				{
 					add_submenu_page( 'options-general.php', $ourPluginName.' Test', $ourPluginName.' Test', STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_TESTSETTINGS, array(&$this, 'printAdminPage'));
 				}
 				
 				if (!$myDBaseObj->getDbgOption('Dev_DisableTestMenus') 
-				  && current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN) )
+				  && (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN) || current_user_can(STAGESHOW_CAPABILITY_DEVUSER)))
 				{
-					if ( file_exists(STAGESHOW_TEST_PATH.'stageshowlib_devtestcaller.php') ) 
-						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));
+					if ( isset($_SESSION['stageshowlib_debug_test']) && file_exists(STAGESHOW_TEST_PATH.'stageshowlib_devtestcaller.php') ) 
+					{
+						include STAGESHOW_TEST_PATH.'stageshowlib_devtestcaller.php';   
+						$devTestFiles = StageShowLibDevCallerClass::DevTestFilesList(STAGESHOW_TEST_PATH);
+						if (count($devTestFiles) > 0)
+							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOW_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));
+					}
 
 					if ( isset($_SESSION['stageshowlib_debug_menu']) )
 					{

@@ -64,7 +64,7 @@ if (!class_exists('StageShowWPOrgOverviewAdminListClass'))
 		function GetDetailsRowsDefinition()
 		{
 			$ourOptions = array(
-//				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Name',	                     StageShowLibTableClass::TABLEPARAM_ID => 'showName',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYPAL_APILIB_PPSALENAME_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => PAYPAL_APILIB_PPSALENAME_EDITLEN, ),
+//				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Name',	                     StageShowLibTableClass::TABLEPARAM_ID => 'showName',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALENAME_TEXTLEN,      StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALENAME_EDITLEN, ),
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsDefinition(), $ourOptions);
@@ -74,7 +74,7 @@ if (!class_exists('StageShowWPOrgOverviewAdminListClass'))
 		function GetDetailsRowsFooter()
 		{
 			$ourOptions = array(
-				array(StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_FUNCTION, StageShowLibTableClass::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
+				array(StageShowLibTableClass::TABLEPARAM_ID => 'saleDetails', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_FUNCTION, StageShowLibTableClass::TABLEPARAM_FUNC => 'ShowSaleDetails'),						
 			);
 			
 			$ourOptions = array_merge(parent::GetDetailsRowsFooter(), $ourOptions);
@@ -211,7 +211,7 @@ if (!class_exists('StageShowWPOrgOverviewAdminClass'))
 	
 			if(count($results) == 0)
 			{
-				// FUNCTIONALITY: Overview - Show Link to Settings page if PayPal settings required
+				// FUNCTIONALITY: Overview - Show Link to Settings page if Payment Gateway settings required
 				if ($isConfigured)
 				{
 					// FUNCTIONALITY: Overview - Show message and "Create Sample" button if no shows configured

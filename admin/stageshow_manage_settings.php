@@ -20,7 +20,7 @@ Copyright 2014 Malcolm Shergold
 
 */
 
-include STAGESHOW_INCLUDE_PATH.'stageshowlib_paypal_settings.php';
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_gateway_settings.php';
 
 if (!class_exists('StageShowWPOrgSettingsAdminListClass')) 
 {
@@ -30,7 +30,7 @@ if (!class_exists('StageShowWPOrgSettingsAdminListClass'))
 	define('STAGESHOW_ORGANISATIONID_EDITLEN',60);
 	define('STAGESHOW_MAIL_EDITLEN', 60);
 	
-	class StageShowWPOrgSettingsAdminListClass extends PayPalSettingsAdminListClass // Define class
+	class StageShowWPOrgSettingsAdminListClass extends GatewaySettingsAdminListClass // Define class
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{	
@@ -38,9 +38,6 @@ if (!class_exists('StageShowWPOrgSettingsAdminListClass'))
 			{
 				$editMode = false;
 			}
-			
-			if (!isset($this->IncludeAPI))
-				$this->IncludeAPI = false;
 			
 			// Call base constructor
 			parent::__construct($env, $editMode);
@@ -60,12 +57,26 @@ if (!class_exists('StageShowWPOrgSettingsAdminListClass'))
 			return "stageshow-settings";
 		}
 		
+		function OutputList($results, $updateFailed = false)
+		{
+			ob_start();
+			parent::OutputList($results, $updateFailed);
+			$htmlout = ob_get_contents();
+			ob_end_clean();
+			
+			$gatewaySelectIDDef = 'id="GatewaySelected"';
+			$gatewaySelectOnClick = ' onchange="stageshow_ClickGateway(this)" ';
+			
+			$htmlout = str_replace($gatewaySelectIDDef, $gatewaySelectOnClick.$gatewaySelectIDDef, $htmlout);
+			echo $htmlout;
+		}
+		
 		function GetMainRowsDefinition()
 		{
 			$this->isTabbedOutput = true;
 			
 			$rowDefs = array(			
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'General',    StageShowLibTableClass::TABLEPARAM_ID => 'general-settings-tab', StageShowLibTableClass::TABLEPARAM_AFTER => 'paypal-settings-tab', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'General',    StageShowLibTableClass::TABLEPARAM_ID => 'general-settings-tab', StageShowLibTableClass::TABLEPARAM_AFTER => 'gateway-settings-tab', ),
 			);
 			
 			$rowDefs = $this->MergeSettings(parent::GetMainRowsDefinition(), $rowDefs);

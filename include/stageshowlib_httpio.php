@@ -1,13 +1,8 @@
 <?php
 /* 
-Plugin Name: StageShow
-Plugin URI: http://www.corondeck.co.uk/StageShow/WPOrg
-Version: 4.3
-Author: Malcolm Shergold
-Author URI: http://www.corondeck.co.uk
-Description: A Wordpress Plugin to sell theatre tickets online
+Description: Generic HTTP Functions
  
-Copyright 2013 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,24 +13,44 @@ Copyright 2013 Malcolm Shergold
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-if (defined('IPN_CALLBACK'))
+if (!class_exists('StageShowLibHTTPIO')) 
 {
-	if (IPN_CALLBACK != 'STAGESHOW_VARIANT')
-		return;
+	class StageShowLibHTTPIO // Define class
+	{
+
+		static function GetRequestedInt($paramId, $defaultVal = '', $exitOnError = true)
+		{
+			if (!isset($_REQUEST[$paramId]))
+				return $defaultVal;
+			
+			$rtnVal = $_REQUEST[$paramId];	
+			if (!is_numeric($rtnVal))
+			{
+				if ($exitOnError)
+					die("Program Terminated - Invalid POST");
+				else
+					return $defaultVal;
+			}
+			
+			return $rtnVal;
+		}
+		
+		static function GetRequestedString($paramId, $defaultVal = '')
+		{
+			if (!isset($_REQUEST[$paramId]))
+				return $defaultVal;
+			
+			return $_REQUEST[$paramId];
+		}
+		
+	}
 }
 
-define('STAGESHOW_CODE_PREFIX', 'stageshow');
-
-include 'stageshow_defs.php';
-include 'stageshow_main.php';
-
-new StageShowWPOrgPluginClass(__FILE__);
-		
 ?>

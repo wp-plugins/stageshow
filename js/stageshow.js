@@ -143,46 +143,62 @@ function stageshow_OnClickAdd(obj)
 {
 	if (typeof stageshow_OnClickAdd == 'function') 
 	{ 
-  		stageshow_OnClickAdd(obj); 
+  		return stageshow_OnClickAdd(obj); 
 	}	
+	return true;
 }
 
 function stageshow_OnClickSelectseats(obj)
 {
 	if (typeof stageshowCustom_OnClickSelectseats == 'function') 
 	{ 
-  		stageshowCustom_OnClickSelectseats(obj); 
+  		return stageshowCustom_OnClickSelectseats(obj); 
 	}	
+	return true;
 }
 
 function stageshow_OnClickSeatsselected(obj)
 {
 	if (typeof stageshowCustom_OnClickSeatsselected == 'function') 
 	{ 
-  		stageshowCustom_OnClickSeatsselected(obj); 
+  		return stageshowCustom_OnClickSeatsselected(obj); 
 	}	
+	return true;
 }
 
 function stageshow_OnClickReserve(obj)
 {
 	if (typeof stageshowCustom_OnClickReserve == 'function') 
 	{ 
-  		stageshowCustom_OnClickReserve(obj); 
+  		return stageshowCustom_OnClickReserve(obj); 
 	}	
+	return true;
 }
 
 function stageshow_OnClickCheckout(obj)
 {
 	if (typeof stageshowCustom_OnClickCheckout == 'function') 
 	{ 
-  		stageshowCustom_OnClickCheckout(obj); 
+  		return stageshowCustom_OnClickCheckout(obj); 
 	}
+	return true;
+}
+
+function stageshow_OnClickSubmitDetails(obj)
+{
+	if (typeof stageshowCustom_OnClickSubmitDetails == 'function') 
+	{ 
+  		return stageshowCustom_OnClickSubmitDetails(obj); 
+	}
+	
+	return stageshowStandard_OnClickSubmitDetails(obj); 
 }
 
 function stageshow_OnClickRemove(obj)
 {
 	if (typeof stageshowCustom_OnClickRemove == 'function') 
 	{ 
-  		stageshowCustom_OnClickRemove(obj); 
+  		return stageshowCustom_OnClickRemove(obj); 
 	}
+	return true;
 }

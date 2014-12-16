@@ -22,6 +22,8 @@ Copyright 2014 Malcolm Shergold
 	
 if (!class_exists('StageShowLibTableTestEMailClass')) 
 {
+	include 'stageshowlib_httpio.php';
+	
 	if (!defined('STAGESHOWLIB_TESTSALES_LIMIT')) 
 		define('STAGESHOWLIB_TESTSALES_LIMIT', 20);
 	
@@ -48,7 +50,7 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 				$caller->CheckAdminReferer();
 					
 				// Run EMail Test		
-				$saleID = $_POST['TestSaleID'];
+				$saleID = StageShowLibHTTPIO::GetRequestedInt('TestSaleID');
 				$DivertEMailTo = stripslashes($_POST['DivertEMailTo']);
 				$saleResults = $myDBaseObj->GetSale($saleID);
 				if(count($saleResults) == 0) {
@@ -59,13 +61,22 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 					if (strlen($DivertEMailTo) == 0)
 						$DivertEMailTo = $saleResults[0]->saleEMail;
 						
+					if (isset($_POST['EMailSale_DebugEnabled'])) 
+						$myDBaseObj->dbgOptions['Dev_ShowEMailMsgs'] = true;
+					
+					$myDBaseObj->adminOptions['BccEMailsToAdmin'] = isset($_POST['EMailSale_BCCToAdmin']);
+					
 					if ($myDBaseObj->EMailSale($saleResults[0]->saleID, $DivertEMailTo) == 'OK')
 						echo '<div id="message" class="updated"><p>'.__('EMail Sent to', $myDBaseObj->get_domain()).' '.$DivertEMailTo.'</p></div>';
 				}	
 			}
 			
-			if (!$inForm) echo '<form method="post">'."\n";
-			
+			if (!$inForm) 
+			{
+				$EMailFrom = $myDBaseObj->adminOptions['AdminEMail'];
+				echo '<form method="post">'."\n";
+				$bccChecked = $myDBaseObj->adminOptions['BccEMailsToAdmin'] ? ' checked="yes" ' : "";		
+			}
 ?>
 	<?php $caller->WPNonceField(); ?>
 	<table class="stageshow-form-table">			
@@ -73,10 +84,11 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 			<td vertical-align="middle"><?php _e('Selected Sale', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
 				<select name="TestSaleID" id="TestSaleID">
-<?php		
-foreach($results as $result) {
-			echo '<option value="',$result->saleID.'">'.$result->saleTxnId.' - '.$result->saleEMail.' - '.$result->saleDateTime.'&nbsp;&nbsp;</option>'."\n";
-}
+<?php
+			foreach($results as $result) 
+			{
+				echo '<option value="',$result->saleID.'">'.$result->saleTxnId.' - '.$result->saleEMail.' - '.$result->saleDateTime.'&nbsp;&nbsp;</option>'."\n";
+			}
 ?>
 				</select>
 			</td>
@@ -85,6 +97,25 @@ foreach($results as $result) {
 			<td vertical-align="middle"><?php _e('Divert EMail To', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
 				<input name="DivertEMailTo" id="DivertEMailTo" type="text" maxlength="110" size="50" value="<?php echo $DivertEMailTo; ?>" />
+			</td>
+		</tr>
+<?php
+			if (!$inForm) 
+			{
+?>		
+		<tr valign="top">
+			<td vertical-align="middle"><?php _e('Bcc to Admin', $myDBaseObj->get_domain()); ?>:</td>
+			<td>
+				<input name="EMailSale_BCCToAdmin" type="checkbox" <?php echo $bccChecked; ?> value="1"  />&nbsp;Enable
+			</td>
+		</tr>
+<?php
+			}
+?>		
+		<tr valign="top">
+			<td vertical-align="middle"><?php _e('Debug Output', $myDBaseObj->get_domain()); ?>:</td>
+			<td>
+				<input name="EMailSale_DebugEnabled" type="checkbox" value="1"  />&nbsp;Enable
 			</td>
 		</tr>
 		<tr valign="top">

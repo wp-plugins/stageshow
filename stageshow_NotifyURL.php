@@ -3,6 +3,6 @@
 // Historical target for IPN requests from PayPal ....
 // Does an include to effectively do a redirect
 
-include 'stageshow_ipn_callback.php';
+include 'include/stageshowlib_paypal_callback.php';
 
 ?>
