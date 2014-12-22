@@ -166,6 +166,11 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 					$adminRole->add_cap(STAGESHOW_CAPABILITY_VIEWSETTINGS);
 			}				
 			
+			// Add copies of PayPal IPN notification code for historical configurations
+			// Note: MixedCase copy of stageshow_ipn_callback.php does nothing on Windows Server
+			copy(STAGESHOW_FILE_PATH.'stageshow_ipn_callback.php', STAGESHOW_FILE_PATH.'stageshow_NotifyURL.php');
+			copy(STAGESHOW_FILE_PATH.'stageshow_ipn_callback.php', STAGESHOW_FILE_PATH.'StageShow_ipn_callback.php');
+			
       		$myDBaseObj->upgradeDB();
 		}
 

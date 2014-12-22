@@ -43,6 +43,7 @@ if (!defined('StageShowLibAdminClass'))
 
 include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_salevalidate.php'; 
 include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_validate_api.php';      
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';      
 
 //StageShowLibUtilsClass::print_r($_POST, '$_POST');
 $DBClass = STAGESHOW_PLUGIN_NAME.'ValidateDBaseClass';
@@ -52,6 +53,14 @@ $env['PluginObj'] = null;
 $env['DBaseObj'] = new $DBClass();
 $env['Domain'] = 'stageshow';
 
+$callerNOnce = isset($_REQUEST['nonce']) ? $_REQUEST['nonce'] : "";	
+$ourNOnce = StageShowLibNonce::GetStageShowLibNonce(STAGESHOW_SALEVALIDATE_TARGET);
+if ($callerNOnce != $ourNOnce)
+{
+	echo "Authorisation Failed";
+	exit;
+}
+	
 $SaleClass = STAGESHOW_PLUGIN_NAME.'SaleValidateClass';
 $valObj = new $SaleClass($env);
 $valObj->myDBaseObj = $env['DBaseObj'];
