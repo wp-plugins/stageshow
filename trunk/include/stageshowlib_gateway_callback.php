@@ -24,7 +24,12 @@ Copyright 2014 Malcolm Shergold
 if (!defined('DB_NAME'))
 {
 	// Include wp-config.php - This will include wp settings and plugins ...
-	include '../../../../wp-config.php';	
+	$rootPath = __FILE__;
+	$folder = 'public_html';
+	$index = strpos($rootPath, $folder);
+	$rootPath = substr($rootPath, 0, $index + strlen($folder));
+	
+	include $rootPath.'/wp-config.php';	
 }
 
 include 'stageshowlib_logfile.php';

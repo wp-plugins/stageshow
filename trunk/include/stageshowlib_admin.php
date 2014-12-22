@@ -39,15 +39,6 @@ if (!class_exists('StageShowLibAdminBaseClass'))
 			$this->myDomain = $env['Domain'];
 		}
 		
-		static function getEnv($callerContext)
-		{
-			$env['caller'] = $callerContext->caller;
-			$env['PluginObj'] = $callerContext->myPluginObj;
-			$env['DBaseObj'] = $callerContext->myDBaseObj;
-			$env['Domain'] = $callerContext->myDomain;
-			return $env;
-		}
-		
 		function WPNonceField($referer = '', $name = '_wpnonce', $echo = true)
 		{
 			$this->myDBaseObj->WPNonceField($referer, $name, $echo);

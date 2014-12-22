@@ -31,6 +31,8 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 	if (!defined('STAGESHOW_VERIFYLOG_DUPLICATEACTION')) 
 		define('STAGESHOW_VERIFYLOG_DUPLICATEACTION', '');
 
+	define('STAGESHOW_SALEVALIDATE_TARGET', 'stageshow_jquery_validate.php');
+	
 	include STAGESHOW_INCLUDE_PATH.'stageshowlib_admin.php';
 	
 	class StageShowWPOrgSaleValidateClass extends StageShowLibAdminClass
@@ -142,6 +144,7 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 				
 		function ValidateSaleForm()
 		{
+include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';      
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$TxnId = '';
@@ -181,7 +184,8 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 				</td>
 			</tr>
 			<?php
-			$jQueryURL = STAGESHOW_URL."include/stageshow_jquery_validate.php";
+			$jQueryURL = STAGESHOW_URL."include/".STAGESHOW_SALEVALIDATE_TARGET;
+			$ourNOnce = StageShowLibNonce::GetStageShowLibNonce(STAGESHOW_SALEVALIDATE_TARGET);
 
 			echo '
 			<script>
@@ -249,6 +253,7 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 					var url = "'.$jQueryURL.'";
 				    jQuery.post(url,
 					    {
+					      nonce: "'.$ourNOnce.'",
 					      TxnId: TxnId,
 					      perfID: perfID,
 					      location: location,'.$postParams.'

@@ -724,7 +724,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function SaveDBCredentials($credsPath, $defines = '')
 		{
-			$dbCreds = DB_NAME."-".DB_USER."-".DB_PASSWORD."-".DB_HOST;
+			$dbCreds = DB_NAME."-".DB_USER."-".DB_PASSWORD."-".DB_HOST."-".NONCE_KEY; 
 			
 			global $table_prefix;			
 			if ($table_prefix != '')
@@ -755,6 +755,9 @@ if (!class_exists('StageShowLibDBaseClass'))
 
 		/** MySQL hostname */
 		define('DB_HOST', '".DB_HOST."');		
+
+		/** NONCE_KEY salt value */
+		define('NONCE_KEY', '".NONCE_KEY."');		
 	}
 	
 	/** Composite of all DB Credentials - Used to check if they have changed ... */
