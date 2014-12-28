@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
 Tested up to: 4.1
-Stable tag: 4.3.1
+Stable tag: 4.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -37,7 +37,7 @@ StageShow Features Summary
 * Access to StageShow Admin pages/features controlled by custom capabilities
 * Extensive Help (in PDF format) file shipped with plugin
 
-Additional Features in StageShow+ (available <a href="http://corondeck.co.uk/StageShow/Plus">here</a>)
+<a name="StageShowPlus"></a>Additional Features in StageShow+ (available <a href="http://corondeck.co.uk/StageShow/Plus">here</a>)
 
 * No limit on number of Shows or Performances
 * Unlimited number of User defined "Price Plans" to set prices when adding a performance
@@ -55,7 +55,7 @@ Additional Features in StageShow+ (available <a href="http://corondeck.co.uk/Sta
 * Booking Closing Time can be specified for each performance
 * Custom Style Sheets
 
-Additional Features in StageShowGold (available <a href="http://corondeck.co.uk/StageShow/Gold">here</a>)
+<a name="StageShowGold"></a>Additional Features in StageShowGold (available <a href="http://corondeck.co.uk/StageShow/Gold">here</a>)
 
 * Allocated Seating
 * Custom Seating Layouts
@@ -188,6 +188,14 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 4.4 (28/12/2014) =
+* Bug Fix: Seat Decode Definition only changes after second template modification (StageShowGold)
+* Bug Fix: Error in default IPN URLs
+* Bug Fix: Server Error accessing wp-config.php in IPN call (on some servers)
+* Added "Inactivity" timeout to Shopping Trolley - default 30 minutes
+* Add Zone and Import Template Buttons removed when Seating Plan is ReadOnly (StageShowGold)
+* Added "Requested" and "Selected" Seats Count to Seats Selector (StageShowGold)
 
 = 4.3.1 (22/12/2014) =
 * Bug Fix: Historical IPN Target URL(s) missing

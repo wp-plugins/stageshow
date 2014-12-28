@@ -25,9 +25,9 @@ if (!defined('DB_NAME'))
 {
 	// Include wp-config.php - This will include wp settings and plugins ...
 	$rootPath = __FILE__;
-	$folder = 'public_html';
+	$folder = 'wp-content';
 	$index = strpos($rootPath, $folder);
-	$rootPath = substr($rootPath, 0, $index + strlen($folder));
+	$rootPath = substr($rootPath, 0, $index);
 	
 	include $rootPath.'/wp-config.php';	
 }
