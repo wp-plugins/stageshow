@@ -39,6 +39,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		define('STAGESHOWLIB_NOTETOSELLER_ROWS', 2);
 	}
 	
+	if (!defined('STAGESHOWLIB_TROLLEYTIMEOUT'))
+	{
+		define('STAGESHOWLIB_TROLLEYTIMEOUT', 30*60);
+	}
+	
 	class StageShowLibSalesPluginBaseClass
 	{
 		const PAGEMODE_NORMAL = 'normal';
@@ -606,23 +611,37 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function GetTrolleyContents()
 		{
+			$clearTrolley = true;
+			$timestampNow = time();
 			if (isset($_SESSION[$this->trolleyid]))
 			{
 				$cartContents = unserialize($_SESSION[$this->trolleyid]);
+				if ($timestampNow - $cartContents->timestamp <= STAGESHOWLIB_TROLLEYTIMEOUT)
+				{
+					$clearTrolley = false;
+				}
 			}
-			else
+			
+			if ($clearTrolley)
 			{
 				$cartContents = new stdClass;
 				$cartContents->nextIndex = 1;
 				$cartContents->saleDonation = '';
 				$cartContents->saleNoteToSeller = '';
+				$cartContents->timestamp = 0;
 			}
 			
 			if ($this->myDBaseObj->dev_ShowTrolley())
 			{
+				if ($clearTrolley)
+				{
+					echo "Trolley Cleared - (Timeout or Missing)!<br>";
+				}
 				StageShowLibUtilsClass::print_r($cartContents, 'Get cartContents ('.$this->trolleyid.')');
 			}
 			
+			$cartContents->timestamp = $timestampNow;
+
 			return $cartContents;
 		}
 		
@@ -658,10 +677,14 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$cartContents->nextIndex++;
 			
 			$cartContents->rows[$index] = $newCartEntry;
+			
+			$cartContents->timestamp = time();
 		}
 		
 		function SaveTrolleyContents($cartContents)
 		{
+			$cartContents->timestamp = time();
+
 			if ($this->myDBaseObj->dev_ShowTrolley())
 			{
 				StageShowLibUtilsClass::print_r($cartContents, 'Save cartContents ('.$this->trolleyid.')');

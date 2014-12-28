@@ -131,6 +131,15 @@ define('STAGESHOWLIB_IMAGESURL', 'http://asite.com/images/');
 -------------------------------------------------------------------------------- */
 define('STAGESHOWLIB_NOTETOSELLER_ROWS', 5);
 
+/* --------------------------------------------------------------------------------
+	STAGESHOWLIB_TROLLEYTIMEOUT
+	
+	This value specifies the time, in seconds, that the shopping trolley can be 
+	"inactive" for before it is automatically cleared (default value 1800)
+	
+-------------------------------------------------------------------------------- */
+define('STAGESHOWLIB_TROLLEYTIMEOUT', 1800);
+
 /*
 ------------------------------------------------------------------------------------------------
 	STAGESHOW_VERIFYLOG_DUPLICATEACTION

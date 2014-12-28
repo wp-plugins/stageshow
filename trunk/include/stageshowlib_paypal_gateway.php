@@ -201,7 +201,7 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 				$adminOptions['PayPalAPISig']);
 			$this->SetTestMode(false);
 
-			$useLocalIPNServer = isset($dbgOptions['Dev_IPNLocalServer']);
+			$useLocalIPNServer = isset($dbgOptions['Dev_IPNLocalServer']) && ($dbgOptions['Dev_IPNLocalServer']);
 
 			$this->GatewayNotifyURL = STAGESHOW_PAYPAL_IPN_NOTIFY_URL;							
 			$this->PayPalURL = $this->GetPayPalURL(false);

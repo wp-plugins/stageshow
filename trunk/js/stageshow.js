@@ -1,14 +1,21 @@
 
-const SeatAvailableClass = "stageshow-boxoffice-seat-available";
-const SeatRequestedClass = "stageshow-boxoffice-seat-requested";
-const SeatReservedClass = "stageshow-boxoffice-seat-reserved";
-const SeatDisabledClass = "stageshow-boxoffice-seat-disabled";
+const SeatAvailableClassText = "stageshow-boxoffice-seat-available";
+const SeatRequestedClassText = "stageshow-boxoffice-seat-requested";
+const SeatReservedClassText = "stageshow-boxoffice-seat-reserved";
+const SeatDisabledClassText = "stageshow-boxoffice-seat-disabled";
+
+const SeatStateAvailable = 0;
+const SeatStateRequested = 1;
+const SeatStateReserved = 2;
+const SeatStateDisabled = 3;
 
 const SeatLeftEndClass = "stageshow-boxoffice-leftend";
 const SeatRightEndClass = "stageshow-boxoffice-rightend";
 
 var hasEndLimitTags;
 var hasDebugOutput;
+
+var zonesReq = new Array();
 
 function stageshow_SeatAvailability(seatId)
 {
@@ -62,167 +69,171 @@ function stageshow_IsSeatState(obj, srchState)
 function stageshow_GetSeatState(obj)
 {
 	thisSeatClass = obj.className;
-	if (thisSeatClass.indexOf(SeatRequestedClass) > -1)
+	if (thisSeatClass.indexOf(SeatRequestedClassText) > -1)
 	{
-		return SeatRequestedClass;
+		return SeatStateRequested;
 	}
 	
-	if (thisSeatClass.indexOf(SeatReservedClass) > -1)
+	if (thisSeatClass.indexOf(SeatReservedClassText) > -1)
 	{
-		return SeatReservedClass;
+		return SeatStateReserved;
 	}
 	
-	if (thisSeatClass.indexOf(SeatDisabledClass) > -1)
+	if (thisSeatClass.indexOf(SeatDisabledClassText) > -1)
 	{
-		return SeatDisabledClass;
+		return SeatStateDisabled;
 	}
 	
-	return "stageshow-boxoffice-seat-available";
+	return SeatStateAvailable;
 }
 
 function stageshow_CheckClickSeat(obj)
 {
 	if (!hasEndLimitTags)
-	{
 		return true;
+	
+	if (typeof stageshowCustom_CheckClickSeat == 'function') 
+	{ 
+  		return stageshowCustom_CheckClickSeat(obj); 
 	}
 	
+	if (minSeatSpace <= 0)
+		return true;
+		
 	if (hasDebugOutput)
 	{
-		RequestedRightCountElem = document.getElementById("RequestedRightCount");
-		AvailableRightCountElem = document.getElementById("AvailableRightCount");
-		RequestedLeftCountElem = document.getElementById("RequestedLeftCount");
-		AvailableLeftCountElem = document.getElementById("AvailableLeftCount");
-
-		RequestedRightCountElem.value = "";
-		AvailableRightCountElem.value = "";
-		RequestedLeftCountElem.value = "";
-		AvailableLeftCountElem.value = "";		
+		DebugSeatingGapBlockingElem = document.getElementById("DebugSeatingGapBlocking");
+		DebugSeatingGapBlockingElem.value = "";
 	}
 	
 	seatPosnParts = obj.id.split("_");
 	clickedColNo = parseInt(seatPosnParts[1]);
 	
-	/* Scan for a "gap" to the left of selected seat */
-	var scanCount = [];
+	/* Scan for "gaps" in this block of unallocated seats */
+	var seatsStates = [];
+	var limits = [];
+	var rowEnd = [];
 	
-	nextSeatObj = obj;
-
-	seatState = stageshow_GetSeatState(nextSeatObj);
-	unselectRequest = (seatState == SeatRequestedClass);
-	
-	if (unselectRequest)
+	seatState = stageshow_GetSeatState(obj);
+	switch (seatState)
 	{
-		if ( (stageshow_IsSeatState(obj, SeatLeftEndClass))
-		  || (stageshow_IsSeatState(obj, SeatRightEndClass)) )
-		{
-			return true;
-		}
-		
-		for (seatOffset=-1; seatOffset<=1; seatOffset+=2)
-		{
-			seatColNo = clickedColNo + seatOffset;
-			seatObjId = seatPosnParts[0] + '_' + seatColNo;
-			nextSeatObj = document.getElementById(seatObjId);
-			seatState = stageshow_GetSeatState(nextSeatObj);
-			if (seatState != SeatRequestedClass)
-			{
-				return true;
-			}
-		}
-		
-		return false;
+		case SeatStateAvailable:
+			seatState = SeatStateRequested;
+			break;	
+			
+		case SeatStateRequested:
+			seatState = SeatStateAvailable;
+			break;	
+			
+		default:
+			return false;
 	}
+	seatsStates[clickedColNo] = seatState;
 	
-	scanCountIndex = 0;
-	for (seatOffset=1; seatOffset<=2; seatOffset++)
+	for (scanLoopIndex=0; scanLoopIndex<=1; scanLoopIndex++)
 	{
-		if (seatOffset == 1)
+		seatNo = clickedColNo;
+		if (scanLoopIndex == 0)
 		{
-			/* Repeat scan to the right */
-			endClass = SeatRightEndClass;
-			nextSeatOffset = 1;
+			scanOffset = -1;
+			scanEnd = SeatLeftEndClass;
 		}
 		else
 		{
-			/* Repeat scan to the left */
-			endClass = SeatLeftEndClass;
-			nextSeatOffset = -1;
+			scanOffset = 1;
+			scanEnd = SeatRightEndClass;
 		}
-		
-		if (stageshow_IsSeatState(obj, endClass))
+		limits[scanLoopIndex] = seatNo;
+		rowEnd[scanLoopIndex] = true;
+		if (stageshow_IsSeatState(obj, scanEnd))
 		{
-			scanCount[scanCountIndex+1] = 0;
-			scanCount[scanCountIndex+2] = 1000;
-			scanCountIndex += 2;
 			continue;
 		}
-
-		scanFor = SeatRequestedClass;
-		seatColNo = clickedColNo + nextSeatOffset;
-			
-		for (stateScan=1; stateScan<=2; stateScan++)
+		
+		for (; seatNo>=1; )
 		{
-			scanCountIndex++;
-			scanCount[scanCountIndex] = 0;
-			while (true)
+			seatNo += scanOffset;
+			seatObjId = seatPosnParts[0] + '_' + seatNo;
+			nextSeatObj = document.getElementById(seatObjId);
+			seatState = stageshow_GetSeatState(nextSeatObj);
+						
+			if (seatState >= SeatStateReserved)
 			{
-				seatObjId = seatPosnParts[0] + '_' + seatColNo;
-				nextSeatObj = document.getElementById(seatObjId);
-				seatState = stageshow_GetSeatState(nextSeatObj);
-				if (seatState != scanFor)
-				{
-					if ( (seatState != SeatAvailableClass) && (stateScan == 1) )
-					{
-						/*  The Seat next to the Last Seat Requested is un-available ... 
-							OK to add seat at the other end 
-						*/
-						return true;
-					}
-					break;
-				}
-				
-				scanCount[scanCountIndex] += 1;
-				
-				if (stageshow_IsSeatState(nextSeatObj, endClass))
-				{
-					if (stateScan == 1)
-					{
-						/*  The Last Seat Requested is at the end of a row ... 
-							OK to add seat at the other end 
-						*/
-						return true;
-					}
-					else
-					{
-						scanCount[scanCountIndex] += 1000;						
-					}
-					break;
-				}
-				
-				seatColNo = seatColNo + nextSeatOffset;
+				rowEnd[scanLoopIndex] = false;
+				break;
 			}
-			 
-			scanFor = SeatAvailableClass;
-		}
 			
-	}	
-	
-	if (hasDebugOutput)
-	{
-		RequestedRightCountElem.value = scanCount[1];
-		AvailableRightCountElem.value = scanCount[2];
-		RequestedLeftCountElem.value = scanCount[3];
-		AvailableLeftCountElem.value = scanCount[4];		
+			seatsStates[seatNo] = seatState;
+			limits[scanLoopIndex] = seatNo;		
+			if (stageshow_IsSeatState(nextSeatObj, scanEnd))
+			{
+				break;
+			}
+			
+		}
 	}
 	
-	if ( ((scanCount[2] > 0) && (scanCount[2] < minSeatSpace))
-	  || ((scanCount[4] > 0) && (scanCount[4] < minSeatSpace)) )
+	inBlock = false;
+	blocksCount = 0;
+	availSeatsCount = 0;	
+	foundSmallGap = false;
+	
+	for (seatNo=limits[0]; seatNo<=limits[1]; seatNo++)
 	{
+		seatState = seatsStates[seatNo];
+		switch (seatState)
+		{
+			case SeatStateAvailable:
+				inBlock = false;
+				availSeatsCount++;
+				break;	
+				
+			case SeatStateRequested:
+				if (!inBlock) blocksCount++;
+				inBlock = true;
+				if ((availSeatsCount > 0) && (availSeatsCount < minSeatSpace))
+					foundSmallGap = true;
+				availSeatsCount = 0;
+				break;	
+		}
+	}
+	if ((availSeatsCount > 0) && (availSeatsCount < minSeatSpace))
+		foundSmallGap = true;
+
+	if (blocksCount > 1) 
 		return false;
-	}
+	
+	if (rowEnd[0] && (seatsStates[limits[0]] == SeatStateRequested)) 
+		return true;
+	if (rowEnd[1] && (seatsStates[limits[1]] == SeatStateRequested)) 
+		return true;
+	
+	if (foundSmallGap) 
+		return false;
 	
 	return true;
+}
+
+function stageshow_UpdateZonesCount(zoneID, zoneCountRequested, zoneCountCurrent)
+{
+	var elemIdRoot = "stageshow-boxoffice-zoneSeatsBlock";
+	var blockElem = document.getElementById(elemIdRoot);
+	if (blockElem == null)
+		return;
+		
+	var zoneElem = document.getElementById(elemIdRoot+zoneID);
+	if (zoneElem == null)
+		return;
+		
+	requestedElem = document.getElementById(elemIdRoot+"-requested"+zoneID);
+	requestedElem.innerHTML = zoneCountRequested;
+	
+	zoneCountSelected = zoneCountRequested - zoneCountCurrent;
+	selectedElem = document.getElementById(elemIdRoot+"-selected"+zoneID);
+	selectedElem.innerHTML = zoneCountSelected;
+	
+	zoneElem.style.display = '';
+	blockElem.style.display = '';
 }
 
 function stageshow_ClickSeat(obj)
@@ -246,6 +257,7 @@ function stageshow_ClickSeat(obj)
 
 	if (!stageshow_CheckClickSeat(obj))
 	{
+		alert(CantReserveSeatMessage);
 		return;
 	}
 
@@ -255,31 +267,33 @@ function stageshow_ClickSeat(obj)
 	zoneIDMark = " " + zoneID + " ";
 	
 	var className = obj.className;
-	var classPosn = className.search(SeatAvailableClass);
+	var classPosn = className.search(SeatAvailableClassText);
 	
 	hiddenSeatsElem = document.getElementById("stageshow-boxoffice-layout-seats");
 	hiddenZonesElem = document.getElementById("stageshow-boxoffice-layout-zones");
 	
 	/* Remove existing class specifier */
-	className  = className.replace(SeatAvailableClass + ' ', '');
-	className  = className.replace(SeatRequestedClass + ' ', '');
+	className  = className.replace(SeatAvailableClassText + ' ', '');
+	className  = className.replace(SeatRequestedClassText + ' ', '');
 	
 	if (classPosn >= 0)
 	{
 		if (zones[zoneID] <= 0)
 			return;
 			
-		className = SeatRequestedClass + ' ' + className;		
+		className = SeatRequestedClassText + ' ' + className;		
 		hiddenSeatsElem.value = hiddenSeatsElem.value + seatIdMark;
 		hiddenZonesElem.value = hiddenZonesElem.value + zoneIDMark;
 		zones[zoneID] = zones[zoneID] - 1;
+		stageshow_UpdateZonesCount(zoneID, zonesReq[zoneID], zones[zoneID]);
 	}
 	else
 	{
-		className = SeatAvailableClass + ' ' + className;
+		className = SeatAvailableClassText + ' ' + className;
 		hiddenSeatsElem.value = hiddenSeatsElem.value.replace(seatIdMark, "");
 		hiddenZonesElem.value = hiddenZonesElem.value.replace(zoneIDMark, "");
 		zones[zoneID] = zones[zoneID] + 1;
+		stageshow_UpdateZonesCount(zoneID, zonesReq[zoneID], zones[zoneID]);
 	}
 	obj.className = className;
 	
@@ -315,26 +329,32 @@ function stageshow_OnSeatsLoad()
 					switch (stageshow_SeatAvailability(seatId))
 					{
 						case '': 
-							seatObj.className = SeatAvailableClass + ' ' + className;
+							seatObj.className = SeatAvailableClassText + ' ' + className;
 							break;
 							
 						case 'selected': 
-							seatObj.className = SeatAvailableClass + ' ' + className;
+							seatObj.className = SeatAvailableClassText + ' ' + className;
 							stageshow_ClickSeat(seatObj);
 							break;
 							
 						default: 
-							seatObj.className = SeatReservedClass + ' ' + className;
+							seatObj.className = SeatReservedClassText + ' ' + className;
 							break;
 							
 					}
 				}
 				else
 				{
-					seatObj.className = SeatDisabledClass + ' ' + className;					
+					seatObj.className = SeatDisabledClassText + ' ' + className;					
 				}
 			}
 		}
+	}
+	
+	for (var zoneID in zones) 
+	{
+		zonesReq[zoneID] = zones[zoneID];
+		stageshow_UpdateZonesCount(zoneID, zonesReq[zoneID], zones[zoneID]);		
 	}
 }
 
