@@ -21,11 +21,11 @@ Copyright 2014 Malcolm Shergold
 */
 
 include 'stageshowlib_table.php';
-include 'stageshowlib_paypal_salesadmin.php';      
+include 'stageshowlib_gatewaysalesadmin.php';      
 
 if (!class_exists('StageShowWPOrgSalesAdminListClass')) 
 {
-	class StageShowWPOrgSalesAdminListClass extends StageShowLibPayPalSalesAdminListClass // Define class
+	class StageShowWPOrgSalesAdminListClass extends StageShowLibGatewaySalesAdminListClass // Define class
 	{		
 		var	$salesList;
 		

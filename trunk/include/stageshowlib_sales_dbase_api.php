@@ -235,7 +235,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		//Returns an array of admin options
-		function getOptions($childOptions = array(), $saveToDB = true) 
+		function getOptions($childOptions = array()) 
 		{
 			$ourOptions = array(
 				'CheckoutCompleteURL' => '',        
@@ -261,11 +261,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$currOptions = parent::getOptions($ourOptions, false);
 			
+			$saveToDB = false;
+			
 			// PayPalLogoImageURL option has been changed to PayPalLogoImageFile
 			if (isset($currOptions['PayPalLogoImageURL']))
 			{
 				$currOptions['PayPalLogoImageFile'] = basename($currOptions['PayPalLogoImageURL']);
 				unset($currOptions['PayPalLogoImageURL']);
+				$saveToDB = true;
 			}
 				
 			// PayPalHeaderImageURL option has been changed to PayPalHeaderImageFile
@@ -273,6 +276,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			{
 				$currOptions['PayPalHeaderImageFile'] = basename($currOptions['PayPalHeaderImageURL']);
 				unset($currOptions['PayPalHeaderImageURL']);
+				$saveToDB = true;
 			}
 				
 			$this->adminOptions = $currOptions;
@@ -353,7 +357,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$this->ShowDebugModes();
 		}
 		
-		function UseTestPayPalSettings($testSettings)
+		function SetTestSettings($testSettings)
 		{
 			if (!isset($this->adminOptions))
 			{
@@ -369,10 +373,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		// Saves the admin options to the options data table
-		function saveOptions($newOptions = null)
+		function saveOptions()
 		{
-			if ($newOptions == null)
-				$newOptions = $this->adminOptions;
+			$newOptions = $this->adminOptions;
 				
 			if (isset($newOptions['PayPalCurrency']))
 			{
@@ -428,6 +431,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						salePPPhone VARCHAR('.PAYMENT_API_SALEPPPHONE_TEXTLEN.'),
 						salePaid DECIMAL(9,2) NOT NULL,
 						saleDonation DECIMAL(9,2) NOT NULL DEFAULT 0,
+						salePostage DECIMAL(9,2) NOT NULL DEFAULT 0,
 						saleTransactionFee DECIMAL(9,2) NOT NULL DEFAULT 0,
 						saleFee DECIMAL(9,2) NOT NULL,
 						saleTxnId VARCHAR('.PAYMENT_API_SALETXNID_TEXTLEN.') NOT NULL,
@@ -579,6 +583,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				'saleEMail', 
 				'salePaid', 
 				'saleDonation', 
+				'salePostage', 
 				'saleTransactionFee', 
 				'saleFee', 
 				'salePPStreet', 
@@ -912,6 +917,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				case '[saleTransactionFee]':
 				case '[salePaid]':
 				case '[saleDonation]':
+				case '[salePostage]':
 					return true;
 			}
 			
@@ -1248,6 +1254,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					$saleVals['saleFee'] = '0.0';
 					if (isset($results['saleTransactionfee']))  $saleVals['saleTransactionFee'] = $results['saleTransactionfee'];
 					if (isset($results['saleDonation']))        $saleVals['saleDonation'] = $results['saleDonation'];
+					if (isset($results['salePostage']))         $saleVals['salePostage'] = $results['salePostage'];
 					if (isset($results['saleNoteToSeller']))	$saleVals['saleNoteToSeller'] = $results['saleNoteToSeller'];
 					if (isset($results['salePPExpToken']))      $saleVals['salePPExpToken'] = $results['salePPExpToken'];
 									

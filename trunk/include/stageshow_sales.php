@@ -76,7 +76,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
         	return $atts;
 		}
 		
-		function OutputContent_OnlineStore($atts)
+		function OutputContent_DoShortcode($atts)
 		{
 			if ($this->pageMode == self::PAGEMODE_DEMOSALE)
 			{
@@ -113,7 +113,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 				echo '<div id="message" class="stageshow-ok ok">'.$saleStatus.'</div>';
 			}
 			
-			return parent::OutputContent_OnlineStore($atts);
+			return parent::OutputContent_DoShortcode($atts);
 		}
 	
 		function OutputContent_OnlineStoreMain($atts)
@@ -608,7 +608,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 			return $cartContents->saleTransactionFee;				
 		}
 		
-		function OutputContent_OnlineTrolleyDonation($cartContents)
+		function OutputContent_OnlineTrolleyExtras($cartContents)
 		{
 			return 0;
 		}
@@ -650,13 +650,11 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 			$cartEntry->perfID = $result->perfID;
 		}
 		
-		function OnlineStore_AddExtraPayment(&$rslt, &$paramCount, $amount, $name, $detailID)
+		function OnlineStore_AddExtraPayment(&$rslt, $amount, $name, $detailID)
 		{
 			if (($rslt->totalDue > 0) && ($amount > 0))
 			{
 				$rslt->totalDue += $amount;
-				
-				$paramCount++;
 				
 				$this->myDBaseObj->gatewayObj->AddItem($name, $amount, 1, 0);
 				

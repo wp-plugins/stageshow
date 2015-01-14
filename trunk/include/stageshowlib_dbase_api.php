@@ -69,6 +69,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			
 			if ( isset($_REQUEST['debugmodes']) )
 			{
+				$clearDebugModes = false;
 				if ($_REQUEST['debugmodes'] != '')
 				{
 					$debugModes = explode(',', $_REQUEST['debugmodes']);
@@ -86,11 +87,17 @@ if (!class_exists('StageShowLibDBaseClass'))
 								break;
 							
 							default:
+								$clearDebugModes = true;
 								break;
 						}
 					}
 				}			
 				else
+				{
+					$clearDebugModes = true;
+				}
+				
+				if ($clearDebugModes)
 				{
 					$debugFlagsArray = $this->getDebugFlagsArray();
 					foreach ($debugFlagsArray as $debugMode)
@@ -514,7 +521,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		}
 		
 		//Returns an array of admin options
-		function getOptions($childOptions = array(), $saveToDB = true)
+		function getOptions($childOptions = array())
 		{
 			if (!isset($this->opts['CfgOptionsID']))
 			{
@@ -558,8 +565,14 @@ if (!class_exists('StageShowLibDBaseClass'))
 			// Now update defaults with values from DB
 			if (!empty($currOptions))
 			{
+				$saveToDB = false;
 				foreach ($currOptions as $key => $option)
 					$ourOptions[$key] = $option;
+			}
+			else
+			{
+				// New options ... save to DB
+				$saveToDB = true;
 			}
 
 			if (defined('CORONDECK_RUNASDEMO'))	// Set AdminID and EMail to current user
@@ -573,7 +586,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$this->adminOptions = $ourOptions;
 			
 			if ($saveToDB)
-				$this->saveOptions();
+				$this->saveOptions();// Saving Options - in getOptions functions
 				
 			return $ourOptions;
 		}
@@ -682,14 +695,12 @@ if (!class_exists('StageShowLibDBaseClass'))
 		}
 		
 		// Saves the admin options to the options data table
-		function saveOptions($newOptions = null)
+		function saveOptions()
 		{
-			// Update admin Options first?
-			if ($newOptions != null)
-				$this->adminOptions = $newOptions;
-			
 			update_option($this->opts['CfgOptionsID'], $this->adminOptions);
 			update_option($this->opts['DbgOptionsID'], $this->dbgOptions);
+			
+			$this->SaveDBCredentials(true);
 		}
 		
 		function dev_ShowTrolley()
@@ -722,16 +733,79 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 		}
 		
-		function SaveDBCredentials($credsPath, $defines = '')
+		function GetDBCredentials()
 		{
+			$pluginURI = $this->get_pluginURI();
+			
+			$defines = "
+	define('STAGESHOWLIB_PLUGINS_URI', '$pluginURI');
+	";
+	
+			return $defines;
+		}
+		
+		function AddADefine($defName, $devVal)
+		{
+			return "    define('$defName', '$devVal');\n";
+		}
+		
+		function OptionsToDefines($globalVarId, $optionsList)
+		{
+			$globalVarId = '$'.$globalVarId;
+			
+			$defines = "
+	global	$globalVarId; 	
+	$globalVarId = array(";
+			if ($optionsList != '')
+			{
+				foreach ($optionsList as $optionID => $optionValue)
+				{
+				$defines .= "
+		'$optionID' => '$optionValue',";
+				}				
+			}
+			
+			$defines .= ');
+			';
+
+			return $defines;
+		}
+		
+		function SaveDBCredentials($forceNew = false)
+		{
+			$credsPath = __FILE__;
+			$credsPath = str_replace('plugins', 'uploads', $credsPath);
+			$endPosn = strrpos($credsPath, 'include');
+			$credsPath = substr($credsPath, 0, $endPosn);
+			
+			$dirPath = substr($credsPath, 0, $endPosn-1);
+			if (!is_dir($dirPath))
+			{
+				mkdir($dirPath);
+			}
+				
+			$credsPath .= 'wp-config-db.php';
+
+			// Get Wordpress Date and Time Format
+			$globalOptions = array(
+				'date_format' => get_option( 'date_format' ),
+				'time_format' => get_option( 'time_format' ),
+			);
+			
 			$dbCreds = DB_NAME."-".DB_USER."-".DB_PASSWORD."-".DB_HOST."-".NONCE_KEY; 
 			
 			global $table_prefix;			
 			if ($table_prefix != '')
 				$dbCreds .= '-'.$table_prefix;
 					
-			if (file_exists($credsPath))
+			foreach ($globalOptions as $globalVal)		
 			{
+				$dbCreds .= '-'.$globalVal;
+			}
+			
+			if (!$forceNew && file_exists($credsPath))
+			{
+				if (!defined('DB_CREDS'))
 				include $credsPath;
 				if ($dbCreds == DB_CREDS)
 					return false;
@@ -743,7 +817,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 	
 	if (!defined('DB_NAME'))
 	{
-		// ** MySQL settings - Local Test Site ** //
 		/** The name of the database for WordPress */
 		define('DB_NAME', '".DB_NAME."');
 
@@ -771,7 +844,11 @@ if (!class_exists('StageShowLibDBaseClass'))
 				';				
 			}
 
-			$phpText .= $defines;
+			$phpText .= $this->GetDBCredentials();
+			$phpText .= $this->OptionsToDefines('stageshowOptions', $this->adminOptions);
+			$phpText .= $this->OptionsToDefines('stageshowDebugOptions', $this->dbgOptions);
+
+			$phpText .= "\n";
 
 			$phpText .= "\n".'?'.'>'."\n";
 			

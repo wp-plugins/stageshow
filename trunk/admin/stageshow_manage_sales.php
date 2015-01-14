@@ -89,7 +89,7 @@ if (!class_exists('StageShowWPOrgSalesAdminClass'))
 					$myDBaseObj = $this->env['DBaseObj'];
 					$myDBaseObj->allowAdminOnly = true;
 				}
-				echo $pluginObj->OutputContent_OnlineStore(NULL);
+				echo $pluginObj->OutputContent_DoShortcode(NULL);
 				return '';
 			}
 			

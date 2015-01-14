@@ -54,6 +54,9 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 			$this->StoreTranslatedText('Transaction ID', __('Transaction ID', $myDomain));
 			$this->StoreTranslatedText('Wrong Performance', __('Wrong Performance', $myDomain));
 
+			$valDBClass = STAGESHOW_PLUGIN_NAME.'ValidateDBaseClass';
+			$this->validateDBObj = new $valDBClass();
+
 			parent::__construct($env);
 		}
 		
@@ -82,7 +85,7 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 			else
 			{
 				// Get performances list for all shows
-				$perfsList = $myDBaseObj->GetActivePerformancesList();
+				$perfsList = $this->validateDBObj->GetActivePerformancesList();
 			
 				$selected = ' selected="" ';
 				

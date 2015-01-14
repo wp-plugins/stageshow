@@ -62,10 +62,13 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		define('PAYMENT_API_CHECKOUT_TIMEOUT_EDITLEN', 4);	
 		define('PAYMENT_API_CHECKOUT_TIMEOUT_DEFAULT', 60);	
 
-		define('PAYMENT_API_SALESTATUS_COMPLETED', 'Completed');
-		define('PAYMENT_API_SALESTATUS_PENDING', 'Pending');
-		define('PAYMENT_API_SALESTATUS_CHECKOUT', 'Checkout');
-		define('PAYMENT_API_SALESTATUS_PENDINGPPEXP', 'PendingPPExp');		
+		if (!defined('PAYMENT_API_SALESTATUS_COMPLETED'))
+		{
+			define('PAYMENT_API_SALESTATUS_COMPLETED', 'Completed');
+			define('PAYMENT_API_SALESTATUS_PENDING', 'Pending');
+			define('PAYMENT_API_SALESTATUS_CHECKOUT', 'Checkout');
+			define('PAYMENT_API_SALESTATUS_PENDINGPPEXP', 'PendingPPExp');
+		}		
 	}
 		
 	include 'stageshowlib_logfile.php';
@@ -181,6 +184,14 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			return null;
 		}
 		
+		function Gateway_LoadUserScripts()
+		{
+		}
+		
+		function Gateway_LoadAdminStyles()
+		{
+		}
+		
 		function LoginGatewayAPI($adminOptions, $dbgOptions)
 		{
 		}
@@ -198,6 +209,11 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		function VerifyLogin()
 		{
 			return 'VerifyLogin not defined';
+		}
+		
+		function GetButtonImage($buttonID)
+		{
+			return '';
 		}
 		
 		function IsCheckout()
@@ -336,6 +352,11 @@ echo "<br><br><strong>LogToFile</strong> Line:".__LINE__." - Logging:".$this->Lo
 		
 		protected static function IsOptionChanged($adminOptions, $optionID)
 		{
+			if (!class_exists('StageShowLibUtilsClass')) 
+			{
+				include_once('stageshowlib_utils.php');
+			}
+			
 			if (isset($_POST[$optionID]) && (trim(StageShowLibUtilsClass::GetArrayElement($adminOptions, $optionID)) !== trim($_POST[$optionID])))
 			{
 				return true;
@@ -346,6 +367,9 @@ echo "<br><br><strong>LogToFile</strong> Line:".__LINE__." - Logging:".$this->Lo
 		
 		static function HTTPAction($url, $urlParams = '', $method = 'POST', $redirect = true)
 		{
+			if( !class_exists( 'WP_Http' ) )
+				include_once( ABSPATH . WPINC. '/class-http.php' );
+
 			$args = array(
 			'method' => $method,
 			'body' => $urlParams,
@@ -380,7 +404,7 @@ echo "<br><br><strong>LogToFile</strong> Line:".__LINE__." - Logging:".$this->Lo
 				echo "METHOD: $method<br>";
 				echo "URL Params: <br>";
 				print_r($urlParams);
-				StageShowLibUtilsClass::print_r($response, 'HTTPResponse:');
+				print_r($response, 'HTTPResponse:');
 			}
 */
 			return $response;			

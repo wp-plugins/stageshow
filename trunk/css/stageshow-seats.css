@@ -28,7 +28,7 @@ Copyright 2014 Malcolm Shergold
 #stageshow-boxoffice-zoneSeatsBlock
 {
 	border: 1px;	
-	padding: 0px 10px 0px 20px;	
+	padding: 10px 0px 20px 0px;	
 }
 
 .stageshow-boxoffice-layout td

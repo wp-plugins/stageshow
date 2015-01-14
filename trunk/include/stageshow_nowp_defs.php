@@ -32,7 +32,7 @@ if ($endURL == false)
 $siteurl = substr($siteurl, 0, $endURL);
 
 include '../stageshow_defs.php';
-include WP_CONTENT_DIR.'/uploads/'.STAGESHOW_FOLDER.'/wp-config-db.php';			
+include STAGESHOW_UPLOADS_PATH.'/wp-config-db.php';			
 include "stageshowlib_nowp_dbase.php";
 
 

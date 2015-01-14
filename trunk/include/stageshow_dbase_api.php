@@ -371,8 +371,10 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 		}
 		
 		//Returns an array of admin options
-		function getOptions($childOptions = array(), $saveToDB = true)
+		function getOptions($childOptions = array())
 		{
+			$saveToDB = false;
+			
 			// Initialise settings array with default values
 			$ourOptions = array(        
 		        'loaded' => true,
@@ -418,10 +420,15 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 				unset($currOptions['PayPalAPITestSig']);
 				unset($currOptions['PayPalAPITestPwd']);
 				unset($currOptions['PayPalAPITestEMail']);
+				
+				$saveToDB = true;
 			}
 			
 			if ($currOptions['SetupUserRole'] == '') 
+			{
 				$currOptions['SetupUserRole'] = STAGESHOW_DEFAULT_SETUPUSER;
+				$saveToDB = true;
+			}
 				
 			$this->adminOptions = $currOptions;
 			
@@ -548,27 +555,30 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			}
 		}
 		
-		function SaveDBCredentials($credsPath, $defines = '')
+		function GetDBCredentials()
 		{
 			$defines = "
-	if (!defined('STAGESHOW_TABLE_PREFIX'))
+	if (!defined('STAGESHOW_INCLUDES_GATEWAY') && !defined('PAYMENT_API_SALESTATUS_COMPLETED'))
 	{
 	define('PAYMENT_API_SALESTATUS_COMPLETED', '".PAYMENT_API_SALESTATUS_COMPLETED."');
 	define('PAYMENT_API_SALESTATUS_PENDING', '".PAYMENT_API_SALESTATUS_PENDING."');
 	define('PAYMENT_API_SALESTATUS_CHECKOUT', '".PAYMENT_API_SALESTATUS_PENDINGPPEXP."');
 	define('PAYMENT_API_SALESTATUS_PENDINGPPEXP', '".PAYMENT_API_SALESTATUS_PENDINGPPEXP."');
 	define('STAGESHOW_SALESTATUS_RESERVED', '".STAGESHOW_SALESTATUS_RESERVED."');
+	}
 	
+	if (!defined('STAGESHOW_TABLE_PREFIX'))
+	{
 	define('STAGESHOW_TABLE_PREFIX', '".STAGESHOW_TABLE_PREFIX."');
 	define('STAGESHOW_SHOWS_TABLE', '".STAGESHOW_SHOWS_TABLE."');
 	define('STAGESHOW_PERFORMANCES_TABLE', '".STAGESHOW_PERFORMANCES_TABLE."');
 	define('STAGESHOW_PRICES_TABLE', '".STAGESHOW_PRICES_TABLE."');
 	define('STAGESHOW_SALES_TABLE', '".STAGESHOW_SALES_TABLE."');
-	define('STAGESHOW_TICKETS_TABLE', '".STAGESHOW_TICKETS_TABLE."');" . $defines ."			
+	define('STAGESHOW_TICKETS_TABLE', '".STAGESHOW_TICKETS_TABLE."');			
 	}
 ";
 							
-			parent::SaveDBCredentials($credsPath, $defines);
+			return parent::GetDBCredentials().$defines;
     	}
         
 		function DBField($fieldName)

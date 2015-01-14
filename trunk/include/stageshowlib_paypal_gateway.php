@@ -26,14 +26,6 @@ if (defined('STAGESHOWLIB_TRACK_INCLUDES_FILE'))
 	trackIncludes(__FILE__);
 }
 	
-if( !class_exists( 'WP_Http' ) )
-	include_once( ABSPATH . WPINC. '/class-http.php' );
-
-if (file_exists('stageshowlib_utils.php')) 
-{
-	include_once( 'stageshowlib_utils.php' );
-}
-
 // Definitions for API Interface Functions
 if (!class_exists('StageShowLib_paypal_GatewayClass')) 
 {
@@ -193,6 +185,14 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			return $rowDefs;
 		}
 			
+		function Gateway_LoadUserScripts()
+		{
+		}
+		
+		function Gateway_LoadAdminStyles()
+		{
+		}
+		
 		function LoginGatewayAPI($adminOptions, $dbgOptions)
 		{
 			$this->SetLoginParams(
