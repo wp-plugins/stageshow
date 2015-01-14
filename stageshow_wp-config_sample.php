@@ -60,6 +60,7 @@ define('STAGESHOW_ADDBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stage
 define('STAGESHOW_CHECKOUTBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Checkout.gif');
 define('STAGESHOW_REMOVEBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Remove.gif');
 define('STAGESHOW_RESERVEBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Reserve.gif');
+define('STAGESHOW_SEATSSELECTEDBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Continue.gif');
 define('STAGESHOW_SELECTSEATSBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_SelectSeats.gif');
 define('STAGESHOW_CONFIRMANDPAYBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_CommandAndPay.gif');
 

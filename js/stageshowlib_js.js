@@ -16,25 +16,48 @@ function StageShowLib_addWindowsLoadHandler(newHandler)
 	}
 }
 
-function StageShowLib_OnChangeDonation(obj)
+function StageShowLib_OnChangeTrolleyTotal(obj)
 {
-	var seatId = obj.id;
-	var saleDonation = parseFloat(obj.value);
-	if (isNaN(saleDonation))
+	var donationObj = document.getElementById('saleDonation');
+	var saleDonation = 0;
+	if (donationObj != null)
 	{
-		saleDonation = 0;
+		var saleDonation = parseFloat(donationObj.value);
+		if (isNaN(saleDonation))
+		{
+			saleDonation = 0;
+		}
+		else
+		{
+			saleDonation = Math.abs(saleDonation);
+		}		
 	}
-	else
+
+	var postValue = 0;
+	var postTicketsObj = document.getElementById('salePostTickets');
+	if (postTicketsObj != null)
 	{
-		saleDonation = Math.abs(saleDonation);
+		var salePostageRowObj = document.getElementById('stageshow-trolley-postagerow');
+		if (postTicketsObj.checked)
+		{
+			var salePostageObj = document.getElementById('salePostage');
+			postValue = parseFloat(salePostageObj.value);
+			
+			salePostageRowObj.style.display = '';
+		}
+		else
+		{			
+			salePostageRowObj.style.display = 'none';
+		}
 	}
-	
+
 	var subTotalObj = document.getElementById("saleTrolleyTotal");
 	var finalTotalObj = document.getElementById("stageshow-trolley-totalval");
 	var subTotal = subTotalObj.value;
 	
 	var newTotalVal = parseFloat(subTotal);
 	newTotalVal += saleDonation;
+	newTotalVal += postValue;
 	newTotalVal += 0.00001; /* To force rounding error ... then it is corrected below */
 		 	
 	var newTotal = newTotalVal.toString();

@@ -106,12 +106,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		}
 		// Saves the admin options to the options data table
 		
-		function saveStageshowOptions()
-		{
-			$myDBaseObj = $this->myDBaseObj;
-			$myDBaseObj->saveOptions();
-		}
-		
 		// ----------------------------------------------------------------------
 		// Activation / Deactivation Functions
 		// ----------------------------------------------------------------------
@@ -142,7 +136,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			// EMail Template defaults to templates folder - remove folders from path
 			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath', STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH);
 			
-      		$this->saveStageshowOptions();
+      		$this->myDBaseObj->saveOptions();
       
 			$setupUserRole = $myDBaseObj->adminOptions['SetupUserRole'];
 
@@ -210,7 +204,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_sample_dbase.php'; 
 				
 			$myDBaseObj = $this->myDBaseObj;
-			$this->saveStageshowOptions();
+			$this->myDBaseObj->saveOptions();
 			
 			$sampleClassId = STAGESHOW_PLUGIN_NAME.'SampleDBaseClass';
 			$sampleClassObj = new $sampleClassId($myDBaseObj);
@@ -300,6 +294,8 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		
 		function load_user_scripts()
 		{
+			parent::load_user_scripts();
+
 			// Add our own Javascript
 			wp_enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', __FILE__ ));
 			wp_enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ));
@@ -309,8 +305,8 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		
 		function load_admin_styles()
 		{
-			//echo "<!-- load_admin_styles called! ".plugins_url( 'admin/css/stageshow-admin.css', __FILE__ )." -->\n";
-			
+			parent::load_admin_styles();
+
 			// Add our own style sheet
 			wp_enqueue_style( 'stageshow', plugins_url( 'admin/css/stageshow-admin.css', __FILE__ ));
 			
@@ -373,7 +369,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			$formHTML .= $this->GetParamAsHiddenTag('id');
 			$formHTML .= "<table>\n";			
 
-			// Output all PayPal tags as edit boxes
+			// Output all Payment Gateway tags as edit boxes
 			foreach ($paramIDs as $paramID => $paramLabel)
 			{
 				$paramValue = isset($cartContents->$paramID) ? $cartContents->$paramID : '';
@@ -444,9 +440,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			$formHTML .= "</table>\n";			
 			$formHTML .= "</form>\n";			
 			$formHTML .= "<div>\n";			
-			
-			// Now Output all PayPal tags as edit boxes
-			//$formHTML .= $this->GatewayTags($this->myDBaseObj->opts['CfgOptionsID'], false);
 			
 			echo $formHTML;
 			return $formHTML;

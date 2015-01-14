@@ -99,7 +99,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			add_action('wp_loaded', array(&$this, 'OnlineStore_ProcessCheckout'));
 
 			// FUNCTIONALITY: Main - Add ShortCode for client "front end"
-			add_shortcode($this->shortcode, array(&$this, 'OutputContent_OnlineStore'));
+			add_shortcode($this->shortcode, array(&$this, 'OutputContent_DoShortcode'));
 		}
 		
 		function GetOurURL()
@@ -113,6 +113,20 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function CheckAdminReferer($referer = '')
 		{
+		}
+		
+		function load_user_scripts()
+		{
+			$myDBaseObj = $this->myDBaseObj;			
+
+			$myDBaseObj->gatewayObj->Gateway_LoadUserScripts();
+		}	
+		
+		function load_admin_styles()
+		{
+			$myDBaseObj = $this->myDBaseObj;			
+
+			$myDBaseObj->gatewayObj->Gateway_LoadAdminStyles();
 		}
 		
 		function OutputContent_OnlineStoreMain($atts)
@@ -316,7 +330,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			echo '<a name="'.self::ANCHOR_PREFIX.$anchor.'"></a>';	
 		}
 		
-		function OutputContent_OnlineStore( $atts )
+		function OutputContent_DoShortcode( $atts )
 		{
 	  		// FUNCTIONALITY: Runtime - Output Shop Front
 			$myDBaseObj = $this->myDBaseObj;
@@ -543,11 +557,16 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return 0;
 		}
 				
-		function OutputContent_OnlineTrolleyDonation($cartContents)
+		function OutputContent_OnlineTrolleyExtras($cartContents)
 		{
 			return 0;
 		}
 				
+		function OutputContent_OnlineTrolleyFooterRows($cartContents)
+		{
+			return;
+		}
+		
 		function GetButtonPostID($buttonID)
 		{
 			return $this->GetButtonID($buttonID);
@@ -566,13 +585,23 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 		function GetButtonTypeDef($buttonID, $buttonName = '', $buttonType = 'submit')
 		{
-			$buttonTypeDef = 'type="'.$buttonType.'"';
+			$buttonTypeDef = '';
 			
+			// Try for a payment gateway defined button ...
+			$buttonImage = $this->myDBaseObj->gatewayObj->GetButtonImage($buttonID);
+			if ($buttonImage != '')
+			{
+				$buttonType = 'image';
+				$buttonTypeDef .= 'src="'.$buttonImage.'" ';
+			}
+			
+			$buttonTypeDef .= 'type="'.$buttonType.'"';
+				
 			if ($buttonName == '')
 			{
 				$buttonName = $this->GetButtonID($buttonID);
 			}
-			$buttonTypeDef .= ' id="'.$buttonName.'" name="'.$buttonName.'"';
+			$buttonTypeDef .= ' id="'.$buttonName.'" name="'.$buttonName.'"';					
 			
 			return $buttonTypeDef;
 		}
@@ -952,6 +981,7 @@ echo $html;
 						$this->AddToTrolleyContents($cartContents, $cartEntry);
 					}
 
+					$cartContents->salePostTickets = isset($_POST['salePostTickets']);
 					$this->SaveTrolleyContents($cartContents);
 				}
 			}
@@ -978,6 +1008,7 @@ echo $html;
 					$cartContents->saleTransactionFee = $myDBaseObj->FormatCurrency(0);
 					$cartContents->saleDonation = '';
 				}
+				$cartContents->salePostTickets = isset($_POST['salePostTickets']);
 				$this->SaveTrolleyContents($cartContents);
 			}
 				
@@ -1081,8 +1112,8 @@ echo $html;
 			if ($doneHeader)
 			{	
 				$runningTotal += $this->OutputContent_OnlineTrolleyFee($cartContents);
-				$trolleyTotal = $runningTotal + $this->OutputContent_OnlineTrolleyDonation($cartContents);
-				
+				$trolleyTotal = $runningTotal + $this->OutputContent_OnlineTrolleyExtras($cartContents);
+									
 				// Add totals row and checkout button
 				$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);				
 				$trolleyTotal = $myDBaseObj->FormatCurrency($trolleyTotal);
@@ -1126,7 +1157,7 @@ echo $html;
 							</tr>
 							';
 					}
-					
+										
 					echo '<tr>'."\n";
 					echo '<td align="center" colspan="'.$this->trolleyHeaderCols.'" class="'.$this->cssTrolleyBaseID.'-checkout">'."\n";
 					
@@ -1138,12 +1169,9 @@ echo $html;
 					echo "</tr>\n";
 				}
 				
+				$this->OutputContent_OnlineTrolleyFooterRows($cartContents);
+				
 				if ( ($checkoutNotePosn == 'below') && ($checkoutNote != '') )
-				{
-					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
-				}
-					
-				if ($myDBaseObj->getOption('CheckoutNoteToSeller'))
 				{
 					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
 				}
@@ -1241,16 +1269,17 @@ echo $html;
 				$rslt->totalDue += ($itemPrice * $qty);
 			}
 			
-			$this->OnlineStore_AddExtraPayment($rslt, $paramCount, $cartContents->saleTransactionFee, __('Booking Fee', $this->myDomain), 'saleTransactionfee');
+			$this->OnlineStore_AddExtraPayment($rslt, $cartContents->saleTransactionFee, __('Booking Fee', $this->myDomain), 'saleTransactionfee');
 
 			if (isset($_POST['saleDonation']))
 			{
 				$newSaleDonation = StageShowLibHTTPIO::GetRequestedInt('saleDonation', 0, false);
 				$cartContents->saleDonation = $myDBaseObj->FormatCurrency($newSaleDonation);					
 			}	
+			
 			if ($cartContents->saleDonation > 0)
 			{
-				$this->OnlineStore_AddExtraPayment($rslt, $paramCount, $cartContents->saleDonation, __('Donation', $this->myDomain), 'saleDonation');				
+				$this->OnlineStore_AddExtraPayment($rslt, $cartContents->saleDonation, __('Donation', $this->myDomain), 'saleDonation');				
 			}	
 			
 			// Shopping Trolley contents have changed if there are "extra" passed parameters 
@@ -1267,7 +1296,7 @@ echo $html;
 			return $rslt;
 		}		
 
-		function OnlineStore_AddExtraPayment(&$rslt, &$paramCount, $amount, $name, $detailID)
+		function OnlineStore_AddExtraPayment(&$rslt, $amount, $name, $detailID)
 		{
 		}
 		

@@ -52,6 +52,7 @@ if (!class_exists('StageShowLibSampleDBaseClass'))
 			
 			$salesVals['saleTransactionFee'] = $this->myDBaseObj->GetTransactionFee();
 			$salesVals['saleDonation'] = 0;
+			$salesVals['salePostage'] = 0;
 			
 			return $this->myDBaseObj->AddSale($saleDateTime, $salesVals);
 		}

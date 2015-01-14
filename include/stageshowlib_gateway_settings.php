@@ -119,9 +119,9 @@ if (!class_exists('GatewaySettingsAdminListClass'))
 	}
 }
 
-if (!class_exists('PayPalSettingsAdminClass')) 
+if (!class_exists('GatewaySettingsAdminClass')) 
 {
-	class PayPalSettingsAdminClass extends StageShowLibSettingsAdminClass // Define class
+	class GatewaySettingsAdminClass extends StageShowLibSettingsAdminClass // Define class
 	{
 		function __construct($env) //constructor	
 		{

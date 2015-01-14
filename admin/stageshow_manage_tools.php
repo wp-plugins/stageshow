@@ -170,8 +170,7 @@ if (!class_exists('StageShowWPOrgToolsAdminClass'))
 
 		function Tools_Validate()
 		{
-			$dbCredsPath = WP_CONTENT_DIR . '/uploads/'.STAGESHOW_FOLDER.'/wp-config-db.php';			
-			$this->myDBaseObj->SaveDBCredentials($dbCredsPath);
+			$this->myDBaseObj->SaveDBCredentials();
 			
 			$classId = $this->adminClassPrefix.'SaleValidateClass';
 			new $classId($this->env);

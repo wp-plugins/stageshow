@@ -140,7 +140,7 @@ window.onload = stageshow_OnSettingsLoad;
 		
 if (!class_exists('StageShowWPOrgSettingsAdminClass')) 
 {
-	class StageShowWPOrgSettingsAdminClass extends PayPalSettingsAdminClass // Define class
+	class StageShowWPOrgSettingsAdminClass extends GatewaySettingsAdminClass // Define class
 	{		
 		function __construct($env)
 		{

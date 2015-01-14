@@ -147,7 +147,7 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 			{
 				$this->CheckAdminReferer();
 				
-				$myDBaseObj->UseTestPayPalSettings($testDefaults);							
+				$myDBaseObj->SetTestSettings($testDefaults);							
 				echo '<div id="message" class="updated"><p>Settings initialised to '.$selectedPayPalID.'</p></div>';
 			}		
 							

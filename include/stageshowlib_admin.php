@@ -242,19 +242,18 @@ if (!class_exists('StageShowLibAdminClass'))
 		{
 			echo "ProcessActionButtons() function not defined in ".get_class()."<br>\n";
 		}
-		
+/*		
 		function AdminUpgradeNotice() 
 		{ 
 			// Function to add notification to admin page
-			// add_action( 'admin_notices', 'AdminUpgradeNotice' );
-				
+			add_action( 'admin_notices', 'AdminUpgradeNotice' );		
 ?>
 	<div id="message" class="updated fade">
 		<p><?php echo '<strong>Plugin is ready</strong>'; ?></p>
 	</div>
 <?php
 		}
-		
+*/		
  	}
 }
 
