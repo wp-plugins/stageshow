@@ -408,7 +408,7 @@ if (!class_exists('GatewaySimulator'))
 			$code = '
 	<script language="JavaScript">
 	<!--
-			function onclickqty() {
+			function stageshow_onclickqty() {
 			var total = 0.0;
 	';
 			for ($indexNo = 1; $indexNo <= $itemsCount; $indexNo++)
@@ -418,7 +418,7 @@ if (!class_exists('GatewaySimulator'))
 			document.gateway_sim.mc_fee.value = (Math.floor((total*3.4) + 20))/100;
 			}
 
-			function onclickrefresh() {
+			function stageshow_onclickrefresh() {
 			var now = new Date();
 			var transactionID;
 

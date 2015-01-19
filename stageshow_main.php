@@ -53,12 +53,15 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			add_action('wp_print_styles', array(&$this, 'load_user_styles') );
 			add_action('wp_print_scripts', array(&$this, 'load_user_scripts') );
 			
-			//add_action('wp_enqueue_scripts', array(&$this, 'load_user_scrips') );
+			//add_action('wp_enqueue_scripts', array(&$this, 'load_user_scripts') );
 			add_action('admin_enqueue_scripts', array(&$this, 'load_admin_styles') );
 			
 			// Add a reference to the header
 			add_action('wp_head', array(&$this, 'OutputMetaTag'));
-			
+/*			
+			// Function to add notification to admin page
+			add_action( 'admin_notices', array(&$this, 'AdminUpgradeNotice'));
+*/
 			$this->myDBaseObj->pluginSlug = 'stageshow';
 			$this->adminClassFilePrefix = 'stageshow';
 			$this->adminClassPrefix = 'StageShowWPOrg';
