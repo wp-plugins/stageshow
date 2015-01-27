@@ -143,6 +143,11 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			return StageShowLibSalesDBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
 		}
 		
+		function GetCurrencyOptionID()
+		{
+			return '';
+		}
+		
 		function GetCurrencyTable()
 		{
 			return array();

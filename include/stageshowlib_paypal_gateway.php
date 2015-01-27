@@ -110,6 +110,11 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			return $this->myDBaseObj->adminOptions['PayPalCheckoutType'];
 		}
 		
+		function GetCurrencyOptionID()
+		{
+			return 'PayPalCurrency';
+		}
+		
 		function GetCurrencyTable()
 		{
 			return array( 

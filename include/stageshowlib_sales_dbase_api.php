@@ -376,10 +376,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function saveOptions()
 		{
 			$newOptions = $this->adminOptions;
-				
-			if (isset($newOptions['PayPalCurrency']))
+			
+			$currencyOptionID = $this->gatewayObj->GetCurrencyOptionID();	
+			if (isset($newOptions[$currencyOptionID]))
 			{
-				$currency = $newOptions['PayPalCurrency'];			
+				$currency = $newOptions[$currencyOptionID];			
 				$currencyDef = $this->gatewayObj->GetCurrencyDef($currency);
 				
 				if (isset($currencyDef['Symbol']))
@@ -396,7 +397,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				}							
 			}
 			
-			parent::saveOptions($newOptions);
+			$this->adminOptions = $newOptions;
+			parent::saveOptions();
 		}
 		
 		function getTableNames($dbPrefix)
