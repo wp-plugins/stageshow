@@ -69,7 +69,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				$this->colID['name'] = __('Name', $this->myDomain);
 				$this->cssColID['name'] = "name";			
-				$this->colID['datetime'] = __('Name', $this->myDomain);
+				$this->colID['datetime'] = __('Date & Time', $this->myDomain);
 				$this->cssColID['datetime'] = "name";			
 				$this->colID['ref'] = __('Ref', $this->myDomain);
 				$this->cssColID['ref'] = "ref";
@@ -100,8 +100,26 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 
 			// FUNCTIONALITY: Main - Add ShortCode for client "front end"
 			add_shortcode($this->shortcode, array(&$this, 'OutputContent_DoShortcode'));
+			
+			if (defined('STAGESHOWLIB_BLOCK_HTTPS'))
+			{
+				add_filter('http_api_transports', array($this, 'StageShowLibBlockSSLHttp'), 10, 3);				
+			}
+
 		}
 		
+		function StageShowLibBlockSSLHttp($transports, $args, $url)
+		{
+			$argsCount = count($args);
+			if (($argsCount == 1) && isset($args['ssl']))
+			{
+//echo "<br> ***************** HTTP SSL Transport Disabled ***************** <br>\n";
+				return array();
+			}
+
+			return $transports;
+		}
+
 		function GetOurURL()
 		{			
 			$actionURL = remove_query_arg('_wpnonce');
@@ -237,7 +255,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$storeRowHTML = '';
 			$myDBaseObj = $this->myDBaseObj;
 			
-			$altTag = $myDBaseObj->adminOptions['OrganisationID'].' '.__('Sales', $this->myDomain);
+			$altTag = $myDBaseObj->getOption('OrganisationID').' '.__('Sales', $this->myDomain);
 			$buttonURL = $myDBaseObj->getImageURL('AddCartButtonURL');
 
 			$itemPrice = $myDBaseObj->FormatCurrency($this->GetOnlineStoreItemPrice($result));
@@ -319,6 +337,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$atts = shortcode_atts(array(
 				'id'    => '',
 				'count' => '',
+				'anchor' => '',
 				'style' => 'normal' 
 			), $atts );
         
@@ -616,17 +635,25 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		function OutputContent_OnlineCheckoutButton($cartContents)
 		{
 			$checkoutSelector = $this->myDBaseObj->gatewayObj->GetCheckoutType();
-			$secure_connection = !empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != 'off');
+			$showCheckoutButton = $checkoutSelector == StageShowLibGatewayBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
 			
-			if ( (!$secure_connection) 
-			  && ($checkoutSelector != StageShowLibSalesDBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD)
-			  && (!current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) )
+			$gatewayParent = $this->myDBaseObj->gatewayObj->GetParent();
+			if ($gatewayParent == 'paypal')
 			{
-				// PayPal Express is only allowed on secure connections
-				$checkoutSelector = StageShowLibSalesDBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
-				echo "\n<!-- ******* PayPal Express Disabled: Not on secure connection ******* -->\n";
+				$secure_connection = !empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != 'off');
+				
+				if ( (!$secure_connection) 
+				  && ($checkoutSelector != StageShowLibGatewayBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD)
+				  && (!current_user_can(STAGESHOWLIB_CAPABILITY_ADMINUSER)) )
+				{
+					// PayPal Express is only allowed on secure connections
+					$checkoutSelector = StageShowLibGatewayBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
+					echo "\n<!-- ******* PayPal Express Disabled: Not on secure connection ******* -->\n";
+				}
+				$showCheckoutButton = ($checkoutSelector != StageShowLib_paypal_exp_GatewayClass::STAGESHOWLIB_CHECKOUTSTYLE_EXPRESS);				
 			}
-			if ($checkoutSelector != StageShowLibSalesDBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_EXPRESS)
+			
+			if ($showCheckoutButton)
 			{
 				if (count($this->myDBaseObj->gatewayObj->Gateway_ClientFields()) > 0)
 					$buttonType = $this->GetButtonTypeDef('checkoutdetails');
@@ -1046,7 +1073,7 @@ echo $html;
 				if (count($priceEntries) == 0)
 				{
 					echo '<div id="message" class="'.$this->cssDomain.'-error error">'.__("Shopping Trolley Cleared", $this->myDomain).'</div>';					
-					if (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN) || current_user_can(STAGESHOW_CAPABILITY_DEVUSER))
+					if ($myDBaseObj->isSysAdmin())
 					{
 						echo "<br><strong></strong></br>Dumping Trolley (only for SysAdmin User)</strong><br>";
 						echo "No entry for ItemID:$itemID<br>";

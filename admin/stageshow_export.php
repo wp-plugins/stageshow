@@ -20,12 +20,12 @@ Copyright 2014 Malcolm Shergold
 
 */
 
-if (!defined('STAGESHOW_DBASE_CLASS'))
+if (!defined('STAGESHOWLIB_DBASE_CLASS'))
 {
 	include '../../../../wp-config.php';
 }
 
-$stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
+$stageShowDBaseClass = STAGESHOWLIB_DBASE_CLASS;
 
 if ( isset( $_POST['download'] ) )
 {

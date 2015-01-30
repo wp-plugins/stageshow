@@ -53,7 +53,7 @@ if (!class_exists('StageShowWPOrgToolsAdminClass'))
 <?php
 			$this->Tools_Validate();
 			$this->Tools_Export();
-			if (class_exists('StageShowLibTableTestEMailClass') && current_user_can(STAGESHOW_CAPABILITY_DEVUSER)) new StageShowLibTableTestEMailClass($this);
+			if (class_exists('StageShowLibTableTestEMailClass') && current_user_can(STAGESHOWLIB_CAPABILITY_DEVUSER)) new StageShowLibTableTestEMailClass($this);
 ?>
 	</div>
 </div>
@@ -144,7 +144,7 @@ if (!class_exists('StageShowWPOrgToolsAdminClass'))
 <th><?php _e('Type', $this->myDomain); ?></th>
 <td>
 <select name="export_type" id="export_type" onchange=stageshow_onSelectDownload(this)>
-	<?php if (current_user_can(STAGESHOW_CAPABILITY_SETUPUSER)) { ?>
+	<?php if (current_user_can(STAGESHOWLIB_CAPABILITY_SETUPUSER)) { ?>
 	<option value="settings"><?php _e('Settings', $this->myDomain); ?> </option>
 	<?php } ?>
 	<option value="tickets"><?php _e('Tickets', $this->myDomain); ?> </option>

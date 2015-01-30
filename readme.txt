@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
 Tested up to: 4.1
-Stable tag: 4.5.3
+Stable tag: 4.5.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -189,7 +189,14 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
-= 4.5.3 (27/01/2015) =
+= 4.5.4 (30/01/2015) =
+* Bug Fix: Currency Symbol not shown on Postage price
+* Bug Fix: Currency Symbol not updated when gateway changed (StageShowPlus)
+* Bug Fix: Box-Office - Unallocated seats count error with pre-allocated seats (StageShowGold)
+* Added code for uid-sid and uid-pid to use text entries in URLs (StageShowGold)
+* Added examples of {URL....}sid="The Wordpress Show" etc. (StageShowGold)
+
+= 4.5.3 (26/01/2015) =
 * Option to select show name or performance date in Box-Office URL (StageShowGold)
 
 = 4.5.2 (19/01/2015) =

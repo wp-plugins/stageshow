@@ -64,6 +64,11 @@ if (!class_exists('StageShowLibUtilsClass'))
 			if ($debug) echo "Compare Versions ($ourVersion , $serverVersion)<br>\n";					
 			for ($i=0; $i<max(count($ourVersionVals),count($serverVersionVals)); $i++)
 			{
+				if (!ctype_digit($ourVersionVals[$i]))
+				{
+					return false;
+				}
+				
 				$ourVersionVal = isset($ourVersionVals[$i]) ? (int)$ourVersionVals[$i] : 0;
 				$serverVersionVal = isset($serverVersionVals[$i]) ? (int)$serverVersionVals[$i] : 0;
 				if ($serverVersionVal > $ourVersionVal)

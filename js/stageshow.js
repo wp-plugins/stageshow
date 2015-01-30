@@ -238,6 +238,11 @@ function stageshow_UpdateZonesCount(zoneID, zoneCountRequested, zoneCountCurrent
 
 function stageshow_ClickSeat(obj)
 {
+	stageshow_ToggleSeat(obj, true);
+}
+
+function stageshow_ToggleSeat(obj, isClick)
+{
 	var seatId, hiddenSeatsElem, hiddenZonesElem;
 	
 	seatIdParts = obj.id.split("-");
@@ -285,7 +290,6 @@ function stageshow_ClickSeat(obj)
 		hiddenSeatsElem.value = hiddenSeatsElem.value + seatIdMark;
 		hiddenZonesElem.value = hiddenZonesElem.value + zoneIDMark;
 		zones[zoneID] = zones[zoneID] - 1;
-		stageshow_UpdateZonesCount(zoneID, zonesReq[zoneID], zones[zoneID]);
 	}
 	else
 	{
@@ -293,8 +297,12 @@ function stageshow_ClickSeat(obj)
 		hiddenSeatsElem.value = hiddenSeatsElem.value.replace(seatIdMark, "");
 		hiddenZonesElem.value = hiddenZonesElem.value.replace(zoneIDMark, "");
 		zones[zoneID] = zones[zoneID] + 1;
+	}
+	if (isClick)
+	{
 		stageshow_UpdateZonesCount(zoneID, zonesReq[zoneID], zones[zoneID]);
 	}
+
 	obj.className = className;
 	
 }
@@ -309,6 +317,11 @@ function stageshow_OnSeatsLoad()
 	/* Clear hidden pass back values - Required if page is refreshed */
 	document.getElementById("stageshow-boxoffice-layout-seats").value = '';
 	document.getElementById("stageshow-boxoffice-layout-zones").value = '';
+	
+	for (var zoneID in zones) 
+	{
+		zonesReq[zoneID] = zones[zoneID];
+	}
 	
 	/* Note: Uses maxRows and maxCols which must be defined in template */
 	var row, col;
@@ -334,7 +347,7 @@ function stageshow_OnSeatsLoad()
 							
 						case 'selected': 
 							seatObj.className = SeatAvailableClassText + ' ' + className;
-							stageshow_ClickSeat(seatObj);
+							stageshow_ToggleSeat(seatObj, false);
 							break;
 							
 						default: 
@@ -353,7 +366,6 @@ function stageshow_OnSeatsLoad()
 	
 	for (var zoneID in zones) 
 	{
-		zonesReq[zoneID] = zones[zoneID];
 		stageshow_UpdateZonesCount(zoneID, zonesReq[zoneID], zones[zoneID]);		
 	}
 }

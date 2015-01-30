@@ -75,6 +75,8 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 	
 	class StageShowLibGatewayBaseClass // Define class
 	{
+		const STAGESHOWLIB_CHECKOUTSTYLE_STANDARD = 1;
+		
 		var	$testmode = false;
 		var $items = array();
 		var $totalDue = 0;
@@ -128,6 +130,11 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			return 'Undefined';
 		}
 		
+		static function GetID()
+		{
+			return self::GetType();
+		}
+		
 		static function GetParent()
 		{
 			return '';
@@ -140,7 +147,7 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		
 		function GetCheckoutType()
 		{
-			return StageShowLibSalesDBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
+			return self::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
 		}
 		
 		function GetCurrencyOptionID()

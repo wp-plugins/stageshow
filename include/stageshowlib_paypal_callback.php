@@ -300,6 +300,6 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 	}
 }
 
-new StageShowLib_paypal_CallbackClass(STAGESHOW_DBASE_CLASS, __FILE__);	
+new StageShowLib_paypal_CallbackClass(STAGESHOWLIB_DBASE_CLASS, __FILE__);	
 
 ?>

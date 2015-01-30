@@ -34,7 +34,7 @@ if (!class_exists('StageShowWPOrgSettingsAdminListClass'))
 	{		
 		function __construct($env, $editMode = false) //constructor
 		{	
-			if (!current_user_can(STAGESHOW_CAPABILITY_SETUPUSER))
+			if (!current_user_can(STAGESHOWLIB_CAPABILITY_SETUPUSER))
 			{
 				$editMode = false;
 			}

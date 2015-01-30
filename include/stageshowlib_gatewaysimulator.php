@@ -265,7 +265,7 @@ if (!class_exists('GatewaySimulator'))
 					<td class="gatewaysim_formFieldValue">
 						<input name="txn_id" id="txn_id" type="text" maxlength="32" size="32" value="'.$this->transactionID.'" />
 					</td>
-					<td class="gatewaysim_formFieldButton"><input class="button-primary" type="button" name="refreshbutton" value="Refresh" onClick=onclickrefresh() /></td>
+					<td class="gatewaysim_formFieldButton"><input class="button-primary" type="button" name="refreshbutton" value="Refresh" onClick=stageshow_onclickrefresh() /></td>
 				</tr>
 				<tr class="gatewaysim_formRow">
 					<td class="gatewaysim_formFieldID">Payment Status:&nbsp; </td>

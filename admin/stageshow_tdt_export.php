@@ -52,7 +52,7 @@ if (!class_exists('StageShowWPOrgTDTExportAdminClass'))
 					switch ($_POST['export_type'])
 					{          
 						case 'settings':
-								if (!current_user_can(STAGESHOW_CAPABILITY_ADMINUSER)) die("Access Denied"); 
+								if (!current_user_can(STAGESHOWLIB_CAPABILITY_ADMINUSER)) die("Access Denied"); 
 								$this->fileName = 'stageshow-settings';
 								$this->output_downloadHeader('text/tab-separated-values');
 								$this->export_shows();

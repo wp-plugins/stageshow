@@ -10,7 +10,7 @@ if (!class_exists('StageShowWPOrgTestNotify'))
 		{
 			$this->CanEditTotal = true;
 			
-	  		parent::__construct(STAGESHOW_DBASE_CLASS);	
+	  		parent::__construct(STAGESHOWLIB_DBASE_CLASS);	
 	   	}
 	
 		function OutputHeader() 

@@ -67,11 +67,11 @@ if (!class_exists('GatewayDefaultsClass'))
 			return false;
 		}
 		
-		static function GetDefaults($paypalSettingsFile) 
+		static function GetDefaults($gatewaySettingsFile) 
 		{
 			$defaultSettings = array();
 			
-			if ($paypalSettingsFile == '')
+			if ($gatewaySettingsFile == '')
 			{
 				$defaultSettings['PayPalMerchantID'] = '';
 				$defaultSettings['PayPalAPIUser'] = '';
@@ -94,42 +94,18 @@ if (!class_exists('GatewayDefaultsClass'))
 				return $defaultSettings;
 			}
 			
-			$className = str_replace('.php', '', $paypalSettingsFile);
+			$className = str_replace('.php', '', $gatewaySettingsFile);
 			$className = str_replace('-', '_', $className);
 			
-			include ABSPATH.$paypalSettingsFile;
-			$paypalSettingsObj = new $className();
-
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVEMERCHANTID))
-				$defaultSettings['PayPalMerchantID'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVEMERCHANTID;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVEUSER))
-				$defaultSettings['PayPalAPIUser'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVEUSER;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVEPWD))
-				$defaultSettings['PayPalAPIPwd'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVEPWD;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVESIG))
-				$defaultSettings['PayPalAPISig'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVESIG;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVEEMAIL))
-				$defaultSettings['PayPalAPIEMail'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_LIVEEMAIL;
-	
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_ORGANISATION_ID))
-				$defaultSettings['OrganisationID'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_ORGANISATION_ID;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_ADMIN_ID))
-				$defaultSettings['AdminID'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_ADMIN_ID;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_ADMIN_EMAIL))
-				$defaultSettings['AdminEMail'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_ADMIN_EMAIL;
-
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_AUTHTXNID))
-				$defaultSettings['AuthTxnId'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_AUTHTXNID;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_AUTHTXNEMAIL))
-				$defaultSettings['AdminTxnEMail'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_AUTHTXNEMAIL;
-	
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_SALES_ID))
-				$defaultSettings['SalesID'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_SALES_ID;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_SALES_EMAIL))
-				$defaultSettings['SalesEMail'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_SALES_EMAIL;
-			if (isset($paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_EMAIL_TEMPLATE_PATH))
-				$defaultSettings['EMailTemplatePath'] = $paypalSettingsObj->TEST_PAYPALAPI_SETTINGS_EMAIL_TEMPLATE_PATH;
+			include ABSPATH.$gatewaySettingsFile;
+			$gatewaySettingsObj = new $className();
+			$gatewayDefaults = $gatewaySettingsObj->GetDefaults();
 			
+			foreach ($gatewayDefaults as $defaultKey => $defaultValue)
+			{
+				$defaultSettings[$defaultKey] = $defaultValue;
+			}
+
 			return $defaultSettings;
 		}
 	}

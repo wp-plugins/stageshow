@@ -382,6 +382,11 @@ if (!class_exists('StageShowLibDBaseClass'))
 				$hasDebug = false;			
 			}
 			
+			if (defined('STAGESHOWLIB_BLOCK_HTTPS'))
+			{
+				echo  '<strong>'.__('SSL over HTTP', $this->get_domain()).":</strong> Blocked<br>\n";	
+			}
+			
 			return $hasDebug;
 		}
 		
@@ -588,6 +593,11 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if ($saveToDB)
 				$this->saveOptions();// Saving Options - in getOptions functions
 				
+			if ($this->getDbgOption('Dev_ShowOptions'))
+			{
+				StageShowLibUtilsClass::print_r($ourOptions, 'Options');
+			}
+			
 			return $ourOptions;
 		}
 		
@@ -665,21 +675,23 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$rtnVal = $this->isOptionSet($optionID, StageShowLibDBaseClass::DEBUG_SETTING);
 			if ($rtnVal)
 			{
-				switch ($optionID)
+				if (!defined('STAGESHOWLIB_ALWAYS_ALLOW_DEBUGOUT'))
 				{
-					case 'Dev_ShowGET';
-					case 'Dev_ShowPOST';
-					case 'Dev_ShowSESSION':
-					case 'Dev_ShowSQL';
-					case 'Dev_DBOutput';
-					case 'Dev_ShowTrolley';
-						$rtnVal = $this->isSysAdmin();
-						break;
-						
-					default:
-						break;
+					switch ($optionID)
+					{
+						case 'Dev_ShowGET';
+						case 'Dev_ShowPOST';
+						case 'Dev_ShowSESSION':
+						case 'Dev_ShowSQL';
+						case 'Dev_DBOutput';
+						case 'Dev_ShowTrolley';
+							$rtnVal = $this->isSysAdmin();
+							break;
+							
+						default:
+							break;
+					}
 				}
-				
 			}
 			
 			return $rtnVal;
@@ -725,8 +737,18 @@ if (!class_exists('StageShowLibDBaseClass'))
 			{
 				return false;
 			}
+			
+			if (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN))
+			{
+				return true;
+			}
+				
+			if (defined('STAGESHOWLIB_CAPABILITY_DEVUSER') && current_user_can(STAGESHOWLIB_CAPABILITY_DEVUSER))
+			{
+				return true;
+			}
 	
-			return (current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN));
+			return false;
 		}
 		
 		function createDB($dropTable = false)

@@ -75,6 +75,7 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'No Sample Sales',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbNoSampleSales',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_NoSampleSales', ),
 					
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Disable Test Menus',StageShowLibTableClass::TABLEPARAM_NAME => 'cbDisableTestMenus', StageShowLibTableClass::TABLEPARAM_ID => 'Dev_DisableTestMenus', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Options',      StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowOptions',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowOptions', ),
 			);
 			
 			
@@ -146,7 +147,6 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 			if (isset($_POST['testbutton_SetPayPalTestSettings'])) 
 			{
 				$this->CheckAdminReferer();
-				
 				$myDBaseObj->SetTestSettings($testDefaults);							
 				echo '<div id="message" class="updated"><p>Settings initialised to '.$selectedPayPalID.'</p></div>';
 			}		

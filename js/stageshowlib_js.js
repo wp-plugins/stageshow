@@ -1,3 +1,4 @@
+var currencySymbol = '';
 
 function StageShowLib_addWindowsLoadHandler(newHandler)
 {
@@ -16,13 +17,32 @@ function StageShowLib_addWindowsLoadHandler(newHandler)
 	}
 }
 
+function StageShowLib_ParseCurrency(currencyText)
+{
+	currencySymbol = '';
+	while (currencyText.length >= 1) 
+	{
+		nextChar = currencyText[0];
+		if (!isNaN(parseInt(nextChar)))
+			break;
+			
+		if (nextChar == '.')
+			break;
+			
+		currencySymbol = currencySymbol + nextChar;
+		currencyText = currencyText.substr(1, currencyText.length);
+	}
+	
+	return parseFloat(currencyText);
+}
+
 function StageShowLib_OnChangeTrolleyTotal(obj)
 {
 	var donationObj = document.getElementById('saleDonation');
 	var saleDonation = 0;
 	if (donationObj != null)
 	{
-		var saleDonation = parseFloat(donationObj.value);
+		var saleDonation = StageShowLib_ParseCurrency(donationObj.value);
 		if (isNaN(saleDonation))
 		{
 			saleDonation = 0;
@@ -41,7 +61,7 @@ function StageShowLib_OnChangeTrolleyTotal(obj)
 		if (postTicketsObj.checked)
 		{
 			var salePostageObj = document.getElementById('salePostage');
-			postValue = parseFloat(salePostageObj.value);
+			postValue = StageShowLib_ParseCurrency(salePostageObj.value);
 			
 			salePostageRowObj.style.display = '';
 		}
@@ -55,7 +75,7 @@ function StageShowLib_OnChangeTrolleyTotal(obj)
 	var finalTotalObj = document.getElementById("stageshow-trolley-totalval");
 	var subTotal = subTotalObj.value;
 	
-	var newTotalVal = parseFloat(subTotal);
+	var newTotalVal = StageShowLib_ParseCurrency(subTotal);
 	newTotalVal += saleDonation;
 	newTotalVal += postValue;
 	newTotalVal += 0.00001; /* To force rounding error ... then it is corrected below */
@@ -77,7 +97,7 @@ function StageShowLib_OnChangeTrolleyTotal(obj)
 		newTotal = newTotal.substr(0, newTotal.length + origDps - newDps);
 	}
 	
-	finalTotalObj.innerHTML = newTotal;
+	finalTotalObj.innerHTML = currencySymbol + newTotal;
 }
 
 function StageShowLib_NumberOfDps(price)

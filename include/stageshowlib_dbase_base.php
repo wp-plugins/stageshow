@@ -33,6 +33,12 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			$this->GetLoginID();
 		}	
 		
+		static function IsInWP()
+		{
+			// Use a WP define to find out if WP is loaded
+			return defined('WP_DEFAULT_THEME');
+		}
+		
 		function GetLoginID()
 		{
 			if (!defined('CORONDECK_RUNASDEMO'))	// Get Current User ID in Demo mode
@@ -102,6 +108,15 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			return $wpdb->insert_id;
 		}
 
+		function getresultsWithPrepare($sql, $values)
+		{
+			global $wpdb;
+			
+			$sql = $wpdb->prepare($sql, $values);
+			
+			return $this->get_results($sql);
+		}
+		
 		function get_results($sql, $debugOutAllowed = true, $sqlFilters = array())
 		{
 			global $wpdb;
@@ -125,7 +140,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 				
 			if (function_exists('wp_get_current_user'))
 			{
-				if (!current_user_can(STAGESHOWLIB_CAPABILITY_SYSADMIN) && !current_user_can(STAGESHOW_CAPABILITY_DEVUSER))
+				if (!$this->isSysAdmin())
 					return;				
 			}
 				

@@ -30,7 +30,7 @@ if (defined('STAGESHOWLIB_TRACK_INCLUDES_FILE'))
 if (!class_exists('StageShowLib_paypal_GatewayClass')) 
 {
 	if (!defined('STAGESHOW_PAYPAL_IPN_NOTIFY_URL'))
-		define('STAGESHOW_PAYPAL_IPN_NOTIFY_URL', STAGESHOW_URL.'include/stageshowlib_paypal_callback.php');
+		define('STAGESHOW_PAYPAL_IPN_NOTIFY_URL', STAGESHOWLIB_URL.'include/stageshowlib_paypal_callback.php');
 
 	if (defined('PAYPAL_APILIB_STREET_LABEL')) 
 		define ('PAYMENT_API_STREET_LABEL', PAYPAL_APILIB_STREET_LABEL);	
@@ -107,7 +107,7 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 		
 		function GetCheckoutType()
 		{
-			return $this->myDBaseObj->adminOptions['PayPalCheckoutType'];
+			return $this->myDBaseObj->getOption('PayPalCheckoutType');
 		}
 		
 		function GetCurrencyOptionID()

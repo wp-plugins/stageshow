@@ -83,7 +83,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 				include 'include/stageshow_gatewaysimulator.php';
 				
 				ob_start();
-				new StageShowGatewaySimulator(STAGESHOW_DBASE_CLASS, $this->demosale);
+				new StageShowGatewaySimulator(STAGESHOWLIB_DBASE_CLASS, $this->demosale);
 				$simulatorOutput = ob_get_contents();
 				ob_end_clean();
 

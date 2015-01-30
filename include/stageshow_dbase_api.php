@@ -20,8 +20,8 @@ Copyright 2014 Malcolm Shergold
 
 */
 
-if (!defined('STAGESHOW_DBASE_CLASS'))
-	define('STAGESHOW_DBASE_CLASS', 'StageShowWPOrgDBaseClass');
+if (!defined('STAGESHOWLIB_DBASE_CLASS'))
+	define('STAGESHOWLIB_DBASE_CLASS', 'StageShowWPOrgDBaseClass');
 	
 if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
 	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
@@ -183,11 +183,11 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			// Add Capabilities for StageShow 
 			if ( !empty($adminRole) ) 
 			{
-				$adminRole->add_cap(STAGESHOW_CAPABILITY_SALESUSER);
-				$adminRole->add_cap(STAGESHOW_CAPABILITY_ADMINUSER);
-				$adminRole->add_cap(STAGESHOW_CAPABILITY_SETUPUSER);
-				$adminRole->add_cap(STAGESHOW_CAPABILITY_VIEWSETTINGS);				
-				$adminRole->add_cap(STAGESHOW_CAPABILITY_DEVUSER);
+				$adminRole->add_cap(STAGESHOWLIB_CAPABILITY_SALESUSER);
+				$adminRole->add_cap(STAGESHOWLIB_CAPABILITY_ADMINUSER);
+				$adminRole->add_cap(STAGESHOWLIB_CAPABILITY_SETUPUSER);
+				$adminRole->add_cap(STAGESHOWLIB_CAPABILITY_VIEWSETTINGS);				
+				$adminRole->add_cap(STAGESHOWLIB_CAPABILITY_DEVUSER);
 			}
 			
 			$this->GetLatestNews();
@@ -361,13 +361,13 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$this->DropTable(STAGESHOW_PRICES_TABLE);      
 			$this->DropTable(STAGESHOW_TICKETS_TABLE);  			
 			
-			$this->DeleteCapability(STAGESHOW_CAPABILITY_RESERVEUSER);
-			$this->DeleteCapability(STAGESHOW_CAPABILITY_VALIDATEUSER);
-			$this->DeleteCapability(STAGESHOW_CAPABILITY_SALESUSER);
-			$this->DeleteCapability(STAGESHOW_CAPABILITY_ADMINUSER);
-			$this->DeleteCapability(STAGESHOW_CAPABILITY_SETUPUSER);
-			$this->DeleteCapability(STAGESHOW_CAPABILITY_VIEWSETTINGS);
-			$this->DeleteCapability(STAGESHOW_CAPABILITY_DEVUSER);
+			$this->DeleteCapability(STAGESHOWLIB_CAPABILITY_RESERVEUSER);
+			$this->DeleteCapability(STAGESHOWLIB_CAPABILITY_VALIDATEUSER);
+			$this->DeleteCapability(STAGESHOWLIB_CAPABILITY_SALESUSER);
+			$this->DeleteCapability(STAGESHOWLIB_CAPABILITY_ADMINUSER);
+			$this->DeleteCapability(STAGESHOWLIB_CAPABILITY_SETUPUSER);
+			$this->DeleteCapability(STAGESHOWLIB_CAPABILITY_VIEWSETTINGS);
+			$this->DeleteCapability(STAGESHOWLIB_CAPABILITY_DEVUSER);
 		}
 		
 		//Returns an array of admin options
@@ -616,7 +616,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 
 			if (!function_exists('wp_get_current_user')) return false;
 			
-			return current_user_can(STAGESHOW_CAPABILITY_DEVUSER);
+			return current_user_can(STAGESHOWLIB_CAPABILITY_DEVUSER);
 		}
 		
 		function prepareBoxOffice($showID)
@@ -885,9 +885,11 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			else
 			{
 				$sql  = 'SELECT showID, showName FROM '.STAGESHOW_SHOWS_TABLE;
-				$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showName="'.$showName.'"';
+				$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showName="%s"';
 
-				$showsEntries = $this->get_results($sql);
+				$values = array($showName);
+				
+				$showsEntries = $this->getresultsWithPrepare($sql, $values);
 				$showID = (count($showsEntries) > 0) ? $showsEntries[0]->showID : 0;
 			}
 			
@@ -911,9 +913,11 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 				$sql  = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
 				$sql .= " LEFT JOIN ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.showID='.STAGESHOW_SHOWS_TABLE.'.showID';
 				$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showID="'.$showID.'"';
-				$sql .= ' AND '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime="'.$perfDate.'"';
+				$sql .= ' AND '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime="%s"';
 				
-				$perfsEntries = $this->get_results($sql);
+				$values = array($perfDate);
+				
+				$perfsEntries = $this->getresultsWithPrepare($sql, $values);
 				$perfID = (count($perfsEntries) > 0) ? $perfsEntries[0]->perfID : 0;
 			}
 			
@@ -1767,39 +1771,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 //
 // ----------------------------------------------------------------------
     
-		function LogToFile($Filepath, $LogLine, $OpenMode = 0)
-		{
-			// Use global values for OpenMode
-			
-			// Create a filesystem object
-			if (($OpenMode == self::ForAppending) || ($OpenMode == 0))
-			{
-				$logFile = fopen($Filepath,"ab");
-			}
-			else
-			{
-				$logFile = fopen($Filepath,"wb");
-			}
-
-			// Write log entry
-			if ($logFile != 0)
-			{
-				$LogLine .= "\n";
-				fwrite($logFile, $LogLine, strlen($LogLine));
-				fclose($logFile);
-
-				$rtnStatus = true;
-			}
-			else
-			{
-				echo "Error writing to $Filepath<br>\n";
-				//echo "Error was $php_errormsg<br>\n";
-				$rtnStatus = false;
-			}
-
-			return $rtnStatus;
-		}
-
 		function GetSalesEMail()
 		{
 			return $this->adminOptions['AdminEMail'];

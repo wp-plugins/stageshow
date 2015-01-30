@@ -30,7 +30,7 @@ include 'stageshow_defs.php';
 
 include STAGESHOW_INCLUDE_PATH.'stageshow_dbase_api.php';      
 
-$stageShowDBaseClass = STAGESHOW_DBASE_CLASS;
+$stageShowDBaseClass = STAGESHOWLIB_DBASE_CLASS;
 $myDBaseObj = new $stageShowDBaseClass(__FILE__);
 
 $myDBaseObj->uninstall();

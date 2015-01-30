@@ -515,7 +515,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 			$myPluginObj = $this->myPluginObj;
 			
 			$classId = $myPluginObj->adminClassPrefix.'SalesAdminListClass';
-			$salesList = new $classId($env);	// xxxxxxxxxxxxxSalesAdminListClass etc.
+			$salesList = new $classId($env);	// StageShowLibGatewayBaseClassxxxxSalesAdminListClass etc.
 			$salesList->OutputList($this->results);		
 		}
 				

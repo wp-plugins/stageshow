@@ -72,7 +72,7 @@ if (!class_exists('StageShowWPOrgSalesAdminClass'))
 		
 		function OuputAddSaleButton()
 		{
-			if ( current_user_can(STAGESHOW_CAPABILITY_SALESUSER) )
+			if ( current_user_can(STAGESHOWLIB_CAPABILITY_SALESUSER) )
 			{
 				parent::OuputAddSaleButton();
 			}
@@ -84,7 +84,7 @@ if (!class_exists('StageShowWPOrgSalesAdminClass'))
 			{
 				// Sale Editor ... output tickets selector
 				$pluginObj = $this->env['PluginObj'];
-				if (current_user_can(STAGESHOW_CAPABILITY_SALESUSER))
+				if (current_user_can(STAGESHOWLIB_CAPABILITY_SALESUSER))
 				{
 					$myDBaseObj = $this->env['DBaseObj'];
 					$myDBaseObj->allowAdminOnly = true;
