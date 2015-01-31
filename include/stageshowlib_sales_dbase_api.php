@@ -163,7 +163,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			if (!isset($this->adminOptions['PayPalCheckoutType']))
 			{
-				$this->adminOptions['PayPalCheckoutType'] = self::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
+				$this->adminOptions['PayPalCheckoutType'] = StageShowLibGatewayBaseClass::STAGESHOWLIB_CHECKOUTSTYLE_STANDARD;
 			}
 			
       		$this->saveOptions();      
