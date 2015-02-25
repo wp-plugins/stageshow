@@ -169,6 +169,8 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			copy(STAGESHOW_FILE_PATH.'stageshow_ipn_callback.php', STAGESHOW_FILE_PATH.'StageShow_ipn_callback.php');
 			
       		$myDBaseObj->upgradeDB();
+      		
+      		$myDBaseObj->SaveDBCredentials(true);
 		}
 
 	    function deactivate()

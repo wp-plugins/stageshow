@@ -867,9 +867,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			}
 
 			$phpText .= $this->GetDBCredentials();
-			$phpText .= $this->OptionsToDefines('stageshowOptions', $this->adminOptions);
-			$phpText .= $this->OptionsToDefines('stageshowDebugOptions', $this->dbgOptions);
-
+	
 			$phpText .= "\n";
 
 			$phpText .= "\n".'?'.'>'."\n";
