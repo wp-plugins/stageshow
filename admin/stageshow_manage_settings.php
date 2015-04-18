@@ -57,20 +57,6 @@ if (!class_exists('StageShowWPOrgSettingsAdminListClass'))
 			return "stageshow-settings";
 		}
 		
-		function OutputList($results, $updateFailed = false)
-		{
-			ob_start();
-			parent::OutputList($results, $updateFailed);
-			$htmlout = ob_get_contents();
-			ob_end_clean();
-			
-			$gatewaySelectIDDef = 'id="GatewaySelected"';
-			$gatewaySelectOnClick = ' onchange="stageshow_ClickGateway(this)" ';
-			
-			$htmlout = str_replace($gatewaySelectIDDef, $gatewaySelectOnClick.$gatewaySelectIDDef, $htmlout);
-			echo $htmlout;
-		}
-		
 		function GetMainRowsDefinition()
 		{
 			$this->isTabbedOutput = true;
@@ -115,24 +101,6 @@ if (!class_exists('StageShowWPOrgSettingsAdminListClass'))
 			
 			$rowDefs = $this->MergeSettings($rowDefs, parent::GetDetailsRowsDefinition());
 			return $rowDefs;
-		}
-		
-		function JS_Bottom($defaultTab)
-		{
-			$jsCode  = parent::JS_Bottom($defaultTab);		
-			$jsCode .= "
-
-window.onload = stageshow_OnSettingsLoad;
-
-</script>
-			";
-			
-			return $jsCode;
-		}
-		
-		function GetOnClickHandler()
-		{
-			return 'stageshow_ClickHeader(this)';
 		}
 		
 	}

@@ -29,8 +29,8 @@ if (defined('STAGESHOWLIB_TRACK_INCLUDES_FILE'))
 // Definitions for API Interface Functions
 if (!class_exists('StageShowLib_paypal_GatewayClass')) 
 {
-	if (!defined('STAGESHOW_PAYPAL_IPN_NOTIFY_URL'))
-		define('STAGESHOW_PAYPAL_IPN_NOTIFY_URL', STAGESHOWLIB_URL.'include/stageshowlib_paypal_callback.php');
+	if (!defined('PAYPAL_APILIB_IPN_NOTIFY_URL'))
+		define('PAYPAL_APILIB_IPN_NOTIFY_URL', STAGESHOWLIB_URL.'include/stageshowlib_paypal_callback.php');
 
 	if (defined('PAYPAL_APILIB_STREET_LABEL')) 
 		define ('PAYMENT_API_STREET_LABEL', PAYPAL_APILIB_STREET_LABEL);	
@@ -208,7 +208,7 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 
 			$useLocalIPNServer = isset($dbgOptions['Dev_IPNLocalServer']) && ($dbgOptions['Dev_IPNLocalServer']);
 
-			$this->GatewayNotifyURL = STAGESHOW_PAYPAL_IPN_NOTIFY_URL;							
+			$this->GatewayNotifyURL = PAYPAL_APILIB_IPN_NOTIFY_URL;							
 			$this->PayPalURL = $this->GetPayPalURL(false);
 
 			// URL for Plugin code to verify PayPal IPNs

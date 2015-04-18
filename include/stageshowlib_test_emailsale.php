@@ -113,7 +113,7 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 			}
 ?>		
 		<tr valign="top">
-			<td vertical-align="middle"><?php _e('Debug Output', $myDBaseObj->get_domain()); ?>:</td>
+			<td vertical-align="middle"><?php _e('Add Diagnostics', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
 				<input name="EMailSale_DebugEnabled" type="checkbox" value="1"  />&nbsp;Enable
 			</td>

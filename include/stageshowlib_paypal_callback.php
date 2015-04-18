@@ -81,7 +81,7 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 			{
 				$VerifyURL = '{Skipped}';
 				$gatewayResponse['APIStatus'] = 200;
-				$gatewayResponse['APIResponseText'] = 'VALID';
+				$gatewayResponse['APIResponseText'] = 'VERIFIED';
 			}
 			else
 			{
@@ -109,7 +109,7 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 			$this->AddToLog('Fee:    ' . $Payment_fee);
 
 			// Check notification validation
-			if ( ($gatewayResponse['APIStatus'] != 200 ) || ($gatewayResponse['APIResponseText'] === 'VALID') )
+			if ( ($gatewayResponse['APIStatus'] != 200 ) || ($gatewayResponse['APIResponseText'] === 'VERIFIED') )
 			{
 				if ($gatewayResponse['APIStatus'] != 200 )
 				{
@@ -120,7 +120,7 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 				}
 				else
 				{
-					$this->AddToLog('Gateway Response: VALID');
+					$this->AddToLog('Gateway Response: VERIFIED');
 				}
 				// HTTP error handling
 

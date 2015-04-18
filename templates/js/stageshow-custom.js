@@ -56,7 +56,7 @@ function stageshow_AddCustomHTMLValues()
 
 function stageshow_OnClickAdd(obj)
 {
-	return true;
+	return stageshowJQuery_OnClickTrolleyButton(obj); 
 }
 
 function stageshow_OnClickSelectseats(obj)

@@ -121,7 +121,7 @@ if (!class_exists('StageShowWPOrgCartPluginClass'))
 				// Output Select Status Drop-down Dialogue
 				$saleStatus = isset($cartContents->saleStatus) ? $cartContents->saleStatus : '';
 				$selectCompleted = ($saleStatus == PAYMENT_API_SALESTATUS_COMPLETED) ? 'selected=true ' : '';
-				$selectReserved  = ($saleStatus == STAGESHOW_SALESTATUS_RESERVED) ? 'selected=true ' : '';
+				$selectReserved  = ($saleStatus == PAYMENT_API_SALESTATUS_RESERVED) ? 'selected=true ' : '';
 				
 				$formHTML .=  '
 				<tr class="stageshow-boxoffice-formRow">
@@ -129,7 +129,7 @@ if (!class_exists('StageShowWPOrgCartPluginClass'))
 					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
 				<select id="saleStatus" name="saleStatus">
 					<option value="'.PAYMENT_API_SALESTATUS_COMPLETED.'" '.$selectCompleted.'>'.__('Completed', $this->myDomain).'&nbsp;</option>
-					<option value="'.STAGESHOW_SALESTATUS_RESERVED.'" '.$selectReserved.'>'.__('Reserved', $this->myDomain).'&nbsp;</option>
+					<option value="'.PAYMENT_API_SALESTATUS_RESERVED.'" '.$selectReserved.'>'.__('Reserved', $this->myDomain).'&nbsp;</option>
 				</select>
 					</td>
 				</tr>

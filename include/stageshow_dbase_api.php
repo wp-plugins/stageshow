@@ -390,6 +390,16 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			return $sql;
 		}
 		
+		function clearAll()
+		{
+			parent::clearAll($dropTable);
+
+			$this->DropTable(STAGESHOW_SHOWS_TABLE);
+			$this->DropTable(STAGESHOW_PERFORMANCES_TABLE);
+			$this->DropTable(STAGESHOW_PRICES_TABLE);
+			$this->DropTable(STAGESHOW_TICKETS_TABLE);
+		}
+		
 		function createDB($dropTable = false)
 		{
       		global $wpdb;
@@ -1232,14 +1242,20 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			{
 				// Get URL of StagsShow News server from Plugin Info
 				$updateCheckURL = $this->GetInfoServerURL('news');
-				$latest['LatestNews'] = $this->GetHTTPPage($updateCheckURL);	
-				if (strlen($latest['LatestNews']) <= 2)
+				$htmlPage = $this->GetHTTPPage($updateCheckURL);
+				if (strpos($htmlPage, '<html') || strpos($htmlPage, '<html'))
+				{
+					$latest['Status'] = "HTTP_CompletePage";
+					$latest['LatestNews'] = '';
+				}
+				else if (strlen($latest['LatestNews']) <= 2)
 				{
 					$latest['Status'] = "HTTP_Empty";
 					$latest['LatestNews'] = '';
 				}
 				else
 				{
+					$latest['LatestNews'] = $htmlPage;
 					$latest['Status'] = "HTTP_OK";
 				}
 					

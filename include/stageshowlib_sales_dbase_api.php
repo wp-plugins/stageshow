@@ -334,6 +334,13 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $sql;
 		}
 		
+		function clearAll()
+		{
+			parent::clearAll($dropTable);
+
+			$this->DropTable($this->DBTables->Sales);
+		}
+		
 		function createDB($dropTable = false)
 		{
 			parent::createDB($dropTable);
@@ -357,11 +364,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				return trim($result->saleFirstName.' '.$result->saleLastName);
 			}
 		}
-		
-		
-		
-		
-		
 		
 		function AddSale($saleDateTime = '', $salesVals = array())
 		{
@@ -990,22 +992,22 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$args['redirection'] = 0;
 			
 			$request = new WP_Http;
-			$this->HTTPResult = $request->request( $url, $args );
-			if ( is_wp_error($this->HTTPResult) )
+			$HTTPResult = $request->request( $url, $args );
+			if ( is_wp_error($HTTPResult) )
 			{
 				$response['APIResponseText'] = '';
 				$response['APIStatus'] = 'ERROR';
-				$response['APIStatusMsg'] = $this->HTTPResult->get_error_message();
+				$response['APIStatusMsg'] = $HTTPResult->get_error_message();
 				$response['APIHeaders'] = '';
 				$response['APICookies'] = array();
 			}
 			else
 			{
-				$response['APIResponseText'] = $this->HTTPResult['body'];
-				$response['APIStatus'] = $this->HTTPResult['response']['code'];
-				$response['APIStatusMsg'] = $this->HTTPResult['response']['message'];
-				$response['APIHeaders'] = $this->HTTPResult['headers'];
-				$response['APICookies'] = $this->HTTPResult['cookies'];
+				$response['APIResponseText'] = $HTTPResult['body'];
+				$response['APIStatus'] = $HTTPResult['response']['code'];
+				$response['APIStatusMsg'] = $HTTPResult['response']['message'];
+				$response['APIHeaders'] = $HTTPResult['headers'];
+				$response['APICookies'] = $HTTPResult['cookies'];
 			}
 /*			
 			{

@@ -101,6 +101,19 @@ if (!class_exists('GatewaySettingsAdminListClass'))
 			return $rowDefs;
 		}		
 				
+		function JS_Bottom($defaultTab)
+		{
+			$jsCode  = parent::JS_Bottom($defaultTab);		
+			$jsCode .= "
+
+window.onload = stageshowlib_OnSettingsLoad;
+
+</script>
+			";
+			
+			return $jsCode;
+		}
+		
 		function OutputJavascript($selectedTabIndex = 0)
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -114,6 +127,20 @@ if (!class_exists('GatewaySettingsAdminListClass'))
 			}
 			
 			parent::OutputJavascript($selectedTab);
+		}
+		
+		function OutputList($results, $updateFailed = false)
+		{
+			ob_start();
+			parent::OutputList($results, $updateFailed);
+			$htmlout = ob_get_contents();
+			ob_end_clean();
+			
+			$gatewaySelectIDDef = 'id="GatewaySelected"';
+			$gatewaySelectOnClick = ' onchange="stageshowlib_ClickGateway(this)" ';
+			
+			$htmlout = str_replace($gatewaySelectIDDef, $gatewaySelectOnClick.$gatewaySelectIDDef, $htmlout);
+			echo $htmlout;
 		}
 		
 	}

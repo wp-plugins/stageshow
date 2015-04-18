@@ -425,7 +425,7 @@ if (!class_exists('StageShowLibTableClass'))
 		
 		function GetOnClickHandler()
 		{
-			return '';
+			return 'stageshowlib_ClickHeader(this)';
 		}
 		
 		function Output_ColHeader()
