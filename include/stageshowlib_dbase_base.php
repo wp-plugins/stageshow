@@ -31,6 +31,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 		function __construct() //constructor		
 		{
 			$this->GetLoginID();
+			$this->SetMySQLGlobals();
 		}	
 		
 		static function IsInWP()
@@ -47,6 +48,12 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			if (isset($this->loginID))
 				return $this->loginID;
 				
+			if (isset($_SESSION['stageshowlib_loginID']))
+			{
+				$this->loginID = $_SESSION['stageshowlib_loginID'];	
+				return $this->loginID;
+			}
+				
 			if (!function_exists('get_currentuserinfo'))
 			{
 				require_once( ABSPATH . WPINC . '/pluggable.php' );
@@ -60,7 +67,14 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			else
 				$this->loginID = '';
 							
+			$_SESSION['stageshowlib_loginID'] = $this->loginID;
+			
 			return $this->loginID;
+		}
+		
+		function SetMySQLGlobals()
+		{			
+			$this->query("SET OPTION SQL_BIG_SELECTS=1");
 		}
 		
 		function ShowSQL($sql, $values = null)
@@ -220,6 +234,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 				case 'ALTER':
 				case 'LOCK':
 				case 'UNLOCK':
+				case 'SET':
 					return $sql;
 				
 				case 'SHOW':

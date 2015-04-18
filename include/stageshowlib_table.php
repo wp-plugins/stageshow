@@ -1328,6 +1328,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					}
 					else
 					{
+						if (count($selectOptsArray)==1) $controlValue = key($selectOptsArray);
 						$editControl  = $this->GetSelectOptsText($settingOption, $controlValue);
 						$editControl .=  '<input type="hidden" '.$controlIdDef.' value="'.$controlValue.'"/>';					
 					}
@@ -1581,7 +1582,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 				$hiddenRowsColId = $tableId.'-hiddenCol';
 		
 				$tabbedRowCounts = array();
-				
+		
 				$nextInline = false;
 				$hiddenRows = "<table class=$tableId-table width=\"100%\">\n";
 				foreach ($this->detailsRowsDef as $option)

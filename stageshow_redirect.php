@@ -1,13 +1,8 @@
 <?php
 /* 
-Plugin Name: StageShow
-Plugin URI: http://www.corondeck.co.uk/StageShow/WPOrg
-Version: 4.6.0.4
-Author: Malcolm Shergold
-Author URI: http://www.corondeck.co.uk
-Description: A Wordpress Plugin to sell theatre tickets online
+Description: Redirect for PayPal Express Callback
  
-Copyright 2013 Malcolm Shergold
+Copyright 2014 Malcolm Shergold
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,24 +13,30 @@ Copyright 2013 Malcolm Shergold
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-if (defined('IPN_CALLBACK'))
+if(!isset($_SESSION)) 
 {
-	if (IPN_CALLBACK != 'STAGESHOW_VARIANT')
-		return;
+	// MJS - SC Mod - Register to use SESSIONS
+	session_start();
+}	
+
+// Pass PayPal Express callback Params in $_SESSION variable
+$_SESSION['REDIRECTED_GET'] = serialize($_GET);
+$url = urldecode($_GET['url']);
+
+//echo "<br><br>Redirect Request: $url<br><br>\n";
+Redirect($url, true);
+
+function Redirect($url, $permanent = false)
+{
+    header('Location: ' . $url, true, $permanent ? 301 : 302);
+    die;
 }
 
-define('STAGESHOW_CODE_PREFIX', 'stageshow');
-
-include 'stageshow_defs.php';
-include 'stageshow_main.php';
-
-new StageShowWPOrgPluginClass(__FILE__);
-		
 ?>

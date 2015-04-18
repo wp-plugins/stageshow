@@ -124,3 +124,8 @@ function StageShowLib_HideElement(obj)
 	// Hide the settings row
 	tabElem.style.display = 'none';
 }
+
+function StageShowLib_replaceAll(find, replace, str) 
+{
+	return str.replace(new RegExp(find, 'g'), replace);
+}

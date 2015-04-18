@@ -412,11 +412,11 @@ StageShowLib_DTPicker.prototype.RenderCssCal = function (bNewCal)
 
     vCalHeader += "<tr><td><table class='calTableMonthYear'><tr>";
 
-	vCalHeader += "<td><div class='calNavButton calButtonPrevYear' onmousedown='" + this.CalObjName + ".ClickDecYear();" + "' onmouseover='" + this.CalObjName + ".highlightControl(this, 0)' onmouseout='" + this.CalObjName + ".highlightControl(this, 1)'><div></td>\n"; //Year scroller (decrease 1 year)
-    vCalHeader += "<td><div class='calNavButton calButtonPrevMonth' onmousedown='" + this.CalObjName + ".ClickDecMonth();" + "' onmouseover='" + this.CalObjName + ".highlightControl(this, 0)' onmouseout='" + this.CalObjName + ".highlightControl(this, 1)'><div></td>\n"; //Month scroller (decrease 1 month)
+	vCalHeader += "<td><div class='calNavButton calButtonPrevYear' onmousedown='" + this.CalObjName + ".ClickDecYear();" + "' onmouseover='" + this.CalObjName + ".highlightControl(this, 0)' onmouseout='" + this.CalObjName + ".highlightControl(this, 1)'></div></td>\n"; //Year scroller (decrease 1 year)
+    vCalHeader += "<td><div class='calNavButton calButtonPrevMonth' onmousedown='" + this.CalObjName + ".ClickDecMonth();" + "' onmouseover='" + this.CalObjName + ".highlightControl(this, 0)' onmouseout='" + this.CalObjName + ".highlightControl(this, 1)'></div></td>\n"; //Month scroller (decrease 1 month)
     vCalHeader += "<td width='70%' class='calR calMonthName'>" + this.GetMonthName(this.ShowLongMonth) + " " + this.Year + "</td>"; //Month and Year
-    vCalHeader += "<td><div class='calNavButton calButtonNextMonth' onmousedown='" + this.CalObjName + ".ClickIncMonth();" + "' onmouseover='" + this.CalObjName + ".highlightControl(this, 0)' onmouseout='" + this.CalObjName + ".highlightControl(this, 1)'><div></td>\n"; //Month scroller (increase 1 month)
-    vCalHeader += "<td><div class='calNavButton calButtonNextYear' onmousedown='" + this.CalObjName + ".ClickIncYear();" + "' onmouseover='" + this.CalObjName + ".highlightControl(this, 0)' onmouseout='" + this.CalObjName + ".highlightControl(this, 1)'><div></td>\n"; //Year scroller (increase 1 year)
+    vCalHeader += "<td><div class='calNavButton calButtonNextMonth' onmousedown='" + this.CalObjName + ".ClickIncMonth();" + "' onmouseover='" + this.CalObjName + ".highlightControl(this, 0)' onmouseout='" + this.CalObjName + ".highlightControl(this, 1)'></div></td>\n"; //Month scroller (increase 1 month)
+    vCalHeader += "<td><div class='calNavButton calButtonNextYear' onmousedown='" + this.CalObjName + ".ClickIncYear();" + "' onmouseover='" + this.CalObjName + ".highlightControl(this, 0)' onmouseout='" + this.CalObjName + ".highlightControl(this, 1)'></div></td>\n"; //Year scroller (increase 1 year)
     this.calHeight += 22;
 
     vCalHeader += "</tr></table></td></tr>";

@@ -56,37 +56,6 @@ if (!class_exists('StageShowLibUtilsClass'))
 			return $reqArray[$elementId];
 		}
 		
-		static function isNewVersion($ourVersion, $serverVersion, $debug=false)
-		{
-			// Compare version numbers - format N1.N2.N3 .... etc.
-			$ourVersionVals = explode('.', $ourVersion);
-			$serverVersionVals = explode('.', $serverVersion);
-			if ($debug) echo "Compare Versions ($ourVersion , $serverVersion)<br>\n";					
-			for ($i=0; $i<max(count($ourVersionVals),count($serverVersionVals)); $i++)
-			{
-				if (!ctype_digit($ourVersionVals[$i]))
-				{
-					return false;
-				}
-				
-				$ourVersionVal = isset($ourVersionVals[$i]) ? (int)$ourVersionVals[$i] : 0;
-				$serverVersionVal = isset($serverVersionVals[$i]) ? (int)$serverVersionVals[$i] : 0;
-				if ($serverVersionVal > $ourVersionVal)
-				{
-					if ($debug) echo "serverVersionVal > ourVersionVal ($serverVersionVal > $ourVersionVal)- Exit TRUE<br>\n";					
-					return true;
-				}
-				if ($serverVersionVal < $ourVersionVal)
-				{
-					if ($debug) echo "serverVersionVal < ourVersionVal ($serverVersionVal < $ourVersionVal) - Exit FALSE<br>\n";					
-					return false;
-				}
-				if ($debug) echo "serverVersionVal = ourVersionVal ($serverVersionVal = $ourVersionVal) - Continue<br>\n";
-			}
-			if ($debug) echo "serverVersionVal = ourVersionVal ($ourVersion = $serverVersion) - Exit FALSE<br>\n";					
-			return false;
-		}
-		
 		static function recurse_copy($src, $dst, $perm=0755)
 		{
 			$dir = opendir($src);
@@ -179,28 +148,6 @@ if (!class_exists('StageShowLibUtilsClass'))
 			return false;
 		}
 		
-		static function Output_Javascript_SetFocus($elementId, $inScript = false)
-		{
-			if (!$inScript)
-				echo '
-<script type="text/javascript">
-	<!--
-';
-			echo '
-	function StageShowLib_setInitialFocus()
-	{
-     document.getElementById("'.$elementId.'").focus();
-	}
-	StageShowLib_addWindowsLoadHandler(StageShowLib_setInitialFocus); 
-';
-			if (!$inScript)
-				echo '
-						
-// -->
-</script>
-';
-		}
-
 		static function ShowCallStack($echoOut = true)
 		{
 			$lineBreak = $echoOut ? "<br>\n" : "\n";

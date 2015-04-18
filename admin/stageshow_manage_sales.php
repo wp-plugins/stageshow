@@ -32,36 +32,6 @@ if (!class_exists('StageShowWPOrgSalesAdminClass'))
 			parent::__construct($env);
 		}
 		
-		function GetItemID($pricesEntry)
-		{
-			return $pricesEntry->priceID;
-		}
-				
-		function GetItemPrice($pricesEntry)
-		{
-			return $pricesEntry->priceValue;
-		}
-		
-		function GetItemDesc($pricesEntry)
-		{
-			return StageShowWPOrgDBaseClass::FormatDateForDisplay($pricesEntry->perfDateTime).' - '.$pricesEntry->priceType;
-		}
-		
-		function GetStockID($pricesEntry)
-		{
-			return $pricesEntry->perfID;
-		}
-		
-		function GetSaleQty($ticketsEntry)
-		{
-			return $ticketsEntry->ticketQty;
-		}
-		
-		function SetSaleQty(&$ticketsEntry, $qty)
-		{
-			$ticketsEntry->ticketQty = $qty;
-		}
-		
 		function NoStockMessage()
 		{
 			$perfsPageURL = get_option('siteurl').'/wp-admin/admin.php?page='.STAGESHOW_MENUPAGE_PRICES;
@@ -80,19 +50,6 @@ if (!class_exists('StageShowWPOrgSalesAdminClass'))
 		
 		function Output_MainPage($updateFailed)
 		{
-			if ($this->editingRecord)
-			{
-				// Sale Editor ... output tickets selector
-				$pluginObj = $this->env['PluginObj'];
-				if (current_user_can(STAGESHOWLIB_CAPABILITY_SALESUSER))
-				{
-					$myDBaseObj = $this->env['DBaseObj'];
-					$myDBaseObj->allowAdminOnly = true;
-				}
-				echo $pluginObj->OutputContent_DoShortcode(NULL);
-				return '';
-			}
-			
 			return parent::Output_MainPage($updateFailed);
 		}
 		
@@ -165,6 +122,48 @@ if (!class_exists('StageShowWPOrgSalesAdminClass'))
 			}
 				
 			return $rtnVal;
+		}
+		
+		function CanChangeState($prevSaleStatus, $newSaleStatus)
+		{
+			if ($newSaleStatus  == PAYMENT_API_SALESTATUS_COMPLETED)
+			{
+				if ($prevSaleStatus == PAYMENT_API_SALESTATUS_CHECKOUT) 
+			  		return true;
+				if ($prevSaleStatus == PAYMENT_API_SALESTATUS_UNVERIFIED) 
+			  		return true;
+			  	return false;				
+			}
+			  	
+			return false;
+		}
+
+		function DoBulkAction($bulkAction, $recordId)
+		{
+			switch ($bulkAction)
+			{
+				case StageShowWPOrgSalesAdminListClass::BULKACTION_COMPLETED:	
+					$saleResults = $this->myDBaseObj->GetSale($recordId);
+					$saleEntry = $saleResults[0];
+					
+					// Check record can be changed to COMPLETED
+					$prevSaleStatus = $saleEntry->saleStatus;
+					
+					// Get the sale entry
+					if (!$this->CanChangeState($prevSaleStatus, PAYMENT_API_SALESTATUS_COMPLETED))
+						return false;
+						
+					// Change saleStatus to Completed	
+					$this->myDBaseObj->UpdateSaleIDStatus($recordId, PAYMENT_API_SALESTATUS_COMPLETED);
+					if ($prevSaleStatus == PAYMENT_API_SALESTATUS_UNVERIFIED)
+					{
+						// Previously Unverified Sale is confirmed - Send EMail to Purchaser
+						$this->myDBaseObj->EMailSale($saleEntry->saleID);
+					}
+					return true;
+			}
+				
+			return parent::DoBulkAction($bulkAction, $recordId);
 		}
 		
 	}

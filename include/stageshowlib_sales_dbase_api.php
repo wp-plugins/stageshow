@@ -29,8 +29,8 @@ if(!isset($_SESSION))
 if (!defined('STAGESHOWLIB_DBASE_CLASS'))
 	define('STAGESHOWLIB_DBASE_CLASS', 'StageShowLibSalesDBaseClass');
 	
-include 'stageshowlib_dbase_api.php';      
-include 'stageshowlib_email_api.php';   
+if (!class_exists('StageShowLibSalesCartDBaseClass')) 
+	include STAGESHOWLIB_INCLUDE_PATH.'stageshowlib_sales_trolley_dbase_api.php';
 
 if (!class_exists('StageShowLibSalesDBaseClass')) 
 {
@@ -51,7 +51,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 	if (!defined('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH'))
 		define('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH', '');
 		
-  	class StageShowLibSalesDBaseClass extends StageShowLibDBaseClass // Define class
+	class StageShowLibSalesDBaseClass extends StageShowLibSalesCartDBaseClass // Define class 
   	{	
 		const STAGESHOWLIB_LOGSALEMODE_CHECKOUT = 'Checkout';
 		const STAGESHOWLIB_LOGSALEMODE_RESERVE = 'Reserve';
@@ -65,8 +65,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function __construct($opts)		//constructor		
 		{
-			$currOptions = get_option($opts['CfgOptionsID']);
-					
+			$optionsId = $opts['CfgOptionsID'];
+			$currOptions = get_option($optionsId);
 			$gatewayUpdated = true;
 			$opts['DBaseObj'] = $this;
 			if (isset($currOptions['GatewaySelected']))
@@ -92,13 +92,17 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				{
 					$currOptions['GatewaySelected'] = '';
 				}
+
 				update_option($opts['CfgOptionsID'], $currOptions);
 			}
 
 			parent::__construct($opts);
 						
 			if (!isset($this->emailObjClass))
+			{
 				$this->emailObjClass = 'StageShowLibEMailAPIClass';
+				$this->emailClassFilePath = STAGESHOWLIB_INCLUDE_PATH.'stageshowlib_email_api.php';   			
+			}
 				
 		}
 
@@ -107,21 +111,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
     		return 'paypal';
 		}
 		
-		function AddGateway($opts, $gatewayID)
-		{
-			$this->GatewayID = $gatewayID;
-			
-			$gatewayFile = 'stageshowlib_'.$this->GatewayID.'_gateway.php'; 
-			if (!file_exists(dirname(__FILE__).'/'.$gatewayFile)) return false;
-
-			$gatewayClass = 'StageShowLib_'.$this->GatewayID.'_GatewayClass'; 
-			
-			include $gatewayFile;      						// i.e. stageshowlib_paypal_api.php
-			$this->gatewayObj = new $gatewayClass($opts); 	// i.e. StageShowLib_paypal_GatewayClass
-			
-			$this->GatewayName = $this->gatewayObj->GetName();
-			return true;
-		}
 		
 		function SplitSaleNameField()
 		{
@@ -156,7 +145,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			// Copy release templates to plugin persistent templates and images folders
 			StageShowLibUtilsClass::recurse_copy($salesDefaultTemplatesPath, $salesTemplatesPath);
 			
-			if (!isset($this->adminOptions['CheckoutTimeout']))
+			if (!isset($this->adminOptions['CheckoutTimeout']) || ($this->adminOptions['CheckoutTimeout'] == ''))
 			{
 				$this->adminOptions['CheckoutTimeout'] = PAYMENT_API_CHECKOUT_TIMEOUT_DEFAULT;
 			}
@@ -213,25 +202,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $isConfigured;
 		}
 				
-		function getImagesURL()
-		{
-			if (defined('STAGESHOWLIB_IMAGESURL'))
-				return STAGESHOWLIB_IMAGESURL;
-				
-			$siteurl = get_option('siteurl');
-			if ($this->isOptionSet('PayPalImagesUseSSL'))
-			{
-				$siteurl = str_replace('http', 'https', $siteurl);
-			}
-			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
-			return $siteurl.'/wp-content/uploads/'.$pluginID.'/images/';
-		}
 		
-		function getImageURL($optionId)
-		{			
-			$imageURL = isset($this->adminOptions[$optionId]) ? $this->getImagesURL().$this->adminOptions[$optionId] : '';
-			return $imageURL;
-		}
 		
 		//Returns an array of admin options
 		function getOptions($childOptions = array()) 
@@ -258,7 +229,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			$ourOptions = array_merge($ourOptions, $childOptions);
 			
-			$currOptions = parent::getOptions($ourOptions, false);
+			$currOptions = parent::getOptions($ourOptions);
 			
 			$saveToDB = false;
 			
@@ -286,54 +257,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$this->saveOptions();
 				
 			return $currOptions;
-		}
-
-		static function FormatDateForDisplay($dateInDB)
-		{
-			// Convert time string to UNIX timestamp
-			$timestamp = strtotime( $dateInDB );
-			return self::FormatTimestampForDisplay($timestamp);
-		}
-		
-		static function FormatTimestampForDisplay($timestamp)
-		{
-			if (defined('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT'))
-				$dateFormat = STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT;
-			else
-				// Use Wordpress Date and Time Format
-				$dateFormat = get_option( 'date_format' ).' '.get_option( 'time_format' );
-				
-			// Get Time & Date formatted for display to user
-			$dateAndTime = date($dateFormat, $timestamp);
-			if (strlen($dateAndTime) < 2)
-			{
-				$dateAndTime = '[Invalid WP Date/Time Format]';
-			}
-			
-			return $dateAndTime;
-		}
-		
-		function FormatCurrency($amount, $asHTML = true)
-		{
-			$currencyText = sprintf($this->adminOptions['CurrencyFormat'], $amount);
-			if (!$this->adminOptions['UseCurrencySymbol'])
-				return $currencyText;
-				
-			if ($asHTML)
-			{
-				$currencyText = $this->adminOptions['CurrencySymbol'].$currencyText;				
-			}
-			else
-			{
-				$currencyText = $this->adminOptions['CurrencyText'].$currencyText;
-			}
-
-			return $currencyText;
-		}
-		
-		function SettingsConfigured()
-		{
-			return $this->gatewayObj->IsGatewayConfigured($this->adminOptions);
 		}
 		
 		function Output_PluginHelp()
@@ -372,51 +295,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		// Saves the admin options to the options data table
-		function saveOptions()
-		{
-			$newOptions = $this->adminOptions;
-
-			$currentGateway = $this->gatewayObj->GetID();
-			$newGateway = $newOptions['GatewaySelected'];
-			if ($newGateway != $currentGateway)		
-			{
-				// Load new gateway ...
-				$this->AddGateway($this->gatewayObj->opts, $newGateway);
-			}
-			
-			$currencyOptionID = $this->gatewayObj->GetCurrencyOptionID();	
-			if (isset($newOptions[$currencyOptionID]))
-			{
-				$currency = $newOptions[$currencyOptionID];			
-				$currencyDef = $this->gatewayObj->GetCurrencyDef($currency);
-				
-				if (isset($currencyDef['Symbol']))
-				{
-					$newOptions['CurrencySymbol'] = $currencyDef['Symbol'];
-					$newOptions['CurrencyText']   = ($currencyDef['Char'] != '') ? $currencyDef['Char'] : $currency.'';
-					$newOptions['CurrencyFormat'] = $currencyDef['Format'];
-				}
-				else
-				{
-					$newOptions['CurrencySymbol'] = $currency.'';
-					$newOptions['CurrencyText']   = $currency.'';
-					$newOptions['CurrencyFormat'] = '%01.2f';
-				}							
-			}
-			
-			$this->adminOptions = $newOptions;
-			parent::saveOptions();
-		}
 		
-		function getTableNames($dbPrefix)
-		{
-			$DBTables = parent::getTableNames($dbPrefix);
-			
-			$DBTables->Sales = $dbPrefix.'sales';
-			$DBTables->Orders = $dbPrefix.'orders';
-			
-			return $DBTables;
-		}
 		
 		function getTableDef($tableName)
 		{
@@ -447,6 +326,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						saleStatus VARCHAR('.PAYMENT_API_SALESTATUS_TEXTLEN.'),
 						saleNoteToSeller TEXT,
 						salePPExpToken VARCHAR('.PAYMENT_API_EXPTOKEN_TEXTLEN.') NOT NULL DEFAULT "",
+						user_login VARCHAR(60) NOT NULL DEFAULT "",
 					';
 					break;
 			}
@@ -478,80 +358,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 		}
 		
-		function GetSalesQueryFields($sqlFilters = null)
-		{
-			return '*';
-		}
 		
-		function GetJoinedTables($sqlFilters = null, $classID = '')
-		{
-			return '';
-		}
 		
-		function GetWhereSQL($sqlFilters)
-		{
-			$sqlWhere = '';
-			$sqlCmd = ' WHERE ';
-			
-			if (isset($sqlFilters['saleID']) && ($sqlFilters['saleID'] > 0))
-			{
-				$sqlWhere .= $sqlCmd.$this->DBTables->Sales.'.saleID="'.$sqlFilters['saleID'].'"';
-				$sqlCmd = ' AND ';
-			}
-			
-			if (isset($sqlFilters['saleTxnId']) && (strlen($sqlFilters['saleTxnId']) > 0))
-			{
-				$sqlWhere .= $sqlCmd.$this->DBTables->Sales.'.saleTxnId="'.$sqlFilters['saleTxnId'].'"';
-				$sqlCmd = ' AND ';
-			}
-			
-			if (isset($sqlFilters['searchtext']))
-			{
-				$searchFields = array('saleEMail', 'saleFirstName', 'saleLastName');
-				
-				$sqlWhere .= $sqlCmd.'(';
-				$sqlOr = '';				
-				foreach ($searchFields as $searchField)
-				{
-					$sqlWhere .= $sqlOr;
-					$sqlWhere .= $this->DBTables->Sales.'.'.$searchField.' LIKE "'.$sqlFilters['searchtext'].'"';
-					$sqlOr = ' OR ';
-				}
-				$sqlWhere .= ')';
-				$sqlCmd = ' AND ';
-			}
-			
-			return $sqlWhere;
-		}
 		
-		function AddSQLOpt($sql, $optName, $optValue)
-		{
-			if (strstr($sql, $optName))
-			{
-				$sql = str_replace($optName, $optName.$optValue.',', $sql);
-			}
-			else
-			{
-				$sql .= $optName.$optValue;
-			}
-			
-			return $sql;
-		}
 		
-		function GetOptsSQL($sqlFilters, $sqlOpts = '')
-		{
-			if (isset($sqlFilters['orderBy']))
-			{
-				$sqlOpts = $this->AddSQLOpt($sqlOpts, ' ORDER BY ', $sqlFilters['orderBy']);
-			}
-			
-			if (isset($sqlFilters['limit']))
-			{
-				$sqlOpts = $this->AddSQLOpt($sqlOpts, ' LIMIT ', $sqlFilters['limit']);
-			}
-			
-			return $sqlOpts;
-		}
 		
 		function AddSale($saleDateTime = '', $salesVals = array())
 		{
@@ -578,115 +388,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		}
 		
 		// Edit Sale
-		function GetSalesFields()
-		{
-			return array
-			(
-				'saleFirstName', 
-				'saleLastName', 
-				'saleDateTime', 
-				'saleTxnId', 
-				'saleStatus', 
-				'salePPName', 
-				
-				'saleEMail', 
-				'salePaid', 
-				'saleDonation', 
-				'salePostage', 
-				'saleTransactionFee', 
-				'saleFee', 
-				'salePPStreet', 
-				'salePPCity', 
-				'salePPState', 
-				'salePPZip', 
-				'salePPCountry', 
-				'salePPPhone', 
-				
-				'saleNoteToSeller', 
-			);
-		}			
 		
-		function Ex_AddSale($saleDateTime = '', $salesVals = array())
-		{
-			$sqlFields = 'INSERT INTO '.$this->DBTables->Sales.'(saleDateTime';
-			$sqlValues = ' VALUES("'.$saleDateTime.'"';
-			
-			$fieldsList = $this->GetSalesFields();
-			
-			foreach ($fieldsList as $fieldName)
-			{
-				if ($fieldName == 'saleDateTime')
-					continue;
-					
-				//if (!isset($salesVals->$fieldName))
-				//	continue;
-				$fieldValue = $salesVals->$fieldName;
-				
-				$sqlFields .= ', '.$fieldName;
-				$sqlValues .= ', "'.self::_real_escape($fieldValue).'"';
-			}
-			$sqlFields .= ')';
-			$sqlValues .= ')';
-			
-			$sql = $sqlFields.$sqlValues;
-			 
-			$this->query($sql);
-			$saleID = $this->GetInsertId();
-	
-			return $saleID;
-		}			
-		
-		function UpdateSale($results, $fromTrolley = self::STAGESHOWLIB_NOTFROMTROLLEY)
-		{
-			if ($fromTrolley)
-			{
-				$saleID = $results->saleID;
-			}
-			else
-			{
-				$saleID = $results['saleID'];
-			}
-			
-			$fieldsList = $this->GetSalesFields();
-			
-			$fieldSep = 'UPDATE '.$this->DBTables->Sales.' SET ';
-			
-			$sql = '';
-			foreach ($fieldsList as $fieldName)
-			{
-				if ($fromTrolley)
-				{
-					if (!isset($results->$fieldName))
-						continue;
-					$fieldValue = self::_real_escape($results->$fieldName);
-				}
-				else
-				{
-					if (!isset($results[$fieldName]))
-						continue;
-					$fieldValue = self::_real_escape($results[$fieldName]);
-				}
-					
-				$sql .= $fieldSep.$fieldName.'="'.$fieldValue.'"';
-				$fieldSep = ' , ';
-			}
-			
-			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleID='.$saleID;;
-			 
-			$rtnVal = $this->query($sql);	
-			if ($this->getDbgOption('Dev_ShowSQL'))
-			{
-				echo "<br>UpdateSale - query() Returned: $rtnVal<br>\n";
-			}
-			
-			if (!$rtnVal)
-				return 0;
-			
-			if ($this->queryResult == 0)
-				return 0-$saleID;
-				
-			return $saleID;
-		}
 			
 		function PurgePendingSales($timeout = '')
 		{
@@ -713,59 +415,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $this->AddSaleItem($saleID, $stockID, $qty, $paid, $saleExtras);
 		}
 		
-		function AddSaleItem($saleID, $stockID, $qty, $paid, $saleExtras = array())
-		{
-			$paid *= $qty;
-			
-			$sqlFields  = 'INSERT INTO '.$this->DBTables->Orders.'(saleID, '.$this->DBField('stockID').', '.$this->DBField('orderQty').', '.$this->DBField('orderPaid');
-			$sqlValues  = ' VALUES('.$saleID.', '.$stockID.', "'.$qty.'", "'.$paid.'"';
-			
-			foreach ($saleExtras as $field => $value)
-			{
-				$sqlFields .= ','.$field;
-				$sqlValues .= ', "'.$value.'"';
-			}
-			
-			$sqlFields .= ')';
-			$sqlValues .= ')';
-			
-			$sql = $sqlFields.$sqlValues;
-			
-			$this->query($sql);
-			$orderID = $this->GetInsertId();
-				
-			return $orderID;
-		}			
-		
-		function UpdateSaleItem($saleID, $stockID, $qty, $paid, $saleExtras = array())
-		{
-			$paid *= $qty;
-			
-			// Delete a show entry
-			$sql  = 'UPDATE '.$this->DBTables->Orders;
-			$sql .= ' SET '.$this->DBField('orderQty').'="'.$qty.'"';
-			$sql .= ' ,   '.$this->DBField('orderPaid').'="'.$paid.'"';
-			
-			foreach ($saleExtras as $field => $value)
-			{
-				$sql .= ' ,   '.$field.'="'.$value.'"';
-			}
-			
-			$sql .= ' WHERE '.$this->DBTables->Orders.".saleID=$saleID";
-			$sql .= ' AND   '.$this->DBTables->Orders.".".$this->DBField('stockID')."=$stockID";
-
-			$this->query($sql);
-		}
-		
-		function DeleteSaleItem($saleID, $stockID)
-		{
-			// Delete a show entry
-			$sql  = 'DELETE FROM '.$this->DBTables->Orders;
-			$sql .= ' WHERE '.$this->DBTables->Orders.".saleID=$saleID";
-			$sql .= ' AND   '.$this->DBTables->Orders.".".$this->DBField('stockID')."=$stockID";
-			 
-			$this->query($sql);
-		}
 		
 		function GetSalesQty($sqlFilters)
 		{
@@ -805,9 +454,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->query($sql);
 		}			
 
-		function AddSaleFields(&$salesListArray)
-		{
-		}
 		
 		function GetAllSalesList($sqlFilters = null)
 		{
@@ -850,88 +496,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $saleDetails;
 		}						
 		
-		function GetSale($saleID)
-		{
-			$sqlFilters['saleID'] = $saleID;
-			return $this->GetSalesList($sqlFilters);
-		}
 				
-		function GetSalesList($sqlFilters)
-		{
-			$selectFields  = $this->GetSalesQueryFields($sqlFilters);
-			
-			if (isset($sqlFilters['saleID']) || isset($sqlFilters['priceID']))
-			{
-				// Explicitly add joined fields from "base" tables (otherwise values will be NULL if there is no matching JOIN)
-				$selectFields .= ', '.$this->DBTables->Sales.'.saleID';
 
-				$joinCmd = ' LEFT JOIN ';
-			}
-			else
-				$joinCmd = ' JOIN ';
-				
-			if (isset($sqlFilters['groupBy']))	
-			{			
-				$totalSalesField = $this->TotalSalesField($sqlFilters);
-				if ($totalSalesField != '')
-					$selectFields .= ','.$totalSalesField;
-			}
-
-			$sql  = 'SELECT '.$selectFields.' FROM '.$this->DBTables->Sales;
-			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
-			
-			$sql .= $this->GetWhereSQL($sqlFilters);
-			$sql .= $this->GetOptsSQL($sqlFilters);
-			
-			// Get results ... but suppress debug output until AddSaleFields has been called
-			$salesListArray = $this->get_results($sql, false);			
-			if (!isset($sqlFilters['addTicketFee']))
-			{
-				$this->AddSaleFields($salesListArray);				
-			}
-			
-			$this->show_results($salesListArray);
-					
-			return $salesListArray;
-		}			
-
-		function GetTransactionFee()
-		{
-			return 0;
-		}
 		
-		function LogToFile($Filepath, $LogLine, $OpenMode = 0)
-		{
-			// Use global values for OpenMode
-			
-			// Create a filesystem object
-			if (($OpenMode == self::ForAppending) || ($OpenMode == 0))
-			{
-				$logFile = fopen($Filepath,"ab");
-			}
-			else
-			{
-				$logFile = fopen($Filepath,"wb");
-			}
-
-			// Write log entry
-			if ($logFile != 0)
-			{
-				$LogLine .= "\n";
-				fwrite($logFile, $LogLine, strlen($LogLine));
-				fclose($logFile);
-
-				$rtnStatus = true;
-			}
-			else
-			{
-				echo "Error writing to $Filepath<br>\n";
-				//echo "Error was $php_errormsg<br>\n";
-				$rtnStatus = false;
-			}
-
-			return $rtnStatus;
-		}
 
 		function GetSalesEMail()
 		{
@@ -1071,14 +638,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $this->GetTemplatePath($templateID, 'emails');
 		}
 
-		function GetTemplatesFolder($folder)
-		{
-			$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder			
-			$templateFolder = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/'.$folder.'/';
-
-			return $templateFolder;
-		}
-
 		function GetTemplatePath($templateID, $folder)
 		{
 			// EMail Template defaults to templates folder
@@ -1090,11 +649,15 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 
 		function EMailSale($saleID, $EMailTo = '')
 		{
-			// Get sale	and ticket details
 			$salesList = $this->GetSale($saleID);
 			if (count($salesList) < 1) 
 				return 'salesList Empty';
+				
+			return $this->EMailSaleRecord($salesList, $EMailTo);
+		}
 
+		function EMailSaleRecord($salesList, $EMailTo = '')
+		{
 			$templatePath = $this->GetEmailTemplatePath('EMailTemplatePath', $salesList);
 	
 			return $this->SendEMailFromTemplate($salesList, $templatePath, $EMailTo);
@@ -1121,32 +684,12 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $fileContents;
 		}
 		
-		function GetTemplateSection($mailTemplate, $startMark = '', $endMark = '', $delMarkedLine = false)
-		{
-			// Get template section starting from line after $startMark and ending line before $endMark
-			if ($startMark != '')
-			{
-				$posnStart = stripos($mailTemplate, $startMark);
-				if (($posnStart !== false) && $delMarkedLine) $posnStart = strpos($mailTemplate, "\n", $posnStart);
-				if ($posnStart !== false) $mailTemplate = substr($mailTemplate, $posnStart);			
-			}
-			
-			if ($endMark != '')
-			{
-				$posnEnd = stripos($mailTemplate, $endMark);
-				if ($posnEnd !== false) $posnEnd += strlen($endMark);
-				if (($posnEnd !== false) && $delMarkedLine) $posnEnd = strrpos(substr($mailTemplate, 0, $posnEnd), "\n");
-				if ($posnEnd !== false) $mailTemplate = substr($mailTemplate, 0, $posnEnd);
-			}
-			
-			return $mailTemplate;
-		}
-		
 		function SendEMailFromTemplate($saleRecord, $templatePath, $EMailTo = '')
 		{		
 			$EMailSubject = '';
 			$saleConfirmation = '';
 
+			include $this->emailClassFilePath;
 			$this->emailObj = new $this->emailObjClass($this);
 			
 			$rtnStatus = $this->AddSaleToTemplate($saleRecord, $templatePath, $EMailSubject, $saleConfirmation);	
@@ -1217,15 +760,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return 'OK';		
 		}
 		
-		function OutputViewTicketButton($saleID = 0)
-		{
-			$text = __('View Ticket', $this->get_domain());
-			echo $this->GetViewTicketLink($text, 'button-secondary', $saleID);
-		}
 		
-		function GetViewTicketLink($text='', $class = '', $saleId = 0)
-		{
-		}
 		
 		function GetTxnStatus($Txnid)
 		{
@@ -1239,15 +774,20 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $txnEntries[0]->saleStatus;
 		}
 		
-		function DBField($fieldName)
-		{
-			return $fieldName;
-		}
 		
 		function UpdateSaleIDStatus($SaleId, $Payment_status)
 		{
 			$sql  = 'UPDATE '.$this->DBTables->Sales;
 			$sql .= ' SET saleStatus="'.$Payment_status.'"';		
+			$sql .= ' WHERE saleId="'.$SaleId.'"';							
+			 
+			$this->query($sql);			
+		}
+		
+		function UpdateSaleToken($SaleId, $saleToken)
+		{
+			$sql  = 'UPDATE '.$this->DBTables->Sales;
+			$sql .= ' SET salePPExpToken="'.$saleToken.'"';		
 			$sql .= ' WHERE saleId="'.$SaleId.'"';							
 			 
 			$this->query($sql);			
@@ -1259,7 +799,17 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$sql .= ' SET saleStatus="'.$Payment_status.'"';		
 			$sql .= ' WHERE saleTxnId="'.$Txn_id.'"';							
 			 
-			$this->query($sql);			
+			$this->query($sql);	
+					
+			// Get the SaleId and return it ....
+			$sql  = 'SELECT saleId FROM '.$this->DBTables->Sales;
+			$sql .= ' WHERE saleTxnId="'.$Txn_id.'"';							
+			 
+			$saleEntry = $this->get_results($sql);
+			if (count($saleEntry) == 0)
+					return 0;
+							 
+			return $saleEntry[0]->saleId;
 		}
 		
 		function GetSaleExtras($itemNo, $results)
@@ -1299,7 +849,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					if (isset($results['salePostage']))         $saleVals['salePostage'] = $results['salePostage'];
 					if (isset($results['saleNoteToSeller']))	$saleVals['saleNoteToSeller'] = $results['saleNoteToSeller'];
 					if (isset($results['salePPExpToken']))      $saleVals['salePPExpToken'] = $results['salePPExpToken'];
-									
+					
+					global $current_user;
+					if (is_user_logged_in())
+					{
+						wp_get_current_user();
+						$saleVals['user_login'] = $current_user->user_login;
+					}		
+							
 					$saleID = $this->AddSale($saleDateTime, $saleVals);
 
 					break;
@@ -1388,31 +945,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$this->query($sql);
 		}
 		
-		function HTTPAnchor($url, $name = '')
-		{
-			if ($name == '') 
-			{
-				$name = $url;
-			}
-			$anchor  = '<a href="';
-			$anchor .= $url;
-			$anchor .= '">'.$name.'</a>';
-			
-			return $anchor;
-		}
-		
-		function DownloadBaseURL($currOptions)
-		{
-			if ($currOptions['DownloadURL'] !== '')
-				$downloadURL = $currOptions['DownloadURL'];
-			else if (isset($this->opts['DefaultDownloadURL']))
-				$downloadURL = $this->opts['DefaultDownloadURL'];
-			else
-				$downloadURL = '';
-			
-			return $downloadURL;
-		}
-		
 	    function HTTPGet($url)
 	    {	
 			return $this->HTTPRequest($url, '', 'GET');
@@ -1430,7 +962,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$method = ($urlParams == '') ? 'GET' : 'POST';			
 			}
 			
-			$HTTPResponse = StageShowLibGatewayBaseClass::HTTPAction($url, $urlParams, $method, $redirect);
+			$HTTPResponse = $this->HTTPAction($url, $urlParams, $method, $redirect);
 			if ($this->getDbgOption('Dev_ShowMiscDebug') == 1)
 			{
 				echo "HTTPRequest Called<br>";
@@ -1443,6 +975,51 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $HTTPResponse; 
 	    }
     
+		function HTTPAction($url, $urlParams = '', $method = 'POST', $redirect = true)
+		{
+			if( !class_exists( 'WP_Http' ) )
+				include_once( ABSPATH . WPINC. '/class-http.php' );
+
+			$args = array(
+			'method' => $method,
+			'body' => $urlParams,
+			'sslverify' => false
+			);
+			
+			if (!$redirect)
+				$args['redirection'] = 0;
+			
+			$request = new WP_Http;
+			$this->HTTPResult = $request->request( $url, $args );
+			if ( is_wp_error($this->HTTPResult) )
+			{
+				$response['APIResponseText'] = '';
+				$response['APIStatus'] = 'ERROR';
+				$response['APIStatusMsg'] = $this->HTTPResult->get_error_message();
+				$response['APIHeaders'] = '';
+				$response['APICookies'] = array();
+			}
+			else
+			{
+				$response['APIResponseText'] = $this->HTTPResult['body'];
+				$response['APIStatus'] = $this->HTTPResult['response']['code'];
+				$response['APIStatusMsg'] = $this->HTTPResult['response']['message'];
+				$response['APIHeaders'] = $this->HTTPResult['headers'];
+				$response['APICookies'] = $this->HTTPResult['cookies'];
+			}
+/*			
+			{
+				echo "HTTPRequest Called<br>";
+				echo "URL: $url<br>";
+				echo "METHOD: $method<br>";
+				echo "URL Params: <br>";
+				print_r($urlParams);
+				print_r($response, 'HTTPResponse:');
+			}
+*/
+			return $response;			
+		}
+
 	}
 }
 

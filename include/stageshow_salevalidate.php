@@ -45,14 +45,14 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 			
 			$myDomain = $env['Domain'];
 			
-			$this->StoreTranslatedText('All Performances', __('All Performances', $myDomain));
-			$this->StoreTranslatedText('Already Verified', __('Already Verified', $myDomain));
-			$this->StoreTranslatedText('Matching record found', __('Matching record found', $myDomain));
-			$this->StoreTranslatedText('No matching record', __('No matching record', $myDomain));
-			$this->StoreTranslatedText('Sale Status', __('Sale Status', $myDomain));
-			$this->StoreTranslatedText('Sale Validation', __('Sale Validation', $myDomain));
-			$this->StoreTranslatedText('Transaction ID', __('Transaction ID', $myDomain));
-			$this->StoreTranslatedText('Wrong Performance', __('Wrong Performance', $myDomain));
+			$this->StoreTranslatedText('All Performances', $myDomain);
+			$this->StoreTranslatedText('Already Verified', $myDomain);
+			$this->StoreTranslatedText('Matching record found', $myDomain);
+			$this->StoreTranslatedText('No matching record', $myDomain);
+			$this->StoreTranslatedText('Sale Status', $myDomain);
+			$this->StoreTranslatedText('Sale Validation', $myDomain);
+			$this->StoreTranslatedText('Transaction ID', $myDomain);
+			$this->StoreTranslatedText('Wrong Performance', $myDomain);
 
 			$valDBClass = STAGESHOW_PLUGIN_NAME.'ValidateDBaseClass';
 			$this->validateDBObj = new $valDBClass();
@@ -110,8 +110,9 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 			return $html;			
 		}
 		
-		function StoreTranslatedText($text, $translation)
+		function StoreTranslatedText($text, $domain)
 		{
+			$translation = __($text, $domain);
 			if ($text != $translation)
 			{
 				$this->TL8Strings[$text] = $translation;				
@@ -220,16 +221,20 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 					jQuery("#TxnId").prop("disabled", true);	
 					jQuery("#jqueryvalidatebutton").prop("disabled", true);	
 											
+					var postvars = {
+						jquery: "true"
+					};
+					
 					/* Get translated label text strings */
 					var labels = [];
-					var tl8 = [];
-					
-';
+					var tl8_srch = [];		
+					var tl8_repl = [];		
+					';
 					
 			foreach ($this->TL8Strings as $id => $text)
 			{
-	        	echo 'tl8[tl8.length] = "'.$id.'";'."\n";
-	        	echo 'tl8[tl8.length] = "'.$text.'";'."\n";
+	        	echo 'tl8_srch[tl8_srch.length] = "'.$id.'";'."\n";
+	        	echo 'tl8_repl[tl8_repl.length] = "'.$text.'";'."\n";
 			}
 			
 			$postParams = '';
@@ -237,6 +242,8 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			{
 				$postParams = '
 					loginID: "'.$this->myDBaseObj->loginID.'",';
+				echo '
+					postvars.loginID = "'.$this->myDBaseObj->loginID.'";';
 			}
 					
 			echo '
@@ -251,6 +258,12 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 							
 	   					}
    					);
+					
+					postvars.nonce = "'.$ourNOnce.'";
+					postvars.TxnId = TxnId;
+					postvars.perfID = perfID;
+					postvars.location = location;
+					postvars.validatesalebutton = true;
 					
 					/* Get Validation Result from Server */
 					var url = "'.$jQueryURL.'";
@@ -283,9 +296,9 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 							/* Apply translations to any message */
 							messageElem = jQuery(".stageshow-validate-message");
 							messageHtml = messageElem.html();
-							for (var index=0; index<tl8.length; index +=2)
+							for (var index=0; index<tl8_srch.length; index++)
 							{
-								messageHtml = messageHtml.replace(tl8[index], tl8[index+1]);
+								messageHtml = messageHtml.replace(tl8_srch[index], tl8_repl[index]);
 							}
 							messageElem.html(messageHtml);
 							
@@ -333,8 +346,11 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			$myDBaseObj->CheckAdminReferer();
 
 			$TxnId = trim(stripslashes($_REQUEST['TxnId']));
-			if (!ctype_alnum($TxnId)) return 0;
-			
+			if (preg_match('/[^a-z_\-0-9]/i', $TxnId))
+			{
+				return 0;
+			}
+		
 			$verifyMessageHTML = '';
 			$saleDetailsHTML = '';
 			$ticketsListTableHTML = '';

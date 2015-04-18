@@ -37,7 +37,7 @@ if (!class_exists('GatewaySimulator'))
 				$actionHTML = '';
 				if (!defined('CORONDECK_RUNASDEMO'))
 				{
-					$notifyURL = $this->myDBaseObj->gatewayObj->GatewayNotifyURL;
+					$notifyURL = $this->GetGatewayNotifyURL();
 					if ($notifyURL == '')
 					{
 						echo "Warning: No NotifyURL specified<br></br>";
@@ -61,6 +61,11 @@ if (!class_exists('GatewaySimulator'))
 			$formHTML .=  '</form>';			
 			
 			echo $formHTML;
+	   	}
+
+		function GetGatewayNotifyURL()
+		{
+			return $this->myDBaseObj->gatewayObj->GatewayNotifyURL;
 	   	}
 
 		function OutputSaleForm($saleId)
@@ -100,8 +105,17 @@ if (!class_exists('GatewaySimulator'))
 		
 		function OutputSaleSelect() 
 		{
+			$myDBaseObj = $this->myDBaseObj;
 			$sqlFilters = array();
-			$saleList = $this->myDBaseObj->GetSalesList($sqlFilters);
+			
+			$sql  = 'SELECT saleID, saleCheckoutTime, saleDateTime, saleTxnId, saleStatus FROM '.$myDBaseObj->DBTables->Sales;
+			$sql .= ' WHERE ';
+			$sql .= '(saleStatus!="'.PAYMENT_API_SALESTATUS_COMPLETED.'")';
+			$sql .= ' AND ';
+			$sql .= '(saleStatus!="'.STAGESHOW_SALESTATUS_RESERVED.'")';
+			$saleList = $myDBaseObj->get_results($sql);			
+			//$saleList = $this->myDBaseObj->GetSalesList($sqlFilters);
+			
 			if (count($saleList) == 0)
 			{
 				$siteURL = get_option('siteurl');
@@ -121,17 +135,9 @@ if (!class_exists('GatewaySimulator'))
 						<select name="id">
 			';
 			
-			$lastSaleID = -1;
 			foreach ($saleList as $sale)
 			{
-				if ($lastSaleID == $sale->saleID)
-					continue;
-				$lastSaleID = $sale->saleID;
-				
-				if (($sale->saleTxnId == '0') || (strlen($sale->saleTxnId) == 0))
-				{
-					$selectHTML .= '<option value="'.$sale->saleID.'" selected="">'.$sale->saleCheckoutTime.'</option>'."\n";
-				}
+				$selectHTML .= '<option value="'.$sale->saleID.'" selected="">'.$sale->saleDateTime.'</option>'."\n";
 			}
 			
 			$selectHTML .= '
@@ -241,6 +247,18 @@ if (!class_exists('GatewaySimulator'))
 		
 		function OutputActionsTable() 
 		{
+			switch ($this->gatewayType)
+			{
+				case 'payfast':
+					$payment_status_OK = 'COMPLETE';
+					break;
+					
+				case 'paypal':
+				default:
+					$payment_status_OK = 'Completed';
+					break;
+			}
+			
 			$readOnly = isset($this->CanEditTotal) ? '' : ' readonly="readonly" ';
 			$actionsHTML = '';
 			$actionsHTML .= '
@@ -271,7 +289,8 @@ if (!class_exists('GatewaySimulator'))
 					<td class="gatewaysim_formFieldID">Payment Status:&nbsp; </td>
 					<td class="gatewaysim_formFieldValue" colspan="2">
 						<select name="payment_status">
-							<option value="Completed" selected="">Completed</option>
+							<option value="'.$payment_status_OK.'" selected="">Completed</option>
+							<option value="Unverified">Unverified</option>
 							<option value="Pending">Pending</option>
 							<option value="ERROR">ERROR</option>
 						</select>
@@ -330,8 +349,8 @@ if (!class_exists('GatewaySimulator'))
 					
 				case 'payfast':
 					$payment_id = time();
+			        $html .= $this->AddHiddenTag('m_payment_id', $saleId);
 			        $html .= $this->AddHiddenTag('pf_payment_id', $payment_id);
-			        $html .= $this->AddHiddenTag('payment_status', 'COMPLETE');
 			        $html .= $this->AddHiddenTag('item_name', 'Tickets');
 			        $html .= $this->AddHiddenTag('item_description', 'Tickets');
 					for ($i=1; $i<=5; $i++)
@@ -340,7 +359,7 @@ if (!class_exists('GatewaySimulator'))
 			        	$html .= $this->AddHiddenTag('custom_int'.$i, '');
 					}
 			        $html .= $this->AddHiddenTag('merchant_id', '10001702');
-			        $html .= $this->AddHiddenTag('signature', '1234567890abcdefghijklmnopqrstuv');
+			        $html .= $this->AddHiddenTag('signature', 'signature_not_calculated');
 					break;
 			}
 					

@@ -55,18 +55,6 @@ if (!class_exists('GatewayDefaultsClass'))
 			return $activeModes;
 		}
 		
-		static function IsDefineSet($defineID)
-		{
-			if (defined($defineID))
-			{
-				echo "<br><br><strong>Cannot set PayPal settings</strong><br>";
-				echo "$defineID is already defined<br><br>\n";
-				return true;
-			}
-			
-			return false;
-		}
-		
 		static function GetDefaults($gatewaySettingsFile) 
 		{
 			$defaultSettings = array();

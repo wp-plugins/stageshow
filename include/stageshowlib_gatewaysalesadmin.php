@@ -121,6 +121,7 @@ if (!class_exists('StageShowLibGatewaySalesAdminListClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => $zip,                        StageShowLibTableClass::TABLEPARAM_ID => 'salePPZip',     StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPZIP_TEXTLEN,     StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPZIP_EDITLEN, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => $country,                    StageShowLibTableClass::TABLEPARAM_ID => 'salePPCountry', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPCOUNTRY_TEXTLEN, StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPCOUNTRY_EDITLEN, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => $phone,                      StageShowLibTableClass::TABLEPARAM_ID => 'salePPPhone',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_SALEPPPHONE_TEXTLEN,   StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_SALEPPPHONE_EDITLEN, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'User Login',	             StageShowLibTableClass::TABLEPARAM_ID => 'user_login',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Total Paid/Due',            StageShowLibTableClass::TABLEPARAM_ID => 'salePaid',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => $gatewayName.' Fees',        StageShowLibTableClass::TABLEPARAM_ID => 'saleFee',       StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Transaction Date & Time',   StageShowLibTableClass::TABLEPARAM_ID => 'saleDateTime',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW),
@@ -146,7 +147,8 @@ if (!class_exists('StageShowLibGatewaySalesAdminListClass'))
 		
 		function GetTableID($result)
 		{
-			return "paypal-sales-list-tab";
+			$gatewayName = $this->myDBaseObj->gatewayObj->GetType();
+			return $gatewayName."-sales-list-tab";
 		}
 		
 		function CreateSalesAdminDetailsListObject($env, $editMode /* = false */)
@@ -313,9 +315,22 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function Output_MainPage($updateFailed)
 		{
+			if ($this->editingRecord)
+			{
+				// Sale Editor ... output tickets selector
+				$pluginObj = $this->env['PluginObj'];
+				if (current_user_can(STAGESHOWLIB_CAPABILITY_SALESUSER))
+				{
+					$myDBaseObj = $this->env['DBaseObj'];
+					$myDBaseObj->allowAdminOnly = true;
+				}
+				echo $pluginObj->OutputContent_DoShortcode(NULL);
+				return '';
+			}
+			
 			$myPluginObj = $this->myPluginObj;
 			$myDBaseObj = $this->myDBaseObj;				
-			
+	
 			$myDBaseObj->PurgePendingSales();
 					
 			if (!$this->editingRecord)
@@ -420,36 +435,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 			return $rtnVal;
 		}
 		
-		function GetItemID($pricesEntry)
-		{
-			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetItemID');
-		}
-				
-		function GetItemPrice($pricesEntry)
-		{
-			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetItemPrice');
-		}
-		
-		function GetItemDesc($pricesEntry)
-		{
-			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetItemDesc');
-		}
-		
-		function GetStockID($pricesEntry)
-		{
-			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetStockID');
-		}
-		
-		function GetSaleQty($ticketsEntry)
-		{
-			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'GetSaleQty');
-		}
-		
-		function SetSaleQty(&$ticketsEntry, $qty)
-		{
-			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'SetSaleQty');
-		}
-		
 		function DoBulkPreAction($bulkAction, $recordId)
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -513,9 +498,12 @@ if (!class_exists('PayPalSalesAdminClass'))
 		function OutputSalesList($env)
 		{
 			$myPluginObj = $this->myPluginObj;
-			
+						
 			$classId = $myPluginObj->adminClassPrefix.'SalesAdminListClass';
 			$salesList = new $classId($env);	// StageShowLibGatewayBaseClassxxxxSalesAdminListClass etc.
+			$extraTableClass = $myPluginObj->myDomain.'-sales-list-table';
+			$salesList->tableTags = str_replace(' widefat', ' '.$extraTableClass.' widefat', $salesList->tableTags);
+			
 			$salesList->OutputList($this->results);		
 		}
 				

@@ -26,15 +26,98 @@ if(!isset($_SESSION))
 	session_start();
 }	
 
-require_once "stageshowlib_utils.php";
-require_once "stageshowlib_dbase_base.php";
+if (!function_exists('get_option'))
+{
+	// Wordpress not loaded - add Wordpress simulation functions
+	define('STAGESHOWLIB_WP_NOTLOADED', 1);
+	
+	function wp_get_current_user()
+	{
+		$current_user = new stdClass();
+		
+		$current_user->user_login = '';
+	    $current_user->user_email = '';
+	    $current_user->user_firstname = '';
+	    $current_user->user_lastname = '';
+	    $current_user->display_name = '';
+	    $current_user->ID = 0;
+		
+		return $current_user;
+	}
+
+	function current_user_can($cap)
+	{
+		//echo "Check current_user_can($cap)<br>\n";
+		return isset($_SESSION['Capability_'.$cap]) && $_SESSION['Capability_'.$cap];
+	}
+
+	function get_option( $option, $default = false )
+	{
+		global $stageshowGlobalOptions;
+		
+		if (!isset($stageshowGlobalOptions[$option]))
+		{
+			global $wpdb;
+
+			// Get values from Database
+			$optionsTable = $wpdb->prefix.'options';
+			$sql  = "SELECT option_value FROM $optionsTable ";
+			$sql .= 'WHERE option_name="'.$option.'"';
+			
+			$optionsInDB = $wpdb->get_results($sql);
+			if (count($optionsInDB) == 1)
+			{
+				$optionsVal = unserialize($optionsInDB[0]->option_value);
+				$stageshowGlobalOptions[$option] = $optionsVal;
+			}
+		}
+
+		return isset($stageshowGlobalOptions[$option]) ? $stageshowGlobalOptions[$option] : '';
+	}
+	
+	function add_filter()
+	{		
+	}
+	
+	function add_action()
+	{		
+	}
+	
+	function add_shortcode()
+	{		
+	}
+	
+	function register_activation_hook()
+	{		
+	}
+
+	function register_deactivation_hook()
+	{		
+	}
+
+	function get_bloginfo()
+	{
+		return '';
+	}
+	
+	function shortcode_atts( $pairs, $atts, $shortcode = '' )
+	{
+		// TODO - JQUERY Trolley - Deal with shortcode atts
+		$atts = array_merge($atts, $pairs);
+		return $atts;
+	}
+}
+
+require_once STAGESHOWLIB_INCLUDE_PATH.'stageshowlib_utils.php';
+require_once STAGESHOWLIB_INCLUDE_PATH.'stageshowlib_dbase_base.php';
 
 if (!class_exists('StageShowLibDBaseClass'))
 {
 	if (!defined('STAGESHOWLIB_EVENTS_PER_PAGE'))
 		define('STAGESHOWLIB_EVENTS_PER_PAGE', 20);
 	
-	define('STAGESHOWLIB_CAPABILITY_SYSADMIN', 'manage_options');
+	if (!defined('STAGESHOWLIB_CAPABILITY_SYSADMIN'))
+		define('STAGESHOWLIB_CAPABILITY_SYSADMIN', 'manage_options');
 
 	class StageShowLibDBaseClass extends StageShowLibGenericDBaseClass // Define class
 	{
@@ -59,6 +142,8 @@ if (!class_exists('StageShowLibDBaseClass'))
 		var $pluginInfo;
 		var $opts;
 		
+		var	$buttonImageURLs = array();
+	
 		function __construct($opts = null) //constructor		
 		{
 			if ( defined('STAGESHOWLIB_DEVELOPER') )
@@ -111,13 +196,63 @@ if (!class_exists('StageShowLibDBaseClass'))
 			
 			$this->opts = $opts;
 			$this->getOptions();
-			
+					
+			if ( defined('STAGESHOWLIB_WP_NOTLOADED') )
+			{
+				$this->pluginInfo = $this->adminOptions['pluginInfo'];
+			}
+					
 			$dbPrefix = $this->getTablePrefix();
 			$this->DBTables = $this->getTableNames($dbPrefix);
 		}
 
 	    function uninstall()
 	    {
+		}
+		
+		function AllUserCapsToServervar()
+		{
+			$this->UserCapToServervar(STAGESHOWLIB_CAPABILITY_SYSADMIN);
+		}
+		
+		function UserCapToServervar($capability)
+		{
+			$_SESSION['Capability_'.$capability] = current_user_can($capability);
+		}
+		
+		function IfButtonHasURL($buttonID)
+		{
+			$ourButtonURL = $this->ButtonURL($buttonID);
+			if ($ourButtonURL == '')
+				return false;
+			
+			return true;
+		}
+		
+		function ButtonHasURL($buttonID, &$buttonURL)
+		{
+			$ourButtonURL = $this->ButtonURL($buttonID);
+			if ($ourButtonURL == '')
+				return false;
+			
+			$buttonURL = $ourButtonURL;	
+			return true;
+		}
+		
+		function ButtonURL($buttonID)
+		{
+			if (self::IsInWP())
+			{
+				if (!isset($this->buttonImageURLs[$buttonID])) return '';				
+				return $this->buttonImageURLs[$buttonID];	
+			}
+			else
+			{
+				global	$stageshowButtonURLs;
+				
+				if (!isset($stageshowButtonURLs[$buttonID])) return '';				
+				return $stageshowButtonURLs[$buttonID];	
+			}
 		}
 		
 		function getDebugFlagsArray()
@@ -153,17 +288,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$EMailTemplate = str_replace('[url]', get_option('siteurl'), $EMailTemplate);
 			
 			return $EMailTemplate;
-		}
-		
-		function GetWPNonce($referer = '')
-		{
-			if ($referer == '')
-			{
-				$caller = $this->opts['Caller'];
-				$referer = plugin_basename($caller);
-			}
-			
-			return wp_create_nonce($referer);
 		}
 		
 		function GetWPNonceField($referer = '', $name = '_wpnonce')
@@ -251,11 +375,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 				$editControl = '<div class='.$buttonClass.'>'.$editControl.'</div>'."\n";  
 			}
 			return $editControl;    
-		}
-		
-		function HasSettings()
-		{
-			return false;
 		}
 		
 		function DeleteCapability($capID)
@@ -448,15 +567,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $wpdb->_real_escape($string);
 		}
 		
-		function queryWithPrepare($sql, $values)
-		{
-			global $wpdb;
-			
-			$sql = $wpdb->prepare($sql, $values);
-			
-			return $this->query($sql);
-		}
-		
 		function query($sql)
 		{
 			global $wpdb;
@@ -481,10 +591,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $wpdb->insert_id;
 		}
 
-		function CheckVersionNumber($stockRec)
-		{
-		}
-			
 		function getColumnSpec($table_name, $colName)
 		{
 			$sql = "SHOW COLUMNS FROM $table_name WHERE field = '$colName'";			 
@@ -517,16 +623,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$wpdb->query($sql);			
 		}
 		
-		function has_results($sql)
-		{
-			$results = $this->get_results($sql);
-			return true;
-			
-			return count($results > 0);
-		}
-		
-		//Returns an array of admin options
-		function getOptions($childOptions = array())
+		function getOptionsFromDB()
 		{
 			if (!isset($this->opts['CfgOptionsID']))
 			{
@@ -540,8 +637,23 @@ if (!class_exists('StageShowLibDBaseClass'))
 				exit;
 			}
 			
-			// Initialise settings array with default values
+			// Get current values from MySQL
+			$currOptions = get_option($this->opts['CfgOptionsID']);
+			$this->dbgOptions = get_option($this->opts['DbgOptionsID']);
 			
+			return $currOptions;
+		}
+		
+		function getOptions($childOptions = array())
+		{			
+			if (defined('STAGESHOWLIB_WP_NOTLOADED'))
+			{
+				$currOptions = $this->getOptionsFromDB();
+				$this->adminOptions = $currOptions;
+				return $currOptions;
+			}
+		
+			// Initialise settings array with default values			
 			$ourOptions = array(
 				'ActivationCount' => 0,
 				'LastVersion' => '',
@@ -564,8 +676,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$ourOptions = array_merge($ourOptions, $childOptions);
 			
 			// Get current values from MySQL
-			$currOptions = get_option($this->opts['CfgOptionsID']);
-			$this->dbgOptions = get_option($this->opts['DbgOptionsID']);
+			$currOptions = $this->getOptionsFromDB();
 			
 			// Now update defaults with values from DB
 			if (!empty($currOptions))
@@ -582,11 +693,21 @@ if (!class_exists('StageShowLibDBaseClass'))
 
 			if (defined('CORONDECK_RUNASDEMO'))	// Set AdminID and EMail to current user
 			{				
+				if (!function_exists('get_currentuserinfo'))
+				{
+					require_once( ABSPATH . WPINC . '/pluggable.php' );
+				}
 				global $current_user;
 				get_currentuserinfo();
 				$ourOptions['AdminID'] = $current_user->display_name;
 				$ourOptions['AdminEMail'] = $current_user->user_email;
 			}
+			
+			$this->pluginInfo['Name'] = $this->get_name();
+			$this->pluginInfo['Version'] = $this->get_version();
+			$this->pluginInfo['Author'] = $this->get_author();
+			$this->pluginInfo['PluginURI'] = $this->get_pluginURI();
+			$ourOptions['pluginInfo'] = $this->pluginInfo;
 			
 			$this->adminOptions = $ourOptions;
 			
@@ -620,23 +741,20 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function getDbgOption($optionID)
 		{
-			return $this->getOption($optionID, StageShowLibDBaseClass::DEBUG_SETTING);
+			return $this->getOption($optionID, self::DEBUG_SETTING);
 		}
 		
-		function setDbgOption($optionID, $optionValue)
+		function getOption($optionID, $optionClass = self::ADMIN_SETTING)
 		{
-			return $this->setOption($optionID, $optionValue, StageShowLibDBaseClass::DEBUG_SETTING);
-		}
-		
-		function getOption($optionID, $optionClass = StageShowLibDBaseClass::ADMIN_SETTING)
-		{
+			$isInWP = self::IsInWP();
+
 			switch ($optionClass)
 			{
-				case StageShowLibDBaseClass::ADMIN_SETTING: 
+				case self::ADMIN_SETTING: 
 					$options = $this->adminOptions;
 					break;
 
-				case StageShowLibDBaseClass::DEBUG_SETTING: 
+				case self::DEBUG_SETTING: 
 					$options = $this->dbgOptions;
 					break;
 				
@@ -644,22 +762,24 @@ if (!class_exists('StageShowLibDBaseClass'))
 					return;					
 			}
 			
-			if (!isset($options[$optionID]))
-				return '';
-			
-			$optionVal = $options[$optionID];
+			$optionVal = '';		
+			if (isset($options[$optionID]))
+			{
+				$optionVal = $options[$optionID];
+			}
+
 			return $optionVal;
 		}
 		
-		function setOption($optionID, $optionValue, $optionClass = StageShowLibDBaseClass::ADMIN_SETTING)
+		function setOption($optionID, $optionValue, $optionClass = self::ADMIN_SETTING)
 		{
 			switch ($optionClass)
 			{
-				case StageShowLibDBaseClass::ADMIN_SETTING: 
+				case self::ADMIN_SETTING: 
 					$this->adminOptions[$optionID] = $optionValue;
 					break;
 
-				case StageShowLibDBaseClass::DEBUG_SETTING: 
+				case self::DEBUG_SETTING: 
 					$this->dbgOptions[$optionID] = $optionValue;
 					break;
 				
@@ -672,7 +792,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function isDbgOptionSet($optionID)
 		{
-			$rtnVal = $this->isOptionSet($optionID, StageShowLibDBaseClass::DEBUG_SETTING);
+			$rtnVal = $this->isOptionSet($optionID, self::DEBUG_SETTING);
 			if ($rtnVal)
 			{
 				if (!defined('STAGESHOWLIB_ALWAYS_ALLOW_DEBUGOUT'))
@@ -697,7 +817,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $rtnVal;
 		}
 		
-		function isOptionSet($optionID, $optionClass = StageShowLibDBaseClass::ADMIN_SETTING)
+		function isOptionSet($optionID, $optionClass = self::ADMIN_SETTING)
 		{
 			$value = $this->getOption($optionID, $optionClass);
 			if ($value == '')
@@ -727,7 +847,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 				}
 				$rtnVal = true;
 			}
-			
+
 			return $rtnVal;
 		}
 		
@@ -763,32 +883,41 @@ if (!class_exists('StageShowLibDBaseClass'))
 	define('STAGESHOWLIB_PLUGINS_URI', '$pluginURI');
 	";
 	
+			if (defined('CORONDECK_RUNASDEMO')) $defines .= "
+	define('CORONDECK_RUNASDEMO', '".CORONDECK_RUNASDEMO."');
+	";
+	
 			return $defines;
 		}
 		
-		function AddADefine($defName, $devVal)
-		{
-			return "    define('$defName', '$devVal');\n";
+		function ArrayValsToDefine($optionsList, $indent = '    ')
+			{
+			$defines = " array(\n";
+				foreach ($optionsList as $optionID => $optionValue)
+				{
+				if (is_array($optionValue))
+				{
+					$optionValue = $this->ArrayValsToDefine($optionValue, $indent.'    ');			
+				}				
+				else
+				{
+					$optionValue = "'$optionValue'";
+				}
+				$defines .= "$indent'$optionID' => $optionValue,\n";
+			}
+			
+			$defines .= "$indent)";			
+								
+			return $defines;
 		}
 		
 		function OptionsToDefines($globalVarId, $optionsList)
 		{
-			$globalVarId = '$'.$globalVarId;
+			$optionID = '$'.$globalVarId;
 			
-			$defines = "
-	global	$globalVarId; 	
-	$globalVarId = array(";
-			if ($optionsList != '')
-			{
-				foreach ($optionsList as $optionID => $optionValue)
-				{
-				$defines .= "
-		'$optionID' => '$optionValue',";
-				}				
-			}
-			
-			$defines .= ');
-			';
+			$defines = '$'.$globalVarId." = ";
+					
+			$defines .= $this->ArrayValsToDefine($optionsList).";\n\n";			
 
 			return $defines;
 		}
@@ -804,32 +933,35 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if (!is_dir($dirPath))
 			{
 				mkdir($dirPath);
+				$forceNew = true;
 			}
 				
 			$credsPath .= 'wp-config-db.php';
 
+			// Get last modified date/time of wp-config.php file 
+			// ... then use it to check if config may have changed
+			$endPosn = strrpos($credsPath, 'wp-content');
+			$wpconfigPath = substr($credsPath, 0, $endPosn).'wp-config.php';
+			
 			// Get Wordpress Date and Time Format
 			$globalOptions = array(
-				'date_format' => get_option( 'date_format' ),
-				'time_format' => get_option( 'time_format' ),
+				'date_format' => self::GetDateFormat(),
+				'time_format' => self::GetTimeFormat(),
+				'datetime_format' => self::GetDateTimeFormat(),
 			);
 			
-			$dbCreds = DB_NAME."-".DB_USER."-".DB_PASSWORD."-".DB_HOST."-".NONCE_KEY; 
+			$configMarker = filemtime($wpconfigPath); 
 			
-			global $table_prefix;			
-			if ($table_prefix != '')
-				$dbCreds .= '-'.$table_prefix;
-					
 			foreach ($globalOptions as $globalVal)		
 			{
-				$dbCreds .= '-'.$globalVal;
+				$configMarker .= '-'.$globalVal;
 			}
 			
 			if (!$forceNew && file_exists($credsPath))
 			{
-				if (!defined('DB_CREDS'))
+				if (!defined('STAGESHOWLIB_CONFIG_STAMP'))
 				include $credsPath;
-				if ($dbCreds == DB_CREDS)
+				if ($configMarker == STAGESHOWLIB_CONFIG_STAMP)
 					return false;
 			}
 			
@@ -855,10 +987,25 @@ if (!class_exists('StageShowLibDBaseClass'))
 		define('NONCE_KEY', '".NONCE_KEY."');		
 	}
 	
-	/** Composite of all DB Credentials - Used to check if they have changed ... */
-	define('DB_CREDS', '".$dbCreds."');
+	/** Composite of all Config Elements - Used to check if they have changed ... */
+	define('STAGESHOWLIB_CONFIG_STAMP', '".$configMarker."');
 	";
 			
+			if (defined('STAGESHOWLIB_TROLLEYID'))
+			{
+				
+			$phpText .= "	
+	if (!defined('STAGESHOWLIB_TROLLEYID'))
+	{
+		/** The name of the database for WordPress */
+		define('STAGESHOWLIB_TROLLEYID', '".STAGESHOWLIB_TROLLEYID."');
+	}
+	";
+	
+			}
+			
+			global $table_prefix;			
+
 			if ($table_prefix != '')
 			{
 				$phpText .= '
@@ -867,12 +1014,49 @@ if (!class_exists('StageShowLibDBaseClass'))
 			}
 
 			$phpText .= $this->GetDBCredentials();
-	
+			$phpText .= "\n";
+
+			$phpText .= $this->OptionsToDefines('stageshowGlobalOptions', $globalOptions);
+			$phpText .= $this->OptionsToDefines('stageshowButtonURLs', $this->buttonImageURLs);
+
 			$phpText .= "\n";
 
 			$phpText .= "\n".'?'.'>'."\n";
 			
 			$this->LogToFile($credsPath, $phpText, StageShowLibLogFileClass::ForWriting);
+		}
+		
+		static function GetTimeFormat()
+		{
+			if (defined('STAGESHOWLIB_TIME_BOXOFFICE_FORMAT'))
+				$timeFormat = STAGESHOWLIB_TIME_BOXOFFICE_FORMAT;
+			else
+				// Use Wordpress Time Format
+				$timeFormat = get_option( 'time_format' );
+				
+			return $timeFormat;
+		}
+
+		static function GetDateFormat()
+		{
+			if (defined('STAGESHOWLIB_DATE_BOXOFFICE_FORMAT'))
+				$dateFormat = STAGESHOWLIB_DATE_BOXOFFICE_FORMAT;
+			else
+				// Use Wordpress Date Format
+				$dateFormat = get_option( 'date_format' );
+				
+			return $dateFormat;
+		}
+
+		static function GetDateTimeFormat()
+		{
+			if (defined('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT'))
+				$dateFormat = STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT;
+			else
+				// Use Wordpress Date and Time Format
+				$dateFormat = get_option( 'date_format' ).' '.get_option( 'time_format' );
+				
+			return $dateFormat;
 		}
 	}
 }

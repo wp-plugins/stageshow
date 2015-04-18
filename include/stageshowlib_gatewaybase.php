@@ -67,6 +67,7 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			define('PAYMENT_API_SALESTATUS_COMPLETED', 'Completed');
 			define('PAYMENT_API_SALESTATUS_PENDING', 'Pending');
 			define('PAYMENT_API_SALESTATUS_CHECKOUT', 'Checkout');
+			define('PAYMENT_API_SALESTATUS_UNVERIFIED', 'Unverified');
 			define('PAYMENT_API_SALESTATUS_PENDINGPPEXP', 'PendingPPExp');
 		}		
 	}
@@ -160,6 +161,11 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			return array();
 		}
 		
+		function IsCallback(&$mode, &$token, &$payerID)
+		{
+			return false;
+		}
+		
 		//Returns an array of admin options
 		function Gateway_GetOptions() 
 		{
@@ -172,6 +178,12 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		function Gateway_SettingsRowsDefinition()
 		{
 			// Returns an array defining the settings for a Gateway
+			return array();
+		}
+		
+		function Gateway_SystemFields()
+		{
+			// Returns an array of fields that are added for this gateway
 			return array();
 		}
 		
@@ -326,7 +338,6 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			if (!strpos($this->LogsFolder, ':'))
 				$this->LogsFolder = ABSPATH . $this->LogsFolder;
 				
-echo "<br><br><strong>LogToFile</strong> Line:".__LINE__." - Logging:".$this->LogsFolder."<br><br>\n";
 			$logFileObj = new StageShowLibLogFileClass($this->LogsFolder);
 			$logFileObj->LogToFile($LogNotifyFile, $DebugMessage, StageShowLibDBaseClass::ForAppending);
 		}
@@ -375,52 +386,7 @@ echo "<br><br><strong>LogToFile</strong> Line:".__LINE__." - Logging:".$this->Lo
 			}
 					
 			return false;
-		}
-		
-		static function HTTPAction($url, $urlParams = '', $method = 'POST', $redirect = true)
-		{
-			if( !class_exists( 'WP_Http' ) )
-				include_once( ABSPATH . WPINC. '/class-http.php' );
-
-			$args = array(
-			'method' => $method,
-			'body' => $urlParams,
-			'sslverify' => false
-			);
-			
-			if (!$redirect)
-				$args['redirection'] = 0;
-			
-			$request = new WP_Http;
-			$result = $request->request( $url, $args );
-			if ( is_wp_error($result) )
-			{
-				$response['APIResponseText'] = '';
-				$response['APIStatus'] = 'ERROR';
-				$response['APIStatusMsg'] = $result->get_error_message();
-				$response['APIHeaders'] = '';
-				$response['APICookies'] = array();
-			}
-			else
-			{
-				$response['APIResponseText'] = $result['body'];
-				$response['APIStatus'] = $result['response']['code'];
-				$response['APIStatusMsg'] = $result['response']['message'];
-				$response['APIHeaders'] = $result['headers'];
-				$response['APICookies'] = $result['cookies'];
-			}
-/*			
-			{
-				echo "HTTPRequest Called<br>";
-				echo "URL: $url<br>";
-				echo "METHOD: $method<br>";
-				echo "URL Params: <br>";
-				print_r($urlParams);
-				print_r($response, 'HTTPResponse:');
-			}
-*/
-			return $response;			
-		}
+		}		
 
 	}
 }

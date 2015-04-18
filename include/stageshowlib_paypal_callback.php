@@ -30,39 +30,16 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 {
 	class StageShowLib_paypal_CallbackClass extends StageShowLibGatewayCallbackClass // Define class
 	{
-		function __construct($targetDBaseClass, $callerPath)
+		function DoCallback()
 		{
-			$ourDBaseObj = new $targetDBaseClass($callerPath);
-			$this->notifyDBaseObj = $ourDBaseObj;
-
-			$LogIPNCallFile = STAGESHOWLIB_FILENAME_LASTGATEWAYCALL;
-
-			$ourOptions = $this->notifyDBaseObj->adminOptions;
-
-	  		// FUNCTIONALITY: IPN Notify - Logs Folder uses ABSPATH if no ':' is included
-			$this->LogsFolder = $ourOptions['LogsFolderPath'].'/';
-			if (!strpos($this->LogsFolder, ':'))
-				$this->LogsFolder = ABSPATH . $this->LogsFolder;
+			$IPNError = '';
 				
-			$this->LogMessage = '';
-
-			if (defined('CORONDECK_RUNASDEMO'))
-			{
-				$this->displayIPNs = true;
-				$this->skipIPNServer = true;
-			}
-			else
-			{
-				$this->displayIPNs   = $this->notifyDBaseObj->isDbgOptionSet('Dev_IPNDisplay');
-				$this->skipIPNServer = $this->notifyDBaseObj->isDbgOptionSet('Dev_IPNSkipServer');
-			}
-			
-			$this->charset = $this->QueryParam('charset', 'windows-1252');
+			$gatewayResponse = array();
 
 			// read post from PayPal server and add 'cmd'
 			$URLParamsArray = $this->GetQueryString();
 
-			$IPNRxdMsg = 'IPN Request Received at ' . date(DATE_RFC822);
+			$IPNRxdMsg = ' Gateway Callback Received at ' . date(DATE_RFC822);
 			$this->AddToLog($IPNRxdMsg);
 
 			// Add 'cmd' parameter to URL params array
@@ -77,7 +54,7 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 			{
 				$this->AddToLog('PayPal Environment: LIVE' );
 			}
-			$PayPalNotifyEMail = trim($ourOptions['PayPalAPIEMail']);
+			$PayPalNotifyEMail = trim($this->ourOptions['PayPalAPIEMail']);
 
 			if ($this->notifyDBaseObj->isDbgOptionSet('Dev_IPNLogRequests'))
 			{
@@ -87,13 +64,13 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 					$decodedParams .= "$key=$param\n";
 				}
 				
-				$LogIPNContent = "IPN Verify Request Parameters: \n" . $decodedParams . "\n";
+				$LogIPNContent = "Gateway Verify Request Parameters: \n" . $decodedParams . "\n";
 				$this->LogDebugToFile(STAGESHOWLIB_FILENAME_LASTGATEWAYCALL, $LogIPNContent);
 			}
 
 			if ($this->displayIPNs)
 			{
-				echo "Display IPNs option set - Dumping URLParamsArray:<br>\n";
+				echo "Display Gateway Callback option set - Dumping URLParamsArray:<br>\n";
 				foreach ($URLParamsArray as $key => $param)
 					echo "$key=$param<br>\n";
 				echo "<br>\n";
@@ -104,15 +81,15 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 			{
 				$VerifyURL = '{Skipped}';
 				$gatewayResponse['APIStatus'] = 200;
-				$gatewayResponse['APIResponseText'] = 'VERIFIED';
+				$gatewayResponse['APIResponseText'] = 'VALID';
 			}
 			else
 			{
 				$VerifyURL = $this->notifyDBaseObj->gatewayObj->PayPalVerifyURL;
-				$gatewayResponse = $this->notifyDBaseObj->HTTPPost($VerifyURL, $URLParamsArray);
+				$gatewayResponse = $this->VerifyGatewayCallback($VerifyURL, $URLParamsArray);
 			}
 
-			$this->AddToLog('IPN Verify URL: ' . $VerifyURL);
+			$this->AddToLog("Gateway Verify URL: $VerifyURL");
 
 			// assign posted variables to local variables
 			$Payment_status = $this->HTTPParam('payment_status');
@@ -132,21 +109,28 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 			$this->AddToLog('Fee:    ' . $Payment_fee);
 
 			// Check notification validation
-			if ($gatewayResponse['APIStatus'] != 200 )
+			if ( ($gatewayResponse['APIStatus'] != 200 ) || ($gatewayResponse['APIResponseText'] === 'VALID') )
 			{
-				$this->AddToLog("IPN Response: Status=".$gatewayResponse['APIStatus']." (".$gatewayResponse['APIStatusMsg'].")");
+				if ($gatewayResponse['APIStatus'] != 200 )
+				{
+					$this->AddToLog("Gateway Response: Status=".$gatewayResponse['APIStatus']." (".$gatewayResponse['APIStatusMsg'].")");
+
+					if ($Payment_status == PAYMENT_API_SALESTATUS_COMPLETED)
+						$Payment_status = PAYMENT_API_SALESTATUS_UNVERIFIED;					
+				}
+				else
+				{
+					$this->AddToLog('Gateway Response: VALID');
+				}
 				// HTTP error handling
-			}			
-			else if ($gatewayResponse['APIResponseText'] === 'VERIFIED')
-			{
-				$this->AddToLog('IPN Response: VERIFIED');
+
 				$this->AddToLog('    Payment_status: ' . $Payment_status);
 				$this->AddToLog('    Txn_id:         ' . $Txn_id);
 				$this->AddToLog('    Receiver_email: ' . $Receiver_email);
-				$IPNError = '';
+
 				if ($IPNError === '')
 				{
-					// Check that $Payment_status and deal with "Pending" payment status
+					// Check $Payment_status and deal with "Pending" payment status
 					if (($Payment_status !== PAYMENT_API_SALESTATUS_COMPLETED) && ($Payment_status !== 'Pending'))
 						$IPNError = 'Payment_status not completed';
 				}
@@ -170,7 +154,9 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 				if ($IPNError === '')
 				{
 					if ($txnStatus !== '')
-						$this->notifyDBaseObj->UpdateSaleStatus($Txn_id, $Payment_status);
+					{
+						$saleID = $this->notifyDBaseObj->UpdateSaleStatus($Txn_id, $Payment_status);
+					}
 					else
 					{
 						$results['saleTxnId'] = $Txn_id;
@@ -215,56 +201,61 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 						$results['saleDateTime'] = current_time('mysql');
 						$results['saleID'] = $this->HTTPParam('custom');
 						
-	  					// FUNCTIONALITY: IPN Notify - Log Sale to DB
+	  					// FUNCTIONALITY: Gateway Notify - Log Sale to DB
 						$saleID = $this->notifyDBaseObj->LogSale($results, StageShowLibSalesDBaseClass::STAGESHOWLIB_LOGSALEMODE_PAYMENT);
+					}
 						
-						if ($saleID > 0)
+					if ($saleID > 0)
+					{
+						$this->AddToLog('Sale Logged - SaleID: '.$saleID);
+												
+	  					// FUNCTIONALITY: Gateway Notify - Send Sale EMail to buyer (and admin))
+						if ($Payment_status == PAYMENT_API_SALESTATUS_COMPLETED)
 						{
-							$this->AddToLog('Sale Logged - SaleID: '.$saleID);
-													
-		  					// FUNCTIONALITY: IPN Notify - Send Sale EMail to buyer (and admin))
 							$emailStatus = $this->notifyDBaseObj->EMailSale($saleID);
 							$this->AddToLog('EMail Status: '.$emailStatus);
+							$this->emailSent = true;
 						}
-						else if ($saleID < 0)
+					}
+					else if ($saleID < 0)
+					{
+						// Send Sale Rejected EMail - No Matching Rows
+						$this->AddToLog('Sale Rejected (Checkout Timed Out) - SaleID: '.$saleID);
+						
+						$templatePath = $this->notifyDBaseObj->GetEmailTemplatePath('TimeoutEMailTemplatePath');
+						$emailTo = $this->notifyDBaseObj->GetEmail($this->notifyDBaseObj->adminOptions);
+						
+						$emailData[0] = new stdClass();
+						foreach ($results as $key => $result)
 						{
-							// Send Sale Rejected EMail - No Matching Rows
-							$this->AddToLog('Sale Rejected (Checkout Timed Out) - SaleID: '.$saleID);
-							
-							$templatePath = $this->notifyDBaseObj->GetEmailTemplatePath('TimeoutEMailTemplatePath');
-							$emailTo = $this->notifyDBaseObj->GetEmail($this->notifyDBaseObj->adminOptions);
-							
-							$emailData[0] = new stdClass();
-							foreach ($results as $key => $result)
-							{
-								if (is_numeric(substr($key, -1, 1)))
-									continue;
-									
-								$emailData[0]->$key = $result;
-							}
-							
-							for ($i=1; $i<$itemNo; $i++)
-							{
-								$elemId = 'itemName' . $lineNo;
-								$emailData[0]->$elemId = $results[$elemId];
-								$elemId = 'itemRef' . $lineNo;
-								$emailData[0]->$elemId = $results[$elemId];
-								$elemId = 'itemOption' . $lineNo;
-								$emailData[0]->$elemId = $results[$elemId];
-								$elemId = 'qty' . $lineNo;
-								$emailData[0]->$elemId = $results[$elemId];
-								$elemId = 'itemPaid' . $lineNo;
-								$emailData[0]->$elemId = $results[$elemId];
-							}
+							if (is_numeric(substr($key, -1, 1)))
+								continue;
+								
+							$emailData[0]->$key = $result;
+						}
+						
+						for ($i=1; $i<$itemNo; $i++)
+						{
+							$elemId = 'itemName' . $lineNo;
+							$emailData[0]->$elemId = $results[$elemId];
+							$elemId = 'itemRef' . $lineNo;
+							$emailData[0]->$elemId = $results[$elemId];
+							$elemId = 'itemOption' . $lineNo;
+							$emailData[0]->$elemId = $results[$elemId];
+							$elemId = 'qty' . $lineNo;
+							$emailData[0]->$elemId = $results[$elemId];
+							$elemId = 'itemPaid' . $lineNo;
+							$emailData[0]->$elemId = $results[$elemId];
+						}
 
-							$emailStatus = $this->notifyDBaseObj->SendEMailFromTemplate($emailData, $templatePath, $emailTo);
-							$this->AddToLog('EMail Status: '.$emailStatus);
-						}
-						else
-						{
-							// Error in LogSale()
-							$IPNError = 'DB Error in LogSale';
-						}
+						$emailStatus = $this->notifyDBaseObj->SendEMailFromTemplate($emailData, $templatePath, $emailTo);
+						$this->AddToLog('EMail Status: '.$emailStatus);
+						$this->emailSent = true;
+					}
+					else
+					{
+						// Error in LogSale()
+						$IPNError = 'DB Error in LogSale';
 					}
 				}
 				
@@ -274,21 +265,22 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 				}
 				else
 				{
-					$this->AddToLog('IPN Rejected: '.$IPNError);
+					$this->AddToLog('Gateway Callback Rejected: '.$IPNError);
 					echo "$IPNError<br>\n";
 				}
 			}
 			else if ($gatewayResponse['APIResponseText'] == 'INVALID')
 			{
 				// log for manual investigation
-				$this->AddToLog('IPN Response: INVALID');
+				$this->AddToLog('Gateway Response: INVALID');
 				echo "INVALID<br>\n";
 			}			
 			else
 			{
 				// error
-				$this->AddToLog("IPN Response: Unknown Response (len=" . strlen($gatewayResponse['APIResponseText']) . ")" . substr($gatewayResponse['APIResponseText'], 0, 80));
+				$this->AddToLog("Gateway Response: Unknown Response (len=" . strlen($gatewayResponse['APIResponseText']) . ")" . substr($gatewayResponse['APIResponseText'], 0, 80));
 			}
+				
 			$this->AddToLog("---------------------------------------------------------------------");
 			if ($this->notifyDBaseObj->isDbgOptionSet('Dev_IPNLogRequests'))
 			{
@@ -296,6 +288,8 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 				$this->LogDebugToFile(STAGESHOWLIB_FILENAME_GATEWAYNOTIFY, $this->LogMessage);
 			}
 			
+			$this->AddToLog("---------------------------------------------------------------------");
+
 		}
 	}
 }

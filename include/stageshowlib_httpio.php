@@ -34,9 +34,44 @@ if (!class_exists('StageShowLibHTTPIO'))
 			if (!is_numeric($rtnVal))
 			{
 				if ($exitOnError)
-					die("Program Terminated - Invalid POST");
+				{
+					$origVal = $_REQUEST[$paramId];	
+					die("Program Terminated - Invalid POST - $paramId=$origVal");					
+				}
 				else
 					return $defaultVal;
+			}
+			
+			return $rtnVal;
+		}
+
+		static function GetRequestedCurrency($paramId, $exitOnError = true)
+		{
+			$defaultVal = 0;
+			if (!isset($_REQUEST[$paramId]))
+				return $defaultVal;
+			
+			$rtnVal = $_REQUEST[$paramId];
+			if ($rtnVal == '')
+			{
+				$rtnVal = $defaultVal;
+			}
+			else if (preg_match('/([0-9\.]+)/', $rtnVal, $matches))
+			{
+				$rtnVal = $matches[1];
+			}
+			if (!is_numeric($rtnVal))
+			{
+				if ($exitOnError)
+				{
+					$origVal = $_REQUEST[$paramId];	
+					die("Program Terminated - Invalid POST - $paramId=$origVal");					
+				}
+				else
+				{
+					echo "currencySymbol: $currencySymbol <br>\n";
+					return $defaultVal;
+				}
 			}
 			
 			return $rtnVal;

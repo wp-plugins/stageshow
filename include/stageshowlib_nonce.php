@@ -20,6 +20,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
+if(!isset($_SESSION)) 
+{
+	// Must be Registered to use SESSIONS 
+	session_start();
+}	
+
 if (!class_exists('StageShowLibNonce'))
 {
 	if (!defined('MINUTE_IN_SECONDS'))
@@ -34,7 +40,7 @@ if (!class_exists('StageShowLibNonce'))
 		static function GetStageShowLibNonce($action = -1)
 		{
 			$uid = __FILE__;
-			$token = '';	// TBD - Add a token ....
+			$token = SID;
 				
 			$nonce_life = DAY_IN_SECONDS;
 			$i = ceil(time() / ( $nonce_life / 2 ));

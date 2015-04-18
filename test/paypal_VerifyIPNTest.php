@@ -7,5 +7,5 @@
 		echo 'INVALID';
   else  
 */  
-		echo 'VERIFIED';
+		echo 'VALID';
 ?>

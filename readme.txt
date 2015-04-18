@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
-Tested up to: 4.1
-Stable tag: 4.5.6
+Tested up to: 4.1.1
+Stable tag: 4.6.0.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -12,7 +12,7 @@ StageShow adds the facility for an online Box-Office for Small Theatres/Drama Gr
 
 StageShow provides a simple interface to define your Shows, Performances and Prices. Then a single Wordpress shortcode adds a online BoxOffice to your website.
 
-StageShow uses itsâ€™ own integrated Shopping Trolley to collect orders, and PayPal to collect payments. Purchasers can pay using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
+StageShow uses its’ own integrated Shopping Trolley to collect orders, and PayPal to collect payments. Purchasers can pay using either a PayPal account or a credit/debit card. PayPal IPN (Instant Payment Notification) is used to record sales and to collect buyer information. 
 
 Each sale is fully recorded, with contact and payment details, tickets purchased and PayPal transaction number all saved to the Wordpress database. Confirmation emails, which can be customised as required, are sent to each purchaser and can be copied to the system administrator.
 
@@ -188,6 +188,17 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 5.0 (19/02/2015) =
+* Bug Fix: Tools|Verify Sale does not work with Manual Sales (since ver4.5)
+* Bug Fix: Incorrect style for Manual Sale Add buttons
+* Shopping Trolley "Add" and "Remove" buttons responsiveness improved using JQuery
+* Shopping Trolley MySQL queries optimised
+* Added salePostage to Add Manual Sale 
+* Added Send EMail button to Manual Sale Confirmation Screen
+* Records user_login with each sale (when logged in)
+* Add SQL_BIG_SELECTS=1 to MySQL queries
+* Added Continue button image
 
 = 4.5.6 (25/02/2015) =
 * Bug Fix: Possible Parse Error in wp-config-db.php - Breaks Tools Page/Sale Validator

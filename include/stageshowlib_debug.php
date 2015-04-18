@@ -85,6 +85,8 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 		
 		function Test_DebugSettings() 
 		{
+			$doneCheckboxes = false;
+			
 			$myDBaseObj = $this->myDBaseObj;
 			
 			if (isset($_POST['testbutton_SaveDebugSettings'])) 
@@ -123,13 +125,14 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			}
 ?>
 		<h3>Debug Settings</h3>
-		<table class="stageshow-form-table">
+		<table class="stageshow-settings-table">
 <?php	
 		if ($myDBaseObj->ShowDebugModes())
 			echo '<br>';
 		
 		$optDefs = $this->GetOptionsDefs();
 		$count = 0;
+		$checkboxesPerLine = 4;
 
 		foreach ($optDefs as $optDef)
 		{
@@ -140,22 +143,43 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			{
 				$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
 				$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_ID];
-				$optIsChecked = StageShowLibUtilsClass::GetArrayElement($myDBaseObj->dbgOptions, $settingId) == 1 ? 'checked="yes" ' : '';
-				if (isset($optDef[StageShowLibTableClass::TABLEPARAM_TYPE]))
+				$optValue = StageShowLibUtilsClass::GetArrayElement($myDBaseObj->dbgOptions, $settingId);
+				if (!isset($optDef[StageShowLibTableClass::TABLEPARAM_TYPE]))
 				{
-					$optText = $optIsChecked ? __('Enabled') : __('Disabled');
-					$optEntry = $label. '&nbsp;('.$optText.')';
+					$optDef[StageShowLibTableClass::TABLEPARAM_TYPE] = StageShowLibTableClass::TABLEENTRY_CHECKBOX;
 				}
-				else
+				
+				switch ($optDef[StageShowLibTableClass::TABLEPARAM_TYPE])
 				{
-					$optEntry = '<input name="'.$ctrlId.'" type="checkbox" value="1" '.$optIsChecked.' />&nbsp;'.$label;
+					case 'TBD':
+						$optText = ($optValue == 1) ? __('Enabled') : __('Disabled');
+						$optEntry = $label. '&nbsp;('.$optText.')';
+						break;
+					
+					case StageShowLibTableClass::TABLEENTRY_TEXT:
+						$label .= '&nbsp';
+						if ($count != 0) echo '</tr>';
+						if (!$doneCheckboxes) echo '<tr><td>&nbsp</td></tr>';
+						echo '<tr valign="top">'."\n";
+						echo '<td align="left" valign="middle" width="25%">'.$label.'</td>'."\n";
+						echo '<td align="left" colspan='.$checkboxesPerLine.'>';
+						echo '<input name="'.$ctrlId.'" type="input" autocomplete="off" maxlength="127" size="60" value="'.$optValue.'" />'."\n";
+						echo '</td>'."\n";
+						$count = $checkboxesPerLine;
+						break;
+	
+					case StageShowLibTableClass::TABLEENTRY_CHECKBOX:
+						$optIsChecked = ($optValue == 1) ? 'checked="yes" ' : '';
+						echo '<td align="left" width="25%">';
+						echo '<input name="'.$ctrlId.'" type="checkbox" value="1" '.$optIsChecked.' />&nbsp;'.$label;
+						echo '</td>'."\n";
+						break;
 				}
-				echo '<td align="left" width="25%">'.$optEntry.'</td>'."\n";
 			}
 			else
 				echo '<td align="left">&nbsp;</td>'."\n";
 			$count++;
-			if ($count == 4) 
+			if ($count >= $checkboxesPerLine) 
 			{
 				echo '</tr>'."\n";
 				$count = 0;

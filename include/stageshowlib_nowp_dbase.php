@@ -32,7 +32,7 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 			
 			// Create connection
 			$this->con = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD);
-
+			
 			// Check connection
 			if (!$this->con)
 			{
@@ -43,6 +43,13 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 			{
 				if ($this->dbg) echo "CONNECTED: to MySQL: <br>\n";
 			}
+
+			// Set the character set for the connection
+			if ( defined( 'DB_CHARSET' ) )
+				$charset = DB_CHARSET;
+			else
+				$charset = 'utf8';
+			mysqli_query($this->con, "SET CHARACTER SET $charset");
 
 			mysqli_select_db($this->con, DB_NAME);  			
 		}
@@ -125,6 +132,48 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 					
 			return $rsltArray;
 		}
+		
+		/*
+			Functions taken from wpdb class (wp-db.php)
+		*/
+		function _real_escape( $string ) 
+		{
+			if ( $this->con ) 
+			{
+				return mysqli_real_escape_string( $this->con, $string );
+			}
+			return addslashes( $string );
+		}
+		
+		public function escape_by_ref( &$string ) 
+		{
+			if ( ! is_float( $string ) )
+				$string = $this->_real_escape( $string );
+		}
+
+		public function prepare( $query, $args ) 
+		{
+			if ( is_null( $query ) )
+				return;
+
+			// This is not meant to be foolproof -- but it will catch obviously incorrect usage.
+			if ( strpos( $query, '%' ) === false ) {
+				_doing_it_wrong( 'wpdb::prepare', sprintf( __( 'The query argument of %s must have a placeholder.' ), 'wpdb::prepare()' ), '3.9' );
+			}
+
+			$args = func_get_args();
+			array_shift( $args );
+			// If args were passed as an array (as in vsprintf), move them up
+			if ( isset( $args[0] ) && is_array($args[0]) )
+				$args = $args[0];
+			$query = str_replace( "'%s'", '%s', $query ); // in case someone mistakenly already singlequoted it
+			$query = str_replace( '"%s"', '%s', $query ); // doublequote unquoting
+			$query = preg_replace( '|(?<!%)%f|' , '%F', $query ); // Force floats to be locale unaware
+			$query = preg_replace( '|(?<!%)%s|', "'%s'", $query ); // quote the strings, avoiding escaped strings like %%s
+			array_walk( $args, array( $this, 'escape_by_ref' ) );
+			return @vsprintf( $query, $args );
+		}
+
 	}
 }
 

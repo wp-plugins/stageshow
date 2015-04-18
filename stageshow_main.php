@@ -20,31 +20,18 @@ Copyright 2014 Malcolm Shergold
 
 */
 
-include 'include/stageshow_sales.php';
+if (!defined('STAGESHOWLIB_DATABASE_FULL')) define('STAGESHOWLIB_DATABASE_FULL', true);
+
+if (!class_exists('StageShowWPOrgCartPluginClass')) 
+	include 'stageshow_trolley.php';
 	
 if (!class_exists('StageShowWPOrgPluginClass')) 
 {
-	class StageShowWPOrgPluginClass extends StageShowWPOrgSalesPluginClass 
+	class StageShowWPOrgPluginClass extends StageShowWPOrgCartPluginClass // Define class 
 	{
-		var $ourPluginName;
-		var $myDBaseObj;
-		var	$env;
-		
-		var	$adminClassFilePrefix;
-		var $adminClassPrefix;
-		
 		function __construct($caller)		 
 		{
-			if (defined('STAGESHOW_ERROR_REPORTING')) 
-			{
-				error_reporting(STAGESHOW_ERROR_REPORTING);
-			}
-			
-			$myDBaseObj = $this->CreateDBClass($caller);
-			
-			$this->myDBaseObj = $myDBaseObj;
-					
-			parent::__construct();
+			parent::__construct($caller);
 			
 			//Actions
 			register_activation_hook( $caller, array(&$this, 'activate') );
@@ -62,18 +49,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			// Function to add notification to admin page
 			add_action( 'admin_notices', array(&$this, 'AdminUpgradeNotice'));
 */
-			$this->myDBaseObj->pluginSlug = 'stageshow';
-			$this->adminClassFilePrefix = 'stageshow';
-			$this->adminClassPrefix = 'StageShowWPOrg';
-			
-			$this->env = array(
-			    'caller' => $caller,
-			    'PluginObj' => $this,
-			    'DBaseObj' => $this->myDBaseObj,
-			    'Domain' => $this->myDomain,
-			);
-
-			$this->getStageshowOptions();
 			
 			$myDBaseObj = $this->myDBaseObj;
 			
@@ -82,7 +57,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		  
 			add_action('init', array(&$this, 'init'));
 		  
-			if ($myDBaseObj->checkVersion())
+			if ($myDBaseObj->IsInWP() && $myDBaseObj->checkVersion())
 			{
 				// FUNCTIONALITY: Main - Call "Activate" on plugin update
 				// Versions are different ... call activate() to do any updates
@@ -90,8 +65,11 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			}			
 		}
 		
-		function CreateDBClass($caller)
+		static function CreateDBClass($caller)
 		{					
+			if (!class_exists('StageShowWPOrgDBaseClass')) 
+				include STAGESHOW_INCLUDE_PATH.'stageshow_dbase_api.php';
+				
 			return new StageShowWPOrgDBaseClass($caller);		
 		}
 		
@@ -102,11 +80,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		}
 		
 		//Returns an array of admin options
-		function getStageshowOptions() 
-		{
-			$myDBaseObj = $this->myDBaseObj;
-			return $myDBaseObj->adminOptions;
-		}
 		// Saves the admin options to the options data table
 		
 		// ----------------------------------------------------------------------
@@ -177,19 +150,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 	    {
 	    }
 
-		function init()
-		{
-			$myDBaseObj = $this->myDBaseObj;
-			$myDBaseObj->init($this->env['caller']);
-			
-		    $domain = 'stageshow';
-		    
-	  		// FUNCTIONALITY: Runtime - Load StageShow custom language file
-			load_plugin_textdomain($domain, false, STAGESHOW_LANG_RELPATH);
-			
-			// Get plugin version number
-			wp_update_plugins();
-		}
 
  		function OutputMetaTag()
 		{
@@ -219,7 +179,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		function printAdminPage() 
 		{
 			$this->adminPageActive = true;
-			
+		
 			$id = isset($_GET['id']) ? $_GET['id'] : '';
 			$this->SetTrolleyID($id);
 
@@ -290,7 +250,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 					new StageShowLibDevCallerClass($this->env);
 					break;
 							
-				case STAGESHOW_MENUPAGE_DEBUG:
+				case STAGESHOW_MENUPAGE_DIAGNOSTICS:
 		      		include STAGESHOW_ADMIN_PATH.'stageshow_debug.php';    
 					new StageShowWPOrgDebugAdminClass($this->env);
 					break;							
@@ -320,222 +280,6 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			wp_enqueue_script( $this->adminClassPrefix.'-dtpicker', plugins_url( 'admin/js/datetimepicker_css.js', __FILE__ ));
 		}
 
-		function OutputContent_OnlineStoreMain($atts)
-		{
-			$myDBaseObj = $this->myDBaseObj;
-
-			// Deal with sale editor pages
-			if ($this->adminPageActive)
-			{
-				$buttonID = $this->GetButtonID('editbuyer');
-				if (isset($_POST[$buttonID]))	// 'editbuyer' editing sale - get buyer details
-				{
-					// Output Buyer Details Form
-					if (!current_user_can(STAGESHOWLIB_CAPABILITY_ADMINUSER))
-						return;
-					
-					$saleId = StageShowLibHTTPIO::GetRequestedInt('id', 0);
-					echo '<input type="hidden" name="id" value="'.$saleId.'"/>'."\n";
-						
-					$this->OutputContent_OnlinePurchaserDetails();
-					return;
-				}
-				
-				$buttonID = $this->GetButtonID('savesaleedit');
-				if (isset($_POST[$buttonID]))
-					return;
-
-			}
-			
-			parent::OutputContent_OnlineStoreMain($atts);				
-		}
-
-		function OutputContent_OnlinePurchaserDetails()
-		{
-			$cartContents = $this->GetTrolleyContents();
-			
-			$paramIDs = array(
-				'saleEMail'     => __('EMail', $this->myDomain),
-				'saleFirstName' => __('First Name', $this->myDomain),
-				'saleLastName'  => __('Last Name', $this->myDomain),
-				'salePPStreet'  => __('Street', $this->myDomain),
-				'salePPCity'    => __('City', $this->myDomain),
-				'salePPState'   => __('County', $this->myDomain),
-				'salePPZip'     => __('Postcode', $this->myDomain),
-				'salePPCountry' => __('Country', $this->myDomain),
-				'salePPPhone'   => __('Phone', $this->myDomain),
-				);
-			
-			$formHTML  = ''; 
-			
-			$formHTML .= '<div class="stageshow-boxoffice-purchaserdetails">'."\n";			
-			$formHTML .= "<h2>Purchaser Details:</h2>\n"; 
-			$formHTML .= '<form method="post">'."\n";						
-			$formHTML .= $this->GetParamAsHiddenTag('id');
-			$formHTML .= "<table>\n";			
-
-			// Output all Payment Gateway tags as edit boxes
-			foreach ($paramIDs as $paramID => $paramLabel)
-			{
-				$paramValue = isset($cartContents->$paramID) ? $cartContents->$paramID : '';
-				$formHTML .=  '
-				<tr class="stageshow-boxoffice-formRow">
-					<td class="stageshow-boxoffice-formFieldID">'.$paramLabel.':&nbsp;</td>
-					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
-						<input name="'.$paramID.'" id="'.$paramID.'" type="text" maxlength="50" size="50" value="'.$paramValue.'" />
-					</td>
-				</tr>
-			';
-			}
-			
-			if ($this->myDBaseObj->getOption('EnableReservations'))
-			{
-				// Output Select Status Drop-down Dialogue
-				$saleStatus = isset($cartContents->saleStatus) ? $cartContents->saleStatus : '';
-				$selectCompleted = ($saleStatus == PAYMENT_API_SALESTATUS_COMPLETED) ? 'selected=true ' : '';
-				$selectReserved  = ($saleStatus == STAGESHOW_SALESTATUS_RESERVED) ? 'selected=true ' : '';
-				
-				$formHTML .=  '
-				<tr class="stageshow-boxoffice-formRow">
-					<td class="stageshow-boxoffice-formFieldID">'.__('Status', $this->myDomain).':&nbsp;</td>
-					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
-				<select id="saleStatus" name="saleStatus">
-					<option value="'.PAYMENT_API_SALESTATUS_COMPLETED.'" '.$selectCompleted.'>'.__('Completed', $this->myDomain).'&nbsp;</option>
-					<option value="'.STAGESHOW_SALESTATUS_RESERVED.'" '.$selectReserved.'>'.__('Reserved', $this->myDomain).'&nbsp;</option>
-				</select>
-					</td>
-				</tr>
-				';
-			}
-			else
-			{
-				$formHTML .= '
-				<input type="hidden" id="saleStatus" name="saleStatus" value="'.PAYMENT_API_SALESTATUS_COMPLETED.'"/>
-				';
-			}
-			
-			if ($this->myDBaseObj->getOption('UseNoteToSeller'))
-			{
-				$rowsDef = '';
-				$noteToSeller = $cartContents->saleNoteToSeller;
-				
-				$formHTML .=  '
-				<tr class="stageshow-boxoffice-formRow">
-				<td class="stageshow-boxoffice-formFieldID">'.__('Message To Seller', $this->myDomain).'</td>
-				<td class="stageshow-boxoffice-formFieldValue" colspan="2">
-				<textarea name="saleNoteToSeller" id="saleNoteToSeller" '.$rowsDef.'>'.$noteToSeller.'</textarea>
-				</td>
-				</tr>
-				';
-			}
-			
-			$saveCaption = __('Save', $this->myDomain);
-			$buttonID = $this->GetButtonID('savesaleedit');
-			
-			$buttonClassdef = ($this->adminPageActive) ? 'class="button-secondary " ' : 'class="xx" ';
-			
-			$formHTML .=  '
-				<tr class="stageshow-boxoffice-formRow">
-					<td colspan="2" class="stageshow-boxoffice-savesale">
-						<input name="'.$buttonID.'" '.$buttonClassdef.'id="'.$buttonID.'" type="submit" value="'.$saveCaption.'" />
-					</td>
-				</tr>
-			';
-			
-			$formHTML .= "</table>\n";			
-			$formHTML .= "</form>\n";			
-			$formHTML .= "<div>\n";			
-			
-			echo $formHTML;
-			return $formHTML;
-		}
-		
-		function OnlineStoreSaveEdit()
-		{
-			$myDBaseObj = $this->myDBaseObj;
-			
-			if (isset($_POST['id']))
-			{
-				// Get Current DB Entry
-				$saleID = StageShowLibHTTPIO::GetRequestedInt('id');
-				$saleEntries = $myDBaseObj->GetSale($saleID);				
-			}
-			else
-			{
-				$saleID = 0;
-				$saleEntries = array();
-			}
-//echo "<br> -- saleID=$saleID --<br><br>";
-			
-			// Scan Trolley Contents
-			$cartContents = $this->GetTrolleyContents();
-			
-			$itemsOK = true;
-			foreach ($cartContents->rows as $cartIndex => $cartEntry)
-			{
-				$itemValid = $this->IsOnlineStoreItemValid($cartContents->rows[$cartIndex], $saleEntries);
-				$itemsOK &= $itemValid;
-//echo "<br>itemsOK=$itemsOK<br><br>";
-			}
-			
-			if (!$itemsOK)
-			{
-				$this->SaveTrolleyContents($cartContents);
-			}
-
-			if ($itemsOK)
-			{
-				if ($saleID == 0)
-				{
-					// Add a new Sale
-					$saleDateTime = current_time('mysql'); 
-					$runningTotal = 0;
-					
-					foreach ($cartContents->rows as $cartEntry)
-					{
-						$runningTotal += ($cartEntry->price * $cartEntry->qty);
-					}
-				
-					$cartContents->saleTxnId = 'MAN-'.time();				
-					//$cartContents->saleStatus = PAYMENT_API_SALESTATUS_COMPLETED;			
-					$cartContents->salePPName = $cartContents->saleFirstName.''.$cartContents->saleLastName;
-					$cartContents->salePaid = $runningTotal;				
-					$cartContents->saleFee = 0.0;
-					
-					//$saleVals['saleCheckoutTime'] = $saleDateTime;
-					//$saleVals['saleStatus'] = PAYMENT_API_SALESTATUS_CHECKOUT;
-					
-					$saleID = $myDBaseObj->Ex_AddSale($saleDateTime, $cartContents);
-				}
-				else
-				{
-					// Update Sale
-					$saleID = $myDBaseObj->UpdateSale($cartContents, StageShowLibSalesDBaseClass::STAGESHOWLIB_FROMTROLLEY);
-					$saleID = abs($saleID);		// Returned value will be negative if nothing is changed
-				}
-				
-				// Delete Existing Tickets and Add New Ones
-				$myDBaseObj->DeleteTickets($saleID);
-				
-				foreach ($cartContents->rows as $cartEntry)
-				{
-					$myDBaseObj->AddSaleFromTrolley($saleID, $cartEntry);					
-				}
-				//DELETE_AND_REPLACE_TICKETS = UNDEFINED_AS_YET;
-			}
-			else if (isset($this->checkoutMsg))
-			{
-				if (!isset($this->checkoutMsgClass))
-				{
-					$this->checkoutMsgClass = $this->cssDomain.'-error error';
-				}
-				echo '<div id="message" class="'.$this->checkoutMsgClass.'">'.$this->checkoutMsg.'</div>';					
-				$saleID = 0;
-			}
-				
-			return $saleID;
-		}
-		
 		function GenerateMenus() 
 		{
 			$myDBaseObj = $this->myDBaseObj;		
@@ -618,7 +362,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 
 					if ( isset($_SESSION['stageshowlib_debug_menu']) )
 					{
-						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('DEBUG', $this->myDomain), __('DEBUG', $this->myDomain), STAGESHOWLIB_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEBUG, array(&$this, 'printAdminPage'));
+						add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Diagnostics', $this->myDomain), __('Diagnostics', $this->myDomain), STAGESHOWLIB_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DIAGNOSTICS, array(&$this, 'printAdminPage'));
 					}
 				}
 			}	

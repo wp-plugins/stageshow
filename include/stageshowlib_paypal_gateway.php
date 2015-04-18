@@ -214,8 +214,10 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			// URL for Plugin code to verify PayPal IPNs
 			if ($useLocalIPNServer)
 			{
+				$pageURL = StageShowLibUtilsClass::GetPageURL();
 				$pluginName = basename(dirname(dirname(__FILE__)));
-				$this->PayPalVerifyURL = WP_PLUGIN_URL.'/'.$pluginName.'/test/paypal_VerifyIPNTest.php';	
+				$verifyURL = $pageURL.'wp-content/plugins/'.$pluginName.'/test/paypal_VerifyIPNTest.php';	
+				$this->PayPalVerifyURL = $verifyURL;	
 			}
 			else
 			{
@@ -413,8 +415,10 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 		
 		protected function APIAction()
 		{
+			$myDBaseObj = $this->myDBaseObj;
+			
 			$this->APIResponses = null;
-			$response = $this->HTTPAction($this->APIEndPoint, $this->URLParamsArray);
+			$response = $myDBaseObj->HTTPAction($this->APIEndPoint, $this->URLParamsArray);
 			if ($response['APIStatusMsg'] === 'ERROR')
 			{
 			}
@@ -582,7 +586,6 @@ if (!class_exists('StageShowLibPayPalButtonsAPIClass'))
 						
 		function __construct( $opts )
 		{
-//print_r($opts);
 			parent::__construct( $opts );			
 		}
 		

@@ -45,7 +45,7 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 			echo '<form method="post">'."\n";
 			$this->WPNonceField();
 			
-			$this->Test_SetPayPalTestSettings();
+			$this->Test_SetGatewayDefaultSettings();
 			
 			echo '</form>'."\n";
 			// Stage Show TEST HTML Output - End
@@ -107,7 +107,7 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 			}
 		}
 		
-		function Test_SetPayPalTestSettings() 
+		function Test_SetGatewayDefaultSettings() 
 		{
 			$testSettingsPath = dirname(__FILE__).'/gateway_testsettings.php';
 			if (!file_exists($testSettingsPath))
@@ -130,28 +130,28 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 			$gatewaySettingPresets = array_merge(array('' => 'Clear'), $gatewaySettingPresets);				
 
 			// FUNCTIONALITY: Test - Set PayPal settings to defaults
-			echo '<br><br><h3>Set PayPal Test Settings</h3>';
+			echo '<br><br><h3>Payment Gateway Settings</h3>';
 			
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$canEditSettings = true;
 			
 			$selectedPayPalMode = '';	
-			if (isset($_POST['PayPalTestSettings_Mode'])) 
+			if (isset($_POST['GatewayDefaultSettings_Mode'])) 
 			{
-				$selectedPayPalMode = $_POST['PayPalTestSettings_Mode'];
+				$selectedPayPalMode = $_POST['GatewayDefaultSettings_Mode'];
 				$testDefaults = GatewayDefaultsClass::GetDefaults($selectedPayPalMode);	
 				$selectedPayPalID = GatewayDefaultsClass::GetSettingsID($selectedPayPalMode);
 			}			
 			
-			if (isset($_POST['testbutton_SetPayPalTestSettings'])) 
+			if (isset($_POST['testbutton_SetGatewayDefaultSettings'])) 
 			{
 				$this->CheckAdminReferer();
 				$myDBaseObj->SetTestSettings($testDefaults);							
 				echo '<div id="message" class="updated"><p>Settings initialised to '.$selectedPayPalID.'</p></div>';
 			}		
 							
-			if (isset($_POST['testbutton_ShowPayPalTestSettings'])) 
+			if (isset($_POST['testbutton_ShowGatewayDefaultSettings'])) 
 			{
 				$this->CheckAdminReferer();
 				
@@ -164,7 +164,7 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 <?php 
 			if ($canEditSettings && (count($gatewaySettingPresets) > 0))
 			{
-				$content = "<select name=PayPalTestSettings_Mode>\n";
+				$content = "<select name=GatewayDefaultSettings_Mode>\n";
 				foreach ($gatewaySettingPresets as $index => $option)
 				{
 					$selected = ($index == $selectedPayPalMode) ? ' selected=""' : '';
@@ -180,8 +180,8 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 ?>
 		<tr valign="top">
 			<td>
-				<input class="button-primary" type="submit" name="testbutton_SetPayPalTestSettings" value="Use PayPal Defaults"/>
-				<input class="button-primary" type="submit" name="testbutton_ShowPayPalTestSettings" value="Show PayPal Defaults"/>
+				<input class="button-primary" type="submit" name="testbutton_SetGatewayDefaultSettings" value="Use Gateway Defaults"/>
+				<input class="button-primary" type="submit" name="testbutton_ShowGatewayDefaultSettings" value="Show Gateway Defaults"/>
 			</td>
 		</tr>
 	</table>

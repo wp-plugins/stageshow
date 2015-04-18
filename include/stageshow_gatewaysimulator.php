@@ -53,7 +53,10 @@ if (!class_exists('StageShowGatewaySimulator'))
 			$html .= '<td class="stageshow-simulator-type" >'.$result->ticketType.'</td>';
 			if (isset($result->ticketSeat))
 			{
-				$seat = $this->myDBaseObj->DecodeSeatsList($result->ticketSeat, $result->seatingID);
+				if ($result->ticketSeat != '')
+					$seat = StageShowGoldZonesDBaseClass::DecodeSeatsList($this->myDBaseObj,  $result->ticketSeat, $result->perfSeatingID);
+				else
+					$seat = '&nbsp;';
 				$html .= '<td class="stageshow-simulator-seat" >'.$seat.'</td>';
 			}
 			$html .= '<td class="stageshow-simulator-price" >'.$result->priceValue.'</td>';

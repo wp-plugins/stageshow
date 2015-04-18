@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: StageShow 4.5.6 \n"
+"Project-Id-Version: StageShow 4.6.0.4 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshowgold\n"
-"POT-Creation-Date: 2015-02-25 17:50:32+00:00\n"
+"POT-Creation-Date: 2015-03-28 19:13:51+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,13 +13,13 @@ msgstr ""
 "Language-Team: EMAIL@ADDRESS\n"
 "Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
 
-#: admin\stageshow_manage_overview.php:209 stageshow_main.php:586
+#: admin\stageshow_manage_overview.php:209 stageshow_main.php:330
 msgid "Shows"
 msgstr ""
 
 #: admin\stageshow_manage_overview.php:218
 #: admin\stageshow_manage_performances.php:295
-#: admin\stageshow_manage_prices.php:231 admin\stageshow_manage_shows.php:192
+#: admin\stageshow_manage_prices.php:219 admin\stageshow_manage_shows.php:192
 msgid "No Show Configured"
 msgstr ""
 
@@ -36,9 +36,9 @@ msgid "User Guide is Available"
 msgstr ""
 
 #: admin\stageshow_manage_overview.php:246
-#: include\mjslib_sales_dbase_api.php:209
-#: include\mjslib_sales_dbase_api.php:345
-#: include\stageshowplus_dbase_api.php:432
+#: include\mjslib_sales_dbase_api.php:198
+#: include\mjslib_sales_dbase_api.php:268
+#: include\stageshowplus_dbase_api.php:389
 msgid "Here"
 msgstr ""
 
@@ -92,12 +92,12 @@ msgid "Delete"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:86
-#: include\stageshow_dbase_api.php:704
+#: include\stageshow_dbase_api.php:527
 msgid "Active"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:90
-#: include\stageshow_dbase_api.php:706
+#: include\stageshow_dbase_api.php:529
 msgid "INACTIVE"
 msgstr ""
 
@@ -126,13 +126,13 @@ msgid "Empty Date Entry"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:238
-#: admin\stageshow_manage_prices.php:190 admin\stageshow_manage_shows.php:129
+#: admin\stageshow_manage_prices.php:178 admin\stageshow_manage_shows.php:129
 #: admin\stageshowplus_manage_priceplans.php:216
 msgid "Settings have NOT been saved"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:259
-#: admin\stageshow_manage_prices.php:201 admin\stageshow_manage_prices.php:214
+#: admin\stageshow_manage_prices.php:189 admin\stageshow_manage_prices.php:202
 #: admin\stageshow_manage_shows.php:155
 #: admin\stageshowplus_manage_priceplans.php:218 include\mjslib_admin.php:289
 #: include\mjslib_gateway_settings.php:201
@@ -140,8 +140,8 @@ msgid "Settings have been saved"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:295
-#: admin\stageshow_manage_prices.php:231 admin\stageshow_manage_prices.php:245
-#: admin\stageshow_manage_sales.php:68
+#: admin\stageshow_manage_prices.php:219 admin\stageshow_manage_prices.php:233
+#: admin\stageshow_manage_sales.php:38
 msgid "Add one Here"
 msgstr ""
 
@@ -154,8 +154,8 @@ msgid "Add New Performance"
 msgstr ""
 
 #: admin\stageshow_manage_performances.php:358
-#: admin\stageshow_manage_prices.php:278 admin\stageshow_manage_shows.php:210
-#: admin\stageshowgold_manage_seating.php:447
+#: admin\stageshow_manage_prices.php:266 admin\stageshow_manage_shows.php:210
+#: admin\stageshowgold_manage_seating.php:435
 #: admin\stageshowplus_manage_priceplans.php:316 include\mjslib_admin.php:330
 msgid "Save Changes"
 msgstr ""
@@ -173,7 +173,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: admin\stageshow_manage_performances.php:436
-#: admin\stageshow_manage_prices.php:341 admin\stageshow_manage_shows.php:297
+#: admin\stageshow_manage_prices.php:329 admin\stageshow_manage_shows.php:297
 msgid "Tickets already sold!"
 msgstr ""
 
@@ -184,10 +184,10 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: admin\stageshow_manage_performances.php:440
-#: admin\stageshow_manage_prices.php:345 admin\stageshow_manage_shows.php:301
-#: admin\stageshowgold_manage_seating.php:640
+#: admin\stageshow_manage_prices.php:333 admin\stageshow_manage_shows.php:301
+#: admin\stageshowgold_manage_seating.php:628
 #: admin\stageshowplus_manage_priceplans.php:385
-#: include\mjslib_gatewaysalesadmin.php:503
+#: include\mjslib_gatewaysalesadmin.php:488
 msgid "Nothing to Delete"
 msgstr ""
 
@@ -202,46 +202,46 @@ msgstr[1] ""
 msgid "Nothing to Activate/Deactivate"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:173
+#: admin\stageshow_manage_prices.php:161
 msgid "Duplicated Price Type"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:245
+#: admin\stageshow_manage_prices.php:233
 msgid "has No Performances"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:258
+#: admin\stageshow_manage_prices.php:246
 msgid "Show has No Prices"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:271
+#: admin\stageshow_manage_prices.php:259
 #: admin\stageshowplus_manage_priceplans.php:312
 msgid "Add New Price"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:274
+#: admin\stageshow_manage_prices.php:262
 msgid "for performance"
 msgstr ""
 
-#: admin\stageshow_manage_prices.php:339
+#: admin\stageshow_manage_prices.php:327
 msgid "Price does not exist in Database"
 msgid_plural "Prices do not exist in Database"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshow_manage_prices.php:341
+#: admin\stageshow_manage_prices.php:329
 msgid "Price cannot be deleted"
 msgid_plural "Prices cannot be deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshow_manage_prices.php:343
+#: admin\stageshow_manage_prices.php:331
 msgid "Price has been deleted"
 msgid_plural "Prices have been deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshow_manage_sales.php:68
+#: admin\stageshow_manage_sales.php:38
 msgid "No Prices Defined"
 msgstr ""
 
@@ -331,15 +331,16 @@ msgstr ""
 msgid "Format"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:144 stageshowgold.php:210
+#: admin\stageshow_manage_tools.php:144
 msgid "Type"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:148 stageshow_main.php:600
+#: admin\stageshow_manage_tools.php:148 stageshow_main.php:344
 msgid "Settings"
 msgstr ""
 
-#: admin\stageshow_manage_tools.php:150 include\stageshow_sales.php:378
+#: admin\stageshow_manage_tools.php:150
+#: include\stageshow_trolley_sales.php:273
 msgid "Tickets"
 msgstr ""
 
@@ -395,9 +396,9 @@ msgstr ""
 msgid "Price Type"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:107 include\mjslib_salesplugin.php:77
-#: include\stageshow_sales.php:57 stageshowgold.php:60 stageshowgold.php:143
-#: stageshowgold.php:211
+#: admin\stageshow_tdt_export.php:107
+#: include\mjslib_salesplugin_trolley.php:102
+#: include\stageshow_trolley_sales.php:57
 msgid "Price"
 msgstr ""
 
@@ -405,9 +406,9 @@ msgstr ""
 msgid "Checkout Time"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:109 admin\stageshow_tdt_export.php:372
-#: include\mjslib_salesplugin.php:72 include\stageshow_sales.php:53
-#: stageshowgold.php:134
+#: admin\stageshow_tdt_export.php:109 admin\stageshow_tdt_export.php:375
+#: include\mjslib_salesplugin_trolley.php:97
+#: include\stageshow_trolley_sales.php:53
 msgid "Date & Time"
 msgstr ""
 
@@ -416,9 +417,8 @@ msgid "Sale EMail"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:111 admin\stageshowgold_pos_export.php:58
-#: include\mjslib_sales_dbase_api.php:846 include\mjslib_salesplugin.php:1299
-#: include\stageshow_sales.php:597 stageshowgold.php:83 stageshowgold.php:303
-#: stageshowgold_main.php:674
+#: include\mjslib_sales_dbase_api.php:492 include\mjslib_salesplugin.php:515
+#: include\stageshow_trolley_sales.php:481 stageshowgold_main.php:148
 msgid "Booking Fee"
 msgstr ""
 
@@ -426,14 +426,14 @@ msgstr ""
 msgid "Fees"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:113 include\mjslib_sales_dbase_api.php:847
-#: include\mjslib_salesplugin.php:1309 stageshowgold.php:304
-#: stageshowgold_main.php:675 stageshowplus_main.php:215
+#: admin\stageshow_tdt_export.php:113 include\mjslib_sales_dbase_api.php:493
+#: include\mjslib_salesplugin.php:526 stageshowgold_main.php:149
+#: stageshowplus_trolley.php:128
 msgid "Donation"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:114 stageshowgold.php:305
-#: stageshowplus_main.php:236 stageshowplus_main.php:301
+#: admin\stageshow_tdt_export.php:114 stageshowplus_main.php:188
+#: stageshowplus_trolley.php:149
 msgid "Postage"
 msgstr ""
 
@@ -441,13 +441,13 @@ msgstr ""
 msgid "Sale ID"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:116 stageshow_main.php:359
-#: stageshowgold.php:201
+#: admin\stageshow_tdt_export.php:116
+#: include\mjslib_salesplugin_trolley.php:182
 msgid "First Name"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:117 stageshow_main.php:360
-#: stageshowgold.php:202
+#: admin\stageshow_tdt_export.php:117
+#: include\mjslib_salesplugin_trolley.php:183
 msgid "Last Name"
 msgstr ""
 
@@ -455,55 +455,54 @@ msgstr ""
 msgid "Paid"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:119 stageshow_main.php:362
-#: stageshowgold.php:93
+#: admin\stageshow_tdt_export.php:119
+#: include\mjslib_salesplugin_trolley.php:185
 msgid "City"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:120 include\mjslib_gatewaysalesadmin.php:108
-#: stageshow_main.php:365 stageshowgold.php:96
+#: include\mjslib_salesplugin_trolley.php:188
 msgid "Country"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:121 admin\stageshow_tdt_export.php:371
-#: include\mjslib_salesplugin.php:70 include\stageshow_salevalidate.php:460
-#: include\stageshow_salevalidate.php:465 stageshowgold.php:128
-#: stageshowgold.php:198
+#: admin\stageshow_tdt_export.php:121 admin\stageshow_tdt_export.php:374
+#: include\mjslib_salesplugin_trolley.php:95
+#: include\stageshow_salevalidate.php:476
+#: include\stageshow_salevalidate.php:481
 msgid "Name"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:122 include\mjslib_gatewaysalesadmin.php:109
-#: stageshow_main.php:366 stageshowgold.php:97
+#: include\mjslib_salesplugin_trolley.php:189
 msgid "Phone"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:123 include\mjslib_gatewaysalesadmin.php:106
-#: stageshow_main.php:363 stageshowgold.php:94
+#: include\mjslib_salesplugin_trolley.php:186
 msgid "County"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:124 stageshow_main.php:361
+#: admin\stageshow_tdt_export.php:124
+#: include\mjslib_salesplugin_trolley.php:184
 msgid "Street"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:125 include\mjslib_gatewaysalesadmin.php:107
-#: stageshow_main.php:364 stageshowgold.php:95
+#: include\mjslib_salesplugin_trolley.php:187
 msgid "Postcode"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:126 include\stageshow_salevalidate.php:52
-#: include\stageshow_salevalidate.php:461
-#: include\stageshow_salevalidate.php:466
+#: admin\stageshow_tdt_export.php:126 include\stageshow_salevalidate.php:477
+#: include\stageshow_salevalidate.php:482
 msgid "Sale Status"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:127 admin\stageshow_tdt_export.php:228
-#: include\stageshow_salevalidate.php:54
-#: include\stageshow_salevalidate.php:182 stageshowgold.php:206
+#: admin\stageshow_tdt_export.php:127 admin\stageshow_tdt_export.php:229
+#: include\stageshow_salevalidate.php:183
 msgid "Transaction ID"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:128 stageshowgold.php:159
+#: admin\stageshow_tdt_export.php:128
 msgid "Note To Seller"
 msgstr ""
 
@@ -519,7 +518,7 @@ msgstr ""
 msgid "Show ID"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:132 stageshowgold.php:168
+#: admin\stageshow_tdt_export.php:132
 msgid "Show Name"
 msgstr ""
 
@@ -560,42 +559,46 @@ msgid "Ticket Qty"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:142
-msgid "Verify Date & Time"
+msgid "User Login"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:143
-msgid "Verify ID"
+msgid "Verify Date & Time"
 msgstr ""
 
 #: admin\stageshow_tdt_export.php:144
+msgid "Verify ID"
+msgstr ""
+
+#: admin\stageshow_tdt_export.php:145
 msgid "Verify Location"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:225 include\stageshow_salevalidate.php:143
+#: admin\stageshow_tdt_export.php:226 include\stageshow_salevalidate.php:144
 msgid "Validate Sale"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:236
+#: admin\stageshow_tdt_export.php:237
 msgid "Validate"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:362
+#: admin\stageshow_tdt_export.php:365
 msgid "History"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:367
+#: admin\stageshow_tdt_export.php:370
 msgid "Sale Details"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:370
+#: admin\stageshow_tdt_export.php:373
 msgid "TxnId"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:411
+#: admin\stageshow_tdt_export.php:414
 msgid "No matching record found"
 msgstr ""
 
-#: admin\stageshow_tdt_export.php:432
+#: admin\stageshow_tdt_export.php:435
 msgid "Ticket Name"
 msgstr ""
 
@@ -642,51 +645,51 @@ msgstr ""
 msgid "Export Template"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:260 stageshow_main.php:584
+#: admin\stageshowgold_manage_seating.php:260 stageshow_main.php:328
 msgid "Seating Plans"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:289
+#: admin\stageshowgold_manage_seating.php:277
 msgid "Cannot Edit %s Layout - Tickets Already Sold"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:385
+#: admin\stageshowgold_manage_seating.php:373
 msgid "Error Parsing %s Layout"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:437
+#: admin\stageshowgold_manage_seating.php:425
 msgid "No Seating Plans"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:444
+#: admin\stageshowgold_manage_seating.php:432
 msgid "Add Seating Plan"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:504
+#: admin\stageshowgold_manage_seating.php:492
 msgid "Import HTML Template for"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:521
+#: admin\stageshowgold_manage_seating.php:509
 msgid "Select the Template file you want to import below"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:634
+#: admin\stageshowgold_manage_seating.php:622
 msgid "Seating Plan does not exist in Database"
 msgid_plural "Seating Plans do not exist in Database"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshowgold_manage_seating.php:636
+#: admin\stageshowgold_manage_seating.php:624
 msgid "Seating Plan cannot be deleted"
 msgid_plural "Seating Plans cannot be deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshowgold_manage_seating.php:636
+#: admin\stageshowgold_manage_seating.php:624
 msgid "In use for one or more Performances!"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:638
+#: admin\stageshowgold_manage_seating.php:626
 msgid "Seating Plan has been deleted"
 msgid_plural "Seating Plans have been deleted"
 msgstr[0] ""
@@ -696,8 +699,7 @@ msgstr[1] ""
 msgid "Ticket Seat"
 msgstr ""
 
-#: admin\stageshowgold_tdt_export.php:41 stageshowgold.php:15
-#: stageshowgold.php:18
+#: admin\stageshowgold_tdt_export.php:41
 msgid "Zone"
 msgstr ""
 
@@ -818,25 +820,25 @@ msgid_plural "Price Plans Entries have been deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshowplus_manage_sales.php:155
+#: admin\stageshowplus_manage_sales.php:141
 msgid "Sale has been changed to Completed"
 msgid_plural "Sales have been changed to Completed"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshowplus_manage_sales.php:157
+#: admin\stageshowplus_manage_sales.php:143
 msgid "Nothing to Update"
 msgstr ""
 
-#: admin\stageshowplus_manage_settings.php:121
+#: admin\stageshowplus_manage_settings.php:122
 msgid "Seconds"
 msgstr ""
 
-#: admin\stageshowplus_manage_settings.php:121
+#: admin\stageshowplus_manage_settings.php:122
 msgid "Minutes"
 msgstr ""
 
-#: admin\stageshowplus_manage_settings.php:121
+#: admin\stageshowplus_manage_settings.php:122
 msgid "Hours"
 msgstr ""
 
@@ -844,8 +846,9 @@ msgstr ""
 msgid "OFX"
 msgstr ""
 
-#: admin\stageshowplus_manage_tools.php:111 include\mjslib_table.php:174
-#: include\stageshow_sales.php:51 stageshowgold.php:124 stageshowgold.php:329
+#: admin\stageshowplus_manage_tools.php:111
+#: include\mjslib_payfast_gateway.php:237 include\mjslib_table.php:174
+#: include\stageshow_trolley_sales.php:51
 msgid "Show"
 msgstr ""
 
@@ -855,8 +858,7 @@ msgid "All"
 msgstr ""
 
 #: admin\stageshowplus_manage_tools.php:126
-#: include\stageshow_salevalidate.php:175 stageshowgold.php:129
-#: stageshowgold.php:141 stageshowgold.php:330
+#: include\stageshow_salevalidate.php:176
 msgid "Performance"
 msgstr ""
 
@@ -888,19 +890,19 @@ msgstr ""
 msgid "No Settings Configured"
 msgstr ""
 
-#: include\mjslib_dbase_api.php:369
+#: include\mjslib_dbase_api.php:488
 msgid "Session Debug Modes"
 msgstr ""
 
-#: include\mjslib_dbase_api.php:387
+#: include\mjslib_dbase_api.php:506
 msgid "SSL over HTTP"
 msgstr ""
 
-#: include\mjslib_debug.php:146
+#: include\mjslib_debug.php:155
 msgid "Enabled"
 msgstr ""
 
-#: include\mjslib_debug.php:146
+#: include\mjslib_debug.php:155
 msgid "Disabled"
 msgstr ""
 
@@ -912,7 +914,7 @@ msgstr ""
 msgid "Cannot Create Logs Folder"
 msgstr ""
 
-#: include\mjslib_gatewaysalesadmin.php:92 stageshow_main.php:403
+#: include\mjslib_gatewaysalesadmin.php:92 stageshow_trolley.php:131
 msgid "Completed"
 msgstr ""
 
@@ -924,208 +926,236 @@ msgstr ""
 msgid "Town/City"
 msgstr ""
 
-#: include\mjslib_gatewaysalesadmin.php:338
+#: include\mjslib_gatewaysalesadmin.php:353
 msgid "Search Results"
 msgstr ""
 
-#: include\mjslib_gatewaysalesadmin.php:340
+#: include\mjslib_gatewaysalesadmin.php:355
 msgid "Summary"
 msgstr ""
 
-#: include\mjslib_gatewaysalesadmin.php:346 stageshowgold.php:197
+#: include\mjslib_gatewaysalesadmin.php:361
 msgid "Add Sale"
 msgstr ""
 
-#: include\mjslib_gatewaysalesadmin.php:368
+#: include\mjslib_gatewaysalesadmin.php:383
 #: include\mjslib_test_emailsale.php:57
 msgid "No Sales"
 msgstr ""
 
-#: include\mjslib_gatewaysalesadmin.php:400
+#: include\mjslib_gatewaysalesadmin.php:415
 msgid "Search Sales"
 msgstr ""
 
-#: include\mjslib_gatewaysalesadmin.php:499
+#: include\mjslib_gatewaysalesadmin.php:484
 msgid "Sale Entry does not exist in Database"
 msgid_plural "Sale Entries do not exist in Database"
 msgstr[0] ""
 msgstr[1] ""
 
-#: include\mjslib_gatewaysalesadmin.php:501
+#: include\mjslib_gatewaysalesadmin.php:486
 msgid "Sale has been deleted"
 msgid_plural "Sales have been deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: include\mjslib_payfast_gateway.php:112
-msgid "Do Not Collect"
+#: include\mjslib_nowp_dbase.php:161
+msgid "The query argument of %s must have a placeholder."
 msgstr ""
 
 #: include\mjslib_payfast_gateway.php:113
-msgid "Collect Address"
+msgid "Do Not Collect"
 msgstr ""
 
 #: include\mjslib_payfast_gateway.php:114
-msgid "Collect Name & EMail"
+msgid "Collect Address"
 msgstr ""
 
 #: include\mjslib_payfast_gateway.php:115
+msgid "Collect Name & EMail"
+msgstr ""
+
+#: include\mjslib_payfast_gateway.php:116
 msgid "Collect Name, Address & EMail"
 msgstr ""
 
-#: include\mjslib_payfast_gateway.php:119
+#: include\mjslib_payfast_gateway.php:120
 msgid "Live"
 msgstr ""
 
-#: include\mjslib_payfast_gateway.php:119
+#: include\mjslib_payfast_gateway.php:120
 msgid "Sandbox"
 msgstr ""
 
-#: include\mjslib_paypal_exp_gateway.php:188
-#: include\mjslib_salesplugin.php:1252 include\mjslib_salesplugin.php:1281
-#: include\mjslib_salesplugin.php:1318 include\mjslib_salesplugin.php:1373
-#: include\mjslib_salesplugin.php:1399 include\mjslib_salesplugin.php:1437
-#: stageshowgold_main.php:646 stageshowgold_main.php:654
-#: stageshowgold_main.php:754 stageshowplus_main.php:445
+#: include\mjslib_payfast_gateway.php:237
+#: include\stageshowgold_dbase_api.php:1354
+msgid "Qty"
+msgstr ""
+
+#: include\mjslib_paypal_exp_gateway.php:218
+#: include\mjslib_salesplugin.php:468 include\mjslib_salesplugin.php:497
+#: include\mjslib_salesplugin.php:535 include\mjslib_salesplugin.php:590
+#: include\mjslib_salesplugin.php:622 include\mjslib_salesplugin.php:660
+#: stageshowgold_main.php:120 stageshowgold_main.php:128
+#: stageshowgold_main.php:223 stageshowplus_main.php:271
 msgid "Cannot Checkout"
 msgstr ""
 
-#: include\mjslib_paypal_exp_gateway.php:192
+#: include\mjslib_paypal_exp_gateway.php:222
 msgid "Could not get token from PayPal"
 msgstr ""
 
-#: include\mjslib_paypal_gateway.php:270
+#: include\mjslib_paypal_gateway.php:272
 msgid "PayPal Login FAILED"
 msgstr ""
 
-#: include\mjslib_paypal_gateway.php:379
+#: include\mjslib_paypal_gateway.php:381
 msgid "Missing PayPal Login Param"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:209
+#: include\mjslib_sales_dbase_api.php:198
 msgid "Set"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:209
+#: include\mjslib_sales_dbase_api.php:198
 msgid "Payment Gateway Settings First"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:345
+#: include\mjslib_sales_dbase_api.php:268
 msgid "Timezone not set - Set it"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:350
+#: include\mjslib_sales_dbase_api.php:273
 msgid "Plugin"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:351
+#: include\mjslib_sales_dbase_api.php:274
 msgid "Version"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:352
+#: include\mjslib_sales_dbase_api.php:275
 msgid "Gateway"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:353
+#: include\mjslib_sales_dbase_api.php:276
 msgid "Timezone"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:989
+#: include\mjslib_sales_dbase_api.php:556
 msgid "Undefined"
 msgstr ""
 
-#: include\mjslib_sales_dbase_api.php:1222
+#: include\mjslib_sales_trolley_dbase_api.php:521
 msgid "View Ticket"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:74
-msgid "Ref"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:79 include\stageshow_sales.php:59
-#: include\stageshow_sales.php:62 stageshowgold.php:212 stageshowgold.php:332
-#: stageshowgold_main.php:38
-msgid "Quantity"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:258 stageshow_main.php:594
-msgid "Sales"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:304 include\stageshow_sales.php:319
-msgid "Add"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:531
-msgid "Sales Not Available Currently"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:632
-msgid "Remove"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:662 include\mjslib_salesplugin.php:887
-msgid "Checkout"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:827
-msgid "Your Contact Details"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:829
-msgid "must be entered"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:951
-msgid "Sale Details have been saved"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:1075
-msgid "Shopping Trolley Cleared"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:1090
-msgid "Your Order Details"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:1092
-msgid "Selected Seats"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:1094
-msgid "Your Shopping Trolley"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:1150
-msgid "Total"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:1180 stageshow_main.php:424
-msgid "Message To Seller"
-msgstr ""
-
-#: include\mjslib_salesplugin.php:1253
+#: include\mjslib_salesplugin.php:469
 msgid "Shopping Trolley Empty"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:1282
+#: include\mjslib_salesplugin.php:498
 msgid "Shopping Trolley Contents have changed"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:1319
+#: include\mjslib_salesplugin.php:536
 msgid "Item(s) removed from Shopping Trolley"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:1374
+#: include\mjslib_salesplugin.php:591
 msgid "Total sale is zero"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:1416
+#: include\mjslib_salesplugin.php:639
 msgid "Using Local IPN Server - Gateway Checkout call skipped"
 msgstr ""
 
-#: include\mjslib_salesplugin.php:1438
+#: include\mjslib_salesplugin.php:661
 msgid "Sold out for one or more items"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:99
+msgid "Ref"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:104
+#: include\stageshow_trolley_sales.php:59
+#: include\stageshow_trolley_sales.php:62 stageshowgold_trolley.php:48
+msgid "Quantity"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:181
+msgid "EMail"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:225
+msgid "Save"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:437 stageshow_main.php:338
+msgid "Sales"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:483
+#: include\stageshow_trolley_sales.php:214
+msgid "Add"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:581
+msgid "Sales Not Available Currently"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:698
+msgid "Remove"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:705
+msgid "Next"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:734
+#: include\mjslib_salesplugin_trolley.php:965
+msgid "Checkout"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:905
+msgid "Your Contact Details"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:907
+msgid "must be entered"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:1001
+#: include\mjslib_test_emailsale.php:123
+msgid "EMail Sale"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:1100
+msgid "Sale Details have been saved"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:1230
+msgid "Shopping Trolley Cleared"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:1245
+msgid "Your Order Details"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:1247
+msgid "Sale Items"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:1249
+msgid "Your Shopping Trolley"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:1305
+msgid "Total"
+msgstr ""
+
+#: include\mjslib_salesplugin_trolley.php:1335 stageshow_trolley.php:152
+msgid "Message To Seller"
 msgstr ""
 
 #: include\mjslib_table.php:175
@@ -1174,11 +1204,11 @@ msgstr ""
 msgid "Show all Events"
 msgstr ""
 
-#: include\mjslib_table.php:1278 include\mjslib_table.php:1440
+#: include\mjslib_table.php:1278 include\mjslib_table.php:1441
 msgid "Yes"
 msgstr ""
 
-#: include\mjslib_table.php:1278 include\mjslib_table.php:1440
+#: include\mjslib_table.php:1278 include\mjslib_table.php:1441
 msgid "No"
 msgstr ""
 
@@ -1206,116 +1236,73 @@ msgstr ""
 msgid "Debug Output"
 msgstr ""
 
-#: include\mjslib_test_emailsale.php:123
-msgid "EMail Sale"
-msgstr ""
-
-#: include\stageshow_dbase_api.php:636
+#: include\stageshow_dbase_api.php:475
 msgid "Internal Error - showID"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:651
+#: include\stageshow_dbase_api.php:490
 msgid "Performance Reference is not unique"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:653
+#: include\stageshow_dbase_api.php:492
 msgid "New Performance Added"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:700
+#: include\stageshow_dbase_api.php:523
 msgid "DELETED"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:841
+#: include\stageshow_dbase_api.php:633
 msgid "Unnamed Show"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:963
+#: include\stageshow_dbase_api.php:696
 msgid "DB Error"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:963
+#: include\stageshow_dbase_api.php:696
 msgid "Column does not exist"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1283
+#: include\stageshow_dbase_api.php:863
 msgid "Price Not Specified"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1289
+#: include\stageshow_dbase_api.php:869
 msgid "Invalid Price Entry"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:1295
+#: include\stageshow_dbase_api.php:875
 msgid "Price Entry cannot be negative"
 msgstr ""
 
-#: include\stageshow_sales.php:55 stageshowgold.php:59 stageshowgold.php:142
-#: stageshowgold.php:331
-msgid "Ticket Type"
+#: include\stageshow_jquery_email.php:120 stageshowgold_main.php:244
+#: stageshowplus_main.php:266
+msgid "Confirmation EMail sent to"
 msgstr ""
 
-#: include\stageshow_sales.php:159
+#: include\stageshow_sales.php:113
 msgid "Driven by"
 msgstr ""
 
-#: include\stageshow_sales.php:275
+#: include\stageshow_sales.php:146
 msgid "Sold out for one or more performances"
 msgstr ""
 
-#: include\stageshow_sales.php:392
-msgid "Sold Out"
-msgstr ""
-
-#: include\stageshow_sales.php:409
-msgid "Seat Available"
-msgid_plural "Seats Available"
-msgstr[0] ""
-msgstr[1] ""
-
-#: include\stageshow_sales.php:541
-msgid "Next"
-msgstr ""
-
-#: include\stageshow_sales.php:631
+#: include\stageshow_sales.php:170
 msgid "Unknown"
 msgstr ""
 
-#: include\stageshow_sales.php:737
-msgid "Insufficient seats"
-msgstr ""
-
-#: include\stageshow_salevalidate.php:48
 #: include\stageshow_salevalidate.php:103
 msgid "All Performances"
 msgstr ""
 
-#: include\stageshow_salevalidate.php:49
-msgid "Already Verified"
-msgstr ""
-
-#: include\stageshow_salevalidate.php:50
-msgid "Matching record found"
-msgstr ""
-
-#: include\stageshow_salevalidate.php:51
-msgid "No matching record"
-msgstr ""
-
-#: include\stageshow_salevalidate.php:53
-msgid "Sale Validation"
-msgstr ""
-
-#: include\stageshow_salevalidate.php:55
-msgid "Wrong Performance"
-msgstr ""
-
-#: include\stageshow_salevalidate.php:171
+#: include\stageshow_salevalidate.php:172
 msgid "Location / Computer ID"
 msgstr ""
 
-#: include\stageshow_salevalidate.php:471
-#: include\stageshow_salevalidate.php:475
+#: include\stageshow_salevalidate.php:487
+#: include\stageshow_salevalidate.php:491
 msgid "Total Due"
 msgstr ""
 
@@ -1325,620 +1312,218 @@ msgstr ""
 msgid "Cannot Add Performances"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:392
-msgid "Error Finding Tag"
+#: include\stageshow_trolley_sales.php:55
+msgid "Ticket Type"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:400
-msgid "Missing \" in Tag Param"
+#: include\stageshow_trolley_sales.php:288
+msgid "Sold Out"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:410
-msgid "Missing End of Tag Marker"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:495
-msgid "Row"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:495
-#: include\stageshowgold_dbase_api.php:1464 stageshowgold.php:287
-#: stageshowgold_main.php:38
-msgid "Seat"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:568
-msgid "No Zone Found for Seat"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:594
-msgid "Template Uploaded"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:608
-#: include\stageshowgold_dbase_api.php:620
-#: include\stageshowgold_dbase_api.php:629
-msgid "Template Import Error"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:609
-msgid "Seating ID not specified"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:621
-msgid "Empty Filename"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:630
-msgid "Empty File"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:1193
-msgid "Invalid Seat Specification"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:1206
-msgid "Seat Allocated Twice"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:1291
-msgid "Seats Requested"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:1292
-msgid "Seats Selected"
-msgstr ""
-
-#: include\stageshowgold_dbase_api.php:1459
-msgid "Qty"
-msgstr ""
-
-#: include\stageshowplus_dbase_api.php:414
-#: include\stageshowplus_dbase_api.php:420
-msgid "is not set"
-msgstr ""
-
-#: include\stageshowplus_dbase_api.php:432
-msgid "Plugin Auto-Update is DISABLED - Add registration details"
-msgstr ""
-
-#: include\stageshowplus_dbase_api.php:440
-msgid "Plugin Auto-Update ERROR"
-msgstr ""
-
-#: include\stageshowplus_dbase_api.php:446
-msgid "Plugin Auto-Update Server ERROR"
-msgstr ""
-
-#: include\stageshowplus_sales_table.php:43
-msgid "Set Completed"
-msgstr ""
-
-#: include\stageshowplus_sales_table.php:78 stageshow_main.php:404
-msgid "Reserved"
-msgstr ""
-
-#: stageshow_main.php:358 stageshowgold.php:203
-msgid "EMail"
-msgstr ""
-
-#: stageshow_main.php:400 stageshowgold.php:200 stageshowgold.php:207
-msgid "Status"
-msgstr ""
-
-#: stageshow_main.php:432
-msgid "Save"
-msgstr ""
-
-#: stageshow_main.php:581
-msgid "Overview"
-msgstr ""
-
-#: stageshow_main.php:588
-msgid "Price Plans"
-msgstr ""
-
-#: stageshow_main.php:589 stageshowgold.php:125
-msgid "Performances"
-msgstr ""
-
-#: stageshow_main.php:590
-msgid "Prices"
-msgstr ""
-
-#: stageshow_main.php:598
-msgid "Tools"
-msgstr ""
-
-#: stageshow_main.php:616
-msgid "Dev TESTING"
-msgstr ""
-
-#: stageshow_main.php:621
-msgid "DEBUG"
-msgstr ""
-
-#: stageshowgold.php:12
-msgid "Seating"
-msgstr ""
-
-#: stageshowgold.php:23
-msgid "Add Zone"
-msgstr ""
-
-#: stageshowgold.php:24
-msgid "View Template"
-msgstr ""
-
-#: stageshowgold.php:25
-msgid "Import Template"
-msgstr ""
-
-#: stageshowgold.php:26
-msgid "Seating Plan Ref"
-msgstr ""
-
-#: stageshowgold.php:27
-msgid "Zones"
-msgstr ""
-
-#: stageshowgold.php:28 stageshowgold.php:328
-msgid "Seats"
-msgstr ""
-
-#: stageshowgold.php:29
-msgid "Zone Ref"
-msgstr ""
-
-#: stageshowgold.php:30
-msgid "Zone Spec"
-msgstr ""
-
-#: stageshowgold.php:31 stageshowgold.php:33
-msgid "Allocated Seats"
-msgstr ""
-
-#: stageshowgold.php:32
-msgid "Zone Seats"
-msgstr ""
-
-#: stageshowgold.php:36
-msgid "Minimum Empty Seats"
-msgstr ""
-
-#: stageshowgold.php:37
-msgid "POS Ticket Template"
-msgstr ""
-
-#: stageshowgold.php:54
-msgid "Expires"
-msgstr ""
-
-#: stageshowgold.php:55
-msgid "Note Position"
-msgstr ""
-
-#: stageshowgold.php:56 stageshowgold.php:105 stageshowgold.php:208
-msgid "Note"
-msgstr ""
-
-#: stageshowgold.php:61 stageshowgold.php:65
-msgid "Visibility"
-msgstr ""
-
-#: stageshowgold.php:62 stageshowgold.php:66 stageshowgold.php:67
-msgid "No Of Seats"
-msgstr ""
-
-#: stageshowgold.php:72 stageshowgold.php:89
-msgid "Reservations"
-msgstr ""
-
-#: stageshowgold.php:73
-msgid "StageShow Sales EMail Name"
-msgstr ""
-
-#: stageshowgold.php:74
-msgid "Reservation EMail Template"
-msgstr ""
-
-#: stageshowgold.php:75
-msgid "Performance Expires Limit"
-msgstr ""
-
-#: stageshowgold.php:77
-msgid "Terminal Location"
-msgstr ""
-
-#: stageshowgold.php:78
-msgid "Sale Transaction ID"
-msgstr ""
-
-#: stageshowgold.php:79
-msgid "Sale Txn EMail Address"
-msgstr ""
-
-#: stageshowgold.php:80
-msgid "Sale Summary Report EMail"
-msgstr ""
-
-#: stageshowgold.php:81
-msgid "Summary EMail Template"
-msgstr ""
-
-#: stageshowgold.php:82
-msgid "Donations"
-msgstr ""
-
-#: stageshowgold.php:84
-msgid "Ticket Delivery"
-msgstr ""
-
-#: stageshowgold.php:85
-msgid "Postage Fee"
-msgstr ""
-
-#: stageshowgold.php:86
-msgid "Custom Stylesheet"
-msgstr ""
-
-#: stageshowgold.php:87
-msgid "Custom Javascript"
-msgstr ""
-
-#: stageshowgold.php:88
-msgid "Barcode Type"
-msgstr ""
-
-#: stageshowgold.php:90
-msgid "Address 1"
-msgstr ""
-
-#: stageshowgold.php:91
-msgid "Address 2"
-msgstr ""
-
-#: stageshowgold.php:92
-msgid "Address 3"
-msgstr ""
-
-#: stageshowgold.php:98
-msgid "Website Link"
-msgstr ""
-
-#: stageshowgold.php:99
-msgid "Accept Purchaser Donations"
-msgstr ""
-
-#: stageshowgold.php:100
-msgid "Enable Post Tickets Option"
-msgstr ""
-
-#: stageshowgold.php:101
-msgid "Enable Reservations"
-msgstr ""
-
-#: stageshowgold.php:102
-msgid "Remove StageShow Plugin Website Link"
-msgstr ""
-
-#: stageshowgold.php:106
-msgid "EMail Template"
-msgstr ""
-
-#: stageshowgold.php:119
-msgid "Show Trolley"
-msgstr ""
-
-#: stageshowgold.php:126 stageshowgold.php:130 stageshowgold.php:137
-#: stageshowgold.php:169
-msgid "Tickets Sold"
-msgstr ""
-
-#: stageshowgold.php:127 stageshowgold.php:131
-msgid "Sales Value"
-msgstr ""
-
-#: stageshowgold.php:135
-msgid "Reference"
-msgstr ""
-
-#: stageshowgold.php:136
-msgid "Max Seats"
-msgstr ""
-
-#: stageshowgold.php:138 stageshowgold.php:170
-msgid "State"
-msgstr ""
-
-#: stageshowgold.php:148
-msgid "General"
-msgstr ""
-
-#: stageshowgold.php:149
-msgid "Organisation ID"
-msgstr ""
-
-#: stageshowgold.php:150
-msgid "Sale EMail Template"
-msgstr ""
-
-#: stageshowgold.php:151
-msgid "StageShow Sales EMail"
-msgstr ""
-
-#: stageshowgold.php:152
-msgid "Bcc EMails to Sales EMail"
-msgstr ""
-
-#: stageshowgold.php:153
-msgid "Currency Symbol"
-msgstr ""
-
-#: stageshowgold.php:154
-msgid "Box Office Below Trolley"
-msgstr ""
-
-#: stageshowgold.php:155
-msgid "Items per Page"
-msgstr ""
-
-#: stageshowgold.php:156
-msgid "Max Ticket Qty"
-msgstr ""
-
-#: stageshowgold.php:157
-msgid "Checkout Note Position"
-msgstr ""
-
-#: stageshowgold.php:158
-msgid "Checkout Note"
-msgstr ""
-
-#: stageshowgold.php:160
+#: include\stageshow_trolley_sales.php:303
 msgid "Seats Available"
 msgstr ""
 
-#: stageshowgold.php:161
-msgid "Send EMail confirmation to Administrator"
+#: include\stageshow_trolley_sales.php:303
+msgid "Seat Available"
 msgstr ""
 
-#: stageshowgold.php:162
-msgid "Include in Box Office Output"
+#: include\stageshow_trolley_sales.php:579
+msgid "Insufficient seats"
 msgstr ""
 
-#: stageshowgold.php:163
-msgid "Move Box Office below Active Trolley"
+#: include\stageshowgold_dbase_api.php:303
+msgid "Error Finding Tag"
 msgstr ""
 
-#: stageshowgold.php:164
-msgid "Accept Purchaser Text Input"
+#: include\stageshowgold_dbase_api.php:311
+msgid "Missing \" in Tag Param"
 msgstr ""
 
-#: stageshowgold.php:165
-msgid "Show Seats Available on Box Office"
+#: include\stageshowgold_dbase_api.php:321
+msgid "Missing End of Tag Marker"
 msgstr ""
 
-#: stageshowgold.php:183
-msgid "Show $_GET"
+#: include\stageshowgold_dbase_api.php:406
+msgid "Row"
 msgstr ""
 
-#: stageshowgold.php:184
-msgid "Show $_POST"
+#: include\stageshowgold_dbase_api.php:406
+#: include\stageshowgold_dbase_api.php:1359 stageshowgold_trolley.php:48
+msgid "Seat"
 msgstr ""
 
-#: stageshowgold.php:185
-msgid "Show $_SESSION"
+#: include\stageshowgold_dbase_api.php:479
+msgid "No Zone Found for Seat"
 msgstr ""
 
-#: stageshowgold.php:186
-msgid "Show EMail Msgs"
+#: include\stageshowgold_dbase_api.php:505
+msgid "Template Uploaded"
 msgstr ""
 
-#: stageshowgold.php:187
-msgid "Show SQL"
+#: include\stageshowgold_dbase_api.php:519
+#: include\stageshowgold_dbase_api.php:531
+#: include\stageshowgold_dbase_api.php:540
+msgid "Template Import Error"
 msgstr ""
 
-#: stageshowgold.php:188
-msgid "Show DB Output"
+#: include\stageshowgold_dbase_api.php:520
+msgid "Seating ID not specified"
 msgstr ""
 
-#: stageshowgold.php:199
-msgid "Transaction Date"
+#: include\stageshowgold_dbase_api.php:532
+msgid "Empty Filename"
 msgstr ""
 
-#: stageshowgold.php:204
-msgid "Total Paid/Due"
+#: include\stageshowgold_dbase_api.php:541
+msgid "Empty File"
 msgstr ""
 
-#: stageshowgold.php:205
-msgid "Transaction Date & Time"
+#: include\stageshowgold_dbase_api.php:1101
+msgid "Invalid Seat Specification"
 msgstr ""
 
-#: stageshowgold.php:209
-msgid "Item"
+#: include\stageshowgold_dbase_api.php:1122
+msgid "Seat Allocated Twice"
 msgstr ""
 
-#: stageshowgold.php:219 stageshowgold.php:221
-msgid "Payment Gateway"
+#: include\stageshowgold_dbase_api.php:1229
+msgid "Seats Requested"
 msgstr ""
 
-#: stageshowgold.php:220
-msgid "Advanced"
+#: include\stageshowgold_dbase_api.php:1230
+msgid "Seats Selected"
 msgstr ""
 
-#: stageshowgold.php:222
-msgid "EMail Logo Image File"
+#: include\stageshowplus_dbase_api.php:371
+#: include\stageshowplus_dbase_api.php:377
+msgid "is not set"
 msgstr ""
 
-#: stageshowgold.php:223
-msgid "Checkout Timeout"
+#: include\stageshowplus_dbase_api.php:389
+msgid "Plugin Auto-Update is DISABLED - Add registration details"
 msgstr ""
 
-#: stageshowgold.php:224
-msgid "Image URLs"
+#: include\stageshowplus_dbase_api.php:397
+msgid "Plugin Auto-Update ERROR"
 msgstr ""
 
-#: stageshowgold.php:225
-msgid "Checkout Complete URL"
+#: include\stageshowplus_dbase_api.php:403
+msgid "Plugin Auto-Update Server ERROR"
 msgstr ""
 
-#: stageshowgold.php:226
-msgid "Checkout Cancelled URL"
+#: include\stageshowplus_sales_table.php:41
+msgid "Set Completed"
 msgstr ""
 
-#: stageshowgold.php:227
-msgid "Log Files Folder Path"
+#: include\stageshowplus_sales_table.php:76 stageshow_trolley.php:132
+msgid "Reserved"
 msgstr ""
 
-#: stageshowgold.php:228
-msgid "Enable SSL"
+#: stageshow_main.php:325
+msgid "Overview"
 msgstr ""
 
-#: stageshowgold.php:245
-msgid "Server"
+#: stageshow_main.php:332
+msgid "Price Plans"
 msgstr ""
 
-#: stageshowgold.php:246 stageshowgold.php:260
-msgid "Merchant ID"
+#: stageshow_main.php:333
+msgid "Performances"
 msgstr ""
 
-#: stageshowgold.php:247
-msgid "Merchant Key"
+#: stageshow_main.php:334
+msgid "Prices"
 msgstr ""
 
-#: stageshowgold.php:248
-msgid "Pass Phrase"
+#: stageshow_main.php:342
+msgid "Tools"
 msgstr ""
 
-#: stageshowgold.php:249 stageshowgold.php:261
-msgid "Currency"
+#: stageshow_main.php:360
+msgid "Dev TESTING"
 msgstr ""
 
-#: stageshowgold.php:250
-msgid "Contact Details"
+#: stageshow_main.php:365
+msgid "Diagnostics"
 msgstr ""
 
-#: stageshowgold.php:255
-msgid "Checkout Type"
+#: stageshow_trolley.php:128
+msgid "Status"
 msgstr ""
 
-#: stageshowgold.php:256
-msgid "PayPal Header Image File"
-msgstr ""
-
-#: stageshowgold.php:259
-msgid "Account EMail"
-msgstr ""
-
-#: stageshowgold.php:262
-msgid "API User"
-msgstr ""
-
-#: stageshowgold.php:263
-msgid "API Password"
-msgstr ""
-
-#: stageshowgold.php:264
-msgid "API Signature"
-msgstr ""
-
-#: stageshowgold.php:302
-msgid "Edit Sale"
-msgstr ""
-
-#: stageshowgold.php:326
-msgid "Sale"
-msgstr ""
-
-#: stageshowgold.php:327
-msgid "Paid/Due"
-msgstr ""
-
-#: stageshowgold.php:333
-msgid "Location"
-msgstr ""
-
-#: stageshowgold.php:334
-msgid "Verified Date and Time"
-msgstr ""
-
-#: stageshowgold_main.php:207
-msgid "Minimum Seat Spacing Blocking Disabled"
-msgstr ""
-
-#: stageshowgold_main.php:212
-msgid "Invalid Seat Selection"
-msgstr ""
-
-#: stageshowgold_main.php:265
-msgid "Continue"
-msgstr ""
-
-#: stageshowgold_main.php:423
-msgid "Confirm and Pay"
-msgstr ""
-
-#: stageshowgold_main.php:438
-msgid "Select Seats"
-msgstr ""
-
-#: stageshowgold_main.php:452
-msgid "PayPal Express"
-msgstr ""
-
-#: stageshowgold_main.php:456
-msgid "In Context"
-msgstr ""
-
-#: stageshowgold_main.php:647
+#: stageshowgold_main.php:121
 msgid "Database Access Error"
 msgstr ""
 
-#: stageshowgold_main.php:655
+#: stageshowgold_main.php:129
 msgid "Error getting purchaser details from PayPal"
 msgstr ""
 
-#: stageshowgold_main.php:711 stageshowgold_main.php:742
+#: stageshowgold_main.php:183 stageshowgold_main.php:211
 msgid "Sale Cancelled"
 msgstr ""
 
-#: stageshowgold_main.php:742
+#: stageshowgold_main.php:211
 msgid "Timeout"
 msgstr ""
 
-#: stageshowgold_main.php:758
+#: stageshowgold_main.php:227
 msgid "Could not get sale details from PayPal"
 msgstr ""
 
-#: stageshowgold_main.php:775
+#: stageshowgold_main.php:244
 msgid "Sale Complete"
 msgstr ""
 
-#: stageshowgold_main.php:775
-msgid "Confirmation EMail sent to "
-msgstr ""
-
-#: stageshowgold_main.php:882
+#: stageshowgold_main.php:282
 msgid "One or more seats selected is no longer available"
 msgstr ""
 
-#: stageshowgold_main.php:932
+#: stageshowgold_trolley.php:201
+msgid "User Logged In"
+msgstr ""
+
+#: stageshowgold_trolley.php:203
+msgid "Minimum Seat Spacing Blocking Disabled"
+msgstr ""
+
+#: stageshowgold_trolley.php:208
+msgid "Invalid Seat Selection"
+msgstr ""
+
+#: stageshowgold_trolley.php:261
+msgid "Continue"
+msgstr ""
+
+#: stageshowgold_trolley.php:412
+msgid "Confirm and Pay"
+msgstr ""
+
+#: stageshowgold_trolley.php:427
+msgid "Select Seats"
+msgstr ""
+
+#: stageshowgold_trolley.php:441
+msgid "PayPal Express"
+msgstr ""
+
+#: stageshowgold_trolley.php:445
+msgid "In Context"
+msgstr ""
+
+#: stageshowgold_trolley.php:697
 msgid "One or more seats selected is not available"
 msgstr ""
 
-#: stageshowplus_main.php:257
-msgid "Send tickets by post"
-msgstr ""
-
-#: stageshowplus_main.php:355
-msgid "Reserve"
-msgstr ""
-
-#: stageshowplus_main.php:440
+#: stageshowplus_main.php:266
 msgid "Tickets reserved"
 msgstr ""
 
-#: stageshowplus_main.php:440
-msgid "Confirmation EMail sent to"
+#: stageshowplus_trolley.php:170
+msgid "Send tickets by post"
+msgstr ""
+
+#: stageshowplus_trolley.php:244
+msgid "Reserve"
 msgstr ""

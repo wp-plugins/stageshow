@@ -42,12 +42,94 @@ if (!class_exists('StageShowLibGatewayCallbackClass'))
 	if (!defined('STAGESHOWLIB_FILENAME_GATEWAYNOTIFY'))
 		define('STAGESHOWLIB_FILENAME_GATEWAYNOTIFY', 'GatewayNotify.txt');
 		
+	if (!defined('STAGESHOWLIB_GATEWAYCALLBACK_VERIFYRETRIES'))
+		define('STAGESHOWLIB_GATEWAYCALLBACK_VERIFYRETRIES', 4);
+		
 	class StageShowLibGatewayCallbackClass // Define class
 	{
 	    // Class variables:
 	    var		$notifyDBaseObj;			//  Database access Object
     	var		$charset = 'windows-1252';
 
+		function __construct($targetDBaseClass, $callerPath)
+		{
+			$this->notifyDBaseObj = new $targetDBaseClass($callerPath);
+			
+			$this->emailSent = false;			
+			$this->HTTPError = false;			
+			$this->ourOptions = $this->notifyDBaseObj->adminOptions;
+
+	  		// FUNCTIONALITY: IPN Notify - Logs Folder uses ABSPATH if no ':' is included
+			$this->LogsFolder = $this->ourOptions['LogsFolderPath'].'/';
+			if (!strpos($this->LogsFolder, ':'))
+				$this->LogsFolder = ABSPATH . $this->LogsFolder;
+				
+			$this->LogMessage = '';
+
+			if (defined('CORONDECK_RUNASDEMO'))
+			{
+				$this->displayIPNs = true;
+				$this->skipIPNServer = true;
+			}
+			else
+			{
+				$this->displayIPNs   = $this->notifyDBaseObj->isDbgOptionSet('Dev_IPNDisplay');
+				$this->skipIPNServer = $this->notifyDBaseObj->isDbgOptionSet('Dev_IPNSkipServer');
+			}
+			
+			$this->charset = $this->QueryParam('charset', 'windows-1252');
+
+			$this->DoCallback();
+			
+			if ($this->notifyDBaseObj->isDbgOptionSet('Dev_IPNLogRequests'))
+			{
+				$this->LogDebugToFile(STAGESHOWLIB_FILENAME_GATEWAYNOTIFY, $this->LogMessage);
+			}
+
+			if (!$this->emailSent || $this->HTTPError)
+			{
+				$this->GatewayErrorEMail($this->LogMessage);
+			}							
+		}
+		
+		function VerifyGatewayCallback($VerifyURL, $pfParamString)
+		{
+			$retries = 1;
+			$maxRetries = STAGESHOWLIB_GATEWAYCALLBACK_VERIFYRETRIES;
+			do
+			{
+				$gatewayResponse = $this->notifyDBaseObj->HTTPPost($VerifyURL, $pfParamString);					
+				$HTTPStatusMsg = "Gateway Response ($retries/$maxRetries): Status=".$gatewayResponse['APIStatus']." (".$gatewayResponse['APIStatusMsg'].")";
+				$this->AddToLog($HTTPStatusMsg);
+				
+				if ($gatewayResponse['APIStatus'] == 200 )
+				{
+					break;
+				}
+				
+				$this->HTTPError = true;
+				
+				$retries++;
+			}
+			while ($retries <= $maxRetries);
+			
+			return $gatewayResponse;
+		}
+		
+		function GatewayErrorEMail($LogMessage)
+		{
+			$to = $from = $this->notifyDBaseObj->getDbgOption('Dev_GatewayEMailAlerts');			
+			if ($to != '')
+			{
+				$headers  = "From: $from";	
+				$headers .= "\r\nReply-To: $from";	
+										
+				//send the email
+				$orgId = $this->ourOptions['OrganisationID'];
+				wp_mail($to, "Gateway Callback ($orgId) Error Detected", $LogMessage, $headers);
+			}		
+		}
+		
 		function GetQueryString()
 		{
 			// If this was a POST call ... get the QUERY_STRING from the POST request

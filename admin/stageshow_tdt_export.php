@@ -139,6 +139,7 @@ if (!class_exists('StageShowWPOrgTDTExportAdminClass'))
 				'ticketPaid'         => __('Ticket Paid', $this->myDomain),
 				'ticketPostage'      => __('Ticket Postage', $this->myDomain),
 				'ticketQty'          => __('Ticket Qty', $this->myDomain),
+				'user_login'         => __('User Login', $this->myDomain),
 				'verifyDateTime'     => __('Verify Date & Time', $this->myDomain),
 				'verifyID'           => __('Verify ID', $this->myDomain),
 				'verifyLocation'     => __('Verify Location', $this->myDomain),
@@ -254,7 +255,9 @@ td.col_performance
 				$sqlFilters['perfID'] = $perfID;
 				
 			$sqlFilters['addTicketFee'] = true;
-			$this->exportDB($this->myDBaseObj->GetSalesList($sqlFilters));
+			
+			$accumList = $this->myDBaseObj->GetSalesList($sqlFilters);
+			$this->exportDB($accumList);
 		}
 
 		function export_validator($showID=0, $perfID=0)
@@ -473,6 +476,7 @@ echo '
 							$saleRec = new stdClass();
 							$saleRec->saleFirstName = $thisSale->saleFirstName;
 							$saleRec->saleLastName = $thisSale->saleLastName;
+							$saleRec->user_login = $thisSale->user_login;
 							$saleRec->ticketQty = $thisSale->ticketQty;
 							
 							foreach ($typesList as $typeRec)
@@ -495,7 +499,7 @@ echo '
 					}
 				}
 			}
-	
+
 			$this->exportDB($accumList);
 		}
 	}

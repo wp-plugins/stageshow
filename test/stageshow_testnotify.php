@@ -13,6 +13,11 @@ if (!class_exists('StageShowWPOrgTestNotify'))
 	  		parent::__construct(STAGESHOWLIB_DBASE_CLASS);	
 	   	}
 	
+		function GetGatewayNotifyURL()
+		{
+			return STAGESHOWLIB_URL.'test/stageshowlib_test_payfast_callback.php';
+	   	}
+
 		function OutputHeader() 
 		{
 			$header = '

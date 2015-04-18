@@ -13,69 +13,69 @@ cursor:auto;
 .calNavButton
 {
 color:#cc0033;	
-border:1px solid white;
+border:1px white solid;
 height: 20px;
 width: 20px;
 }
 
 .calButtonPrevYear
 {
-background: url("../images/doubleArrowLeft_normal.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/doubleArrowLeft_normal.gif");
 }
 
 .calButtonPrevYearOver
 {
-background: url("../images/doubleArrowLeft_over.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/doubleArrowLeft_over.gif");
 }
 
 .calButtonPrevMonth
 {
-background: url("../images/arrowLeft_normal.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/arrowLeft_normal.gif");
 }
 
 .calButtonPrevMonthOver
 {
-background: url("../images/arrowLeft_over.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/arrowLeft_over.gif");
 }
 
 .calButtonNextMonth
 {
-background: url("../images/arrowRight_normal.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/arrowRight_normal.gif");
 }
 
 .calButtonNextMonthOver
 {
-background: url("../images/arrowRight_over.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/arrowRight_over.gif");
 }
 
 .calButtonNextYear
 {
-background: url("../images/doubleArrowRight_normal.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/doubleArrowRight_normal.gif");
 }
 
 .calButtonNextYearOver
 {
-background: url("../images/doubleArrowRight_over.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/doubleArrowRight_over.gif");
 }
 
 .calButtonUp
 {
-background: url("../images/arrowUp_normal.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/arrowUp_normal.gif");
 }
 
 .calButtonUpOver
 {
-background: url("../images/arrowUp_over.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/arrowUp_over.gif");
 }
 
 .calButtonDown
 {
-background: url("../images/arrowDown_normal.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/arrowDown_normal.gif");
 }
 
 .calButtonDownOver
 {
-background: url("../images/arrowDown_over.gif") no-repeat scroll left top rgba(0, 0, 0, 0);
+background-image: url("../images/arrowDown_over.gif");
 }
 
 .calMonthName

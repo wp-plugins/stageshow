@@ -137,6 +137,15 @@ input.stageshow-dateinput
 }
 
 /* ----------------------------------------------------------------------------------------------------------------
+	Styles for Sales Pages
+---------------------------------------------------------------------------------------------------------------- */
+
+.stageshow-sales-list-table td 
+{
+	padding: 3px 10px;
+}
+
+/* ----------------------------------------------------------------------------------------------------------------
 	Styles for Settings Page
 ---------------------------------------------------------------------------------------------------------------- */
 
@@ -327,14 +336,20 @@ div.stageshow-boxoffice td
 	text-align: right !important;
 }
 
-.stageshow-boxoffice-add input
-{
-	border-width: 0px !important;
-	box-shadow: none !important;
-}
-
 .stageshow-trolley-checkout
 {
+}
+
+.stageshow-button-image
+{
+	border-width: 0px !important;
+	box-shadow: 0px;
+}
+
+#stageshow-trolley-posttickets-checkbox
+{
+	padding: 0 20px 0 0;
+	text-align: right;
 }
 
 #saleDonation

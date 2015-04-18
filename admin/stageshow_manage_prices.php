@@ -72,18 +72,6 @@ if (!class_exists('StageShowWPOrgPricesAdminListClass'))
 			return $ourOptions;
 		}
 		
-		function PerfDates($result)
-		{
-			$perfDatesList = array();
-			$perfsLists    = $this->myDBaseObj->GetPerformancesListByShowID($result->showID);
-			foreach ($perfsLists as $perfsEntry)
-			{
-				$perfDatesList[$perfsEntry->perfID] = $perfsEntry->perfDateTime; // .'|' . $result->perfID;				
-			}
-			
-			return $perfDatesList;
-		}
-		
 		function OutputList($results, $updateFailed = false)
 		{
 			$this->updateFailed = $updateFailed;

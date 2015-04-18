@@ -29,6 +29,8 @@ if (!class_exists('StageShowWPOrgSalesAdminListClass'))
 	{		
 		var	$salesList;
 		
+		const BULKACTION_COMPLETED = 'completed';
+		
 		function __construct($env, $editMode = false) //constructor
 		{
 			// Call base constructor

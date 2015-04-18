@@ -372,11 +372,12 @@ function stageshow_OnSeatsLoad()
 
 function stageshow_OnClickAdd(obj)
 {
-	if (typeof stageshow_OnClickAdd == 'function') 
+	if (typeof stageshowCustom_OnClickAdd == 'function') 
 	{ 
-  		return stageshow_OnClickAdd(obj); 
+  		return stageshowCustom_OnClickAdd(obj); 
 	}	
-	return true;
+	
+	return stageshowJQuery_OnClickTrolleyButton(obj); 
 }
 
 function stageshow_OnClickSelectseats(obj)
@@ -415,6 +416,15 @@ function stageshow_OnClickCheckout(obj)
 	return true;
 }
 
+function stageshow_OnClickCheckoutdetails(obj)
+{
+	if (typeof stageshowCustom_OnClickCheckoutdetails == 'function') 
+	{ 
+  		return stageshowCustom_OnClickCheckoutdetails(obj); 
+	}
+	return true;
+}
+
 function stageshow_OnClickSubmitDetails(obj)
 {
 	if (typeof stageshowCustom_OnClickSubmitDetails == 'function') 
@@ -431,5 +441,33 @@ function stageshow_OnClickRemove(obj)
 	{ 
   		return stageshowCustom_OnClickRemove(obj); 
 	}
-	return true;
+	
+	return stageshowJQuery_OnClickTrolleyButton(obj); 
+}
+
+function stageshow_enable_interface(classId, state)
+{
+	var classSpec = "."+classId;
+	var buttonElemsList = jQuery(classSpec);
+	jQuery.each(buttonElemsList,
+		function(i, listObj) 
+		{
+			var uiElemSpec = "#" + listObj.name;
+			var uiElem = jQuery(uiElemSpec);
+			
+			if (state)
+			{
+				uiElem.prop("disabled", false);			
+				uiElem.css("cursor", "default");				
+			}
+			else
+			{
+				uiElem.prop("disabled", true);			
+				uiElem.css("cursor", "progress");				
+			}
+				
+	    	return true;
+		}
+	);		
+	
 }

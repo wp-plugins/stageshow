@@ -29,7 +29,8 @@ if (!class_exists('StageShowWPOrgDebugAdminClass'))
 		function GetOptionsDefs()
 		{
 			$testOptionDefs = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowTrolley',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowTrolley', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',            StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowTrolley',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowTrolley', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Diagnostic Alert EMails', StageShowLibTableClass::TABLEPARAM_NAME => 'cbGWEMailAlerts',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_GatewayEMailAlerts', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT),
 			);
 			
 			$childOptions = parent::GetOptionsDefs();
