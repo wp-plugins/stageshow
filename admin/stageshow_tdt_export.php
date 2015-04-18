@@ -124,7 +124,7 @@ if (!class_exists('StageShowWPOrgTDTExportAdminClass'))
 				'salePPStreet'       => __('Street', $this->myDomain),
 				'salePPZip'          => __('Postcode', $this->myDomain),
 				'saleStatus'         => __('Sale Status', $this->myDomain),
-				'saleTxnId'          => __('Transaction ID', $this->myDomain),
+				'saleTxnId'          => __('Sale Reference', $this->myDomain),
 				'saleNoteToSeller'   => __('Note To Seller', $this->myDomain),
 				'showEMail'          => __('Show EMail', $this->myDomain),
 				'showExpires'        => __('Show Expires', $this->myDomain),
@@ -226,7 +226,7 @@ td.col_performance
 <h2>'.__('Validate Sale', $this->myDomain).'</h2>
 <table class="stageshow-form-table">
 	<tr>
-		<th>'.__('Transaction ID', $this->myDomain).'</th>
+		<th>'.__('Sale Reference', $this->myDomain).'</th>
 		<td>
 			<input type="text" maxlength="20" size="20" name="TxnId" id="TxnId" value="" onkeypress="onKeyPress(event)" autocomplete="off" />
 		</td>

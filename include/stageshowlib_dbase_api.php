@@ -53,9 +53,9 @@ if (!function_exists('get_option'))
 
 	function get_option( $option, $default = false )
 	{
-		global $stageshowGlobalOptions;
+		global $stageshowlibGlobalOptions;
 		
-		if (!isset($stageshowGlobalOptions[$option]))
+		if (!isset($stageshowlibGlobalOptions[$option]))
 		{
 			global $wpdb;
 
@@ -67,12 +67,16 @@ if (!function_exists('get_option'))
 			$optionsInDB = $wpdb->get_results($sql);
 			if (count($optionsInDB) == 1)
 			{
-				$optionsVal = unserialize($optionsInDB[0]->option_value);
-				$stageshowGlobalOptions[$option] = $optionsVal;
+				$optionsVal = $optionsInDB[0]->option_value;
+				$unserializedVal = @unserialize($optionsVal);
+				if ($unserializedVal !== false)
+					$stageshowlibGlobalOptions[$option] = $unserializedVal;
+				else
+					$stageshowlibGlobalOptions[$option] = $optionsVal;
 			}
 		}
 
-		return isset($stageshowGlobalOptions[$option]) ? $stageshowGlobalOptions[$option] : '';
+		return isset($stageshowlibGlobalOptions[$option]) ? $stageshowlibGlobalOptions[$option] : '';
 	}
 	
 	function add_filter()
@@ -248,10 +252,10 @@ if (!class_exists('StageShowLibDBaseClass'))
 			}
 			else
 			{
-				global	$stageshowButtonURLs;
+				global	$stageshowlibButtonURLs;
 				
-				if (!isset($stageshowButtonURLs[$buttonID])) return '';				
-				return $stageshowButtonURLs[$buttonID];	
+				if (!isset($stageshowlibButtonURLs[$buttonID])) return '';				
+				return $stageshowlibButtonURLs[$buttonID];	
 			}
 		}
 		
@@ -871,6 +875,12 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return false;
 		}
 		
+		function clearAll()
+		{
+			delete_option($this->opts['CfgOptionsID']);
+			delete_option($this->opts['DbgOptionsID']);
+		}
+		
 		function createDB($dropTable = false)
 		{
 		}
@@ -884,7 +894,8 @@ if (!class_exists('StageShowLibDBaseClass'))
 	";
 	
 			if (defined('CORONDECK_RUNASDEMO')) $defines .= "
-	define('CORONDECK_RUNASDEMO', '".CORONDECK_RUNASDEMO."');
+	if (!defined('CORONDECK_RUNASDEMO'))
+		define('CORONDECK_RUNASDEMO', '".CORONDECK_RUNASDEMO."');
 	";
 	
 			return $defines;

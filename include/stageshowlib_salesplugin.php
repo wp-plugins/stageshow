@@ -81,6 +81,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;			
 
+			wp_enqueue_script( 'stageshowlib-admin', plugins_url( 'admin/js/stageshowlib-admin.js', dirname(__FILE__) ));
+			
 			$myDBaseObj->gatewayObj->Gateway_LoadAdminStyles();
 		}
 		
@@ -259,7 +261,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					}
 				}';
 			}
-				
+			
 			echo '
 				var buttonId = obj.id;	
 				postvars[buttonId] = "submit";
@@ -516,9 +518,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 
 			if (isset($_POST['saleDonation']))
 			{
-				$currencySymbol = $this->myDBaseObj->getOption('CurrencySymbol');
-				$newSaleDonation = StageShowLibHTTPIO::GetRequestedCurrency('saleDonation', false);
-				$cartContents->saleDonation = $myDBaseObj->FormatCurrency($newSaleDonation);					
+				$cartContents->saleDonation = StageShowLibHTTPIO::GetRequestedCurrency('saleDonation', false);
 			}	
 			
 			if ($cartContents->saleDonation > 0)

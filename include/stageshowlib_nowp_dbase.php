@@ -34,9 +34,10 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 			$this->con = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD);
 			
 			// Check connection
+			//if (mysqli_connect_errno())			
 			if (!$this->con)
 			{
-				echo "Failed to connect to MySQL: " . mysqli_error();
+				echo "Failed to connect to MySQL: " . mysqli_connect_error();
 				return;
 			}
 			else

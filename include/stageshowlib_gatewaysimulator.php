@@ -28,7 +28,31 @@ if (!class_exists('GatewaySimulator'))
 			{
 				$saleId = $_POST['id'];
 			}
+			
+			if ($saleId == 0)
+			{
+				$saleList = $this->GetSaleList();	
 				
+				if (count($saleList) == 0)
+				{
+					$siteURL = get_option('siteurl');
+					$selectHTML  = '<p>No pending sales - Checkout a sale to add one<p>'."\n";
+					$selectHTML .= 'Go to <a href="'.$siteURL.'">site</a>'."\n";
+					return $selectHTML;
+				}
+				
+				if (count($saleList) == 1)
+				{
+					$saleId = $saleList[0]->saleID;
+				}				
+			}
+			
+			if ($saleId == 0)
+			{
+				$formHTML .= $this->OutputHeader();
+				$formHTML .=  '<form name="gateway_sim" method="post">';			
+				$formHTML .=  $this->OutputSaleSelect($saleList); 
+			}
 			if ($saleId > 0)
 			{
 				if (!is_numeric($saleId)) 
@@ -51,12 +75,6 @@ if (!class_exists('GatewaySimulator'))
 				$formHTML .= $this->OutputHeader();
 				$formHTML .=  '<form name="gateway_sim" '.$actionHTML.' method="post">';			
 				$formHTML .=  $this->OutputSaleForm($saleId);
-			}
-			else
-			{
-				$formHTML .= $this->OutputHeader();
-				$formHTML .=  '<form name="gateway_sim" method="post">';			
-				$formHTML .=  $this->OutputSaleSelect(); 
 			}
 			$formHTML .=  '</form>';			
 			
@@ -103,7 +121,7 @@ if (!class_exists('GatewaySimulator'))
 			return $header;
 	    }
 		
-		function OutputSaleSelect() 
+		function GetSaleList() 
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			$sqlFilters = array();
@@ -112,18 +130,15 @@ if (!class_exists('GatewaySimulator'))
 			$sql .= ' WHERE ';
 			$sql .= '(saleStatus!="'.PAYMENT_API_SALESTATUS_COMPLETED.'")';
 			$sql .= ' AND ';
-			$sql .= '(saleStatus!="'.STAGESHOW_SALESTATUS_RESERVED.'")';
+			$sql .= '(saleStatus!="'.PAYMENT_API_SALESTATUS_RESERVED.'")';
 			$saleList = $myDBaseObj->get_results($sql);			
 			//$saleList = $this->myDBaseObj->GetSalesList($sqlFilters);
 			
-			if (count($saleList) == 0)
-			{
-				$siteURL = get_option('siteurl');
-				$selectHTML  = '<p>No pending sales - Checkout a sale to add one<p>'."\n";
-				$selectHTML .= 'Go to <a href="'.$siteURL.'">site</a>'."\n";
-				return $selectHTML;
-			}
-			
+			return $saleList;
+	    }
+		
+		function OutputSaleSelect($saleList) 
+		{
 			$selectHTML = '
 			<p>
 			<table width="100%" border="0">
@@ -175,6 +190,13 @@ if (!class_exists('GatewaySimulator'))
 			StageShowLibUtilsClass::UndefinedFuncCallError($this, 'OutputItemsTableRow');
 	    }
 		
+		function OutputSupplementaryRow($title, $value) 
+		{
+			$this->totalSale += $value;
+			$html = "<tr><td>$title</td><td>$value</td></tr>\n";
+			return $html;
+	    }
+		
 		function OutputItemsTable($results) 
 		{
 			$html = '';
@@ -215,6 +237,11 @@ if (!class_exists('GatewaySimulator'))
 				$indexNo++;
 				$html .= $this->OutputItemsTableRow($indexNo, $result);
 			}
+
+			$html .= "<tr><td>&nbsp;</td></tr>\n";			
+			$html .= $this->OutputSupplementaryRow('Postage', $results[0]->salePostage);
+			$html .= $this->OutputSupplementaryRow('Donation', $results[0]->saleDonation);
+			$html .= $this->OutputSupplementaryRow('Transaction Fee', $results[0]->saleTransactionFee);
 
 			$html .= '			
 		  		</table>
@@ -279,7 +306,7 @@ if (!class_exists('GatewaySimulator'))
 			{
 				$actionsHTML .= '
 				<tr class="gatewaysim_formRow">
-					<td class="gatewaysim_formFieldID">Transaction ID:&nbsp;</td>
+					<td class="gatewaysim_formFieldID">Sale Reference:&nbsp;</td>
 					<td class="gatewaysim_formFieldValue">
 						<input name="txn_id" id="txn_id" type="text" maxlength="32" size="32" value="'.$this->transactionID.'" />
 					</td>

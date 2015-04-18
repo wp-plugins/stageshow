@@ -278,35 +278,41 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 
 			if ($itemsOK)
 			{
+				$runningTotal = 0;		
+							
+				foreach ($cartContents->rows as $cartEntry)
+				{
+					$runningTotal += ($cartEntry->price * $cartEntry->qty);
+				}
+					
+				if (isset($cartContents->salePostTickets) && $cartContents->salePostTickets)
+				{
+					$cartContents->salePostage = $myDBaseObj->getOption('PostageFee');
+					$runningTotal += $cartContents->salePostage;
+				}
+				else
+					$cartContents->salePostage = 0;
+				
+				if (isset($cartContents->saleDonation))
+				{
+					$runningTotal += $cartContents->saleDonation;
+				}
+				
+				if (isset($cartContents->saleTransactionFee))
+				{
+					$runningTotal += $cartContents->saleTransactionFee;
+				}
+				
+				$cartContents->salePaid = $runningTotal;				
+					
 				if ($saleID == 0)
 				{
 					// Add a new Sale
 					$saleDateTime = current_time('mysql'); 
-					$runningTotal = 0;
-					
-					foreach ($cartContents->rows as $cartEntry)
-					{
-						$runningTotal += ($cartEntry->price * $cartEntry->qty);
-					}
-				
+									
 					$cartContents->saleTxnId = 'MAN-'.time();				
-					//$cartContents->saleStatus = PAYMENT_API_SALESTATUS_COMPLETED;			
 					$cartContents->salePPName = $cartContents->saleFirstName.''.$cartContents->saleLastName;
 					$cartContents->saleFee = 0.0;
-					
-					if (isset($cartContents->salePostTickets) && $cartContents->salePostTickets)
-					{
-						$cartContents->salePostage = $myDBaseObj->getOption('PostageFee');
-						$runningTotal += $cartContents->salePostage;
-					}
-					else
-						$cartContents->salePostage = 0;
-					
-					if (isset($cartContents->saleDonation))
-					{
-						$runningTotal += $cartContents->saleDonation;
-					}
-					$cartContents->salePaid = $runningTotal;				
 					
 					global $current_user;
 					if (is_user_logged_in())
@@ -316,15 +322,15 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 					}		
 					
 					$saleID = $myDBaseObj->Ex_AddSale($saleDateTime, $cartContents);
-					$this->ClearTrolleyContents();
 				}
 				else
 				{
+					// Calculate new sale total
 					// Update Sale
 					$saleID = $myDBaseObj->UpdateSale($cartContents, StageShowLibSalesCartDBaseClass::STAGESHOWLIB_FROMTROLLEY);
 					$saleID = abs($saleID);		// Returned value will be negative if nothing is changed
-					$this->ClearTrolleyContents();
 				}
+				$this->ClearTrolleyContents();
 				
 				// Delete Existing Tickets and Add New Ones
 				$myDBaseObj->DeleteOrders($saleID);
@@ -443,7 +449,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			$addColSpan = ($stockDetails != '') ? ' rowspan="2" ' : '';
 			
 			$storeRowHTML .= '
-				<table cellspacing="0">
+				<table width="100%" cellspacing="0">
 					<tr>
 						<td class="'.$this->cssBaseID.'-'.$this->cssColID['datetime'].'">'.$result->stockName.'</td>
 						<td class="'.$this->cssBaseID.'-'.$this->cssColID['ref'].'">'.$result->stockRef.'</td>
@@ -1041,8 +1047,7 @@ function stageshowlib_manualsale_email_click()
 		{
 			if (isset($_POST['saleDonation']))
 			{
-				$newSaleDonation = StageShowLibHTTPIO::GetRequestedCurrency('saleDonation', false);
-				$cartContents->saleDonation = $this->myDBaseObj->FormatCurrency($newSaleDonation);					
+				$cartContents->saleDonation = StageShowLibHTTPIO::GetRequestedCurrency('saleDonation', false);
 			}	
 
 			if (isset($_POST['saleNoteToSeller']))
@@ -1176,8 +1181,7 @@ function stageshowlib_manualsale_email_click()
 				
 			if (isset($_POST['saleDonation']))
 			{
-				$saleDonation = StageShowLibHTTPIO::GetRequestedCurrency('saleDonation', false);
-				$cartContents->saleDonation = $myDBaseObj->FormatCurrency($saleDonation);
+				$cartContents->saleDonation = StageShowLibHTTPIO::GetRequestedCurrency('saleDonation', false);
 				$this->SaveTrolleyContents($cartContents);
 			}
 			
@@ -1295,7 +1299,7 @@ function stageshowlib_manualsale_email_click()
 			{	
 				$runningTotal += $this->OutputContent_OnlineTrolleyFee($cartContents);
 				$trolleyTotal = $runningTotal + $this->OutputContent_OnlineTrolleyExtras($cartContents);
-									
+
 				// Add totals row and checkout button
 				$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);				
 				$trolleyTotal = $myDBaseObj->FormatCurrency($trolleyTotal);

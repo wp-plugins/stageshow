@@ -43,6 +43,11 @@ if (!class_exists('StageShowLibSalesCartDBaseClass'))
 	if (!defined('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE'))
 		define('PAYPAL_APILIB_DEFAULT_HEADERIMAGE_FILE', '');
 		
+	if( !defined( 'PAYMENT_API_SALESTATUS_RESERVED' ) )
+	{
+		define('PAYMENT_API_SALESTATUS_RESERVED', 'Reserved');		
+	}
+
   	class StageShowLibSalesCartDBaseClass extends StageShowLibDBaseClass // Define class
   	{	
 		const STAGESHOWLIB_LOGSALEMODE_CHECKOUT = 'Checkout';

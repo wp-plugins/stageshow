@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
 Tested up to: 4.1.1
-Stable tag: 4.6.0.4
+Stable tag: 5.0
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -189,19 +189,53 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
-= 5.0 (19/02/2015) =
-* Bug Fix: Tools|Verify Sale does not work with Manual Sales (since ver4.5)
-* Bug Fix: Incorrect style for Manual Sale Add buttons
-* Shopping Trolley "Add" and "Remove" buttons responsiveness improved using JQuery
+= 5.0 (18/04/2015)
+* "Sale Transaction ID" changed to "License Reference ID"
+* "Sale Txn EMail Address" changed to "License Email Address"
+* |ticket "Transaction ID" changed to "Sale Reference"
+* StageShowHelp.pdf updated
+
+= 4.6.0.5 (11/04/2015)
+* Bug Fix: Sale Editor adds new trolley line for unallocated Seats in a Seating Plan
+* Bug Fix: Gateway simulator total sale value omits salePostage etc.
+* Bug Fix: Donations not included when saving edited sale
+* Bug Fix: Seats available check for Unallocated Seats in a Seating Plan incorrect
+* Bug Fix: StageShowLibDirectDBaseClass does not report error details when DB connect fails
+* Gateway simulator skips sale select if only one pending sale
+
+= 4.6.0.3 (27/03/2015) =
+* Bug Fix: Undefined seatingID in gateway simulator
+* Bug Fix: Gateway simulator does not run callback code
+* Bug Fix: DateTime format incorrect in non-wp code
 * Shopping Trolley MySQL queries optimised
+
+= 4.6.0.2 (24/03/2015) =
+* Bug Fix: Settings Drop down selectors with only one option give blank OutputBulkActionsScript 
+* Bug Fix: Donation inconsistent operation in Shopping Trolley  
+* Bug Fix: Post Items option inconsistent operation in Shopping Trolley  
+* Bug Fix: Message to seller operation in Shopping Trolley 
+* Added MySQl DB_CHARSET to non-wp code
+* Added PAYMENT_API_SALESTATUS_UNVERIFIED state 
+* Added relocate zone option to zones defs (i.e. [ru7.5]4.3-4.9) (StageShowGold)
+* Bug Fix: Date/Time picker nav buttons missing with legacy IE browsers
+* Updated contributors list (translations)
+* Updated translations
+* Added retry code to Gateway Callback verify
+* Added item description to PayFast Payment Gateway
+* Debug menu changed to Diagnostics menu
+
+= 4.6.0.1 (26/02/2015) =
 * Added salePostage to Add Manual Sale 
-* Added Send EMail button to Manual Sale Confirmation Screen
-* Records user_login with each sale (when logged in)
-* Add SQL_BIG_SELECTS=1 to MySQL queries
-* Added Continue button image
 
 = 4.5.6 (25/02/2015) =
 * Bug Fix: Possible Parse Error in wp-config-db.php - Breaks Tools Page/Sale Validator
+* Bug Fix: Tools|Verify Sale does not work with Manual Sales (since ver4.5)
+* Bug Fix: Incorrect style for Manual Sale Add buttons
+* Added Send EMail button to Manual Sale Confirmation Screen
+* Shopping Trolley "Add" and "Remove" buttons responsiveness improved using JQuery
+* Add SQL_BIG_SELECTS=1 to MySQL queries
+* Added Continue button image
+* Records user_login with each sale (when logged in)
 
 = 4.5.5 (31/01/2015) =
 * Bug Fix: Error Activating Plugin - STAGESHOWLIB_CHECKOUTSTYLE_STANDARD undefined
@@ -900,4 +934,5 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 = 0.9 =
 * First public release
+
 

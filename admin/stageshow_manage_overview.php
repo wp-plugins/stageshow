@@ -310,12 +310,6 @@ if (!class_exists('StageShowWPOrgOverviewAdminClass'))
 		
 		function Output_UpdateServerHelp()
 		{
-			// FUNCTIONALITY: Overview - Output Update Server 
-			if (defined('STAGESHOW_INFO_SERVER_URL'))
-			{
-				$msg = "<strong>Using Custom Update Server</strong> - Root URL=".STAGESHOW_INFO_SERVER_URL."<br>\n";
-				echo '<br><div id="cust-update-error" class="error inline" onclick=ShowOrHideSubmenu(this) ><p>'.$msg.'</p></div>';
-			}			
 		}
 		
 		function Output_UpdateInfo()

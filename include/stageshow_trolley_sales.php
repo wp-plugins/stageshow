@@ -173,9 +173,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			
 			return $itemsAvailable;
 		}
-			
-
-		
+				
 		function OutputContent_OnlineStoreTitle($result)
 		{
 			$showNameAnchor = '';
@@ -496,9 +494,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 		{
 			return 0;
 		}
-				
-
-		
+					
 		function OnlineStore_GetPriceType($result)
 		{
 			return $result->priceType;
@@ -534,19 +530,20 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 					{
 						// Get the maximum number of seats 
 						$this->seatsAvail[$perfID] = $saleEntry->perfSeats;	
-						if ($this->seatsAvail[$perfID] <= 0) continue;
+						if ($this->seatsAvail[$perfID] < 0) continue;
 						
 						// Deduct the total number of seats sold for this performance	
 						$salesSummary = $myDBaseObj->GetPerformanceSummaryByPerfID($perfID);
 						$this->seatsAvail[$perfID] -= $salesSummary->totalQty;				
-//StageShowLibUtilsClass::print_r($salesSummary, 'salesSummary-'.__LINE__);
 					}
 					
-					// Add the number of seats for this performance for this sale entry
-					$qty = isset($saleEntry->priceNoOfSeats) ? $saleEntry->ticketQty * $saleEntry->priceNoOfSeats : $saleEntry->ticketQty;						
-					$this->seatsAvail[$perfID] += $qty;	
-					
-					
+					if ($this->seatsAvail[$perfID] >= 0)
+					{
+						// Add the number of seats for this performance for this sale entry
+						// (i.e. assume that these seats have been deleted)
+						$qty = isset($saleEntry->priceNoOfSeats) ? $saleEntry->ticketQty * $saleEntry->priceNoOfSeats : $saleEntry->ticketQty;						
+						$this->seatsAvail[$perfID] += $qty;						
+					}
 				}
 			}
 
@@ -557,7 +554,6 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			{
 				// This performance has been added to the sale
 				$salesSummary = $myDBaseObj->GetPerformanceSummaryByPerfID($perfID);
-//StageShowLibUtilsClass::print_r($salesSummary, 'salesSummary-'.__LINE__);
 					
 				// Get the maximum number of seats 
 				$this->seatsAvail[$perfID] = $salesSummary->perfSeats;	

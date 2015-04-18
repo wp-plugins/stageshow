@@ -51,7 +51,7 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 			$this->StoreTranslatedText('No matching record', $myDomain);
 			$this->StoreTranslatedText('Sale Status', $myDomain);
 			$this->StoreTranslatedText('Sale Validation', $myDomain);
-			$this->StoreTranslatedText('Transaction ID', $myDomain);
+			$this->StoreTranslatedText('Sale Reference', $myDomain);
 			$this->StoreTranslatedText('Wrong Performance', $myDomain);
 
 			$valDBClass = STAGESHOW_PLUGIN_NAME.'ValidateDBaseClass';
@@ -180,7 +180,7 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			}
 ?>
 			<tr>
-				<td class="stageshow_tl8" id="label_Transaction_ID"><?php _e('Transaction ID', $this->myDomain); ?></td>
+				<td class="stageshow_tl8" id="label_Transaction_ID"><?php _e('Sale Reference', $this->myDomain); ?></td>
 				<td id="value_Transaction_ID">
 					<input type="text" maxlength="<?php echo PAYMENT_API_SALETXNID_TEXTLEN; ?>" size="<?php echo PAYMENT_API_SALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
 					&nbsp;
@@ -356,7 +356,7 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			$ticketsListTableHTML = '';
 			$validatedMessageHTML = '';
 			
-			$validateMsg = $this->TranslatedText('Sale Validation', $this->myDomain).' ('.$this->TranslatedText('Transaction ID', $this->myDomain).': '.$TxnId.') - ';
+			$validateMsg = $this->TranslatedText('Sale Validation', $this->myDomain).' ('.$this->TranslatedText('Sale Reference', $this->myDomain).': '.$TxnId.') - ';
 			$msgClass = '';
 			$showDetails = true;
 			
@@ -433,7 +433,7 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 								$msgClass = 'stageshow-validate-ok updated ok';
 								break;
 									
-							case STAGESHOW_SALESTATUS_RESERVED:
+							case PAYMENT_API_SALESTATUS_RESERVED:
 								$msgClass = 'stageshow-validate-reserved error alert';
 								$validateMsg .= ' - '.$this->TranslatedText('Sale Status', $this->myDomain).' '.__($salerecord->saleStatus, $this->myDomain);
 								break;
@@ -482,7 +482,7 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 				$ticketsListTableHTML .= '<tr class="stageshow-hidden-table"><td class="stageshow_tl8" id="label_Sale_Status">'.__('Sale Status', $this->myDomain).':</td><td></td></tr>'."\n";
 			}
 			
-			if ((count($results)>0) && ($salerecord->saleStatus == STAGESHOW_SALESTATUS_RESERVED))
+			if ((count($results)>0) && ($salerecord->saleStatus == PAYMENT_API_SALESTATUS_RESERVED))
 			{
 				$ticketsListTableHTML .= '<tr><td class="stageshow_tl8" id="label_Total_Due">'.__('Total Due', $this->myDomain).':</td><td id="value_Total_Due">'.$salerecord->salePaid.'</td></tr>'."\n";
 			}

@@ -104,11 +104,6 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 		define('STAGESHOW_VISIBILITY_ADMIN', 'admin');
 	}
 	
-	if( !defined( 'STAGESHOW_SALESTATUS_RESERVED' ) )
-	{
-		define('STAGESHOW_SALESTATUS_RESERVED', 'Reserved');		
-	}
-
 	class StageShowWPOrgCartDBaseClass extends StageShowWPOrgCartDBaseClass_Parent // Define class
   	{
 		const STAGESHOW_DATE_FORMAT = 'Y-m-d';
@@ -195,7 +190,7 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 	define('PAYMENT_API_SALESTATUS_PENDING', '".PAYMENT_API_SALESTATUS_PENDING."');
 	define('PAYMENT_API_SALESTATUS_CHECKOUT', '".PAYMENT_API_SALESTATUS_PENDINGPPEXP."');
 	define('PAYMENT_API_SALESTATUS_PENDINGPPEXP', '".PAYMENT_API_SALESTATUS_PENDINGPPEXP."');
-	define('STAGESHOW_SALESTATUS_RESERVED', '".STAGESHOW_SALESTATUS_RESERVED."');
+	define('PAYMENT_API_SALESTATUS_RESERVED', '".PAYMENT_API_SALESTATUS_RESERVED."');
 	}
 	
 	if (!defined('STAGESHOW_TABLE_PREFIX'))
@@ -687,7 +682,7 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 			
 			$statusOptions  = '(saleStatus="'.PAYMENT_API_SALESTATUS_COMPLETED.'")';
 			$statusOptions .= ' OR ';
-			$statusOptions .= '(saleStatus="'.STAGESHOW_SALESTATUS_RESERVED.'")';
+			$statusOptions .= '(saleStatus="'.PAYMENT_API_SALESTATUS_RESERVED.'")';
 			$sql .= ', SUM(IF('.$statusOptions.', priceValue * ticketQty, 0)) AS soldValue ';
 			$sql .= ', SUM(IF('.$statusOptions.', ticketQty, 0)) AS soldQty ';				
 			
