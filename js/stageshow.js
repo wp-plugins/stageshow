@@ -370,14 +370,14 @@ function stageshow_OnSeatsLoad()
 	}
 }
 
-function stageshow_OnClickAdd(obj)
+function stageshow_OnClickAdd(obj, inst)
 {
 	if (typeof stageshowCustom_OnClickAdd == 'function') 
 	{ 
-  		return stageshowCustom_OnClickAdd(obj); 
+  		return stageshowCustom_OnClickAdd(obj, inst); 
 	}	
 	
-	return stageshowJQuery_OnClickTrolleyButton(obj); 
+	return stageshowJQuery_OnClickTrolleyButton(obj, inst); 
 }
 
 function stageshow_OnClickSelectseats(obj)
@@ -435,14 +435,14 @@ function stageshow_OnClickSubmitDetails(obj)
 	return stageshowStandard_OnClickSubmitDetails(obj); 
 }
 
-function stageshow_OnClickRemove(obj)
+function stageshow_OnClickRemove(obj, inst)
 {
 	if (typeof stageshowCustom_OnClickRemove == 'function') 
 	{ 
-  		return stageshowCustom_OnClickRemove(obj); 
+  		return stageshowCustom_OnClickRemove(obj, inst); 
 	}
 	
-	return stageshowJQuery_OnClickTrolleyButton(obj); 
+	return stageshowJQuery_OnClickTrolleyButton(obj, inst); 
 }
 
 function stageshow_enable_interface(classId, state)
@@ -468,6 +468,7 @@ function stageshow_enable_interface(classId, state)
 				
 	    	return true;
 		}
-	);		
+	);
 	
+	return state;		
 }

@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
-Tested up to: 4.1.1
-Stable tag: 5.0
+Tested up to: 4.2
+Stable tag: 5.0.2
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -189,13 +189,24 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
-= 5.0 (18/04/2015)
+= 5.0.2 (22/04/2015) =
+* Bug Fix: Seat Numbers not included in Sale EMails (StageShowGold)
+* Bug Fix: Seat Numbers not included in Sale exports (StageShowGold)
+* Tested with WP 4.2
+
+= 5.0.1 (19/04/2015) =
+* Bug Fix: Trolley Button Custom Images not appearing after Add/Remove Actions
+* Bug Fix: Multiple shortcodes on a page generate multiple Trolleys
+* Shortcode Instance ID passed to Trolley Button Click Handlers
+* Fixed Syntax Error in 5.0 changelog!
+
+= 5.0 (17/04/2015) =
 * "Sale Transaction ID" changed to "License Reference ID"
 * "Sale Txn EMail Address" changed to "License Email Address"
 * |ticket "Transaction ID" changed to "Sale Reference"
 * StageShowHelp.pdf updated
 
-= 4.6.0.5 (11/04/2015)
+= 4.6.0.5 (11/04/2015) =
 * Bug Fix: Sale Editor adds new trolley line for unallocated Seats in a Seating Plan
 * Bug Fix: Gateway simulator total sale value omits salePostage etc.
 * Bug Fix: Donations not included when saving edited sale

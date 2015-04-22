@@ -310,6 +310,16 @@ if (!class_exists('StageShowWPOrgOverviewAdminClass'))
 		
 		function Output_UpdateServerHelp()
 		{
+			$myDBaseObj = $this->myDBaseObj;
+			
+			// FUNCTIONALITY: Overview - Output Update Server 
+			$customURL = $myDBaseObj->getDbgOption('Dev_InfoSrvrURL');
+			if ($customURL != '')
+			{
+				$msg = "<strong>Using Custom Update Server</strong> - Root URL=".$customURL."<br>\n";
+				echo '<div id="cust-update-error-container"><br><div id="cust-update-error" class="error inline" onclick=stageshowlib_HideElement("cust-update-error-container") ><p>'.$msg.'</p></div></div>';
+			}		
+				
 		}
 		
 		function Output_UpdateInfo()

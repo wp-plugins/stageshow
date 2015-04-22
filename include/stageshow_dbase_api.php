@@ -1166,11 +1166,12 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 		{
 			$filename = $pagename.'.php';
 			
-			if (defined('STAGESHOW_INFO_SERVER_URL'))
+			$customURL = $this->getDbgOption('Dev_InfoSrvrURL');
+			if ($customURL != '')
 			{
 				$updateCheckURL = $this->get_pluginURI().'/';
 				$pageURLPosn = strrpos($updateCheckURL, '/StageShow');
-				$updateCheckURL = STAGESHOW_INFO_SERVER_URL.substr($updateCheckURL, $pageURLPosn+1, strlen($updateCheckURL));
+				$updateCheckURL = $customURL.substr($updateCheckURL, $pageURLPosn+1, strlen($updateCheckURL));
 			}
 			else
 			{

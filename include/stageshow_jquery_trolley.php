@@ -65,6 +65,11 @@ if (!class_exists('StageShowJQueryTrolley'))
 				die;
 			}		
 			
+			if (isset($_POST['count']))			
+			{
+				$cartObj->shortcodeCount = $_POST['count'];
+			}
+			
 			// Convert JQuery call parameters to original format params
 			if (isset($_POST['buttonid']))			
 			{
@@ -89,9 +94,13 @@ if (!class_exists('StageShowJQueryTrolley'))
 			}
 			 		
 			ob_start();
-			//$trolleyContent = $this->Cart_OnlineStore_GetCheckoutDetails();	
+			$divId = $cartObj->cssTrolleyBaseID.'-trolley-jquery';			
+			$hiddenDivStyle  = 'style="display: none;"';
+			$trolleyDiv = "<div id=$divId name=$divId $hiddenDivStyle >\n";	
+			$endDiv = '</div>'."\n";
+				
 			$hasActiveTrolley = $cartObj->Cart_OnlineStore_HandleTrolley();
-			$trolleyContent = ob_get_contents();
+			$trolleyContent = $trolleyDiv.ob_get_contents().$endDiv;
 			ob_end_clean();
 
 			ob_start();

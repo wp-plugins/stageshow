@@ -29,6 +29,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 	
 	class StageShowLibSalesPluginBaseClass extends StageShowLibSalesCartPluginBaseClass // Define class
 	{
+		var $shortcodeCount = 0;
+		
 		function __construct()
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -155,13 +157,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			
 			if (defined('STAGESHOWLIB_DISABLE_JQUERY_BOXOFFICE')) return 0;
 			
-			static	$shortcodeCount = 0;
-			
-			$shortcodeCount++;
-			
-			if ($shortcodeCount == 1)
+			echo "\n<script>\n";
+			if ($this->shortcodeCount == 1)
 			{
-				echo "\n<script>\n";
 				echo "var tl8_srch = [];\n";		
 				echo "var tl8_repl = [];\n";
 					
@@ -185,37 +183,116 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$this->DefineTranslatedText('Seat Available', $this->myDomain);
 				$this->DefineTranslatedText('Seats Available', $this->myDomain);
 								
-				echo "</script>\n";
+				echo "var attStrings = [];\n";				
 			}
+
+			$comma = '';
+			$attString = '';
+			foreach ($atts as $attKey => $attVal)
+			{
+				$attKey = 'scatt_'.$attKey;
+				$attString .= $comma.$attKey."=".$attVal;
+				$comma = ',';
+			}
+			$index = $this->shortcodeCount-1;
+			echo "attStrings[$index] = '".$attString."';\n";
+			echo "</script>\n";
 
 			$jQueryURL = STAGESHOWLIB_URL.'include/'.STAGESHOWLIB_UPDATETROLLEY_TARGET;
 			
-			echo '<script>
-				jQuery(document).ready(
-					function()
-					{
-					}
-				);
-				
-			function stageshowJQuery_OnClickTrolleyButton(obj)
+			if ($this->shortcodeCount == 1)
 			{
-				jQuery("body").css("cursor", "progress");
-				
-				/* Disable All UI Buttons */
-				stageshow_enable_interface("stageshow-trolley-ui", false);
-						
-				var postvars = {
-					jquery: "true"
-				};
-				';
+				echo '<script>
+					jQuery(document).ready(
+						function()
+						{
+						}
+					);
 					
-			foreach ($atts as $attKey => $attVal)
-			{
-        		$attKey = 'scatt_'.$attKey;
+				function stageshowJQuery_OnClickTrolleyButton(obj, inst)
+				{
+					var scIndex = inst;
+					
+					jQuery("body").css("cursor", "progress");
+					
+					/* Disable All UI Buttons */
+					stageshow_enable_interface("stageshow-trolley-ui", false);
+							
+					var postvars = {
+						jquery: "true"
+					};
+					postvars.count = inst;
+					';
+				
+				$this->OutputContent_TrolleyJQueryPostvars();
+				
 				echo '
-				postvars.'.$attKey.' = "'.$attVal.'";';
+					var buttonId = obj.id;	
+					postvars[buttonId] = "submit";
+					var qty = 0;
+					var nameParts = buttonId.split("_");
+					if (nameParts[0] == "AddTicketSale")
+					{
+						var qtyId = "quantity_" + nameParts[1];
+						var qty = document.getElementById(qtyId).value;
+						postvars[qtyId] = qty;
+					}
+					
+					ourAtts = attStrings[scIndex-1];
+					ourAtts = ourAtts.split(",");
+					for (var attId=0; attId<ourAtts.length; attId++) 
+					{
+						var thisAtt = ourAtts[attId].split("=");
+						var key = thisAtt[0];
+						var value = thisAtt[1];
+						
+						postvars[key] = value;
+					}
+					
+					/* Get New HTML from Server */
+					var url = "'.$jQueryURL.'";
+				    jQuery.post(url, postvars,
+					    function(data, status)
+					    {
+							/* Apply translations to any message */
+							for (var index=0; index<tl8_srch.length; index++)
+							{
+								var srchFor = tl8_srch[index];
+								var repWith = tl8_repl[index];
+								data = StageShowLib_replaceAll(srchFor, repWith, data);
+							}
+								
+							targetElemID = "#stageshow-trolley-container" + inst;
+							divElem = jQuery(targetElemID);
+							divElem.html(data);
+							
+							/* Get updated trolley (which is not visible) */
+							trolleyUpdateElem = jQuery("#stageshow-trolley-trolley-jquery");
+							trolleyHTML = trolleyUpdateElem[0].innerHTML;
+
+							/* Copy New Trolley HTML */
+							trolleyTargetElem = jQuery("#stageshow-trolley-trolley-std");
+							trolleyTargetElem.html(trolleyHTML);
+							
+							/* Now delete the downloaded HTML */
+							trolleyUpdateElem.remove();
+							
+							stageshow_enable_interface("stageshow-trolley-ui", true);
+							jQuery("body").css("cursor", "default");
+					    }
+				    );
+				    
+				    return false;
+				}
+
+	</script>
+	';
 			}
 			
+		}
+		
+		function OutputContent_TrolleyJQueryPostvars()
+		{
 			$_wpnonce = StageShowLibNonce::GetStageShowLibNonce(STAGESHOWLIB_UPDATETROLLEY_TARGET);
 			if ($_wpnonce != '')
 			{
@@ -229,77 +306,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				postvars.action = "'.$_REQUEST['action'].'";';
 			}				
 			
-			if ($this->myDBaseObj->isOptionSet('AllowDonation'))
-			{
-				echo '
-				var saleDonationElem = document.getElementById("saleDonation");
-				if (saleDonationElem)
-				{
-					postvars.saleDonation = saleDonationElem.value;
-				}';
-			}
-				
-			if ($this->myDBaseObj->isOptionSet('UseNoteToSeller'))
-			{
-				echo '
-				var saleNoteToSellerElem = document.getElementById("saleNoteToSeller");
-				if (saleNoteToSellerElem)
-				{
-					postvars.saleNoteToSeller = saleNoteToSellerElem.value;
-				}';
-			}
-				
-			if ($this->myDBaseObj->isOptionSet('PostTicketsEnabled'))
-			{
-				echo '
-				var salePostTicketsElem = document.getElementById("salePostTickets");
-				if (salePostTicketsElem)
-				{
-					if (salePostTicketsElem.checked)
-					{
-						postvars.salePostTickets = salePostTicketsElem.value;
-					}
-				}';
-			}
-			
-			echo '
-				var buttonId = obj.id;	
-				postvars[buttonId] = "submit";
-				var qty = 0;
-				var nameParts = buttonId.split("_");
-				if (nameParts[0] == "AddTicketSale")
-				{
-					var qtyId = "quantity_" + nameParts[1];
-					var qty = document.getElementById(qtyId).value;
-					postvars[qtyId] = qty;
-				}
-				
-				/* Get New HTML from Server */
-				var url = "'.$jQueryURL.'";
-			    jQuery.post(url, postvars,
-				    function(data, status)
-				    {
-						/* Apply translations to any message */
-						for (var index=0; index<tl8_srch.length; index++)
-						{
-							var srchFor = tl8_srch[index];
-							var repWith = tl8_repl[index];
-							data = StageShowLib_replaceAll(srchFor, repWith, data);
-						}
-									
-						divElem = jQuery("#stageshow-trolley-container'.$shortcodeCount.'");
-						divElem.html(data);
-						
-						jQuery("body").css("cursor", "default");
-				    }
-			    );
-			    
-			    return false;
-			}
-
-</script>
-';
-			return $shortcodeCount;
 		}
 				
 		function OutputContent_DoShortcode( $atts )
@@ -312,6 +318,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$pluginAuthor = $myDBaseObj->get_author();
 			$pluginURI = $myDBaseObj->get_pluginURI();
 		
+			$this->shortcodeCount++;
+			
 			$myDBaseObj->AllUserCapsToServervar();
 		
 			// Remove any incomplete Checkouts
@@ -334,7 +342,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$actionURL = remove_query_arg('ppexp', $actionURL);
 
 			$atts = $this->OutputContent_GetAtts($atts);
- 			$shortcodeCount = $this->OutputContent_TrolleyButtonJQuery($atts);
+ 			$this->OutputContent_TrolleyButtonJQuery($atts);
 		      
         	$ourAnchor = $atts['anchor'];
 			if ($ourAnchor != '')
@@ -352,10 +360,14 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			}
 			
 			$outputContent .= '<form id=trolley method="post" action="'.$actionURL.'">'."\n";				
+		
+			$divId = $this->cssTrolleyBaseID.'-container'.$this->shortcodeCount;			
+			$boxoffDiv = "<div id=$divId name=$divId>\n";	
 			
-			$divId = $this->cssTrolleyBaseID.'-container'.$shortcodeCount;			
-			$outputContent .= "<div id=$divId name=$divId>\n";	
-						
+			$divId = $this->cssTrolleyBaseID.'-trolley-std';			
+			$trolleyDiv = "<div id=$divId name=$divId>\n";	
+			$endDiv = '</div>'."\n";	
+			
 			$outputContent .= $myDBaseObj->GetWPNonceField();
 				 
 			if (isset($this->editpage))
@@ -399,6 +411,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				$boxofficeContent = '';
 			}
+			$boxofficeContent = $boxoffDiv.$boxofficeContent.$endDiv;
+			$trolleyContent = $trolleyDiv.$trolleyContent.$endDiv;
 			
 			$this->OutputContent_OnlineStoreMessages();
 			
@@ -411,7 +425,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$outputContent .= $boxofficeContent.$trolleyContent;
 			}
 			
-			$outputContent .= '</div>'."\n";	
 			$outputContent .= '</form>'."\n";	
 			
 			$outputContent .= "\n<!-- $pluginID Plugin Code - Ends Here -->\n";

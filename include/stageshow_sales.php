@@ -62,6 +62,12 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
         	return $atts;
 		}
 		
+		function OutputContent_TrolleyJQueryPostvars()
+		{
+			parent::OutputContent_TrolleyJQueryPostvars();
+			
+		}
+		
 		function OutputContent_DoShortcode($atts)
 		{
 			if ($this->pageMode == self::PAGEMODE_DEMOSALE)

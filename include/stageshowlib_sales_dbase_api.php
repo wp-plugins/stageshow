@@ -323,6 +323,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						saleTransactionFee DECIMAL(9,2) NOT NULL DEFAULT 0,
 						saleFee DECIMAL(9,2) NOT NULL,
 						saleTxnId VARCHAR('.PAYMENT_API_SALETXNID_TEXTLEN.') NOT NULL,
+						saleMethod VARCHAR('.PAYMENT_API_SALEMETHOD_TEXTLEN.'),
 						saleStatus VARCHAR('.PAYMENT_API_SALESTATUS_TEXTLEN.'),
 						saleNoteToSeller TEXT,
 						salePPExpToken VARCHAR('.PAYMENT_API_EXPTOKEN_TEXTLEN.') NOT NULL DEFAULT "",

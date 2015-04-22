@@ -1027,8 +1027,8 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$phpText .= $this->GetDBCredentials();
 			$phpText .= "\n";
 
-			$phpText .= $this->OptionsToDefines('stageshowGlobalOptions', $globalOptions);
-			$phpText .= $this->OptionsToDefines('stageshowButtonURLs', $this->buttonImageURLs);
+			$phpText .= $this->OptionsToDefines('stageshowlibGlobalOptions', $globalOptions);
+			$phpText .= $this->OptionsToDefines('stageshowlibButtonURLs', $this->buttonImageURLs);
 
 			$phpText .= "\n";
 

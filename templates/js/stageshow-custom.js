@@ -54,28 +54,28 @@ function stageshow_AddCustomHTMLValues()
 	stageshow_AddEntryToCheckout('custom_checkout_element');
 }
 
-function stageshow_OnClickAdd(obj)
+function stageshow_OnClickAdd(obj, inst)
 {
-	return stageshowJQuery_OnClickTrolleyButton(obj); 
+	return stageshowJQuery_OnClickTrolleyButton(obj, inst); 
 }
 
-function stageshow_OnClickSelectseats(obj)
+function stageshow_OnClickSelectseats(obj, inst)
 {
 	return true;
 }
 
-function stageshowCustom_OnClickSeatsselected(obj)
+function stageshowCustom_OnClickSeatsselected(obj, inst)
 {	
 	return true;
 }
 
-function stageshowCustom_OnClickReserve(obj)
+function stageshowCustom_OnClickReserve(obj, inst)
 {
 	stageshow_AddCustomHTMLValues();
 	return true;
 }
 
-function stageshowCustom_OnClickCheckout(obj)
+function stageshowCustom_OnClickCheckout(obj, inst)
 {
 	stageshow_AddCustomHTMLValues();
 	return true;

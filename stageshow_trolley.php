@@ -111,6 +111,22 @@ if (!class_exists('StageShowWPOrgCartPluginClass'))
 		{
 			parent::Cart_OutputContent_OnlineStoreMain($atts);				
 		}
+		
+		function OutputContent_TrolleyJQueryPostvars()
+		{
+			parent::OutputContent_TrolleyJQueryPostvars();
+			
+			if ($this->myDBaseObj->isOptionSet('UseNoteToSeller'))
+			{
+				echo '
+				var saleNoteToSellerElem = document.getElementById("saleNoteToSeller");
+				if (saleNoteToSellerElem)
+				{
+					postvars.saleNoteToSeller = saleNoteToSellerElem.value;
+				}';
+			}
+				
+		}
 
 		function OutputContent_OnlinePurchaserDetails($cartContents, $extraHTML = '')
 		{

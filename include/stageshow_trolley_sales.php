@@ -416,7 +416,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			if (!$this->adminPageActive)
 			{
 				$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
-				$buttonTypeDef .= ' onClick="return '.$onClickHandler.'(this)"';				
+				$buttonTypeDef .= ' onClick="return '.$onClickHandler.'(this, '.$this->shortcodeCount.')"';				
 			}
 			
 			return $buttonTypeDef;
