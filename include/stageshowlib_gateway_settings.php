@@ -106,7 +106,7 @@ if (!class_exists('GatewaySettingsAdminListClass'))
 			$jsCode  = parent::JS_Bottom($defaultTab);		
 			$jsCode .= "
 
-window.onload = stageshowlib_OnSettingsLoad;
+StageShowLib_addWindowsLoadHandler(stageshowlib_OnSettingsLoad); 
 
 </script>
 			";

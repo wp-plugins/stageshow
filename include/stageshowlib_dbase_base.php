@@ -37,7 +37,7 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 		static function IsInWP()
 		{
 			// Use a WP define to find out if WP is loaded
-			return defined('WP_DEFAULT_THEME');
+			return defined('WPINC');
 		}
 		
 		function GetLoginID()
@@ -96,6 +96,15 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 				print_r($values);
 				echo "<br>\n";
 			}
+		}
+		
+		function queryWithPrepare($sql, $values)
+		{
+			global $wpdb;
+			
+			$sql = $wpdb->prepare($sql, $values);
+			
+			return $this->query($sql);
 		}
 		
 		function query($sql)

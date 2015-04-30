@@ -91,6 +91,16 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 					parent::Cart_OutputContent_OnlineStoreMain($atts);
 					if (--$count == 0)
 						break;
+
+					if ($this->adminPageActive)
+					{
+						$buttonID = $this->GetButtonID('editbuyer');
+						if (isset($_POST[$buttonID]))	// 'editbuyer' editing sale - get buyer details
+						{
+							break;
+						}
+					}						
+						
 				}
 			}
 			

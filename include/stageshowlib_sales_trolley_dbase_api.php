@@ -308,6 +308,8 @@ if (!class_exists('StageShowLibSalesCartDBaseClass'))
 				'salePPCountry', 
 				'salePPPhone', 
 				
+				'saleMethod', 
+				
 				'saleNoteToSeller', 
 				
 				'user_login', 

@@ -1,16 +1,17 @@
 
-const SeatAvailableClassText = "stageshow-boxoffice-seat-available";
-const SeatRequestedClassText = "stageshow-boxoffice-seat-requested";
-const SeatReservedClassText = "stageshow-boxoffice-seat-reserved";
-const SeatDisabledClassText = "stageshow-boxoffice-seat-disabled";
 
-const SeatStateAvailable = 0;
-const SeatStateRequested = 1;
-const SeatStateReserved = 2;
-const SeatStateDisabled = 3;
+var SeatAvailableClassText = 'stageshow-boxoffice-seat-available';
+var SeatRequestedClassText = 'stageshow-boxoffice-seat-requested';
+var SeatReservedClassText = 'stageshow-boxoffice-seat-reserved';
+var SeatDisabledClassText = 'stageshow-boxoffice-seat-disabled';
 
-const SeatLeftEndClass = "stageshow-boxoffice-leftend";
-const SeatRightEndClass = "stageshow-boxoffice-rightend";
+var SeatStateAvailable = 0;
+var SeatStateRequested = 1;
+var SeatStateReserved = 2;
+var SeatStateDisabled = 3;
+
+var SeatLeftEndClass = 'stageshow-boxoffice-leftend';
+var SeatRightEndClass = 'stageshow-boxoffice-rightend';
 
 var hasEndLimitTags;
 var hasDebugOutput;
@@ -19,13 +20,13 @@ var zonesReq = new Array();
 
 function stageshow_SeatAvailability(seatId)
 {
-	var bookedIndex = bookedSeats.indexOf(seatId);
+	var bookedIndex = jQuery.inArray(seatId, bookedSeats);
 	if (bookedIndex >= 0) 
 	{
 		return 'booked';
 	}
 	
-	var selectedIndex = selectedSeats.indexOf(seatId);
+	var selectedIndex = jQuery.inArray(seatId, selectedSeats);
 	if (selectedIndex >= 0) 
 	{
 		return 'selected';
@@ -310,7 +311,7 @@ function stageshow_ToggleSeat(obj, isClick)
 function stageshow_OnSeatsLoad()
 {
 	/* Check if Block End Markers are defined */
-	elemsList = document.getElementsByClassName(SeatLeftEndClass);
+	elemsList = document.querySelectorAll("."+SeatLeftEndClass);
 	hasEndLimitTags = (elemsList.length > 0);	
 	hasDebugOutput = (document.getElementById("RequestedRightCount") != null);
 	
@@ -443,32 +444,4 @@ function stageshow_OnClickRemove(obj, inst)
 	}
 	
 	return stageshowJQuery_OnClickTrolleyButton(obj, inst); 
-}
-
-function stageshow_enable_interface(classId, state)
-{
-	var classSpec = "."+classId;
-	var buttonElemsList = jQuery(classSpec);
-	jQuery.each(buttonElemsList,
-		function(i, listObj) 
-		{
-			var uiElemSpec = "#" + listObj.name;
-			var uiElem = jQuery(uiElemSpec);
-			
-			if (state)
-			{
-				uiElem.prop("disabled", false);			
-				uiElem.css("cursor", "default");				
-			}
-			else
-			{
-				uiElem.prop("disabled", true);			
-				uiElem.css("cursor", "progress");				
-			}
-				
-	    	return true;
-		}
-	);
-	
-	return state;		
 }

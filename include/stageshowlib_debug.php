@@ -29,7 +29,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 	{
 		function __construct($env) //constructor	
 		{
-			$this->pageTitle = 'TEST Settings';
+			$this->pageTitle = 'Diagnostics';
 			
 			// Call base constructor
 			parent::__construct($env);			
@@ -123,10 +123,14 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 				}
 				echo "</table>\n";
 			}
-?>
+		
+		$tableClass = $this->myDomain."-settings-table";
+		
+		echo '
 		<h3>Debug Settings</h3>
-		<table class="stageshow-settings-table">
-<?php	
+		<table class="'.$tableClass.'">
+		';
+			
 		if ($myDBaseObj->ShowDebugModes())
 			echo '<br>';
 		

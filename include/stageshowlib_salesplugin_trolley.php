@@ -47,6 +47,11 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		define('STAGESHOWLIB_TROLLEYTIMEOUT', 30*60);
 	}
 	
+	if (!defined('STAGESHOWLIB_PAYMENT_METHODS'))
+	{
+		define('STAGESHOWLIB_PAYMENT_METHODS', __('Cash/Cheque/Credit Card/Debit Card/Voucher'));
+	}
+	
 	define('STAGESHOW_SENDEMAIL_TARGET', 'stageshow_jquery_email.php');
 	
 	class StageShowLibSalesCartPluginBaseClass
@@ -211,6 +216,30 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			';
 			}
 			
+			$methodsList = explode('/', STAGESHOWLIB_PAYMENT_METHODS);
+			$methodsList[] = $this->myDBaseObj->gatewayObj->GetName();;
+			$methodsList[] = '';
+			
+			$formHTML .=  '
+				<tr class="stageshow-boxoffice-formRow">
+					<td class="stageshow-boxoffice-formFieldID">'.__('Payment Method', $this->myDomain).':&nbsp;</td>
+					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
+				<select id="saleMethod" name="saleMethod">';
+				
+			$selectedMethod = isset($cartContents->saleMethod) ? $cartContents->saleMethod : '';
+			foreach ($methodsList as $methodId)
+			{
+				$isSelected = ($selectedMethod == $methodId) ? 'selected=true ' : '';
+				$formHTML .=  '
+					<option value="'.$methodId.'" '.$isSelected.'>'.$methodId.'&nbsp;</option>';
+			}
+					
+			$formHTML .=  '
+				</select>
+					</td>
+				</tr>
+				';
+				
 			if ($extraHTML == '')
 			{
 				$formHTML .= '
@@ -1009,8 +1038,8 @@ echo $html;
 <script>
 function stageshowlib_manualsale_email_click()
 {
-	jQuery("body").css("cursor", "progress");
-	stageshow_enable_interface("stageshow-trolley-ui", false);
+	/* Set Cursor to Busy and Disable All UI Buttons */
+	StageShowLib_SetBusy(true, "stageshow-trolley-ui");
 	
 	/* Implement Manual Sale EMail */
 	var postvars = {
@@ -1031,8 +1060,8 @@ function stageshowlib_manualsale_email_click()
 			divElem = jQuery("#stageshow-sendemail-status");
 			divElem.html(data);
 			
-			stageshow_enable_interface("stageshow-trolley-ui", true);
-			jQuery("body").css("cursor", "default");
+			/* Set Cursor to Normal and Enable All UI Buttons */
+			StageShowLib_SetBusy(false, "stageshow-trolley-ui");
 	    }
     );
     
@@ -1089,6 +1118,7 @@ function stageshowlib_manualsale_email_click()
 						$cartContents->salePPCountry = $_POST['salePPCountry'];
 						$cartContents->salePPPhone   = $_POST['salePPPhone'];	
 						$cartContents->saleStatus    = $_POST['saleStatus'];	
+						$cartContents->saleMethod    = $_POST['saleMethod'];	
 																
 						$cartContents->saleNoteToSeller = isset($_POST['saleNoteToSeller']) ? stripslashes($_POST['saleNoteToSeller']) : '';	
 						

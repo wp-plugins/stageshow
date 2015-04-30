@@ -182,9 +182,9 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			<tr>
 				<td class="stageshow_tl8" id="label_Transaction_ID"><?php _e('Sale Reference', $this->myDomain); ?></td>
 				<td id="value_Transaction_ID">
-					<input type="text" maxlength="<?php echo PAYMENT_API_SALETXNID_TEXTLEN; ?>" size="<?php echo PAYMENT_API_SALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
+					<input class="stageshow-tools-ui" type="text" maxlength="<?php echo PAYMENT_API_SALETXNID_TEXTLEN; ?>" size="<?php echo PAYMENT_API_SALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
 					&nbsp;
-					<input class="button-primary" onclick="stageshow_onclick_validate()" type="button" name="jqueryvalidatebutton" id="jqueryvalidatebutton" value="Validate"/>
+					<input class="stageshow-tools-ui button-primary" onclick="stageshow_onclick_validate()" type="button" name="jqueryvalidatebutton" id="jqueryvalidatebutton" value="Validate"/>
 				</td>
 			</tr>
 			<?php
@@ -218,9 +218,9 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 					if (TxnId.length <= 0) return;
 		
 					/* Disable the button and input box .... this will be replaced when the page refreshes */					
-					jQuery("#TxnId").prop("disabled", true);	
-					jQuery("#jqueryvalidatebutton").prop("disabled", true);	
-											
+					/* Set Cursor to Busy and Disable All UI Buttons */
+					StageShowLib_SetBusy(true, "stageshow-tools-ui");
+
 					var postvars = {
 						jquery: "true"
 					};
@@ -301,9 +301,9 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 								messageHtml = messageHtml.replace(tl8_srch[index], tl8_repl[index]);
 							}
 							messageElem.html(messageHtml);
-							
-							jQuery("#TxnId").prop("disabled", false);	
-							jQuery("#jqueryvalidatebutton").prop("disabled", false);	
+
+							/* Set Cursor to Normal and Enable All UI Buttons */
+							StageShowLib_SetBusy(false, "stageshow-tools-ui");
 					    	jQuery("#TxnId").focus();
 					    }
 				    );

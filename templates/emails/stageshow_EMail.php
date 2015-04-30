@@ -7,6 +7,7 @@ The booking below is confirmed. Please bring a copy of this email with you to th
 
 Order Details:
 
+Payment Method: [saleMethod]
 Sale Reference: [saleTxnId]
 Contact EMail:  [saleEMail]
 

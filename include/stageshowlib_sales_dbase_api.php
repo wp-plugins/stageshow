@@ -829,6 +829,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					
 					$saleVals['saleCheckoutTime'] = $saleDateTime;
 					$saleVals['saleStatus'] = PAYMENT_API_SALESTATUS_CHECKOUT;
+					
+					if (isset($results['saleMethod']))    $saleVals['saleMethod'] = $results['saleMethod'];
 				
 					// Add empty values for fields that do not have a default value
 					$saleVals['saleFirstName'] = isset($results['saleFirstName']) ? $results['saleFirstName'] : '';

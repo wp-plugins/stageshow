@@ -129,3 +129,45 @@ function StageShowLib_replaceAll(find, replace, str)
 {
 	return str.replace(new RegExp(find, 'g'), replace);
 }
+
+function StageShowLib_SetBusy(newState, elemClassId) 
+{
+	if (newState)
+	{
+		jQuery("body").css("cursor", "progress");		
+		StageShowLib_EnableControls(elemClassId, false);
+	}
+	else
+	{
+		StageShowLib_EnableControls(elemClassId, true);
+		jQuery("body").css("cursor", "default");		
+	}
+}
+
+function StageShowLib_EnableControls(classId, state)
+{
+	var classSpec = "."+classId;
+	var buttonElemsList = jQuery(classSpec);
+	jQuery.each(buttonElemsList,
+		function(i, listObj) 
+		{
+			var uiElemSpec = "#" + listObj.name;
+			var uiElem = jQuery(uiElemSpec);
+			
+			if (state)
+			{
+				uiElem.prop("disabled", false);			
+				uiElem.css("cursor", "default");				
+			}
+			else
+			{
+				uiElem.prop("disabled", true);			
+				uiElem.css("cursor", "progress");				
+			}
+				
+	    	return true;
+		}
+	);
+	
+	return state;		
+}

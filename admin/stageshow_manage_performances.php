@@ -300,7 +300,7 @@ if (!class_exists('StageShowWPOrgPerformancesAdminClass'))
 <script>
 var PerfIDList = new Array();
 
-window.onload = stageshow_OnLoadPerformances;
+StageShowLib_addWindowsLoadHandler(stageshow_OnLoadPerformances); 
 
 function stageshow_OnLoadPerformances()
 {

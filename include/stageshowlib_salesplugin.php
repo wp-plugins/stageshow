@@ -213,10 +213,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				{
 					var scIndex = inst;
 					
-					jQuery("body").css("cursor", "progress");
-					
-					/* Disable All UI Buttons */
-					stageshow_enable_interface("stageshow-trolley-ui", false);
+					/* Set Cursor to Busy and Disable All UI Buttons */
+					StageShowLib_SetBusy(true, "stageshow-trolley-ui");
 							
 					var postvars = {
 						jquery: "true"
@@ -277,8 +275,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 							/* Now delete the downloaded HTML */
 							trolleyUpdateElem.remove();
 							
-							stageshow_enable_interface("stageshow-trolley-ui", true);
-							jQuery("body").css("cursor", "default");
+							/* Set Cursor to Normal and Enable All UI Buttons */
+							StageShowLib_SetBusy(false, "stageshow-trolley-ui");
 					    }
 				    );
 				    
@@ -625,6 +623,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					{
 						$checkoutRslt->saleDetails[$systemField] = $systemValue;
 					}
+					
+					$checkoutRslt->saleDetails['saleMethod'] = $myDBaseObj->gatewayObj->GetName();
 					
 					// Update quantities ...
 					$saleId = $this->myDBaseObj->LogSale($checkoutRslt->saleDetails, StageShowLibSalesDBaseClass::STAGESHOWLIB_LOGSALEMODE_CHECKOUT);					
