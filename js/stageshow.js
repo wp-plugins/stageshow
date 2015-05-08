@@ -14,7 +14,6 @@ var SeatLeftEndClass = 'stageshow-boxoffice-leftend';
 var SeatRightEndClass = 'stageshow-boxoffice-rightend';
 
 var hasEndLimitTags;
-var hasDebugOutput;
 
 var zonesReq = new Array();
 
@@ -101,12 +100,6 @@ function stageshow_CheckClickSeat(obj)
 	if (minSeatSpace <= 0)
 		return true;
 		
-	if (hasDebugOutput)
-	{
-		DebugSeatingGapBlockingElem = document.getElementById("DebugSeatingGapBlocking");
-		DebugSeatingGapBlockingElem.value = "";
-	}
-	
 	seatPosnParts = obj.id.split("_");
 	clickedColNo = parseInt(seatPosnParts[1]);
 	
@@ -311,9 +304,8 @@ function stageshow_ToggleSeat(obj, isClick)
 function stageshow_OnSeatsLoad()
 {
 	/* Check if Block End Markers are defined */
-	elemsList = document.querySelectorAll("."+SeatLeftEndClass);
+	elemsList = jQuery("."+SeatLeftEndClass);
 	hasEndLimitTags = (elemsList.length > 0);	
-	hasDebugOutput = (document.getElementById("RequestedRightCount") != null);
 	
 	/* Clear hidden pass back values - Required if page is refreshed */
 	document.getElementById("stageshow-boxoffice-layout-seats").value = '';
@@ -371,6 +363,90 @@ function stageshow_OnSeatsLoad()
 	}
 }
 
+function stageshowJQuery_OnClickTrolleyButton(obj, inst)
+{
+	var scIndex = inst;
+	
+	/* Set Cursor to Busy and Disable All UI Buttons */
+	StageShowLib_SetBusy(true, "stageshow-trolley-ui");
+			
+	var postvars = {
+		jquery: "true"
+	};
+	postvars.count = inst;
+	postvars.timeout = 30000;
+	postvars.cache = false;
+	
+	postvars = stageshowJQuery_PostVars(postvars);
+
+	var buttonId = obj.id;	
+	postvars[buttonId] = "submit";
+	var qty = 0;
+	var nameParts = buttonId.split("_");
+	if (nameParts[0] == "AddTicketSale")
+	{
+		var qtyId = "quantity_" + nameParts[1];
+		var qty = document.getElementById(qtyId).value;
+		postvars[qtyId] = qty;
+	}
+	
+	ourAtts = attStrings[scIndex-1];
+	ourAtts = ourAtts.split(",");
+	for (var attId=0; attId<ourAtts.length; attId++) 
+	{
+		var thisAtt = ourAtts[attId].split("=");
+		var key = thisAtt[0];
+		var value = thisAtt[1];
+		
+		postvars[key] = value;
+	}
+
+	/* Get New HTML from Server */
+    jQuery.post(jQueryURL, postvars,
+	    function(data, status)
+	    {
+			trolleyTargetElem = jQuery("#stageshow-trolley-trolley-std");
+			
+	    	if ((status != 'success') || (data.length == 0))
+	    	{
+				StageShowLib_SetBusy(false, "stageshow-trolley-ui");
+				
+	    		/* Fall back to HTML Post Method */
+				return true;
+			}
+
+			/* Apply translations to any message */
+			for (var index=0; index<tl8_srch.length; index++)
+			{
+				var srchFor = tl8_srch[index];
+				var repWith = tl8_repl[index];
+				data = StageShowLib_replaceAll(srchFor, repWith, data);
+			}
+
+			targetElemID = "#stageshow-trolley-container" + inst;
+			divElem = jQuery(targetElemID);
+			divElem.html(data);
+	
+			/* Copy New Trolley HTML */
+			trolleyUpdateElem = jQuery("#stageshow-trolley-trolley-jquery");
+			
+			/* Get updated trolley (which is not visible) */
+			trolleyHTML = trolleyUpdateElem[0].innerHTML;
+
+			/* Copy New Trolley HTML */
+			trolleyTargetElem.html(trolleyHTML);
+			
+			/* Now delete the downloaded HTML */
+			trolleyUpdateElem.remove();
+			
+			/* Set Cursor to Normal and Enable All UI Buttons */
+			StageShowLib_SetBusy(false, "stageshow-trolley-ui");
+	    }
+    );
+    
+    return false;
+}
+				
 function stageshow_OnClickAdd(obj, inst)
 {
 	if (typeof stageshowCustom_OnClickAdd == 'function') 

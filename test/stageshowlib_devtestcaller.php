@@ -26,17 +26,17 @@ if (!class_exists('StageShowLibDevCallerClass'))
 {
 	class StageShowLibDevCallerClass extends StageShowLibAdminClass // Define class
 	{
-		const TESTCLASS_PREFIX = 'StageShow_Test_';
-		
-		static function DevTestFilesList($testDir)
+		static function DevTestFilesList($testDir, $domain)
 		{
-			$filePath = $testDir.strtolower(self::TESTCLASS_PREFIX).'*.php';
+			$fileNames = strtolower($domain).'_test_*.php';
+			$filePath = $testDir.$fileNames;
 			$testFiles = glob( $filePath );
 			return $testFiles;
 		}
 		
-		function __construct($env) //constructor	
+		function __construct($env, $domain) //constructor	
 		{
+			$this->classPrefix = $domain.'_Test_';
 			$this->pageTitle = 'Dev TESTING';
 						
 			// Call base constructor
@@ -53,10 +53,10 @@ if (!class_exists('StageShowLibDevCallerClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			
 			// Stage Show TEST HTML Output - Start 				
-			$testFilePrefix = strtolower(self::TESTCLASS_PREFIX);
+			$testFilePrefix = strtolower($this->classPrefix);
 			$testFilePrefixLen = strlen($testFilePrefix);
 			
-			// This code delas with the change in class names for DEMO builds
+			// This code deals with the change in class names for DEMO builds
 			$updatedClassPrefix = "class StageShow_Test_";
 			$updatedClassPrefix = str_replace("class ", "", $updatedClassPrefix);
 			
@@ -75,7 +75,7 @@ if (!class_exists('StageShowLibDevCallerClass'))
 				$testName = str_replace('.php','', $testName);
 				
 				$testClass = $updatedClassPrefix . $testName;
-				$filePath = $testDir.strtolower(self::TESTCLASS_PREFIX.$testName).'.php';
+				$filePath = $testDir.strtolower($this->classPrefix.$testName).'.php';
 				include $filePath;
 				
 				$testObj = new $testClass($this->env); 

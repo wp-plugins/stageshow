@@ -73,6 +73,9 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		}		
 	}
 		
+	if (!defined('STAGESHOWLIB_FILENAME_GATEWAYAPILOG'))
+		define('STAGESHOWLIB_FILENAME_GATEWAYAPILOG', 'GatewayAPILog.txt');
+		
 	include 'stageshowlib_logfile.php';
 	
 	class StageShowLibGatewayBaseClass // Define class
@@ -333,12 +336,9 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			$this->DebugLogging = true;
 		}
 				
-		function LogToFile($LogNotifyFile, $DebugMessage)
+		function WriteToLogFile($LogNotifyFile, $DebugMessage)
 		{
 			$this->LogsFolder = $this->myDBaseObj->adminOptions['LogsFolderPath'].'/';
-			if (!strpos($this->LogsFolder, ':'))
-				$this->LogsFolder = ABSPATH . $this->LogsFolder;
-				
 			$logFileObj = new StageShowLibLogFileClass($this->LogsFolder);
 			$logFileObj->LogToFile($LogNotifyFile, $DebugMessage, StageShowLibDBaseClass::ForAppending);
 		}
@@ -355,7 +355,7 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			
 			if ($this->DebugLogging && $flush)
 			{
-				$this->LogToFile('GatewayAPILog.txt', $msgCache);
+				$this->WriteToLogFile(STAGESHOWLIB_FILENAME_GATEWAYAPILOG, $msgCache);
 				$msgCache = '';
 			}
 		}

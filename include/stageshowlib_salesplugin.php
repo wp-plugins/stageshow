@@ -196,9 +196,26 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			}
 			$index = $this->shortcodeCount-1;
 			echo "attStrings[$index] = '".$attString."';\n";
-			echo "</script>\n";
 
-			$jQueryURL = STAGESHOWLIB_URL.'include/'.STAGESHOWLIB_UPDATETROLLEY_TARGET;
+			if ($this->shortcodeCount == 1)
+			{
+				$jQueryURL = STAGESHOWLIB_URL.'include/'.STAGESHOWLIB_UPDATETROLLEY_TARGET;
+				echo 'var jQueryURL = "'.$jQueryURL.'";'."\n";
+				
+				echo '
+					function stageshowJQuery_PostVars(postvars)
+					{
+						';
+							
+				$this->OutputContent_TrolleyJQueryPostvars();
+				
+				echo '
+						return postvars;
+					}
+				';
+			}
+			
+			echo "</script>\n";
 			
 			if ($this->shortcodeCount == 1)
 			{
@@ -209,80 +226,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 						}
 					);
 					
-				function stageshowJQuery_OnClickTrolleyButton(obj, inst)
-				{
-					var scIndex = inst;
-					
-					/* Set Cursor to Busy and Disable All UI Buttons */
-					StageShowLib_SetBusy(true, "stageshow-trolley-ui");
-							
-					var postvars = {
-						jquery: "true"
-					};
-					postvars.count = inst;
-					';
-				
-				$this->OutputContent_TrolleyJQueryPostvars();
-				
-				echo '
-					var buttonId = obj.id;	
-					postvars[buttonId] = "submit";
-					var qty = 0;
-					var nameParts = buttonId.split("_");
-					if (nameParts[0] == "AddTicketSale")
-					{
-						var qtyId = "quantity_" + nameParts[1];
-						var qty = document.getElementById(qtyId).value;
-						postvars[qtyId] = qty;
-					}
-					
-					ourAtts = attStrings[scIndex-1];
-					ourAtts = ourAtts.split(",");
-					for (var attId=0; attId<ourAtts.length; attId++) 
-					{
-						var thisAtt = ourAtts[attId].split("=");
-						var key = thisAtt[0];
-						var value = thisAtt[1];
-						
-						postvars[key] = value;
-					}
-					
-					/* Get New HTML from Server */
-					var url = "'.$jQueryURL.'";
-				    jQuery.post(url, postvars,
-					    function(data, status)
-					    {
-							/* Apply translations to any message */
-							for (var index=0; index<tl8_srch.length; index++)
-							{
-								var srchFor = tl8_srch[index];
-								var repWith = tl8_repl[index];
-								data = StageShowLib_replaceAll(srchFor, repWith, data);
-							}
-								
-							targetElemID = "#stageshow-trolley-container" + inst;
-							divElem = jQuery(targetElemID);
-							divElem.html(data);
-							
-							/* Get updated trolley (which is not visible) */
-							trolleyUpdateElem = jQuery("#stageshow-trolley-trolley-jquery");
-							trolleyHTML = trolleyUpdateElem[0].innerHTML;
-
-							/* Copy New Trolley HTML */
-							trolleyTargetElem = jQuery("#stageshow-trolley-trolley-std");
-							trolleyTargetElem.html(trolleyHTML);
-							
-							/* Now delete the downloaded HTML */
-							trolleyUpdateElem.remove();
-							
-							/* Set Cursor to Normal and Enable All UI Buttons */
-							StageShowLib_SetBusy(false, "stageshow-trolley-ui");
-					    }
-				    );
-				    
-				    return false;
-				}
-
 	</script>
 	';
 			}
@@ -291,10 +234,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function OutputContent_TrolleyJQueryPostvars()
 		{
-			$_wpnonce = StageShowLibNonce::GetStageShowLibNonce(STAGESHOWLIB_UPDATETROLLEY_TARGET);
+			$stringToHash = '';
+			$_wpnonce = StageShowLibNonce::GetStageShowLibNonceEx(STAGESHOWLIB_UPDATETROLLEY_TARGET, $stringToHash);
 			if ($_wpnonce != '')
 			{
 				echo '
+				/* stringToHash: '.$stringToHash.' */
 				postvars._wpnonce = "'.$_wpnonce.'";';
 			}				
 			

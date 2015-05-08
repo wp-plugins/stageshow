@@ -25,6 +25,7 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 	class StageShowLibDirectDBaseClass // Define class
 	{
 		var $dbg = false;
+		var $last_error = '';
 		
 		function __construct()		//constructor		
 		{
@@ -53,12 +54,18 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 			mysqli_query($this->con, "SET CHARACTER SET $charset");
 
 			mysqli_select_db($this->con, DB_NAME);  			
+			$this->last_error = mysqli_error( $this->con );
 		}
 		
 		function query($sql)
 		{
 			$return_val = mysqli_query($this->con, $sql);
-
+			$this->last_error = mysqli_error( $this->con );
+			if ($this->last_error)
+			{
+				return false;
+			}
+			
 			if ( preg_match( '/^\s*(create|alter|truncate|drop)\s/i', $sql ) ) 
 			{
 				//$return_val = $return_val;
@@ -102,9 +109,10 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 		function get_results($sql)
 		{
 			$mysqlRslt = mysqli_query($this->con, $sql);
-			if ($mysqlRslt == false)
+			$this->last_error = mysqli_error( $this->con );
+			if ($this->last_error)
 			{
-				if ($this->dbg) echo "SQL Error: ".mysqli_error($this->con);
+				if ($this->dbg) echo "SQL Error: ".$this->last_error;
 				return null;
 			}
 			

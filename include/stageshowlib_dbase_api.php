@@ -571,23 +571,6 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $wpdb->_real_escape($string);
 		}
 		
-		function query($sql)
-		{
-			global $wpdb;
-			
-			if (defined('CORONDECK_RUNASDEMO'))
-			{
-				$sql = $this->SQLForDemo($sql);
-			}	
-			
-			$this->ShowSQL($sql);
-			
-			$this->queryResult = $wpdb->query($sql);
-			$rtnStatus = ($this->queryResult !== false);	
-			
-			return $rtnStatus;		
-		}
-
 		function GetInsertId()
 		{
 			global $wpdb;
@@ -935,24 +918,24 @@ if (!class_exists('StageShowLibDBaseClass'))
 		
 		function SaveDBCredentials($forceNew = false)
 		{
-			$credsPath = __FILE__;
-			$credsPath = str_replace('plugins', 'uploads', $credsPath);
-			$endPosn = strrpos($credsPath, 'include');
-			$credsPath = substr($credsPath, 0, $endPosn);
+			$credsFolder = __FILE__;
+			$credsFolder = str_replace('plugins', 'uploads', $credsFolder);
+			$endPosn = strrpos($credsFolder, 'include');
+			$credsFolder = substr($credsFolder, 0, $endPosn-1);
 			
-			$dirPath = substr($credsPath, 0, $endPosn-1);
-			if (!is_dir($dirPath))
+			if (!is_dir($credsFolder))
 			{
-				mkdir($dirPath);
+				mkdir($credsFolder);
 				$forceNew = true;
 			}
 				
-			$credsPath .= 'wp-config-db.php';
+			$credsFile = 'wp-config-db.php';
+			$credsPath = $credsFolder.'/'.$credsFile;
 
 			// Get last modified date/time of wp-config.php file 
 			// ... then use it to check if config may have changed
-			$endPosn = strrpos($credsPath, 'wp-content');
-			$wpconfigPath = substr($credsPath, 0, $endPosn).'wp-config.php';
+			$endPosn = strrpos($credsFolder, 'wp-content');
+			$wpconfigPath = substr($credsFolder, 0, $endPosn).'wp-config.php';
 			
 			// Get Wordpress Date and Time Format
 			$globalOptions = array(
@@ -1034,7 +1017,8 @@ if (!class_exists('StageShowLibDBaseClass'))
 
 			$phpText .= "\n".'?'.'>'."\n";
 			
-			$this->LogToFile($credsPath, $phpText, StageShowLibLogFileClass::ForWriting);
+			$logFileObj = new StageShowLibLogFileClass($credsFolder);
+			$logFileObj->LogToFile($credsFile, $phpText, StageShowLibDBaseClass::ForWriting);
 		}
 		
 		static function GetTimeFormat()

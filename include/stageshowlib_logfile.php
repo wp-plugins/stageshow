@@ -30,26 +30,58 @@ if (!class_exists('StageShowLibLogFileClass'))
 
 		var	$LogsFolderPath;
 		
-		function __construct($LogsFolderPath)
+		function __construct($LogsFolderPath = '')
 		{
 			$this->LogsFolderPath = $LogsFolderPath;
 		}
 
-		function GetLogFilePath($Filepath)
+		function GetLogFilePath($Filename)
 		{
-			$Filepath = str_replace("\\", "/", $Filepath);			
-			if (strpos($Filepath, "/") === false)
+			if (defined('ABSPATH'))
 			{
-				$Filepath = $this->LogsFolderPath . "/" . $Filepath;
+				$absRoot = str_replace("\\", "/", ABSPATH);
 			}
-			$Filepath = str_replace("//", "/", $Filepath);
-			
+			else
+			{
+				$absRoot = str_replace("\\", "/", __FILE__);
+				$endPath = strpos($absRoot, '/wp-content');
+				$absRoot = substr($absRoot, 0, $endPath+1);
+			}
+
+			$Filepath = str_replace("\\", "/", $Filename);
+			if (substr($Filepath, 0, strlen($absRoot)) != $absRoot)
+			{
+				// Add the "default" logs path folder
+				$Filepath = $this->LogsFolderPath.'/'.$Filepath;
+				$Filepath = str_replace("\\", "/", $Filepath);
+				$Filepath = str_replace("//", "/", $Filepath);
+				if (substr($Filepath, 0, strlen($absRoot)) != $absRoot)
+				{
+					// Add the base folder of the site
+					$Filepath = $absRoot.$Filepath;
+					$Filepath = str_replace("\\", "/", $Filepath);
+					$Filepath = str_replace("//", "/", $Filepath);
+				}
+			}
+						
 			return $Filepath;			
 		}
 
-		function LogToFile($Filepath, $LogLine, $OpenMode = self::ForAppending, $LogHeader = '')
+		function StampedLogToFile($Filename, $LogLine, $OpenMode = self::ForAppending, $LogHeader = '')
+		{			
+			$LogStamp  = 'Log Timestamp: '.date(DATE_RFC822)."\n";
+			$LogStamp .= 'Content Length: '.strlen($LogLine)."\n";
+			$LogStamp .= "Content: \n";
+			
+			$LogLine  = $LogStamp.$LogLine;
+			$LogLine .= "\n---------------------------------------------\n\n";
+		
+			$this->LogToFile($Filename, $LogLine, $OpenMode, $LogHeader);			
+		}
+		
+		function LogToFile($Filename, $LogLine, $OpenMode = self::ForAppending, $LogHeader = '')
 		{
-			$Filepath = $this->GetLogFilePath($Filepath);			
+			$Filepath = $this->GetLogFilePath($Filename);			
 			return self::LogToFileAbs($Filepath, $LogLine, $OpenMode, $LogHeader);			
 		}
 
@@ -95,9 +127,9 @@ if (!class_exists('StageShowLibLogFileClass'))
 			return $rtnStatus;
 		}
 		
-		function DumpToFile($Filepath, $dataId, $dataToDump)
+		function DumpToFile($Filename, $dataId, $dataToDump)
 		{
-			$Filepath = $this->GetLogFilePath($Filepath);	
+			$Filepath = $this->GetLogFilePath($Filename);	
 					
 			if (is_array($dataToDump))
 			{

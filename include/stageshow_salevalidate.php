@@ -33,6 +33,9 @@ if (!class_exists('StageShowWPOrgSaleValidateClass'))
 
 	define('STAGESHOW_SALEVALIDATE_TARGET', 'stageshow_jquery_validate.php');
 	
+	if (!defined('STAGESHOW_VALIDATERESULT_TIMEOUT')) 
+		define('STAGESHOW_VALIDATERESULT_TIMEOUT', 1000);
+
 	include STAGESHOW_INCLUDE_PATH.'stageshowlib_admin.php';
 	
 	class StageShowWPOrgSaleValidateClass extends StageShowLibAdminClass
@@ -193,20 +196,40 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 
 			echo '
 			<script>
-
 				jQuery(document).ready(
 					function()
 					{
+					   jQuery("#TxnId").on("change textInput input", function () 
+					   {
+					        var txnid = this.value;
+					    	if (txnid.length > 0)
+							{
+								var lastChar = txnid.slice(-1);
+								if (lastChar == " ")
+								{
+						      		stageshow_onclick_validate();
+								}
+							}
+					    });
+
 					    jQuery("#TxnId").keypress(function(e)
 					    {
-					      if(e.keyCode==13)
-					      	stageshow_onclick_validate();
+					    	if (e.keyCode == 13)
+					    	{
+					      		stageshow_onclick_validate();
+							}
 					    });
 					    
-						jQuery("#jqueryvalidatebutton").prop("disabled", false);	
-					    jQuery("#TxnId").focus();
+						jQuery("#jqueryvalidatebutton").prop("disabled", false);
+						stageshow_set_txnid_focus();
 					}
 				);
+
+				
+				function stageshow_set_txnid_focus()
+				{
+					jQuery("#TxnId").focus();
+				}	
 
 				function stageshow_onclick_validate()
 				{
@@ -304,7 +327,8 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 
 							/* Set Cursor to Normal and Enable All UI Buttons */
 							StageShowLib_SetBusy(false, "stageshow-tools-ui");
-					    	jQuery("#TxnId").focus();
+					    	jQuery("#jqueryvalidatebutton").focus();
+					    	setTimeout(stageshow_set_txnid_focus, '.STAGESHOW_VALIDATERESULT_TIMEOUT.');
 					    }
 				    );
 				    

@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
-Tested up to: 4.2
-Stable tag: 5.0.3
+Tested up to: 4.2.1
+Stable tag: 5.0.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -189,10 +189,18 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 * Version History for StageShow Plugins 
 
+= 5.0.4 (06/05/2015) =
+* Added delay to Validation screen before Sale Reference gets focus (STAGESHOW_VALIDATERESULT_TIMEOUT)
+* Implemented optional QR Code in Sale EMails (StageShowGold)
+* Terminating space on the Sale Reference now triggers validation page
+* Javascrip querySelectorAll() call replaced by jQuery call (for IE6/7 compatability)
+* Added error report of DB Errors
+
 = 5.0.3 (30/04/2015) =
 * Bug Fix: Auto update of Database on Version Updates fails
 * Bug Fix: Javascript Error with historical version of IE
 * Multiple Windows onLoad events implemented
+* Added sale payment method to sale record (defined by STAGESHOWLIB_PAYMENT_METHODS)
 
 = 5.0.2 (22/04/2015) =
 * Bug Fix: Seat Numbers not included in Sale EMails (StageShowGold)
@@ -208,7 +216,7 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 = 5.0 (17/04/2015) =
 * "Sale Transaction ID" changed to "License Reference ID"
 * "Sale Txn EMail Address" changed to "License Email Address"
-* |ticket "Transaction ID" changed to "Sale Reference"
+* Ticket "Transaction ID" changed to "Sale Reference"
 * StageShowHelp.pdf updated
 
 = 4.6.0.5 (11/04/2015) =

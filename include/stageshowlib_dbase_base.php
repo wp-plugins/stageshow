@@ -77,6 +77,15 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			$this->query("SET OPTION SQL_BIG_SELECTS=1");
 		}
 		
+		function ShowDBErrors()
+		{
+			global $wpdb;
+			if ($wpdb->last_error == '')
+				return;
+				
+			echo '<div id="message" class="error"><p>'.$wpdb->last_error.'</p></div>';
+		}
+
 		function ShowSQL($sql, $values = null)
 		{			
 			if (!$this->isDbgOptionSet('Dev_ShowSQL'))
@@ -121,6 +130,8 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			$this->queryResult = $wpdb->query($sql);
 			$rtnStatus = ($this->queryResult !== false);	
 			
+			$this->ShowDBErrors();
+			
 			return $rtnStatus;		
 		}
 
@@ -152,6 +163,8 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			$this->ShowSQL($sql);
 			$results = $wpdb->get_results($sql);
 			if ($debugOutAllowed) $this->show_results($results);
+			
+			$this->ShowDBErrors();
 			
 			return $results;
 		}

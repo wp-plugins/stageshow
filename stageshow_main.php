@@ -247,7 +247,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 					
 				case STAGESHOW_MENUPAGE_DEVTEST:
 					include STAGESHOW_TEST_PATH.'stageshowlib_devtestcaller.php';   
-					new StageShowLibDevCallerClass($this->env);
+					new StageShowLibDevCallerClass($this->env, 'StageShow');
 					break;
 							
 				case STAGESHOW_MENUPAGE_DIAGNOSTICS:
@@ -261,9 +261,12 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		{
 			parent::load_user_scripts();
 
+			$reloadParam = false;
+			if (defined('STAGESHOW_JS_NOCACHE')) $reloadParam = time();
+			
 			// Add our own Javascript
-			wp_enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', __FILE__ ));
-			wp_enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ));
+			wp_enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', __FILE__ ), array(), $reloadParam);
+			wp_enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ), array(), $reloadParam);
 
 			wp_enqueue_script('jquery');
 		}	
@@ -355,7 +358,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 					if ( isset($_SESSION['stageshowlib_debug_test']) && file_exists(STAGESHOW_TEST_PATH.'stageshowlib_devtestcaller.php') ) 
 					{
 						include STAGESHOW_TEST_PATH.'stageshowlib_devtestcaller.php';   
-						$devTestFiles = StageShowLibDevCallerClass::DevTestFilesList(STAGESHOW_TEST_PATH);
+						$devTestFiles = StageShowLibDevCallerClass::DevTestFilesList(STAGESHOW_TEST_PATH, 'StageShow');
 						if (count($devTestFiles) > 0)
 							add_submenu_page( STAGESHOW_MENUPAGE_ADMINMENU, __('Dev TESTING', $this->myDomain), __('Dev TESTING', $this->myDomain), STAGESHOWLIB_CAPABILITY_DEVUSER, STAGESHOW_MENUPAGE_DEVTEST, array(&$this, 'printAdminPage'));
 					}

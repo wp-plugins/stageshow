@@ -36,6 +36,9 @@ if (!class_exists('StageShowJQueryTrolley'))
 {
 	include 'stageshowlib_nonce.php';
 	
+	if (!defined('STAGESHOW_FILENAME_JQUERYCALLLOG'))
+		define('STAGESHOW_FILENAME_JQUERYCALLLOG', 'JQueryCallLog.txt');
+		
 	class StageShowJQueryTrolley
 	{
 		function __construct()
@@ -59,9 +62,27 @@ if (!class_exists('StageShowJQueryTrolley'))
 				StageShowLibUtilsClass::print_r($_SESSION, '$_SESSION');
 			}	
 				
-        	$ourNOnce = StageShowLibNonce::GetStageShowLibNonce(STAGESHOWLIB_UPDATETROLLEY_TARGET);
+			$logCall = ($myDBaseObj->getDbgOption('Dev_LogJQueryCalls'));
+			$stringToHash = '';
+        	$ourNOnce = StageShowLibNonce::GetStageShowLibNonceEx(STAGESHOWLIB_UPDATETROLLEY_TARGET, $stringToHash);
+        	
+			if ($logCall)
+			{
+				include 'stageshowlib_logfile.php';
+				$LogsFolder = $myDBaseObj->getOption('LogsFolderPath').'/';
+				$logFileObj = new StageShowLibLogFileClass($LogsFolder);
+				
+				$logEntry = print_r($_POST, true);
+				$logEntry .= "stringToHash: $stringToHash \n";
+				$logEntry .= "Expected NOnce: $ourNOnce \n";
+			}
+			
 			if (!isset($_POST['_wpnonce']) || ($_POST['_wpnonce'] != $ourNOnce))
 			{
+				if ($logCall)
+				{
+					$logFileObj->StampedLogToFile(STAGESHOW_FILENAME_JQUERYCALLLOG, $logEntry, StageShowLibDBaseClass::ForAppending);
+				}
 				die;
 			}		
 			
@@ -117,6 +138,12 @@ if (!class_exists('StageShowJQueryTrolley'))
 			else
 			{
 				$outputContent = $boxofficeContent.$trolleyContent;
+			}
+			
+			if ($logCall)
+			{
+				$logEntry .= $outputContent;
+				$logFileObj->StampedLogToFile(STAGESHOW_FILENAME_JQUERYCALLLOG, $logEntry, StageShowLibDBaseClass::ForAppending);
 			}
 			
 			echo $outputContent;

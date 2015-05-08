@@ -49,7 +49,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 	
 	if (!defined('STAGESHOWLIB_PAYMENT_METHODS'))
 	{
-		define('STAGESHOWLIB_PAYMENT_METHODS', __('Cash/Cheque/Credit Card/Debit Card/Voucher'));
+		define('STAGESHOWLIB_PAYMENT_METHODS', __('/Cash/Cheque/Credit Card/Debit Card/Voucher'));
 	}
 	
 	define('STAGESHOW_SENDEMAIL_TARGET', 'stageshow_jquery_email.php');
@@ -216,8 +216,10 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			';
 			}
 			
-			$methodsList = explode('/', STAGESHOWLIB_PAYMENT_METHODS);
-			$methodsList[] = $this->myDBaseObj->gatewayObj->GetName();;
+			$methodsSeparator = substr(STAGESHOWLIB_PAYMENT_METHODS, 0, 1);
+			$methodsList = explode($methodsSeparator, STAGESHOWLIB_PAYMENT_METHODS);
+			/* First Entry will be blank - Overwrite with the Payment Gateway name */
+			$methodsList[0] = $this->myDBaseObj->gatewayObj->GetName();;
 			$methodsList[] = '';
 			
 			$formHTML .=  '

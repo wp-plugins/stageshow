@@ -39,15 +39,21 @@ if (!class_exists('StageShowLibNonce'))
 	{
 		static function GetStageShowLibNonce($action = -1)
 		{
-			$uid = __FILE__;
-			$token = SID;
+			$stringToHash = '';
+			return self::GetStageShowLibNonceEx($action, $stringToHash);
+		}
+		
+		static function GetStageShowLibNonceEx($action = -1, &$stringToHash)
+		{
+			$uid = str_replace("\\","", str_replace("/","",__FILE__));
+			$token = ''; // SID;
 				
 			$nonce_life = DAY_IN_SECONDS;
 			$i = ceil(time() / ( $nonce_life / 2 ));
 
 			$stringToHash = $i . '|' . $action . '|' . $uid . '|' . $token;
-
 			$stringToHash = $i . '|' . $action . '|' . $uid . '|' . $token . '|'. NONCE_KEY;
+
 			$localNOnce = md5($stringToHash);
 			$localNOnce = substr($localNOnce, -12, 10);
 			

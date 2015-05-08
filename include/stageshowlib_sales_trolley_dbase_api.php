@@ -490,39 +490,6 @@ if (!class_exists('StageShowLibSalesCartDBaseClass'))
 			$this->AddSaleItem($saleID, $cartEntry->itemID, $cartEntry->qty, $cartEntry->price, $saleExtras);
 		}
 
-		function LogToFile($Filepath, $LogLine, $OpenMode = 0)
-		{
-			// Use global values for OpenMode
-			
-			// Create a filesystem object
-			if (($OpenMode == self::ForAppending) || ($OpenMode == 0))
-			{
-				$logFile = fopen($Filepath,"ab");
-			}
-			else
-			{
-				$logFile = fopen($Filepath,"wb");
-			}
-
-			// Write log entry
-			if ($logFile != 0)
-			{
-				$LogLine .= "\n";
-				fwrite($logFile, $LogLine, strlen($LogLine));
-				fclose($logFile);
-
-				$rtnStatus = true;
-			}
-			else
-			{
-				echo "Error writing to $Filepath<br>\n";
-				//echo "Error was $php_errormsg<br>\n";
-				$rtnStatus = false;
-			}
-
-			return $rtnStatus;
-		}
-		
 		function OutputViewTicketButton($saleID = 0)
 		{
 			$text = __('View Ticket', $this->get_domain());

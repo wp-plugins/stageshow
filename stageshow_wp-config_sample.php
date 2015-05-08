@@ -157,4 +157,31 @@ define('STAGESHOWLIB_TROLLEYTIMEOUT', 1800);
 define('STAGESHOW_VERIFYLOG_DUPLICATEACTION', 'ignore');
 define('STAGESHOW_VERIFYLOG_DUPLICATEACTION', 'hide');
 
+/*
+------------------------------------------------------------------------------------------------
+	STAGESHOW_VALIDATERESULT_TIMEOUT
+	
+	This value determines the time delay (in thousanths of a second) after a ticket validation
+	before the focus is transferred to the Sale Reference input box.
+	default  - 1000
+	
+------------------------------------------------------------------------------------------------
+*/
+
+define('STAGESHOW_VALIDATERESULT_TIMEOUT', 1000);
+
+/*
+------------------------------------------------------------------------------------------------
+	STAGESHOWLIB_PAYMENT_METHODS
+	
+	This value determines the Payment Method values that can be specified for a manually added
+	sale. The name of the Payment Gateway selected will also be added automatically.
+	The list is separated by a unique character, which is specified by using it as the first 
+	character in the list.
+	
+------------------------------------------------------------------------------------------------
+*/
+
+define('STAGESHOWLIB_PAYMENT_METHODS', __('/Cash/Cheque/Credit Card/Debit Card/Voucher'));
+
 ?>

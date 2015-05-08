@@ -54,6 +54,8 @@ if (!class_exists('StageShowLibSampleDBaseClass'))
 			$salesVals['saleDonation'] = 0;
 			$salesVals['salePostage'] = 0;
 			
+			$salesVals['saleMethod'] = 'PayPal';
+			
 			return $this->myDBaseObj->AddSale($saleDateTime, $salesVals);
 		}
 		

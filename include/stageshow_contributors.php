@@ -12,6 +12,7 @@ if (!class_exists('StageShowWPOrgContributorsClass'))
 			$conDefs = array(
 				'TengYong Ng,			Date & Time Picker,		http://www.rainforestnet.com/datetimepicker/datetimepicker.htm',
 				'David Tufts,			Barcode Generator,   	http://davidscotttufts.com/2009/03/31/how-to-create-barcodes-in-php/',
+				'Deltalab,				QR Code Generator,   	http://phpqrcode.sourceforge.net/',
 				'Nicholas Collinson,	French Translation, 	http://jouandassou.fr',
 				'Andrew Kurtis,			Spanish Translation, 	',
 			);
