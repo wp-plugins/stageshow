@@ -114,11 +114,11 @@ if (!class_exists('StageShowWPOrgCartPluginClass'))
 		
 		function OutputContent_TrolleyJQueryPostvars()
 		{
-			parent::OutputContent_TrolleyJQueryPostvars();
+			$jqCode = parent::OutputContent_TrolleyJQueryPostvars();
 			
 			if ($this->myDBaseObj->isOptionSet('UseNoteToSeller'))
 			{
-				echo '
+				$jqCode .= '
 				var saleNoteToSellerElem = document.getElementById("saleNoteToSeller");
 				if (saleNoteToSellerElem)
 				{
@@ -126,6 +126,7 @@ if (!class_exists('StageShowWPOrgCartPluginClass'))
 				}';
 			}
 				
+			return $jqCode;
 		}
 
 		function OutputContent_OnlinePurchaserDetails($cartContents, $extraHTML = '')

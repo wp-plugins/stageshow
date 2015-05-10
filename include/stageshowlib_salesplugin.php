@@ -133,6 +133,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function DefineTranslatedText($text, $domain, $delim = '')
 		{
+			$jqCode  = '';
+			
 			if ($delim == '')
 			{
 				$delimStart = '>';
@@ -146,9 +148,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$translation = __($text, $domain);
 			if ($text != $translation)
 			{
-	        	echo "tl8_srch[tl8_srch.length] = '".$delimStart.$text.$delimEnd."';\n";
-	        	echo "tl8_repl[tl8_repl.length] = '".$delimStart.$translation.$delimEnd."';\n";
+	        	$jqCode .= "tl8_srch[tl8_srch.length] = '".$delimStart.$text.$delimEnd."';\n";
+	        	$jqCode .= "tl8_repl[tl8_repl.length] = '".$delimStart.$translation.$delimEnd."';\n";
 			}
+			
+			return $jqCode;
 		}
 		
 		function OutputContent_TrolleyButtonJQuery($atts)
@@ -157,33 +161,34 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			
 			if (defined('STAGESHOWLIB_DISABLE_JQUERY_BOXOFFICE')) return 0;
 			
-			echo "\n<script>\n";
+			// Inject JS into output 
+			$scriptCode = "\n<script>\n";
 			if ($this->shortcodeCount == 1)
 			{
-				echo "var tl8_srch = [];\n";		
-				echo "var tl8_repl = [];\n";
+				$scriptCode .= "var tl8_srch = [];\n";		
+				$scriptCode .= "var tl8_repl = [];\n";
 					
-				$this->DefineTranslatedText('Show', $this->myDomain);
-				$this->DefineTranslatedText('Date & Time', $this->myDomain);
-				$this->DefineTranslatedText('Ticket Type', $this->myDomain);
-				$this->DefineTranslatedText('Quantity', $this->myDomain);
-				$this->DefineTranslatedText('Seat', $this->myDomain);
-				$this->DefineTranslatedText('Price', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Show', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Date & Time', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Ticket Type', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Quantity', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Seat', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Price', $this->myDomain);
 
-				$this->DefineTranslatedText('Add', $this->myDomain, '"');
-				$this->DefineTranslatedText('Remove', $this->myDomain, '"');
-				$this->DefineTranslatedText('Reserve', $this->myDomain, '"');
-				$this->DefineTranslatedText('Checkout', $this->myDomain, '"');
-				$this->DefineTranslatedText('Select Seats', $this->myDomain, '"');
+				$scriptCode .= $this->DefineTranslatedText('Add', $this->myDomain, '"');
+				$scriptCode .= $this->DefineTranslatedText('Remove', $this->myDomain, '"');
+				$scriptCode .= $this->DefineTranslatedText('Reserve', $this->myDomain, '"');
+				$scriptCode .= $this->DefineTranslatedText('Checkout', $this->myDomain, '"');
+				$scriptCode .= $this->DefineTranslatedText('Select Seats', $this->myDomain, '"');
 
-				$this->DefineTranslatedText('Donation', $this->myDomain);
-				$this->DefineTranslatedText('Message To Seller', $this->myDomain);
-				$this->DefineTranslatedText('Send tickets by post', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Donation', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Message To Seller', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Send tickets by post', $this->myDomain);
 
-				$this->DefineTranslatedText('Seat Available', $this->myDomain);
-				$this->DefineTranslatedText('Seats Available', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Seat Available', $this->myDomain);
+				$scriptCode .= $this->DefineTranslatedText('Seats Available', $this->myDomain);
 								
-				echo "var attStrings = [];\n";				
+				$scriptCode .=  "var attStrings = [];\n";				
 			}
 
 			$comma = '';
@@ -195,60 +200,60 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$comma = ',';
 			}
 			$index = $this->shortcodeCount-1;
-			echo "attStrings[$index] = '".$attString."';\n";
+			$scriptCode .=  "attStrings[$index] = '".$attString."';\n";
 
 			if ($this->shortcodeCount == 1)
 			{
 				$jQueryURL = STAGESHOWLIB_URL.'include/'.STAGESHOWLIB_UPDATETROLLEY_TARGET;
-				echo 'var jQueryURL = "'.$jQueryURL.'";'."\n";
+				$scriptCode .=  'var jQueryURL = "'.$jQueryURL.'";'."\n";
 				
-				echo '
+				$scriptCode .=  '
 					function stageshowJQuery_PostVars(postvars)
 					{
 						';
 							
-				$this->OutputContent_TrolleyJQueryPostvars();
+				$scriptCode .= $this->OutputContent_TrolleyJQueryPostvars();
 				
-				echo '
+				$scriptCode .=  '
 						return postvars;
 					}
 				';
 			}
 			
-			echo "</script>\n";
-			
 			if ($this->shortcodeCount == 1)
 			{
-				echo '<script>
+				$scriptCode .= '
 					jQuery(document).ready(
 						function()
 						{
 						}
 					);
-					
-	</script>
-	';
+				';
 			}
 			
+			$scriptCode .=  "</script>\n";
+			$this->InjectJSCode($scriptCode);			
 		}
 		
 		function OutputContent_TrolleyJQueryPostvars()
 		{
+			$jqCode = '';
 			$stringToHash = '';
 			$_wpnonce = StageShowLibNonce::GetStageShowLibNonceEx(STAGESHOWLIB_UPDATETROLLEY_TARGET, $stringToHash);
 			if ($_wpnonce != '')
 			{
-				echo '
+				$jqCode .= '
 				/* stringToHash: '.$stringToHash.' */
 				postvars._wpnonce = "'.$_wpnonce.'";';
 			}				
 			
 			if (isset($_REQUEST['action']))
 			{
-				echo '
+				$jqCode .= '
 				postvars.action = "'.$_REQUEST['action'].'";';
 			}				
 			
+			return $jqCode;
 		}
 				
 		function OutputContent_DoShortcode( $atts )
@@ -644,6 +649,18 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return true;
 		}
 		
+		function InjectJSCode($jsCode)
+		{
+			echo "\n<!-- InjectedJSCode -->";
+			// Split into lines ...
+			$jsLines = explode("\n", $jsCode);
+			foreach ($jsLines as $jsLine)
+			{
+				// Output the line with the CR
+				echo trim($jsLine);
+			}
+			echo "\n";
+		}
 	}
 }
 ?>

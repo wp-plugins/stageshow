@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
 Tested up to: 4.2.1
-Stable tag: 5.0.4
+Stable tag: 5.0.5
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -66,17 +66,17 @@ StageShow Features Summary
 First Time Installation
 
 * Download the plugin archive
-* Open the Wordpress Dashboard for you site
+* Open the Wordpress Dashboard for your site
 * Select the "Upload" option 
 * Click "Add New" under the "Plugins" menu 
 * Under "Install a plugin in .zip format" browse to the plugin archive file you downloaded
 * Click Install Now.
 * After it has installed, activate the plugin.
 
-Upgrade
+Manual Upgrade/Update
 
 * On the WP Plugins Page deactivate (but do <span style="text-decoration: underline;">NOT</span> delete) the current StageShow plugin
-* Using FTP (or your ISPs file manager) delete the stageshow plugins folder in the wp-content/plugins folder
+* Using FTP (or your ISPs file manager) delete the current stageshow plugin folder in the wp-content/plugins folder
 * Now Proceed as for the First Time Installation
 
 == Frequently Asked Questions ==
@@ -188,6 +188,11 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 5.0.5 (10/05/2015) =
+* Bug Fix: Admin Pages cannot select page number from keyboard
+* Bug Fix: Removing Seats on Select Seats page not reflected in Trolley (StageShowGold)
+* Injected Javascript output on single line (improved resilience)
 
 = 5.0.4 (06/05/2015) =
 * Added delay to Validation screen before Sale Reference gets focus (STAGESHOW_VALIDATERESULT_TIMEOUT)

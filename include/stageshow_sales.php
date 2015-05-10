@@ -64,8 +64,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 		
 		function OutputContent_TrolleyJQueryPostvars()
 		{
-			parent::OutputContent_TrolleyJQueryPostvars();
-			
+			return parent::OutputContent_TrolleyJQueryPostvars();			
 		}
 		
 		function OutputContent_DoShortcode($atts)

@@ -788,12 +788,15 @@ function StageShowLib_getCheckboxesCount(elem)
 			if ( 'bottom' == $which )
 				$html_current_page = $this->currentPage;
 			else
-				$html_current_page = sprintf( "<input class='current-page' title='%s' type='text' name='%s' value='%s' size='%d' />",
+			{
+				$onKeyCodeHandler = ' onkeypress="StageShowLib_SubmitOnReturnKey(this, event);" ';
+				$html_current_page = sprintf( "<input class='current-page' title='%s' type='text' name='%s' value='%s' $onKeyCodeHandler size='%d' />",
 					esc_attr__( 'Current page', $this->myDomain),
 					esc_attr( 'paged' ),
 					$this->currentPage,
 					strlen( $totalPages )
 				);
+			}
 
 			$html_total_pages = sprintf( "<span class='total-pages'>%s</span>", number_format_i18n( $totalPages ) );
 			$page_links[] = '<span class="paging-input">' . sprintf('%1$s '.__('of', $this->myDomain).' %2$s', $html_current_page, $html_total_pages ) . '</span>';

@@ -171,3 +171,16 @@ function StageShowLib_EnableControls(classId, state)
 	
 	return state;		
 }
+
+function StageShowLib_SubmitOnReturnKey(obj, event)
+{
+	if (event.keyCode!=13)
+	{
+		return true;
+	}
+	
+	/* Find the objects parent form */
+	parentForm = jQuery(obj).closest("form");
+	parentForm.submit();
+	return true;
+}
