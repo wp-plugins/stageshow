@@ -268,6 +268,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 			$this->shortcodeCount++;
 			
+			// StageShow uses inline scripts and styles - wpautop breaks these so disable it
+			//remove_filter('the_content', 'wpautop');
+
 			$myDBaseObj->AllUserCapsToServervar();
 		
 			// Remove any incomplete Checkouts
@@ -386,7 +389,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					$myDBaseObj->saveOptions();
 				}
 			}
-			
+
 			return $outputContent;						
 		}
 		
@@ -651,12 +654,17 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 		function InjectJSCode($jsCode)
 		{
-			echo "\n<!-- InjectedJSCode -->";
+			if (defined('STAGESHOWLIB_INJECTEDJSCODE_UNCOMPRESSED'))
+			{
+				echo $jsCode;
+				return;
+			}
+			
 			// Split into lines ...
 			$jsLines = explode("\n", $jsCode);
 			foreach ($jsLines as $jsLine)
 			{
-				// Output the line with the CR
+				// Output the line without whitespace or the CR
 				echo trim($jsLine);
 			}
 			echo "\n";

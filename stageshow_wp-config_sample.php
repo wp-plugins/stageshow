@@ -184,4 +184,15 @@ define('STAGESHOW_VALIDATERESULT_TIMEOUT', 1000);
 
 define('STAGESHOWLIB_PAYMENT_METHODS', __('/Cash/Cheque/Credit Card/Debit Card/Voucher'));
 
+/*
+------------------------------------------------------------------------------------------------
+	STAGESHOW_BOXOFFICE_SORTFIELD
+	
+	This value determines the database field that will be used to sort the Box-Office output.
+	
+------------------------------------------------------------------------------------------------
+*/
+
+define('STAGESHOW_BOXOFFICE_SORTFIELD', 'priceValue');
+
 ?>

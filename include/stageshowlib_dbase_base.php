@@ -172,7 +172,15 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 		function show_results($results)
 		{
 			if (!$this->isDbgOptionSet('Dev_ShowDBOutput'))
+			{				
+				if ($this->isDbgOptionSet('Dev_ShowSQL'))
+				{
+					$entriesCount = count($results);
+					echo "Database Result Entries: $entriesCount<br>\n";
+					return;				
+				}
 				return;
+			}
 				
 			if (function_exists('wp_get_current_user'))
 			{

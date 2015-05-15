@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
-Tested up to: 4.2.1
-Stable tag: 5.0.5
+Tested up to: 4.2.2
+Stable tag: 5.0.6
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -188,6 +188,13 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 == Changelog ==
 
 * Version History for StageShow Plugins 
+
+= 5.0.6 (15/05/2015) =
+* Added Add Ticket Quantities text box/drop-down selector option
+* Added JS Values checks to all numeric settings
+* Added JS Value check to Quantity Text boxes in Box-Office
+* Added STAGESHOW_BOXOFFICE_SORTFIELD to define sorting of Tickets in Box Office
+* Bug Fix: Minimum Empty Seats functionality inconsistent (StageShowGold)
 
 = 5.0.5 (10/05/2015) =
 * Bug Fix: Admin Pages cannot select page number from keyboard

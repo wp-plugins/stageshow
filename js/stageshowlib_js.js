@@ -184,3 +184,74 @@ function StageShowLib_SubmitOnReturnKey(obj, event)
 	parentForm.submit();
 	return true;
 }
+
+function StageShowLib_CheckNumericOnly(obj, event, maxval, minval, dp)
+{
+	var newValueText = obj.value + event.key;
+	var newValue;
+	
+	if (dp)
+	{
+		newValue = parseFloat(newValueText);
+	}
+	else
+	{
+		newValue = parseInt(newValueText);
+	}
+
+	if ((maxval != 'U') && (newValue > maxval))
+	{
+		obj.value = maxval;
+		event.preventDefault();
+		return false;
+	}
+	if ((minval != 'U') && (newValue < minval))
+	{
+		obj.value = minval;
+		event.preventDefault();
+		return false;
+	}
+	
+	return true;
+}
+
+function StageShowLib_OnChangeNumericOnly(obj, event, maxval, minval, dp)
+{
+	if (obj.value == '') obj.value = minval;
+	
+	return StageShowLib_CheckNumericOnly(obj, event, maxval, minval, dp);
+}
+
+function StageShowLib_OnKeypressNumericOnly(obj, event, maxval, minval, dp)
+{
+	if (event.altKey || event.ctrlKey)
+	{
+		return true;
+	}
+	
+	if (event.keyCode == 13)
+	{
+		event.preventDefault();
+		return false;
+	}
+	
+	if ((event.keyCode == 0) && (event.charCode > 32))
+	{
+		if (dp && (event.charCode == 46))
+		{
+			return StageShowLib_CheckNumericOnly(obj, event, maxval, minval, dp);
+		}
+		else if ((event.charCode < 48) || (event.charCode > 57))
+		{
+			event.preventDefault();
+			return false;
+		}
+		else
+		{
+			/* return StageShowLib_CheckNumericOnly(obj, event, maxval, minval, dp); */
+			return true;
+		}
+	}
+	
+	return true;
+}

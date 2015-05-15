@@ -41,6 +41,7 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEPARAM_TYPE = 'Type';
 		const TABLEPARAM_ITEMS = 'Items';
 		const TABLEPARAM_TEXT = 'Text';
+		const TABLEPARAM_LIMITS = 'Limits';
 		const TABLEPARAM_LEN = 'Len';
 		const TABLEPARAM_SIZE = 'Size';
 		const TABLEPARAM_LINK = 'Link';
@@ -70,6 +71,8 @@ if (!class_exists('StageShowLibTableClass'))
 		const TABLEENTRY_FUNCTION = 'function';
 		const TABLEENTRY_SELECT = 'select';
 		const TABLEENTRY_TEXT = 'text';
+		const TABLEENTRY_INTEGER = 'Interger';
+		const TABLEENTRY_FLOAT = 'Float';
 		const TABLEENTRY_TEXTBOX = 'textbox';
 		const TABLEENTRY_VIEW = 'view';
 		const TABLEENTRY_READONLY = 'readonly';
@@ -1283,6 +1286,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 						break;		
 										
 					case self::TABLEENTRY_TEXT:
+					case self::TABLEENTRY_INTEGER:
+					case self::TABLEENTRY_FLOAT:
 					case self::TABLEENTRY_DATETIME:
 					case self::TABLEENTRY_TEXTBOX:
 					case self::TABLEENTRY_COOKIE:
@@ -1290,7 +1295,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 						break;						
 				}				
 			}
-				
+
+			$eventHandler = '';				
 			switch ($settingType)
 			{
 				case self::TABLEENTRY_DATETIME:
@@ -1301,13 +1307,27 @@ if (!class_exists('StageShowLibAdminListClass'))
 					$editControl .= '<input type="hidden" '.str_replace('="', '="curr', $controlIdDef).' value="'.$controlValue.'" />'."\n";					
 					$this->hasDateTimeEntry = true;
 					break;
-
-				
+			
+				case self::TABLEENTRY_INTEGER:
+				case self::TABLEENTRY_FLOAT:
+					if (isset($settingOption[self::TABLEPARAM_LIMITS]))
+						$limits = $settingOption[self::TABLEPARAM_LIMITS];
+					else
+						$limits = "'U', 0";
+					
+					if ($settingType == self::TABLEENTRY_INTEGER)
+						$limits .= ", false";
+					else
+						$limits .= ", true";
+					$eventHandler = ' onkeypress="StageShowLib_OnKeypressNumericOnly(this, event, '.$limits.');" ';
+					$eventHandler .= ' onchange="StageShowLib_OnChangeNumericOnly(this, event, '.$limits.');" ';
+					// Drop into next case ...
+					
 				case self::TABLEENTRY_TEXT:
 				case self::TABLEENTRY_COOKIE:
 					$editLen = $settingOption[self::TABLEPARAM_LEN];
 					$editSize = isset($settingOption[self::TABLEPARAM_SIZE]) ? $settingOption[self::TABLEPARAM_SIZE] : $editLen+1;
-					$editControl  = '<input type="text"'.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" '.$controlIdDef.' value="'.$controlValue.'" />'."\n";
+					$editControl  = '<input type="text"'.$eventHandler.$autocompleteTag.' maxlength="'.$editLen.'" size="'.$editSize.'" '.$controlIdDef.' value="'.$controlValue.'" />'."\n";
 					$editControl .= '<input type="hidden" '.str_replace('="', '="curr', $controlIdDef).' value="'.$controlValue.'" />'."\n";					
 					break;
 
@@ -1384,6 +1404,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 				{
 					case self::TABLEENTRY_CHECKBOX:
 					case self::TABLEENTRY_TEXT:
+					case self::TABLEENTRY_INTEGER:
+					case self::TABLEENTRY_FLOAT:
 					case self::TABLEENTRY_DATETIME:
 					//case self::TABLEENTRY_TEXTBOX:
 					case self::TABLEENTRY_SELECT:
@@ -1496,6 +1518,8 @@ if (!class_exists('StageShowLibAdminListClass'))
 							// Fall into next case ...
 							
 						case self::TABLEENTRY_TEXT:
+						case self::TABLEENTRY_INTEGER:
+						case self::TABLEENTRY_FLOAT:
 							if (!isset($columnDef[self::TABLEPARAM_LEN]))
 							{
 								echo "No Len entry in Column Definition<br>\n";

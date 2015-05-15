@@ -260,23 +260,32 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			if (!$soldOut)
 			{
 				$quantityTagId = $this->GetOnlineStoreElemTagId('quantity', $result); 
-				$storeRowHTML .= '
-					<td class="stageshow-boxoffice-qty">				
-					<select class="stageshow-trolley-ui" name="'.$quantityTagId.'" id="'.$quantityTagId.'">
-					<option value="1" selected="">1</option>
-					';
+					
 				$maxQty = $myDBaseObj->getOption('MaxTicketQty');
-				if (($seatsAvailable > 0) && ($seatsAvailable <= $maxQty))
+				if (!$this->myDBaseObj->isOptionSet('QtySelectTextInput'))
 				{
-					// TODO - Deduct number of seats in shopping trolley from $seatsAvailable
-					$maxQty = $seatsAvailable;
-				}
-				for ($no=2; $no<=$maxQty; $no++)
-					$storeRowHTML .= '<option value="'.$no.'">'.$no.'</option>'."\n";
-				$storeRowHTML .= '
-					</select>
-					</td>
-				';
+					$qtySelectHTML = '
+						<select class="stageshow-trolley-ui" name="'.$quantityTagId.'" id="'.$quantityTagId.'">
+						<option value="1" selected="">1</option>
+						';
+					if (($seatsAvailable > 0) && ($seatsAvailable <= $maxQty))
+					{
+						// TODO - Deduct number of seats in shopping trolley from $seatsAvailable
+						$maxQty = $seatsAvailable;
+					}
+					for ($no=2; $no<=$maxQty; $no++)
+						$qtySelectHTML .= '<option value="'.$no.'">'.$no.'</option>'."\n";					
+					$qtySelectHTML .= '
+						</select>';
+				}	
+				else
+				{
+					$onKeypressHandler = ' onkeypress="StageShowLib_OnKeypressNumericOnly(this, event, '.$maxQty.', 0, false);" ';
+					$onChangeHandler = ' onchange="StageShowLib_OnChangeNumericOnly(this, event, '.$maxQty.', 0, false);" ';
+					$qtySelectHTML = '<input type="text" autocomplete="off" maxlength="2" size="3" class="stageshow-trolley-ui" name="'.$quantityTagId.'" id="'.$quantityTagId.'" '.$onKeypressHandler.$onChangeHandler.'value="1" />';
+				}			
+					
+				$storeRowHTML .= '<td class="stageshow-boxoffice-qty">'.$qtySelectHTML.'</td>';
 				
 				$altTag = $myDBaseObj->getOption('OrganisationID').' '.__('Tickets', $this->myDomain);
 				$buttonClasses = '';						

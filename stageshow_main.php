@@ -102,6 +102,12 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			// Bump the activation counter
 			$myDBaseObj->adminOptions['ActivationCount']++;
 			
+ 			if ($myDBaseObj->adminOptions['ActivationCount'] == 1)
+			{
+				// First time activation ....
+				$myDBaseObj->adminOptions['QtySelectTextInput'] = true;
+			}
+			
 			$myDBaseObj->adminOptions['TestModeEnabled'] = file_exists(STAGESHOW_TEST_PATH.'stageshow_testsettings.php');
 			
 			$LogsFolder = ABSPATH . '/' . $myDBaseObj->adminOptions['LogsFolderPath'];

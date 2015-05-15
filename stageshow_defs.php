@@ -125,6 +125,9 @@ if (!defined('STAGESHOW_MAXTICKETCOUNT'))
 if (!defined('STAGESHOW_MAX_TICKETSEATS'))
 	define('STAGESHOW_MAX_TICKETSEATS', 8);	// Maximum number of tickets in drop down quantity selector (Prices and Price Plans pages)
 
+if (!defined('STAGESHOW_BOXOFFICE_SORTFIELD'))
+	define('STAGESHOW_BOXOFFICE_SORTFIELD', 'priceType');	// The database field used to sort entries in the Ticket List
+
 if (!defined('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH'))
 	define('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH', 'stageshow_SaleTimeoutEMail.php');
 

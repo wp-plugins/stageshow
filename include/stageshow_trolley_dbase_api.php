@@ -466,7 +466,7 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 				
 		function GetPricesOrder($sqlFilters)
 		{
-			$sql = ' , '.STAGESHOW_PRICES_TABLE.'.priceType';
+			$sql = ' , '.STAGESHOW_BOXOFFICE_SORTFIELD;
 			
 			return $sql;
 		}

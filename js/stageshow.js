@@ -5,6 +5,7 @@ var SeatRequestedClassText = 'stageshow-boxoffice-seat-requested';
 var SeatReservedClassText = 'stageshow-boxoffice-seat-reserved';
 var SeatDisabledClassText = 'stageshow-boxoffice-seat-disabled';
 
+var SeatStateInvalid = -1;
 var SeatStateAvailable = 0;
 var SeatStateRequested = 1;
 var SeatStateReserved = 2;
@@ -103,11 +104,10 @@ function stageshow_CheckClickSeat(obj)
 	seatPosnParts = obj.id.split("_");
 	clickedColNo = parseInt(seatPosnParts[1]);
 	
-	/* Scan for "gaps" in this block of unallocated seats */
 	var seatsStates = [];
 	var limits = [];
-	var rowEnd = [];
 	
+	/* Get the new state of the seat just clicked */
 	seatState = stageshow_GetSeatState(obj);
 	switch (seatState)
 	{
@@ -124,27 +124,34 @@ function stageshow_CheckClickSeat(obj)
 	}
 	seatsStates[clickedColNo] = seatState;
 	
-	for (scanLoopIndex=0; scanLoopIndex<=1; scanLoopIndex++)
+	/* 
+		Scan this row both ways - Stop at one of the following conditions:
+		When the seat is at the end of the row
+		When the seat is next to an aisle
+		When the next seat is a Reserved Seat
+	*/
+	availSeatsCount = 0;	
+	for (loopCount=0; loopCount<=1; loopCount++)
 	{
 		seatNo = clickedColNo;
-		if (scanLoopIndex == 0)
+		if (loopCount == 0) 
 		{
 			scanOffset = -1;
 			scanEnd = SeatLeftEndClass;
 		}
-		else
+		else 
 		{
 			scanOffset = 1;
 			scanEnd = SeatRightEndClass;
 		}
-		limits[scanLoopIndex] = seatNo;
-		rowEnd[scanLoopIndex] = true;
+		
+		limits[loopCount] = seatNo;
 		if (stageshow_IsSeatState(obj, scanEnd))
 		{
 			continue;
 		}
 		
-		for (; seatNo>=1; )
+		for ( ; (seatNo > 0) && (seatNo <= maxCols); )
 		{
 			seatNo += scanOffset;
 			seatObjId = seatPosnParts[0] + '_' + seatNo;
@@ -153,57 +160,64 @@ function stageshow_CheckClickSeat(obj)
 						
 			if (seatState >= SeatStateReserved)
 			{
-				rowEnd[scanLoopIndex] = false;
+				/* Stop scanning without updating seatsStates */
 				break;
 			}
 			
 			seatsStates[seatNo] = seatState;
-			limits[scanLoopIndex] = seatNo;		
+			limits[loopCount] = seatNo;		
 			if (stageshow_IsSeatState(nextSeatObj, scanEnd))
 			{
+				/* Update seatsStates - Then Stop scanning */
 				break;
-			}
-			
+			}			
 		}
 	}
 	
-	inBlock = false;
-	blocksCount = 0;
-	availSeatsCount = 0;	
-	foundSmallGap = false;
+	/* Add a right hand terminator for the scan */
+	seatNo = limits[1] + 1;
+	seatsStates[seatNo] = SeatStateInvalid;
+	limits[1] = seatNo;
 	
+	/*  Scan Seats Block for an available blocks smaller than the limit */
+	lastSeatState = -1;	
+	availableBlocksCount=0;
+	requestedBlocksCount=0;
+	conseqAvailableSeats = 0;
+	smallGapsCount = 0;
 	for (seatNo=limits[0]; seatNo<=limits[1]; seatNo++)
 	{
 		seatState = seatsStates[seatNo];
-		switch (seatState)
+		if (seatState == SeatStateAvailable)
 		{
-			case SeatStateAvailable:
-				inBlock = false;
-				availSeatsCount++;
-				break;	
-				
-			case SeatStateRequested:
-				if (!inBlock) blocksCount++;
-				inBlock = true;
-				if ((availSeatsCount > 0) && (availSeatsCount < minSeatSpace))
-					foundSmallGap = true;
-				availSeatsCount = 0;
-				break;	
+			if (lastSeatState != seatState) availableBlocksCount++;
+			conseqAvailableSeats++;	
+		}
+		else
+		{			
+			if (lastSeatState != seatState)
+			{
+				if (seatState == SeatStateRequested)
+				{
+					requestedBlocksCount++;
+				}
+				if ((conseqAvailableSeats > 0) && (conseqAvailableSeats < minSeatSpace))
+				{
+					smallGapsCount++;
+				}
+			}
+			conseqAvailableSeats = 0;
+		}
+		lastSeatState = seatState;
+	}
+	
+	if ((requestedBlocksCount > 1) || (availableBlocksCount > 1))
+	{
+		if (smallGapsCount > 0)
+		{
+			return false;
 		}
 	}
-	if ((availSeatsCount > 0) && (availSeatsCount < minSeatSpace))
-		foundSmallGap = true;
-
-	if (blocksCount > 1) 
-		return false;
-	
-	if (rowEnd[0] && (seatsStates[limits[0]] == SeatStateRequested)) 
-		return true;
-	if (rowEnd[1] && (seatsStates[limits[1]] == SeatStateRequested)) 
-		return true;
-	
-	if (foundSmallGap) 
-		return false;
 	
 	return true;
 }
@@ -254,7 +268,7 @@ function stageshow_ToggleSeat(obj, isClick)
 		return;
 	}
 
-	if (!stageshow_CheckClickSeat(obj))
+	if (isClick && !stageshow_CheckClickSeat(obj))
 	{
 		alert(CantReserveSeatMessage);
 		return;
