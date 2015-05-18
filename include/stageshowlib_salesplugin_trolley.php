@@ -549,8 +549,6 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			echo '<a name="'.self::ANCHOR_PREFIX.$anchor.'"></a>';	
 		}
 		
-
-		
 		function OutputContent_OnlineStoreSection( $results )
 		{
 			$myDBaseObj = $this->myDBaseObj;

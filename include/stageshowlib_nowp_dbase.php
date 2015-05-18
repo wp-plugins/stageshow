@@ -24,21 +24,31 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 {
 	class StageShowLibDirectDBaseClass // Define class
 	{
+		var $con = false;
 		var $dbg = false;
 		var $last_error = '';
+		var $useMySQLi = true;
 		
 		function __construct()		//constructor		
 		{
-			//$this->dbg = isset($_GET['debug']);
+			$this->dbg = isset($_GET['debug']);
 			
-			// Create connection
-			$this->con = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD);
-			
-			// Check connection
-			//if (mysqli_connect_errno())			
+			// Create connection - Supress Error Message as MySQLi call may fail
+			$this->con = @mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD);
 			if (!$this->con)
 			{
-				echo "Failed to connect to MySQL: " . mysqli_connect_error();
+				$this->useMySQLi = false;
+				$this->con = @mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+			}
+			
+			// Check connection
+			if (!$this->con)
+			{
+				if ($this->useMySQLi)
+					echo "Failed to connect to MySQLi: " . mysqli_connect_error();
+				else
+					echo "Failed to connect to MySQL: " . mysql_error();
+				
 				return;
 			}
 			else
@@ -51,16 +61,30 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 				$charset = DB_CHARSET;
 			else
 				$charset = 'utf8';
-			mysqli_query($this->con, "SET CHARACTER SET $charset");
+				
+			$this->mysqlquery("SET CHARACTER SET $charset");
 
-			mysqli_select_db($this->con, DB_NAME);  			
-			$this->last_error = mysqli_error( $this->con );
+			if ($this->useMySQLi)
+				mysqli_select_db($this->con, DB_NAME); 
+			else 			
+				mysql_select_db(DB_NAME, $this->con);  			
+				
+			$this->last_error = $this->getError();
+		}
+		
+		function mysqlquery($sql)
+		{
+			if ($this->useMySQLi)
+				return mysqli_query($this->con, $sql);
+			else
+				return mysql_query($sql, $this->con);
 		}
 		
 		function query($sql)
 		{
-			$return_val = mysqli_query($this->con, $sql);
-			$this->last_error = mysqli_error( $this->con );
+			$return_val = $this->mysqlquery($sql);
+				
+			$this->last_error = $this->getError();
 			if ($this->last_error)
 			{
 				return false;
@@ -72,44 +96,35 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 			} 
 			elseif ( preg_match( '/^\s*(insert|delete|update|replace)\s/i', $sql ) ) 
 			{
-				$this->rows_affected = mysqli_affected_rows( $this->con );
+				if ($this->useMySQLi)
+					$this->rows_affected = mysqli_affected_rows( $this->con );
+				else
+					$this->rows_affected = mysql_affected_rows( $this->con );
+				
 				// Take note of the insert_id
 				if ( preg_match( '/^\s*(insert|replace)\s/i', $sql ) ) 
 				{
-					$this->insert_id = mysqli_insert_id( $this->con );
+					$this->insert_id = $this->LastInsertId();
 				}
 				// Return number of rows affected
 				$return_val = $this->rows_affected;
 			} 
-/*			
-			else 
-			{
-				$num_rows = 0;
-				while ( $row = @mysqli_fetch_object( $return_val ) ) 
-				{
-					$this->last_result[$num_rows] = $row;
-					$num_rows++;
-				}
-
-				// Log number of rows the query returned
-				// and return number of rows selected
-				$this->num_rows = $num_rows;
-				$return_val     = $num_rows;
-			}
-*/
 
 			return $return_val;
 		}
 		
 		function LastInsertId()
 		{
-			return mysqli_insert_id($this->con);
+			if ($this->useMySQLi)
+				return mysqli_insert_id( $this->con );
+			else
+				return mysql_insert_id( $this->con );
 		}
 
 		function get_results($sql)
 		{
-			$mysqlRslt = mysqli_query($this->con, $sql);
-			$this->last_error = mysqli_error( $this->con );
+			$mysqlRslt = $this->mysqlquery($sql);
+			$this->last_error = $this->getError();
 			if ($this->last_error)
 			{
 				if ($this->dbg) echo "SQL Error: ".$this->last_error;
@@ -120,14 +135,23 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 			// Fetch rows one at a time
 			$rowNo = 0;
 			$rslts = array();
-			while ($row=mysqli_fetch_array($mysqlRslt, MYSQL_ASSOC))
+			while (true)
 			{
+				if ($this->useMySQLi)
+					$row=mysqli_fetch_array($mysqlRslt, MYSQL_ASSOC);				
+				else
+					$row=mysql_fetch_array($mysqlRslt, MYSQL_ASSOC);				
+				if (!$row) break;
+				
 				$rslts[$rowNo] = $row;
 				$rowNo++;
 			}
 
 			// Free result set
-			mysqli_free_result($mysqlRslt);
+			if ($this->useMySQLi)
+				mysqli_free_result($mysqlRslt);
+			else
+				mysql_free_result($mysqlRslt);
 
 			$rsltArray = array();
 			foreach ($rslts as $rowNo => $rsltRow)
@@ -149,7 +173,10 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 		{
 			if ( $this->con ) 
 			{
-				return mysqli_real_escape_string( $this->con, $string );
+				if ($this->useMySQLi)
+					return mysqli_real_escape_string( $this->con, $string );
+				else
+					return mysql_real_escape_string( $string, $this->con );
 			}
 			return addslashes( $string );
 		}
@@ -181,6 +208,14 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 			$query = preg_replace( '|(?<!%)%s|', "'%s'", $query ); // quote the strings, avoiding escaped strings like %%s
 			array_walk( $args, array( $this, 'escape_by_ref' ) );
 			return @vsprintf( $query, $args );
+		}
+		
+		function getError()
+		{
+			if ($this->useMySQLi)
+				return mysqli_error($this->con);
+			else
+				return mysql_error($this->con);
 		}
 
 	}

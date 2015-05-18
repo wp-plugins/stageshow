@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: stageshow 5.0.6 \n"
+"Project-Id-Version: stageshow 5.0.7 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshow\n"
-"POT-Creation-Date: 2015-05-15 07:10:14+00:00\n"
+"POT-Creation-Date: 2015-05-18 09:37:39+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -960,7 +960,7 @@ msgid_plural "Sales have been deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: include\stageshowlib_nowp_dbase.php:170
+#: include\stageshowlib_nowp_dbase.php:197
 msgid "The query argument of %s must have a placeholder."
 msgstr ""
 
@@ -989,7 +989,7 @@ msgid "Sandbox"
 msgstr ""
 
 #: include\stageshowlib_payfast_gateway.php:237
-#: include\stageshowgold_dbase_api.php:1360
+#: include\stageshowgold_dbase_api.php:1363
 msgid "Qty"
 msgstr ""
 
@@ -1111,61 +1111,61 @@ msgstr ""
 msgid "Add"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:618
+#: include\stageshowlib_salesplugin_trolley.php:616
 msgid "Sales Not Available Currently"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:735
+#: include\stageshowlib_salesplugin_trolley.php:733
 msgid "Remove"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:742
+#: include\stageshowlib_salesplugin_trolley.php:740
 msgid "Next"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:771
-#: include\stageshowlib_salesplugin_trolley.php:1002
+#: include\stageshowlib_salesplugin_trolley.php:769
+#: include\stageshowlib_salesplugin_trolley.php:1000
 msgid "Checkout"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:942
+#: include\stageshowlib_salesplugin_trolley.php:940
 msgid "Your Contact Details"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:944
+#: include\stageshowlib_salesplugin_trolley.php:942
 msgid "must be entered"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:1038
+#: include\stageshowlib_salesplugin_trolley.php:1036
 #: include\stageshowlib_test_emailsale.php:123
 msgid "EMail Sale"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:1137
+#: include\stageshowlib_salesplugin_trolley.php:1135
 msgid "Sale Details have been saved"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:1266
+#: include\stageshowlib_salesplugin_trolley.php:1264
 msgid "Shopping Trolley Cleared"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:1281
+#: include\stageshowlib_salesplugin_trolley.php:1279
 msgid "Your Order Details"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:1283
+#: include\stageshowlib_salesplugin_trolley.php:1281
 msgid "Sale Items"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:1285
+#: include\stageshowlib_salesplugin_trolley.php:1283
 msgid "Your Shopping Trolley"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:1341
+#: include\stageshowlib_salesplugin_trolley.php:1339
 msgid "Total"
 msgstr ""
 
-#: include\stageshowlib_salesplugin_trolley.php:1371 stageshow_trolley.php:169
+#: include\stageshowlib_salesplugin_trolley.php:1369 stageshow_trolley.php:169
 msgid "Message To Seller"
 msgstr ""
 
@@ -1360,7 +1360,7 @@ msgid "Row"
 msgstr ""
 
 #: include\stageshowgold_dbase_api.php:412
-#: include\stageshowgold_dbase_api.php:1365 stageshow.php:107
+#: include\stageshowgold_dbase_api.php:1368 stageshow.php:107
 #: stageshowgold_trolley.php:48
 msgid "Seat"
 msgstr ""
