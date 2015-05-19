@@ -1295,7 +1295,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 						break;						
 				}				
 			}
-
+				
 			$eventHandler = '';				
 			switch ($settingType)
 			{
@@ -1307,7 +1307,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					$editControl .= '<input type="hidden" '.str_replace('="', '="curr', $controlIdDef).' value="'.$controlValue.'" />'."\n";					
 					$this->hasDateTimeEntry = true;
 					break;
-			
+
 				case self::TABLEENTRY_INTEGER:
 				case self::TABLEENTRY_FLOAT:
 					if (isset($settingOption[self::TABLEPARAM_LIMITS]))
@@ -1322,7 +1322,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					$eventHandler = ' onkeypress="StageShowLib_OnKeypressNumericOnly(this, event, '.$limits.');" ';
 					$eventHandler .= ' onchange="StageShowLib_OnChangeNumericOnly(this, event, '.$limits.');" ';
 					// Drop into next case ...
-					
+				
 				case self::TABLEENTRY_TEXT:
 				case self::TABLEENTRY_COOKIE:
 					$editLen = $settingOption[self::TABLEPARAM_LEN];
@@ -1450,13 +1450,17 @@ if (!class_exists('StageShowLibAdminListClass'))
 					else
 						$currVal = '';
 				
+					$hiddenVal = $currVal;						
 					if (isset($columnDef[StageShowLibTableClass::TABLEPARAM_DECODE]))
 					{
 						$optionId = $columnDef[StageShowLibTableClass::TABLEPARAM_ID];
 						$funcName = $columnDef[StageShowLibTableClass::TABLEPARAM_DECODE];
-						$currVal = $this->$funcName($result->$optionId, $result);
+						$hiddenVal = $currVal = $this->$funcName($result->$optionId, $result);
+						if (strpos($currVal, '>'))
+						{
+							$hiddenVal = $this->$funcName($result->$optionId, $result, true);
+						}
 					}
-					$hiddenVal = $currVal;
 					
 					$columnType = $columnDef[self::TABLEPARAM_TYPE];
 					if ((!$this->editMode) && ($columnType != self::TABLEENTRY_FUNCTION))

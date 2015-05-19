@@ -26,6 +26,8 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 {
 	class StageShowLibGenericDBaseClass // Define class
 	{
+		var $hideSQLErrors = false;
+		
 		// This class does nothing when running under WP
 		// Overload this class with DB access functions for non-WP access
 		function __construct() //constructor		
@@ -74,11 +76,23 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 		
 		function SetMySQLGlobals()
 		{			
-			$this->query("SET OPTION SQL_BIG_SELECTS=1");
+			$this->hideSQLErrors = true;
+			$rtnVal = $this->query("SET SQL_BIG_SELECTS=1");
+			$this->hideSQLErrors = false;
+			if (!$rtnVal)
+			{
+				// Use the old version of the query if it fails
+				$rtnVal = $this->query("SET OPTION SQL_BIG_SELECTS=1");
+			}
+			
+			return $rtnVal;
 		}
 		
 		function ShowDBErrors()
 		{
+			if ($this->hideSQLErrors)
+				return;
+				
 			global $wpdb;
 			if ($wpdb->last_error == '')
 				return;
@@ -126,11 +140,22 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			}	
 			
 			$this->ShowSQL($sql);
-			
+
+			if ($this->hideSQLErrors)
+			{
+				$suppress_errors = $wpdb->suppress_errors;
+				$wpdb->suppress_errors = true;
+			}
 			$this->queryResult = $wpdb->query($sql);
 			$rtnStatus = ($this->queryResult !== false);	
-			
-			$this->ShowDBErrors();
+			if ($this->hideSQLErrors)
+			{
+				$wpdb->suppress_errors = $suppress_errors;				
+			}
+			else
+			{
+				$this->ShowDBErrors();
+			}		
 			
 			return $rtnStatus;		
 		}

@@ -167,7 +167,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				$scriptCode .= "var tl8_srch = [];\n";		
 				$scriptCode .= "var tl8_repl = [];\n";
-					
+
 				$scriptCode .= $this->DefineTranslatedText('Show', $this->myDomain);
 				$scriptCode .= $this->DefineTranslatedText('Date & Time', $this->myDomain);
 				$scriptCode .= $this->DefineTranslatedText('Ticket Type', $this->myDomain);
@@ -175,12 +175,14 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$scriptCode .= $this->DefineTranslatedText('Seat', $this->myDomain);
 				$scriptCode .= $this->DefineTranslatedText('Price', $this->myDomain);
 
+				$scriptCode .= $this->DefineTranslatedText('Your Shopping Trolley', $this->myDomain);					
 				$scriptCode .= $this->DefineTranslatedText('Add', $this->myDomain, '"');
 				$scriptCode .= $this->DefineTranslatedText('Remove', $this->myDomain, '"');
 				$scriptCode .= $this->DefineTranslatedText('Reserve', $this->myDomain, '"');
 				$scriptCode .= $this->DefineTranslatedText('Checkout', $this->myDomain, '"');
 				$scriptCode .= $this->DefineTranslatedText('Select Seats', $this->myDomain, '"');
 
+				$scriptCode .= $this->DefineTranslatedText('Booking Fee', $this->myDomain);
 				$scriptCode .= $this->DefineTranslatedText('Donation', $this->myDomain);
 				$scriptCode .= $this->DefineTranslatedText('Message To Seller', $this->myDomain);
 				$scriptCode .= $this->DefineTranslatedText('Send tickets by post', $this->myDomain);
@@ -256,7 +258,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return $jqCode;
 		}
 				
-		function OutputContent_DoShortcode( $atts )
+		function OutputContent_DoShortcode($atts)
 		{
 	  		// FUNCTIONALITY: Runtime - Output Shop Front
 			$myDBaseObj = $this->myDBaseObj;

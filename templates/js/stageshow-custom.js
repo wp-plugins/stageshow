@@ -54,12 +54,19 @@ function stageshow_AddCustomHTMLValues()
 	stageshow_AddEntryToCheckout('custom_checkout_element');
 }
 
-function stageshow_OnClickAdd(obj, inst)
+/*
+	The functions in this section can be defined to change the behaviour of the Trolley Buttons
+	Uncomment the functions you want to use, and add your own code.
+	
+	Where these function are defined the default actions are only carried out if called here ...
+*/
+/*	
+function stageshowCustom_OnClickAdd(obj, inst)
 {
 	return stageshowJQuery_OnClickTrolleyButton(obj, inst); 
 }
 
-function stageshow_OnClickSelectseats(obj, inst)
+function stageshowCustom_OnClickSelectseats(obj, inst)
 {
 	return true;
 }
@@ -68,6 +75,22 @@ function stageshowCustom_OnClickSeatsselected(obj, inst)
 {	
 	return true;
 }
+
+function stageshowCustom_OnClickCheckoutdetails(obj, inst)
+{	
+	return true;
+}
+
+function stageshowCustom_OnClickSubmitDetails(obj, inst)
+{	
+	return true;
+}
+ 
+function stageshowCustom_OnClickRemove(obj, inst)
+{	
+	return true;
+}
+*/
 
 function stageshowCustom_OnClickReserve(obj, inst)
 {

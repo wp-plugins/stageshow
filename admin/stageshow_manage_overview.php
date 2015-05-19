@@ -284,13 +284,15 @@ if (!class_exists('StageShowWPOrgOverviewAdminClass'))
 		function Output_Contributors()
 		{
 			echo '<br><h2>'.__("Contributors", $this->myDomain)."</h2>\n";
+			$contName = __("Name", $this->myDomain);
+			$contContrib = __("Contribution", $this->myDomain);
 			
-?>
+			echo '
 <div class="stageshow-overview-info">
 <table class="widefat" cellspacing="0">
-<thead><tr class="stageshow-overview"><th>Name</th><th>Contribution</th><th>URL</th></tr></thead>
+<thead><tr class="stageshow-overview"><th>'.$contName.'</th><th>'.$contContrib.'</th><th>URL</th></tr></thead>
 <tbody>
-<?php
+';
 			$contributorsObj = new StageShowWPOrgContributorsClass();
 			$contributorsList = $contributorsObj->GetContributors();
 			foreach ($contributorsList as $contributor)

@@ -46,6 +46,9 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 				$this->shortcode = STAGESHOW_SHORTCODE_PREFIX."-boxoffice";
 			}
 			
+	  		// FUNCTIONALITY: Runtime - Load StageShow custom language file
+			load_plugin_textdomain('stageshow', false, STAGESHOW_LANG_RELPATH);
+			
 			parent::__construct();
 		}
 	

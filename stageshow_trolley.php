@@ -98,11 +98,6 @@ if (!class_exists('StageShowWPOrgCartPluginClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			$myDBaseObj->init($this->env['caller']);
 			
-		    $domain = 'stageshow';
-		    
-	  		// FUNCTIONALITY: Runtime - Load StageShow custom language file
-			load_plugin_textdomain($domain, false, STAGESHOW_LANG_RELPATH);
-			
 			// Get plugin version number
 			wp_update_plugins();
 		}

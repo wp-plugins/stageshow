@@ -28,6 +28,7 @@ if (!class_exists('StageShowLibDirectDBaseClass'))
 		var $dbg = false;
 		var $last_error = '';
 		var $useMySQLi = true;
+		var $suppress_errors = false;
 		
 		function __construct()		//constructor		
 		{
