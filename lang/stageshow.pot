@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: stageshow 5.0.8 \n"
+"Project-Id-Version: stageshow 5.0.9 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshow\n"
-"POT-Creation-Date: 2015-05-19 09:03:49+00:00\n"
+"POT-Creation-Date: 2015-05-21 21:16:36+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -431,7 +431,7 @@ msgstr ""
 #: admin\stageshow_tdt_export.php:111 admin\stageshowgold_pos_export.php:58
 #: include\stageshowlib_sales_dbase_api.php:495 include\stageshowlib_salesplugin.php:483
 #: include\stageshow_trolley_sales.php:498 stageshow.php:20
-#: stageshowgold_main.php:156
+#: stageshowgold_main.php:154
 msgid "Booking Fee"
 msgstr ""
 
@@ -441,7 +441,7 @@ msgstr ""
 
 #: admin\stageshow_tdt_export.php:113 include\stageshowlib_sales_dbase_api.php:496
 #: include\stageshowlib_salesplugin.php:492 stageshow.php:41
-#: stageshowgold_main.php:157 stageshowplus_trolley.php:120
+#: stageshowgold_main.php:155 stageshowplus_trolley.php:120
 msgid "Donation"
 msgstr ""
 
@@ -639,7 +639,7 @@ msgid "Seating Plan"
 msgstr ""
 
 #: admin\stageshowgold_manage_seating.php:39
-#: include\stageshowlib_gatewaysalesadmin.php:37 include\stageshowlib_table.php:1032
+#: include\stageshowlib_gatewaysalesadmin.php:37 include\stageshowlib_table.php:1052
 msgid "Details"
 msgstr ""
 
@@ -1002,8 +1002,8 @@ msgstr ""
 #: include\stageshowlib_salesplugin.php:436 include\stageshowlib_salesplugin.php:465
 #: include\stageshowlib_salesplugin.php:501 include\stageshowlib_salesplugin.php:556
 #: include\stageshowlib_salesplugin.php:590 include\stageshowlib_salesplugin.php:628
-#: stageshowgold_main.php:128 stageshowgold_main.php:136
-#: stageshowgold_main.php:231 stageshowplus_main.php:301
+#: stageshowgold_main.php:126 stageshowgold_main.php:134
+#: stageshowgold_main.php:229 stageshowplus_main.php:301
 msgid "Cannot Checkout"
 msgstr ""
 
@@ -1178,53 +1178,53 @@ msgstr ""
 msgid "Hide"
 msgstr ""
 
-#: include\stageshowlib_table.php:550
+#: include\stageshowlib_table.php:570
 msgid "Bulk Actions"
 msgstr ""
 
-#: include\stageshowlib_table.php:560
+#: include\stageshowlib_table.php:580
 msgid "Apply"
 msgstr ""
 
-#: include\stageshowlib_table.php:763
+#: include\stageshowlib_table.php:783
 msgid "1 item"
 msgid_plural "%s items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: include\stageshowlib_table.php:779
+#: include\stageshowlib_table.php:799
 msgid "Go to the first page"
 msgstr ""
 
-#: include\stageshowlib_table.php:786
+#: include\stageshowlib_table.php:806
 msgid "Go to the previous page"
 msgstr ""
 
-#: include\stageshowlib_table.php:797
+#: include\stageshowlib_table.php:817
 msgid "Current page"
 msgstr ""
 
-#: include\stageshowlib_table.php:805
+#: include\stageshowlib_table.php:825
 msgid "of"
 msgstr ""
 
-#: include\stageshowlib_table.php:809
+#: include\stageshowlib_table.php:829
 msgid "Go to the next page"
 msgstr ""
 
-#: include\stageshowlib_table.php:816
+#: include\stageshowlib_table.php:836
 msgid "Go to the last page"
 msgstr ""
 
-#: include\stageshowlib_table.php:1155
+#: include\stageshowlib_table.php:1175
 msgid "Show all Events"
 msgstr ""
 
-#: include\stageshowlib_table.php:1284 include\stageshowlib_table.php:1470
+#: include\stageshowlib_table.php:1304 include\stageshowlib_table.php:1490
 msgid "Yes"
 msgstr ""
 
-#: include\stageshowlib_table.php:1284 include\stageshowlib_table.php:1470
+#: include\stageshowlib_table.php:1304 include\stageshowlib_table.php:1490
 msgid "No"
 msgstr ""
 
@@ -1272,27 +1272,27 @@ msgstr ""
 msgid "Unnamed Show"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:706
+#: include\stageshow_dbase_api.php:704
 msgid "DB Error"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:706
+#: include\stageshow_dbase_api.php:704
 msgid "Column does not exist"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:873
+#: include\stageshow_dbase_api.php:866
 msgid "Price Not Specified"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:879
+#: include\stageshow_dbase_api.php:872
 msgid "Invalid Price Entry"
 msgstr ""
 
-#: include\stageshow_dbase_api.php:885
+#: include\stageshow_dbase_api.php:878
 msgid "Price Entry cannot be negative"
 msgstr ""
 
-#: include\stageshow_jquery_email.php:120 stageshowgold_main.php:252
+#: include\stageshow_jquery_email.php:120 stageshowgold_main.php:250
 #: stageshowplus_main.php:296
 msgid "Confirmation EMail sent to"
 msgstr ""
@@ -1936,31 +1936,31 @@ msgstr ""
 msgid "Zones"
 msgstr ""
 
-#: stageshowgold_main.php:129
+#: stageshowgold_main.php:127
 msgid "Database Access Error"
 msgstr ""
 
-#: stageshowgold_main.php:137
+#: stageshowgold_main.php:135
 msgid "Error getting purchaser details from PayPal"
 msgstr ""
 
-#: stageshowgold_main.php:191 stageshowgold_main.php:219
+#: stageshowgold_main.php:189 stageshowgold_main.php:217
 msgid "Sale Cancelled"
 msgstr ""
 
-#: stageshowgold_main.php:219
+#: stageshowgold_main.php:217
 msgid "Timeout"
 msgstr ""
 
-#: stageshowgold_main.php:235
+#: stageshowgold_main.php:233
 msgid "Could not get sale details from PayPal"
 msgstr ""
 
-#: stageshowgold_main.php:252
+#: stageshowgold_main.php:250
 msgid "Sale Complete"
 msgstr ""
 
-#: stageshowgold_main.php:290
+#: stageshowgold_main.php:288
 msgid "One or more seats selected is no longer available"
 msgstr ""
 

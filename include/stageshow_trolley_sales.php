@@ -428,7 +428,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 				default:
 					break;					
 			}
-			
+
 			$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, $buttonType, $buttonClasses);				
 			$buttonTypeDef .= $buttonSrc;
 

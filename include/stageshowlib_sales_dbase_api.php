@@ -337,7 +337,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		function clearAll()
 		{
-			parent::clearAll($dropTable);
+			parent::clearAll();
 
 			$this->DropTable($this->DBTables->Sales);
 		}

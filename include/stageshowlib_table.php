@@ -309,6 +309,26 @@ if (!class_exists('StageShowLibTableClass'))
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
+		function AddTextBoxToTable($result, $inputName, $value, $col=0, $newRow = false)
+		{
+			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
+
+			$params  = " name=$inputName";
+			$params .= " id=$inputName";
+			
+			$content = '<textarea rows="1" cols="60" '.$params.'>'.$value.'</textarea>';
+			
+			$inputName = 'curr'.$inputName;
+			
+			$params  = " name=$inputName";
+			$params .= " id=$inputName";
+			$params .= " value=\"$value\"";
+			
+			$content .= "<input type=\"hidden\" $params />";
+			
+			$this->AddToTable($result, $content, $col, $newRow);
+		}
+		
 		function AddInputToTable($result, $inputName, $maxlength, $value, $col=0, $newRow = false, $extraParams = '')
 		{
 			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
@@ -1407,7 +1427,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 					case self::TABLEENTRY_INTEGER:
 					case self::TABLEENTRY_FLOAT:
 					case self::TABLEENTRY_DATETIME:
-					//case self::TABLEENTRY_TEXTBOX:
+					case self::TABLEENTRY_TEXTBOX:
 					case self::TABLEENTRY_SELECT:
 					case self::TABLEENTRY_VALUE:
 					case self::TABLEENTRY_VIEW:
@@ -1506,8 +1526,6 @@ if (!class_exists('StageShowLibAdminListClass'))
 							$this->AddCheckBoxToTable($result, $columnId, $checked, 0, "1");
 							break;
 							
-						//case self::TABLEENTRY_TEXTBOX:
-						
 						case self::TABLEENTRY_SELECT:
 							$options = self::GetSelectOptsArray($columnDef, $result);							
 							$this->AddSelectToTable($result, $columnDef, $options, $currVal);
@@ -1521,6 +1539,10 @@ if (!class_exists('StageShowLibAdminListClass'))
 								$currVal = '';
 							// Fall into next case ...
 							
+						case self::TABLEENTRY_TEXTBOX:
+							$this->AddTextBoxToTable($result, $columnId, $currVal, 0);
+							break;
+						
 						case self::TABLEENTRY_TEXT:
 						case self::TABLEENTRY_INTEGER:
 						case self::TABLEENTRY_FLOAT:

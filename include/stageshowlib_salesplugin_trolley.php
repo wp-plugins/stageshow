@@ -713,11 +713,11 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 
 			if ($buttonType == 'image')
 			{
-				$buttonClasses .= ' '.$this->myDomain.'-button-image ';				
+				$buttonClasses .= ' '.$this->myDomain.'-button-image';				
 			}
 
-			$buttonClasses .= $this->cssTrolleyBaseID.'-ui ';
-			$buttonClasses .= $this->cssTrolleyBaseID.'-button ';
+			$buttonClasses .= ' '.$this->cssTrolleyBaseID.'-ui';
+			$buttonClasses .= ' '.$this->cssTrolleyBaseID.'-button';
 
 			$buttonTypeDef .= ' id="'.$buttonName.'" name="'.$buttonName.'"';					
 			$buttonTypeDef .= ' class="'.$buttonClasses.'"';					
@@ -1333,7 +1333,7 @@ function stageshowlib_manualsale_email_click()
 				// Add totals row and checkout button
 				$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);				
 				$trolleyTotal = $myDBaseObj->FormatCurrency($trolleyTotal);
-				
+
 				echo '<tr class="'.$this->cssTrolleyBaseID.'-totalrow">'."\n";
 				echo '<td colspan="'.($this->trolleyHeaderCols-4).'">&nbsp;</td>'."\n";
 				echo '<td>'.__('Total', $this->myDomain)."\n";

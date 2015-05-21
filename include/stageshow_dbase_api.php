@@ -392,7 +392,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 		
 		function clearAll()
 		{
-			parent::clearAll($dropTable);
+			parent::clearAll();
 
 			$this->DropTable(STAGESHOW_SHOWS_TABLE);
 			$this->DropTable(STAGESHOW_PERFORMANCES_TABLE);
@@ -674,7 +674,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			return "OK";
 		}
 		
-		
 		function CanDeleteShow($showEntry)
 		{
 			$lastPerfDate = $this->GetLastPerfDateTime($showEntry->showID);
@@ -697,7 +696,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			
 			return $canDelete;		
 		}
-		
 		
 		function renameColumn($table_name, $oldColName, $newColName)
 		{
@@ -860,11 +858,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			return "OK";							
 		}
 		
-				
-				
-				
-				
-				
 		function IsPriceValid($newPriceValue, $result)
 		{
 			// Verify that the price value is not empty
@@ -1278,8 +1271,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$sql .= ', '.STAGESHOW_SHOWS_TABLE.' READ';
 			return $sql;
 		}
-				
-		
 		
 		function AddEMailFields($EMailTemplate, $saleDetails)
 		{
