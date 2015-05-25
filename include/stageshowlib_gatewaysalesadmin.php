@@ -248,7 +248,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 		
 		function __construct($env) //constructor	
 		{
-			$this->pageTitle = 'Sales Log';
+			$this->pageTitle = 'Sales';
 			
 			// TODO - Check this .....
 			if (isset($env['saleQtyInputID'])) 
@@ -311,7 +311,7 @@ if (!class_exists('PayPalSalesAdminClass'))
 
 			$this->invalidInputId = '';
 			
-			$this->pageTitle = $this->salesFor . 'Sales Log';			
+			$this->pageTitle = $this->salesFor . 'Sales';			
 		}
 		
 		function Output_MainPage($updateFailed)

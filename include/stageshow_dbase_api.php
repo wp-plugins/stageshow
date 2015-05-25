@@ -673,7 +673,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 
 			return "OK";
 		}
-		
+			
 		function CanDeleteShow($showEntry)
 		{
 			$lastPerfDate = $this->GetLastPerfDateTime($showEntry->showID);
@@ -695,7 +695,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			}
 			
 			return $canDelete;		
-		}
+		}	
 		
 		function renameColumn($table_name, $oldColName, $newColName)
 		{
@@ -723,9 +723,36 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$sqlFilters['showID'] = $showID;
 			return $this->GetPerformancesList($sqlFilters);
 		}
-				
-				
-				
+
+		function GetActivePerformances()
+		{
+			$selectFields  = '*';
+			//$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
+			//$selectFields .= ','.STAGESHOW_PRICES_TABLE.'.priceID';
+			
+			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
+			$sql .= " LEFT JOIN ".STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
+			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
+
+			// Add SQL filter(s)
+			$sqlCond  = '('.STAGESHOW_PERFORMANCES_TABLE.'.perfState="")';
+			$sqlCond .= ' OR ';
+			$sqlCond .= '('.STAGESHOW_PERFORMANCES_TABLE.'.perfState="'.STAGESHOW_STATE_ACTIVE.'")';
+			$sqlWhere  = "($sqlCond)";
+			$sqlWhere .= ' AND '.STAGESHOW_SHOWS_TABLE.'.showState="'.STAGESHOW_STATE_ACTIVE.'" ';
+										
+			$timeNow = current_time('mysql');
+			$sqlWhere .= ' AND '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime>"'.$timeNow.'" ';
+			
+			$sql .= ' WHERE '.$sqlWhere;
+			
+			$sql .= ' GROUP BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+
+			$perfsListArray = $this->get_results($sql);
+
+			return $perfsListArray;
+		}
 		
 		function CanDeletePerformance($perfsEntry)
 		{

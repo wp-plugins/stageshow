@@ -26,9 +26,10 @@ if (!class_exists('StageShowLibCalendarClass'))
 	{
 		var $cssRoot = 'calendar';
 		var $secsPerDay;
-
+		var $linksOpenNewTab = true;
+		
 		var $myDBaseObj;
-
+		
 		function __construct($myDBaseObj)
 		{
 			$this->myDBaseObj = $myDBaseObj;
@@ -77,7 +78,7 @@ if (!class_exists('StageShowLibCalendarClass'))
 					if ($weekNo != 1) 
 					{
 						// Add end of table tag block
-						$htmlOutput .=  "</tbody></table></div>\n";
+						$htmlOutput .=  "</tbody></table></div></div>\n";
 					}
 
 					$htmlOutput .=  $this->OutputHeader($dateNow);
@@ -109,9 +110,10 @@ if (!class_exists('StageShowLibCalendarClass'))
 						if ($cellAltTag != '') $cellAltTag .= "\n";
 						$cellAltTag .= $this->DateTileTitle($result);
 						
+						$cellTarget = ($this->linksOpenNewTab) ? ' target="_blank" ' : '';
 						// TODO - This link will only go to the last entry in the database that matches
 						if ($cellURL !== '') $cellURL = ' href="'.$cellURL.'" ';
-						$cellLink =  '<a '.$cellURL.' alt="'.$cellAltTag.'"  title="'.$cellAltTag.'" target="_blank">'.$cellLink.'</a>';
+						$cellLink =  '<a '.$cellURL.$cellTarget.' alt="'.$cellAltTag.'"  title="'.$cellAltTag.'">'.$cellLink.'</a>';
 						
 						$eventIndex++;
 						if ($eventIndex < $eventCount)
@@ -138,16 +140,20 @@ if (!class_exists('StageShowLibCalendarClass'))
 				}
 				$htmlOutput .=  "</tr>\n";
 			}			
-			$htmlOutput .=  "</tbody></table>\n";
-			$htmlOutput .= "</div>\n";			
+			$htmlOutput .=  "</tbody></table></div></div>\n";			
 			
 			return $htmlOutput;
 		}
 		
 		function OutputHeader( $dateNow )
 		{	
+			static $blockCount = 1;
+			
 			$htmlOutput  =  '';
 
+			$blockClass = $this->cssRoot.'MonthBlock '.$this->cssRoot.'MonthBlock'.$blockCount++;
+			
+			$htmlOutput .= '<div class="'.$blockClass.'">'."\n";						
 			$htmlOutput .= '<div class="'.$this->cssRoot.'Month">'.date( "F ", $dateNow)."</div>\n";						
 			$htmlOutput .= '<div class="'.$this->cssRoot.'">';						
 			$htmlOutput .= '<table class="'.$this->cssRoot.'Table"><tbody>'."\n<tr>\n";

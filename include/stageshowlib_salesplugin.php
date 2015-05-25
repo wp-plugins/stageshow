@@ -30,6 +30,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 	class StageShowLibSalesPluginBaseClass extends StageShowLibSalesCartPluginBaseClass // Define class
 	{
 		var $shortcodeCount = 0;
+		var $boxofficeContent = '';
 		
 		function __construct()
 		{
@@ -149,7 +150,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			if ($text != $translation)
 			{
 	        	$jqCode .= "tl8_srch[tl8_srch.length] = '".$delimStart.$text.$delimEnd."';\n";
-	        	$jqCode .= "tl8_repl[tl8_repl.length] = '".$delimStart.$translation.$delimEnd."';\n";
+	        	$jqCode .= "tl8_repl[tl8_repl.length] = '".$delimStart.addslashes(htmlspecialchars($translation)).$delimEnd."';\n";
 			}
 			
 			return $jqCode;
@@ -357,25 +358,28 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				
 				$this->OutputContent_OnlineStoreFooter();
 				
-				$boxofficeContent = ob_get_contents();
+				if ($this->boxofficeContent == '')
+				{
+					$this->boxofficeContent = ob_get_contents();
+				}
 				ob_end_clean();				
 			}
 			else
 			{
-				$boxofficeContent = '';
+				$this->boxofficeContent = '';
 			}
-			$boxofficeContent = $boxoffDiv.$boxofficeContent.$endDiv;
+			$this->boxofficeContent = $boxoffDiv.$this->boxofficeContent.$endDiv;
 			$trolleyContent = $trolleyDiv.$trolleyContent.$endDiv;
 			
 			$this->OutputContent_OnlineStoreMessages();
 			
 			if ($myDBaseObj->getOption('ProductsAfterTrolley'))
 			{
-				$outputContent .= $trolleyContent.$boxofficeContent;
+				$outputContent .= $trolleyContent.$this->boxofficeContent;
 			}
 			else
 			{
-				$outputContent .= $boxofficeContent.$trolleyContent;
+				$outputContent .= $this->boxofficeContent.$trolleyContent;
 			}
 			
 			$outputContent .= '</form>'."\n";	

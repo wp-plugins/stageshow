@@ -364,16 +364,21 @@ if (!class_exists('StageShowLibDBaseClass'))
 			check_admin_referer($referer);
 		}
 
-		function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass, $elementId, $buttonAction)
+		function ActionButtonHTML($buttonText, $caller, $domainId, $buttonClass, $elementId, $buttonAction, $extraParams = '', $target = '')
 		{
 			//if ($buttonAction == '') $buttonAction = strtolower(str_replace(" ", "", $buttonText));
 			$buttonText = __($buttonText, $domainId);
 			$page = $_GET['page'];
-				
+			
+			$buttonId = $domainId.'-'.$buttonAction.'-'.$elementId;
+			
 			$editLink = 'admin.php?page='.$page.'&action='.$buttonAction;
 			if ($elementId !== 0) $editLink .= '&id='.$elementId;
 			$editLink = $this->AddParamAdminReferer($caller, $editLink);
-			$editControl = '<a class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a>'."\n";  
+			if ($extraParams != '') $editLink .= '&'.$extraParams;
+			if ($target != '') $target = 'target='.$target;
+			
+			$editControl = "<a id=$buttonId name=$buttonId $target".' class="button-secondary" href="'.$editLink.'">'.$buttonText.'</a>'."\n";  
 			if ($buttonClass != '')
 			{
 				$editControl = '<div class='.$buttonClass.'>'.$editControl.'</div>'."\n";  

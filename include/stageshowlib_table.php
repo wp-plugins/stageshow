@@ -309,13 +309,16 @@ if (!class_exists('StageShowLibTableClass'))
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 
-		function AddTextBoxToTable($result, $inputName, $value, $col=0, $newRow = false)
+		function AddTextBoxToTable($result, $columnDef, $value, $col=0, $newRow = false)
 		{
+			$inputName  = $columnDef[self::TABLEPARAM_ID];
 			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
 
 			$params  = " name=$inputName";
 			$params .= " id=$inputName";
-			
+
+			$params .= isset($columnDef[self::TABLEPARAM_ONCHANGE]) ? ' onchange="'.$columnDef[self::TABLEPARAM_ONCHANGE].'(this)" ' : '';
+		
 			$content = '<textarea rows="1" cols="60" '.$params.'>'.$value.'</textarea>';
 			
 			$inputName = 'curr'.$inputName;
@@ -1540,7 +1543,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 							// Fall into next case ...
 							
 						case self::TABLEENTRY_TEXTBOX:
-							$this->AddTextBoxToTable($result, $columnId, $currVal, 0);
+							$this->AddTextBoxToTable($result, $columnDef, $currVal, 0);
 							break;
 						
 						case self::TABLEENTRY_TEXT:

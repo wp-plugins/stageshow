@@ -40,6 +40,7 @@ function stageshow_TestClickSeat(obj)
 	className  = className.replace('  ', ' ');
 	
 	seatName = 'Row ' + seatId.replace('_', ' Seat ');
+	seatName = obj.title;
 	
 	if (classPosn < 0)
 	{
@@ -53,4 +54,19 @@ function stageshow_TestClickSeat(obj)
 	}
 	obj.className = className;
 	
+}
+
+function stageshow_OnChangeZoneSpec(obj)
+{
+	name = obj.name;
+	
+	/* Extract SeatingID and Zone ID from name */
+	/* Get View Template Button ID */
+	/* Get View Template Button Object */
+	/* Get Link URL from object */
+	/* Remove this Zone Spec from URL */
+	/* Add new value of Zone Spec to URL */
+	/* Update button URL */
+	
+	return true;
 }
