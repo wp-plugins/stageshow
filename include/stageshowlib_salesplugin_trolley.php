@@ -85,6 +85,8 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		
 		var $TL8Strings = array();
 		
+		var $boxofficeContent = '';
+			
 		function __construct()
 		{
 			$myDBaseObj = $this->myDBaseObj;

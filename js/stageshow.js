@@ -390,6 +390,7 @@ function stageshowJQuery_OnClickTrolleyButton(obj, inst)
 	postvars.count = inst;
 	postvars.timeout = 30000;
 	postvars.cache = false;
+	postvars.path = window.location.pathname + window.location.search;
 	
 	postvars = stageshowJQuery_PostVars(postvars);
 

@@ -56,17 +56,65 @@ function stageshow_TestClickSeat(obj)
 	
 }
 
+function stageshow_DisableLinkButton(buttonId)
+{
+	buttonObj = document.getElementById(buttonId);
+	buttonObj.removeAttribute('href');
+}
+
+function stageshow_OnChangeZoneRef(obj)
+{
+	return stageshow_OnChangeZoneEntry(obj, "zoneRef");
+}
+
 function stageshow_OnChangeZoneSpec(obj)
 {
-	name = obj.name;
+	return stageshow_OnChangeZoneEntry(obj, "zoneSpec");
+}
+
+function stageshow_OnChangeZoneDecode(obj)
+{
+	return stageshow_OnChangeZoneEntry(obj, "seatingDecodeTable");
+}
+
+function stageshow_OnChangeZoneEntry(obj, elemRootId)
+{
+	changedElemName = obj.name;
 	
 	/* Extract SeatingID and Zone ID from name */
-	/* Get View Template Button ID */
-	/* Get View Template Button Object */
+	ids = changedElemName.replace(elemRootId, "");
+	idParts = ids.split("_");
+	seatingId = idParts[0];
+	
+	/* Get View Template Link Button Object */
+	buttonId = "stageshow-viewtemplate-" + seatingId;
+	buttonObj = document.getElementById(buttonId);
+		
 	/* Get Link URL from object */
+	buttonHref = buttonObj.getAttribute('href')
+
 	/* Remove this Zone Spec from URL */
+	HrefUrlAndParams = buttonHref.split("?");
+	buttonHref = HrefUrlAndParams[0] + "?";
+	params = HrefUrlAndParams[1].split("&");
+	
 	/* Add new value of Zone Spec to URL */
+	for (var index=0; index<params.length; index++) 
+	{
+		paramNameAndValue = params[index].split("=");
+		if (paramNameAndValue.length < 2)
+			continue;
+		
+		paramId = paramNameAndValue[0];
+		if (paramNameAndValue[0] == changedElemName)
+		{
+			paramNameAndValue[1] = obj.value;
+		}
+		buttonHref += paramNameAndValue[0] + "=" + paramNameAndValue[1] + "&";			
+	}
+	
 	/* Update button URL */
+	buttonObj.setAttribute('href', buttonHref);
 	
 	return true;
 }

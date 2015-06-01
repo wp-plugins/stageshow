@@ -51,8 +51,14 @@ if (!class_exists('StageShowWPOrgToolsAdminClass'))
 <div class="wrap">
 	<div class="stageshow-admin-form">
 <?php
-			$this->Tools_Validate();
-			$this->Tools_Export();
+			if ( current_user_can(STAGESHOWLIB_CAPABILITY_VALIDATEUSER) )
+			{
+				$this->Tools_Validate();
+			}
+			if ( current_user_can(STAGESHOWLIB_CAPABILITY_VIEWSETTINGS) )
+			{
+				$this->Tools_Export();
+			}
 			if (class_exists('StageShowLibTableTestEMailClass') && current_user_can(STAGESHOWLIB_CAPABILITY_DEVUSER)) new StageShowLibTableTestEMailClass($this);
 ?>
 	</div>

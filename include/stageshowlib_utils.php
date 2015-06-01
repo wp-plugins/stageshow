@@ -40,9 +40,16 @@ if (!class_exists('StageShowLibUtilsClass'))
 			return stripslashes(self::GetArrayElement($reqArray, $elementId));
 		}
 		
+		static function GetPageHost() 
+		{			
+			$siteHost = ( is_ssl() ? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'];
+			return $siteHost;
+		}
+		
 		static function GetPageURL() 
 		{			
-			$currentURL = ( is_ssl() ? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			$currentURL  = self::GetPageHost();
+			$currentURL .= $_SERVER['REQUEST_URI'];
 			return $currentURL;
 		}
 		
@@ -56,6 +63,12 @@ if (!class_exists('StageShowLibUtilsClass'))
 			return $reqArray[$elementId];
 		}
 		
+		static function startsWith($haystack, $needle)
+		{
+		     $length = strlen($needle);
+		     return (substr($haystack, 0, $length) === $needle);
+		}
+
 		static function recurse_copy($src, $dst, $perm=0755)
 		{
 			$dir = opendir($src);

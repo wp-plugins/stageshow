@@ -30,7 +30,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 	class StageShowLibSalesPluginBaseClass extends StageShowLibSalesCartPluginBaseClass // Define class
 	{
 		var $shortcodeCount = 0;
-		var $boxofficeContent = '';
 		
 		function __construct()
 		{

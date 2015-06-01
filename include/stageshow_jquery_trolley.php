@@ -126,18 +126,21 @@ if (!class_exists('StageShowJQueryTrolley'))
 
 			ob_start();
 			$cartObj->Cart_OutputContent_OnlineStoreMain($atts);
-			$boxofficeContent = ob_get_contents();
+			if ($cartObj->boxofficeContent == '')
+			{
+				$cartObj->boxofficeContent = ob_get_contents();
+			}
 			ob_end_clean();		
 			
-			$outputContent = $boxofficeContent;		
+			$outputContent = $cartObj->boxofficeContent;		
 
 			if ($myDBaseObj->getOption('ProductsAfterTrolley'))
 			{
-				$outputContent = $trolleyContent.$boxofficeContent;
+				$outputContent = $trolleyContent.$cartObj->boxofficeContent;
 			}
 			else
 			{
-				$outputContent = $boxofficeContent.$trolleyContent;
+				$outputContent = $cartObj->boxofficeContent.$trolleyContent;
 			}
 			
 			if ($logCall)

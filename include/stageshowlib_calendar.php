@@ -31,7 +31,7 @@ if (!class_exists('StageShowLibCalendarClass'))
 		var $myDBaseObj;
 		
 		function __construct($myDBaseObj)
-		{
+		{		
 			$this->myDBaseObj = $myDBaseObj;
 		}
 

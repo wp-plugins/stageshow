@@ -59,4 +59,46 @@ function current_time( $type, $gmt = 0 )
 	}
 }
 
+// Basic version of WP remove_query_arg function
+function remove_query_arg($key, $query)
+{	
+	$regex = '|([\?\&])('.$key.'[\=][^\&\#]*)|';
+	if (preg_match($regex, $query, $matches) == 0)
+	{
+		return $query;
+	}
+	
+	$param = $matches[2];
+	if ($matches[1] == '?')
+	{
+		$query = str_replace($matches[0], '?', $query);
+		$query = str_replace('?&', '?', $query);
+	}
+	else
+	{
+		$query = str_replace($matches[0], '', $query);
+	}
+	
+	return $query;
+}
+
+function add_query_arg($key, $value, $query)
+{
+	$newArg = $key.'='.$value;
+	if (strpos($query, '?') != false)
+	{
+		$query = str_replace('?', '?'.$newArg.'&', $query);
+	}
+	else if (strpos($query, '#') != false)
+	{
+		$query = str_replace('#', '?'.$newArg.'#', $query);
+	}
+	else
+	{
+		$query .= '?'.$newArg;
+	}
+	
+	return $query;
+}
+
 ?>
