@@ -56,10 +56,6 @@ if (!class_exists('StageShowLibDevCallerClass'))
 			$testFilePrefix = strtolower($this->classPrefix);
 			$testFilePrefixLen = strlen($testFilePrefix);
 			
-			// This code deals with the change in class names for DEMO builds
-			$updatedClassPrefix = "class StageShow_Test_";
-			$updatedClassPrefix = str_replace("class ", "", $updatedClassPrefix);
-			
 			$testClasses = array();
 			$maxIndex = 0;
 			$testDir = dirname(__FILE__).'/';
@@ -74,7 +70,7 @@ if (!class_exists('StageShowLibDevCallerClass'))
 				$testName = substr($testFile, $testFilePrefixLen);
 				$testName = str_replace('.php','', $testName);
 				
-				$testClass = $updatedClassPrefix . $testName;
+				$testClass = $this->classPrefix . $testName;
 				$filePath = $testDir.strtolower($this->classPrefix.$testName).'.php';
 				include $filePath;
 				

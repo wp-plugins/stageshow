@@ -203,7 +203,8 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			$this->SetLoginParams(
 				$adminOptions['PayPalAPIUser'], 
 				$adminOptions['PayPalAPIPwd'], 
-				$adminOptions['PayPalAPISig']);
+				$adminOptions['PayPalAPISig'], 
+				$adminOptions['PayPalCurrency']);
 			$this->SetTestMode(false);
 
 			$useLocalIPNServer = isset($dbgOptions['Dev_IPNLocalServer']) && ($dbgOptions['Dev_IPNLocalServer']);

@@ -197,6 +197,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$attString = '';
 			foreach ($atts as $attKey => $attVal)
 			{
+				$attVal = str_replace("'", "\'", $attVal);
 				$attKey = 'scatt_'.$attKey;
 				$attString .= $comma.$attKey."=".$attVal;
 				$comma = ',';
@@ -558,8 +559,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				{
 					$this->checkoutMsg = __('Cannot Checkout', $this->myDomain).' - ';
 					$this->checkoutMsg .= __('Total sale is zero', $this->myDomain);
-					return;						
+					return;
 				}
+				
+				// Process Filter - Allows custom code to change processing
+				//apply_filter('stageshow_checkout', $this);
 								
 				// Lock tables so we can commit the pending sale
 				$this->myDBaseObj->LockSalesTable();
