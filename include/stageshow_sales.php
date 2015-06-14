@@ -62,6 +62,22 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 				'style' => 'normal' 
 			), $atts );
         
+			if (($atts['id'] != '') && !is_numeric($atts['id']))
+			{
+				$showID = $this->myDBaseObj->GetShowID($atts['id']);
+				if ($showID > 0) 
+					$atts['id'] = $showID;
+				else
+				{
+					if (current_user_can(STAGESHOWLIB_CAPABILITY_ADMINUSER))
+					{
+						$scShowErrorMsg = __("Shortcode Specifies Non-existant Show", $this->myDomain)." (".$atts['id'].")";
+						echo "<div id=NonExistantShowError class=stageshow-error>$scShowErrorMsg</div>\n";											
+					}
+					$atts['id'] = '';
+				}
+			}
+			
         	return $atts;
 		}
 		

@@ -296,12 +296,14 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$actionURL = remove_query_arg('ppexp', $actionURL);
 
 			$atts = $this->OutputContent_GetAtts($atts);
+
  			$this->OutputContent_TrolleyButtonJQuery($atts);
 		      
         	$ourAnchor = $atts['anchor'];
 			if ($ourAnchor != '')
 			{
 				$pageAnchor = '#'.self::ANCHOR_PREFIX.$ourAnchor;	// i.e. trolley
+/*				
 				if (strpos($actionURL, '?'))
 				{
 					//$actionURL = str_replace('?', $pageAnchor.'?', $actionURL);
@@ -310,7 +312,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				else
 				{
 					$actionURL .= $pageAnchor;
-				}				
+				}	
+*/				
+				$outputContent .= "<script>\n";
+				$outputContent .= "var stageshowAnchor = [];\n";
+				$outputContent .= "stageshowAnchor[".$this->shortcodeCount."] = '$pageAnchor';\n";
+				$outputContent .= "</script>\n";
 			}
 			
 			$outputContent .= '<form id=trolley method="post" action="'.$actionURL.'">'."\n";				

@@ -469,6 +469,11 @@ function stageshow_OnClickAdd(obj, inst)
   		return stageshowCustom_OnClickAdd(obj, inst); 
 	}	
 	
+	if (typeof stageshowAnchor[inst] == 'string') 
+	{
+		jQuery("body").scrollTo(stageshowAnchor[inst]);
+	}
+	
 	return stageshowJQuery_OnClickTrolleyButton(obj, inst); 
 }
 
