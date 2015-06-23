@@ -1,10 +1,10 @@
-=== BingMaps ===
+=== BingMaps - Map Viewer ===
 Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/BingMaps/donate.html
 Tags: pages, paypal, maps, bing, mapping, ordnance survey, OS, routes, walking
 Requires at least: 3.0
-Tested up to: 3.5.1
-Stable tag: 0.3
+Tested up to: 4.2.2
+Stable tag: 0.4
 
 The BingMaps plugin adds an interactive map(s) to your Wordpress Page or Post, using the Bing Maps AJAX Control.
 
