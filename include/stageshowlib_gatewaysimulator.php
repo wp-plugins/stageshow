@@ -38,7 +38,8 @@ if (!class_exists('GatewaySimulator'))
 					$siteURL = get_option('siteurl');
 					$selectHTML  = '<p>No pending sales - Checkout a sale to add one<p>'."\n";
 					$selectHTML .= 'Go to <a href="'.$siteURL.'">site</a>'."\n";
-					return $selectHTML;
+					echo $selectHTML;
+					return;
 				}
 				
 				if (count($saleList) == 1)
@@ -310,7 +311,7 @@ if (!class_exists('GatewaySimulator'))
 					<td class="gatewaysim_formFieldValue">
 						<input name="txn_id" id="txn_id" type="text" maxlength="32" size="32" value="'.$this->transactionID.'" />
 					</td>
-					<td class="gatewaysim_formFieldButton"><input class="button-primary" type="button" name="refreshbutton" value="Refresh" onClick=stageshow_onclickrefresh() /></td>
+					<td class="gatewaysim_formFieldButton"><input class="button-primary" type="button" name="refreshbutton" value="Refresh" onClick=StageShowLib_onclickrefresh() /></td>
 				</tr>
 				<tr class="gatewaysim_formRow">
 					<td class="gatewaysim_formFieldID">Payment Status:&nbsp; </td>
@@ -358,7 +359,7 @@ if (!class_exists('GatewaySimulator'))
 			        $html .= $this->AddHiddenTag('address_name', '(Unused)');
 					
 			        $html .= $this->AddHiddenTag('address_status', 'unconfirmed');
-			        $html .= $this->AddHiddenTag('business', 'wibble%40stageshow.org.uk');
+			        $html .= $this->AddHiddenTag('business', 'wibble@wobble.org.uk');
 
 					// TODO - Test with Zollstockgürtel
 			        $html .= $this->AddHiddenTag('contact_phone', '01234 567890');
@@ -429,7 +430,7 @@ if (!class_exists('GatewaySimulator'))
 			$tagTitle = str_replace("_", " ", $tagName);
 			$paramID = 'PayPalVal_'.$tagName;
 			
-			$sessionVar = 'StageShowSim_'.$tagName;
+			$sessionVar = 'StageShowLib_Sim_'.$tagName;
 			$tagValue = isset($_SESSION[$sessionVar]) ? $_SESSION[$sessionVar] : '';
 			if ($tagValue != '')
 			{
@@ -454,7 +455,7 @@ if (!class_exists('GatewaySimulator'))
 			$code = '
 	<script language="JavaScript">
 	<!--
-			function stageshow_onclickqty() {
+			function StageShowLib_onclickqty() {
 			var total = 0.0;
 	';
 			for ($indexNo = 1; $indexNo <= $itemsCount; $indexNo++)
@@ -464,7 +465,7 @@ if (!class_exists('GatewaySimulator'))
 			document.gateway_sim.mc_fee.value = (Math.floor((total*3.4) + 20))/100;
 			}
 
-			function stageshow_onclickrefresh() {
+			function StageShowLib_onclickrefresh() {
 			var now = new Date();
 			var transactionID;
 

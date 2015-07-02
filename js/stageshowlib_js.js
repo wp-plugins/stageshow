@@ -38,6 +38,7 @@ function StageShowLib_ParseCurrency(currencyText)
 
 function StageShowLib_OnChangeTrolleyTotal(obj)
 {
+	var pluginId = stageshowlib_pluginId;
 	var donationObj = document.getElementById('saleDonation');
 	var saleDonation = 0;
 	if (donationObj != null)
@@ -57,7 +58,7 @@ function StageShowLib_OnChangeTrolleyTotal(obj)
 	var postTicketsObj = document.getElementById('salePostTickets');
 	if (postTicketsObj != null)
 	{
-		var salePostageRowObj = document.getElementById('stageshow-trolley-postagerow');
+		var salePostageRowObj = document.getElementById(pluginId + '-trolley-postagerow');
 		if (postTicketsObj.checked)
 		{
 			var salePostageObj = document.getElementById('salePostage');
@@ -72,7 +73,7 @@ function StageShowLib_OnChangeTrolleyTotal(obj)
 	}
 
 	var subTotalObj = document.getElementById("saleTrolleyTotal");
-	var finalTotalObj = document.getElementById("stageshow-trolley-totalval");
+	var finalTotalObj = document.getElementById(pluginId + '-trolley-totalval');
 	var subTotal = subTotalObj.value;
 	
 	var newTotalVal = StageShowLib_ParseCurrency(subTotal);
@@ -255,3 +256,105 @@ function StageShowLib_OnKeypressNumericOnly(obj, event, maxval, minval, dp)
 	
 	return true;
 }
+
+function StageShowLib_JQuery_OnClickAdd(obj, inst)
+{
+	rtnVal = StageShowLib_JQuery_OnClickTrolleyButton(obj, inst);
+	
+	if ((typeof stageshowlib_pageAnchor != 'undefined') && (typeof stageshowlib_pageAnchor[inst] == 'string'))
+	{
+		anchorId = "#"+stageshowlib_pageAnchor[inst];
+	    jQuery('html, body').animate({
+	        scrollTop: jQuery(anchorId).offset().top - anchorOffset
+	    }, anchorDuration);		
+	}
+	
+	return rtnVal;
+}
+	
+function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
+{
+	var pluginId = stageshowlib_pluginId;
+	var scIndex = inst;
+	
+	/* Set Cursor to Busy and Disable All UI Buttons */
+	StageShowLib_SetBusy(true, pluginId + "-trolley-ui");
+			
+	var postvars = {
+		jquery: "true"
+	};
+	postvars.count = inst;
+	postvars.timeout = 30000;
+	postvars.cache = false;
+	postvars.path = window.location.pathname + window.location.search;
+	
+	postvars = StageShowLib_JQuery_PostVars(postvars);
+
+	var buttonId = obj.id;	
+	postvars[buttonId] = "submit";
+	var qty = 0;
+	var nameParts = buttonId.split("_");
+	if (nameParts[0] == "AddItemButton")
+	{
+		var qtyId = "quantity_" + nameParts[1];
+		var qty = document.getElementById(qtyId).value;
+		postvars[qtyId] = qty;
+	}
+	
+	ourAtts = stageshowlib_attStrings[scIndex-1];
+	ourAtts = ourAtts.split(",");
+	for (var attId=0; attId<ourAtts.length; attId++) 
+	{
+		var thisAtt = ourAtts[attId].split("=");
+		var key = thisAtt[0];
+		var value = thisAtt[1];
+		
+		postvars[key] = value;
+	}
+
+	/* Get New HTML from Server */
+    jQuery.post(jQueryURL, postvars,
+	    function(data, status)
+	    {
+			trolleyTargetElem = jQuery("#" + pluginId + "-trolley-trolley-std");
+			
+	    	if ((status != 'success') || (data.length == 0))
+	    	{
+				StageShowLib_SetBusy(false, pluginId + "-trolley-ui");
+				
+	    		/* Fall back to HTML Post Method */
+				return true;
+			}
+
+			/* Apply translations to any message */
+			for (var index=0; index<tl8_srch.length; index++)
+			{
+				var srchFor = tl8_srch[index];
+				var repWith = tl8_repl[index];
+				data = StageShowLib_replaceAll(srchFor, repWith, data);
+			}
+
+			targetElemID = "#" + pluginId + "-trolley-container" + inst;
+			divElem = jQuery(targetElemID);
+			divElem.html(data);
+	
+			/* Copy New Trolley HTML */
+			trolleyUpdateElem = jQuery("#" + pluginId + "-trolley-trolley-jquery");
+			
+			/* Get updated trolley (which is not visible) */
+			trolleyHTML = trolleyUpdateElem[0].innerHTML;
+
+			/* Copy New Trolley HTML */
+			trolleyTargetElem.html(trolleyHTML);
+			
+			/* Now delete the downloaded HTML */
+			trolleyUpdateElem.remove();
+			
+			/* Set Cursor to Normal and Enable All UI Buttons */
+			StageShowLib_SetBusy(false, pluginId + "-trolley-ui");
+	    }
+    );
+    
+    return false;
+}
+				

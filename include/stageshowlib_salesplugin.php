@@ -26,7 +26,13 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 if (!class_exists('StageShowLibSalesPluginBaseClass')) 
 {
 	include 'stageshowlib_nonce.php';
-	
+
+	if (!defined('STAGESHOWLIB_SCROLLTOANCHOR_OFFSET'))
+		define('STAGESHOWLIB_SCROLLTOANCHOR_OFFSET', 0);
+		
+	if (!defined('STAGESHOWLIB_SCROLLTOANCHOR_DURATION'))
+		define('STAGESHOWLIB_SCROLLTOANCHOR_DURATION', 1000);
+		
 	class StageShowLibSalesPluginBaseClass extends StageShowLibSalesCartPluginBaseClass // Define class
 	{
 		var $shortcodeCount = 0;
@@ -76,7 +82,15 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;			
 
+			$reloadParam = false;
+			if (defined('STAGESHOWLIB_JS_NOCACHE')) $reloadParam = time();
+			
+			// Add our own Javascript
+			wp_enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', dirname(__FILE__)), array(), $reloadParam);
+
 			$myDBaseObj->gatewayObj->Gateway_LoadUserScripts();
+
+			wp_enqueue_script('jquery');
 		}	
 		
 		function load_admin_styles()
@@ -190,7 +204,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$scriptCode .= $this->DefineTranslatedText('Seat Available', $this->myDomain);
 				$scriptCode .= $this->DefineTranslatedText('Seats Available', $this->myDomain);
 								
-				$scriptCode .=  "var attStrings = [];\n";				
+				$scriptCode .=  "var stageshowlib_attStrings = [];\n";				
+				$scriptCode .=  "var stageshowlib_pageAnchor = [];\n";
+				$scriptCode .=  "var stageshowlib_pluginId = '".$this->myDomain."';\n";
 			}
 
 			$comma = '';
@@ -203,7 +219,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$comma = ',';
 			}
 			$index = $this->shortcodeCount-1;
-			$scriptCode .=  "attStrings[$index] = '".$attString."';\n";
+			$scriptCode .=  "stageshowlib_attStrings[$index] = '".$attString."';\n";
 
 			if ($this->shortcodeCount == 1)
 			{
@@ -211,7 +227,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$scriptCode .=  'var jQueryURL = "'.$jQueryURL.'";'."\n";
 				
 				$scriptCode .=  '
-					function stageshowJQuery_PostVars(postvars)
+					function StageShowLib_JQuery_PostVars(postvars)
 					{
 						';
 							
@@ -271,7 +287,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		
 			$this->shortcodeCount++;
 			
-			// StageShow uses inline scripts and styles - wpautop breaks these so disable it
+			// StageShowLib uses inline scripts and styles - wpautop breaks these so disable it
 			//remove_filter('the_content', 'wpautop');
 
 			$myDBaseObj->AllUserCapsToServervar();
@@ -290,7 +306,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			}
 			$outputContent .= "--> \n";
 
-			$outputContent .= '<form></form>'."\n";		// Insulate StageShow from unterminated form tags
+			$outputContent .= '<form></form>'."\n";		// Insulate from unterminated form tags
 
 			$actionURL = $this->GetOurURL();
 			$actionURL = remove_query_arg('ppexp', $actionURL);
@@ -302,22 +318,14 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
         	$ourAnchor = $atts['anchor'];
 			if ($ourAnchor != '')
 			{
-				$pageAnchor = '#'.self::ANCHOR_PREFIX.$ourAnchor;	// i.e. trolley
-/*				
-				if (strpos($actionURL, '?'))
-				{
-					//$actionURL = str_replace('?', $pageAnchor.'?', $actionURL);
-					$actionURL .= $pageAnchor;
-				}
-				else
-				{
-					$actionURL .= $pageAnchor;
-				}	
-*/				
+				$pageAnchor = self::ANCHOR_PREFIX.$ourAnchor;	// i.e. trolley
 				$outputContent .= "<script>\n";
-				$outputContent .= "var stageshowAnchor = [];\n";
-				$outputContent .= "stageshowAnchor[".$this->shortcodeCount."] = '$pageAnchor';\n";
+				$outputContent .= "stageshowlib_pageAnchor[".$this->shortcodeCount."] = '$pageAnchor';\n";
+				$outputContent .= "anchorOffset = ".STAGESHOWLIB_SCROLLTOANCHOR_OFFSET.";\n";
+				$outputContent .= "anchorDuration = ".STAGESHOWLIB_SCROLLTOANCHOR_DURATION.";\n";
 				$outputContent .= "</script>\n";
+				
+				$actionURL .= '#'.$pageAnchor;
 			}
 			
 			$outputContent .= '<form id=trolley method="post" action="'.$actionURL.'">'."\n";				
@@ -570,7 +578,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				}
 				
 				// Process Filter - Allows custom code to change processing
-				//apply_filter('stageshow_checkout', $this);
+				//apply_filter('stageshowlib_checkout', $this);
 								
 				// Lock tables so we can commit the pending sale
 				$this->myDBaseObj->LockSalesTable();

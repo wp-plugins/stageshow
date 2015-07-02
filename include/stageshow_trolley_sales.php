@@ -47,6 +47,8 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 		
 			parent::__construct();
 			
+			$this->myJSRoot = $this->myDomain;
+			
 			// colID and cssColID are re-defined here 
 			$this->colID['name'] = defined('STAGESHOW_BOXOFFICECOL_NAME') ? STAGESHOW_BOXOFFICECOL_NAME : __('Show', $this->myDomain);
 			$this->cssColID['name'] = "show";					
@@ -220,7 +222,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			$storeRowHTML = '';
 			
 			$submitButton = __('Add', $this->myDomain);
-			$submitId     = $this->GetOnlineStoreElemTagId('AddTicketSale', $result);
+			$submitId     = $this->GetOnlineStoreElemTagId('AddItemButton', $result);
 			$showAllDates = defined('STAGESHOW_BOXOFFICE_ALLDATES');
 				
 			$myDBaseObj = $this->myDBaseObj;
@@ -432,12 +434,6 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			$buttonTypeDef = parent::GetButtonTypeDef($buttonID, $buttonName, $buttonType, $buttonClasses);				
 			$buttonTypeDef .= $buttonSrc;
 
-			if (!$this->adminPageActive)
-			{
-				$onClickHandler = 'stageshow_OnClick'.ucwords($buttonID);
-				$buttonTypeDef .= ' onClick="return '.$onClickHandler.'(this, '.$this->shortcodeCount.')"';				
-			}
-			
 			return $buttonTypeDef;
 		}
 				

@@ -20,6 +20,12 @@ Copyright 2014 Malcolm Shergold
 
 */
 
+if(!isset($_SESSION)) 
+{
+	// Must be Registered to use SESSIONS 
+	session_start();
+}	
+
 include 'stageshow_nowp_defs.php';
 
 if (!defined('StageShowLibAdminClass'))

@@ -1,10 +1,10 @@
-=== StageShow - Theatre Ticket Sales Plugin ===
+=== StageShow ===
 Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
 Tested up to: 4.2.2
-Stable tag: 5.0.16.3
+Stable tag: 5.1
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,7 +187,14 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 == Changelog ==
 
+= 5.1 (02/07/2015) =
+* Record sale as "Unverified" if HTTP Error in PayPal IPN Verify 
 * Version History for StageShow Plugins 
+* Bug Fix: Duplicate write to Gateway Notify Log removed
+* Bug Fix: First pass of GetLayoutTemplate() generates undefined variable error
+* Bug Fix: Shortcode Anchor option only works with jQuery
+* Added smooth scroll with shortcode anchor= option
+* Payment Gateway Logo and Header made optional
 
 = 5.0.16 (14/06/2015) =
 * Bug Fix: Seats Requested & Seats Selected counts on SelectSeats screen not updating (StageShowGold)

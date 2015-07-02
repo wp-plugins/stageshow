@@ -20,9 +20,6 @@ Copyright 2014 Malcolm Shergold
 
 */
 
-if (!defined('STAGESHOWLIB_CARTDBASE_CLASS'))
-	define('STAGESHOWLIB_CARTDBASE_CLASS', 'StageShowWPOrgCartDBaseClass');
-	
 if (!defined('STAGESHOWLIB_DATABASE_FULL'))
 {
 	if (!class_exists('StageShowLibSalesCartDBaseClass')) 

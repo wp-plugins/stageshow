@@ -178,15 +178,6 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Currency',                        StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalCurrency',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $currSelect, ),
 			);
 			
-			if (basename(dirname(dirname(__FILE__))) != 'stageshow')
-			{
-				$rowDefs = StageShowLibAdminListClass::MergeSettings($rowDefs, array(
-					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'API User',                        StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPIUser',         StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_LOGIN_USER_TEXTLEN,        StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_LOGIN_EDITLEN, StageShowLibTableClass::TABLEPARAM_AFTER => 'PayPalMerchantID', ),
-					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'API Password',                    StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPIPwd',          StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_LOGIN_PWD_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_LOGIN_EDITLEN, StageShowLibTableClass::TABLEPARAM_AFTER => 'PayPalAPIUser', ),
-					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'API Signature',                   StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPISig',          StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_LOGIN_SIG_TEXTLEN,         StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_LOGIN_EDITLEN, StageShowLibTableClass::TABLEPARAM_AFTER => 'PayPalAPIPwd',  ),
-				));								
-			}
-
 			return $rowDefs;
 		}
 			
@@ -307,8 +298,8 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			$logoURL = $myDBaseObj->getImageURL('PayPalLogoImageFile');
 			$headerURL = $myDBaseObj->getImageURL('PayPalHeaderImageFile');
 
-			$reqParams['image_url'] = $logoURL;
-			$reqParams['cpp_header_image'] = $headerURL;
+			if ($logoURL != '') $reqParams['image_url'] = $logoURL;
+			if ($headerURL != '') $reqParams['cpp_header_image'] = $headerURL;
 			$reqParams['no_shipping'] = '2';
 
 			// Use Merchant ID if it is defined

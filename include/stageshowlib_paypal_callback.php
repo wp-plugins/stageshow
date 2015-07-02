@@ -131,7 +131,9 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 				if ($IPNError === '')
 				{
 					// Check $Payment_status and deal with "Pending" payment status
-					if (($Payment_status !== PAYMENT_API_SALESTATUS_COMPLETED) && ($Payment_status !== 'Pending'))
+					if ( ($Payment_status !== PAYMENT_API_SALESTATUS_COMPLETED) 
+					  && ($Payment_status !== PAYMENT_API_SALESTATUS_UNVERIFIED) 
+					  && ($Payment_status !== 'Pending') )
 						$IPNError = 'Payment_status not completed';
 				}
 				if ($IPNError === '')
@@ -282,14 +284,6 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 			}
 				
 			$this->AddToLog("---------------------------------------------------------------------");
-			if ($this->notifyDBaseObj->isDbgOptionSet('Dev_IPNLogRequests'))
-			{
-				//$this->LogMessage = print_r($_POST, true)."\n".$this->LogMessage;
-				$this->LogDebugToFile(STAGESHOWLIB_FILENAME_GATEWAYNOTIFY, $this->LogMessage);
-			}
-			
-			$this->AddToLog("---------------------------------------------------------------------");
-
 		}
 	}
 }

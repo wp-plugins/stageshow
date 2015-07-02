@@ -228,7 +228,16 @@ if (!class_exists('StageShowWPOrgOverviewAdminClass'))
 			{
 				$classId       = $this->GetAdminListClass();
 				$overviewList = new $classId($this->env);
-				$overviewList->OutputList($results);		
+				$overviewList->OutputList($results);	
+					
+				$saleCounts = array();
+				$this->totalSales = 0;
+				foreach($results as $result)
+				{
+					$this->totalSales += $result->soldValue;
+				}
+				
+				if ($this->totalSales > 0) echo "<br>Total Sales: ".$myDBaseObj->FormatCurrencyValue($this->totalSales)." <br>";
 			}
 		}
 		

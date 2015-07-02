@@ -26,6 +26,9 @@ if(!isset($_SESSION))
 	session_start();
 }	
 
+if (!defined('STAGESHOWLIB_DBASE_CLASS'))
+	define('STAGESHOWLIB_DBASE_CLASS', 'StageShowLibSalesCartDBaseClass');
+	
 if (!class_exists('StageShowLibDBaseClass')) 
 	include STAGESHOWLIB_INCLUDE_PATH.'stageshowlib_dbase_api.php';
 	
@@ -139,9 +142,15 @@ if (!class_exists('StageShowLibSalesCartDBaseClass'))
 			return $dateAndTime;
 		}
 		
-		function FormatCurrency($amount, $asHTML = true)
+		function FormatCurrencyValue($amount, $asHTML = true)
 		{
 			$currencyText = sprintf($this->getOption('CurrencyFormat'), $amount);
+			return $currencyText;
+		}
+		
+		function FormatCurrency($amount, $asHTML = true)
+		{
+			$currencyText = $this->FormatCurrencyValue($amount, $asHTML);
 			if (!$this->getOption('UseCurrencySymbol'))
 				return $currencyText;
 				
@@ -492,7 +501,7 @@ if (!class_exists('StageShowLibSalesCartDBaseClass'))
 
 		function OutputViewTicketButton($saleID = 0)
 		{
-			$text = __('View Ticket', $this->get_domain());
+			$text = __('View EMail', $this->get_domain());
 			echo $this->GetViewTicketLink($text, 'button-secondary', $saleID);
 		}
 		

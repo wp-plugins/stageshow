@@ -63,7 +63,7 @@ if (!defined('STAGESHOW_INCLUDE_PATH'))
 	define('STAGESHOWLIB_INCLUDE_PATH', STAGESHOW_INCLUDE_PATH);
 }
 
-define('STAGESHOW_DEFAULT_TEMPLATES_PATH', STAGESHOW_FILE_PATH . 'templates/');
+define('STAGESHOWLIB_DEFAULT_TEMPLATES_PATH', STAGESHOW_FILE_PATH . 'templates/');
 define('STAGESHOW_LANG_RELPATH', STAGESHOW_FOLDER . '/lang/');
 
 if (!defined('STAGESHOW_SHORTCODE_PREFIX'))
@@ -107,6 +107,8 @@ if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
 {
 	define('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT',STAGESHOW_DATETIME_BOXOFFICE_FORMAT);
 }
+
+define('STAGESHOWLIB_SENDEMAIL_TARGET', 'stageshow_jquery_email.php');
 
 /*
 ------------------------------------------------------------------------

@@ -79,7 +79,7 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 			}
 ?>
 	<?php $caller->WPNonceField(); ?>
-	<table class="stageshow-form-table">			
+	<table class="form-table">			
 		<tr valign="top">
 			<td vertical-align="middle"><?php _e('Selected Sale', $myDBaseObj->get_domain()); ?>:</td>
 			<td>
@@ -120,10 +120,10 @@ if (!class_exists('StageShowLibTableTestEMailClass'))
 		</tr>
 		<tr valign="top">
 			<td>
-				<input class="button-primary" type="submit" name="testbutton_EMailSale" value="<?php _e('EMail Sale', $myDBaseObj->get_domain()); ?>"/>
+				<?php $myDBaseObj->OutputViewTicketButton(); ?>
 			</td>
 			<td>
-				<?php $myDBaseObj->OutputViewTicketButton(); ?>
+				<input class="button-primary" type="submit" name="testbutton_EMailSale" value="<?php _e('EMail Sale', $myDBaseObj->get_domain()); ?>"/>
 			</td>
 		</tr>
 	</table>

@@ -29,6 +29,8 @@ if(!isset($_SESSION))
 if (!defined('STAGESHOWLIB_DBASE_CLASS'))
 	define('STAGESHOWLIB_DBASE_CLASS', 'StageShowLibSalesDBaseClass');
 	
+if (!defined('STAGESHOWLIB_DATABASE_FULL')) define('STAGESHOWLIB_DATABASE_FULL', true);
+
 if (!class_exists('StageShowLibSalesCartDBaseClass')) 
 	include STAGESHOWLIB_INCLUDE_PATH.'stageshowlib_sales_trolley_dbase_api.php';
 
@@ -296,6 +298,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		
 		// Saves the admin options to the options data table
 		
+		
+		function CheckVersionNumber($stockRec)
+		{
+		}
 		
 		function getTableDef($tableName)
 		{
@@ -622,7 +628,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				return;
 				
 			// If EMail Summmary Template is a default template ... set to the correct one
-			$templatePath = STAGESHOW_DEFAULT_TEMPLATES_PATH . 'emails/*.php';
+			$templatePath = STAGESHOWLIB_DEFAULT_TEMPLATES_PATH . 'emails/*.php';
 			$templateFiles = glob($templatePath);
 			foreach ($templateFiles as $path)
 			{

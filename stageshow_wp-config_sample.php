@@ -195,4 +195,20 @@ define('STAGESHOWLIB_PAYMENT_METHODS', __('/Cash/Cheque/Credit Card/Debit Card/V
 
 define('STAGESHOW_BOXOFFICE_SORTFIELD', 'priceValue');
 
+/*
+------------------------------------------------------------------------------------------------
+	STAGESHOWLIB_SCROLLTOANCHOR_OFFSET
+	STAGESHOWLIB_SCROLLTOANCHOR_DURATION
+	
+	These values determine constants used when the Box-Office scrolls to an anchor on  the  page 
+	after clicking the Add button. STAGESHOWLIB_SCROLLTOANCHOR_OFFSET is the offset  (in pixels)  from 
+	the top of the anchor block that the page scrolls to, and  STAGESHOWLIB_SCROLLTOANCHOR_DURATION is
+	the time (in ms) for the scroll to complete.
+	
+------------------------------------------------------------------------------------------------
+*/
+
+define('STAGESHOWLIB_SCROLLTOANCHOR_OFFSET', 0);
+define('STAGESHOWLIB_SCROLLTOANCHOR_DURATION', 1000);
+
 ?>

@@ -36,7 +36,8 @@ if (!class_exists('StageShowLibDevCallerClass'))
 		
 		function __construct($env, $domain) //constructor	
 		{
-			$this->classPrefix = $domain.'_Test_';
+			$this->ourClassPrefix = $domain.'_Test_';
+			$this->libClassPrefix = 'StageShowLib_Test_';
 			$this->pageTitle = 'Dev TESTING';
 						
 			// Call base constructor
@@ -53,25 +54,36 @@ if (!class_exists('StageShowLibDevCallerClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			
 			// Stage Show TEST HTML Output - Start 				
-			$testFilePrefix = strtolower($this->classPrefix);
-			$testFilePrefixLen = strlen($testFilePrefix);
+			$ourTestFilePrefix = strtolower($this->ourClassPrefix);
+			$ourTestFilePrefixLen = strlen($ourTestFilePrefix);
+			
+			$libTestFilePrefix = strtolower($this->libClassPrefix);
+			$libTestFilePrefixLen = strlen($libTestFilePrefix);
 			
 			$testClasses = array();
 			$maxIndex = 0;
 			$testDir = dirname(__FILE__).'/';
 			$testFiles = scandir( $testDir );
+
 			foreach ($testFiles as $testFile)
 			{
-				if (substr($testFile, 0, $testFilePrefixLen) != $testFilePrefix)
+				$testName = str_replace('.php','', $testFile);
+				if (substr($testName, 0, $ourTestFilePrefixLen) == $ourTestFilePrefix)
+				{
+					$testName = substr($testName, $ourTestFilePrefixLen);
+					$testClass = $this->ourClassPrefix.$testName;
+				}
+				else if (substr($testName, 0, $libTestFilePrefixLen) == $libTestFilePrefix)
+				{
+					$testName = substr($testName, $libTestFilePrefixLen);
+					$testClass = $this->libClassPrefix.$testName;
+				}
+				else
 					continue;
 					
 				//echo "Test File: $testFile <br>\n";
-				
-				$testName = substr($testFile, $testFilePrefixLen);
-				$testName = str_replace('.php','', $testName);
-				
-				$testClass = $this->classPrefix . $testName;
-				$filePath = $testDir.strtolower($this->classPrefix.$testName).'.php';
+								
+				$filePath = $testDir.strtolower($testClass).'.php';
 				include $filePath;
 				
 				$testObj = new $testClass($this->env); 

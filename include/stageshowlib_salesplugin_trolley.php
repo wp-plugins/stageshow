@@ -52,7 +52,10 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		define('STAGESHOWLIB_PAYMENT_METHODS', __('/Cash/Cheque/Credit Card/Debit Card/Voucher'));
 	}
 	
-	define('STAGESHOW_SENDEMAIL_TARGET', 'stageshow_jquery_email.php');
+	if (!defined('STAGESHOWLIB_SENDEMAIL_TARGET'))
+	{
+		define('STAGESHOWLIB_SENDEMAIL_TARGET', 'stageshowlib_jquery_email.php');
+	}
 	
 	class StageShowLibSalesCartPluginBaseClass
 	{
@@ -74,6 +77,8 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		var $trolleyid;
 		var $shortcode;
 
+		var $myJSRoot = 'StageShowLib_JQuery';
+		
 		var $trolleyHeaderCols;
 		
 		var $checkoutMsg;
@@ -92,7 +97,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$this->myDomain = $myDBaseObj->get_domain();
-							
+					
 			if (!isset($this->cssDomain)) $this->cssDomain = $this->myDomain;
 			if (!isset($this->cssBaseID)) $this->cssBaseID = $this->cssDomain.'-shop';
 			if (!isset($this->cssTrolleyBaseID)) $this->cssTrolleyBaseID = $this->cssDomain.'-trolley';
@@ -198,7 +203,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			
 			$formHTML  = ''; 
 			
-			$formHTML .= '<div class="stageshow-boxoffice-purchaserdetails">'."\n";			
+			$formHTML .= '<div class="'.$this->cssBaseID.'-purchaserdetails">'."\n";			
 			$formHTML .= "<h2>Purchaser Details:</h2>\n"; 
 			$formHTML .= '<form method="post">'."\n";						
 			$formHTML .= $this->GetParamAsHiddenTag('id');
@@ -209,9 +214,9 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			{
 				$paramValue = isset($cartContents->$paramID) ? $cartContents->$paramID : '';
 				$formHTML .=  '
-				<tr class="stageshow-boxoffice-formRow">
-					<td class="stageshow-boxoffice-formFieldID">'.$paramLabel.':&nbsp;</td>
-					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
+				<tr class="'.$this->cssBaseID.'-formRow">
+					<td class="'.$this->cssBaseID.'-formFieldID">'.$paramLabel.':&nbsp;</td>
+					<td class="'.$this->cssBaseID.'-formFieldValue" colspan="2">
 						<input name="'.$paramID.'" id="'.$paramID.'" type="text" maxlength="50" size="50" value="'.$paramValue.'" />
 					</td>
 				</tr>
@@ -225,9 +230,9 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			$methodsList[] = '';
 			
 			$formHTML .=  '
-				<tr class="stageshow-boxoffice-formRow">
-					<td class="stageshow-boxoffice-formFieldID">'.__('Payment Method', $this->myDomain).':&nbsp;</td>
-					<td class="stageshow-boxoffice-formFieldValue" colspan="2">
+				<tr class="'.$this->cssBaseID.'-formRow">
+					<td class="'.$this->cssBaseID.'-formFieldID">'.__('Payment Method', $this->myDomain).':&nbsp;</td>
+					<td class="'.$this->cssBaseID.'-formFieldValue" colspan="2">
 				<select id="saleMethod" name="saleMethod">';
 				
 			$selectedMethod = isset($cartContents->saleMethod) ? $cartContents->saleMethod : '';
@@ -261,8 +266,8 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			$buttonClassdef = ($this->adminPageActive) ? 'class="button-secondary " ' : 'class="xx" ';
 			
 			$formHTML .=  '
-				<tr class="stageshow-boxoffice-formRow">
-					<td colspan="2" class="stageshow-boxoffice-savesale">
+				<tr class="'.$this->cssBaseID.'-formRow">
+					<td colspan="2" class="'.$this->cssBaseID.'-savesale">
 						<input name="'.$buttonID.'" '.$buttonClassdef.'id="'.$buttonID.'" type="submit" value="'.$saveCaption.'" />
 					</td>
 				</tr>
@@ -515,11 +520,17 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 				
 			$buttonTag = ($buttonURL != '') ? ' src="'.$buttonURL.'"' : '';
 			
-			$buttonId = $this->GetOnlineStoreElemTagId('AddTicketSale', $result);
-						
+			$submitButton = __('Add', $this->myDomain);
+			$submitId = $this->GetOnlineStoreElemTagId('AddItemButton', $result);
+
+			$buttonClasses = '';						
+			if ($this->adminPageActive) $buttonClasses .= ' button-secondary';
+				
+			$buttonClassdef = $this->GetButtonTypeDef('add', $submitId, '', $buttonClasses);
+			
 			$storeRowHTML .= '
 				<td '.$addColSpan.'class="'.$this->cssBaseID.'-add">
-					<input class="'.$this->cssBaseID.'-ui" type="submit" value="'.__('Add', $this->myDomain).'" alt="'.$altTag.'" '.$buttonTag.' id="'.$buttonId.'" name="'.$buttonId.'"/>
+					<input '.$buttonClassdef.' value="'.$submitButton.'" alt="'.$altTag.'" '.$buttonTag.'/>
 				</td>
 				</tr>				
 				';
@@ -548,7 +559,8 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		
 		function Cart_OutputContent_Anchor( $anchor )
 		{
-			echo '<a name="'.self::ANCHOR_PREFIX.$anchor.'"></a>';	
+			$anchor = self::ANCHOR_PREFIX.$anchor;
+			echo '<a name="'.$anchor.'" id="'.$anchor.'"></a>';	
 		}
 		
 		function OutputContent_OnlineStoreSection( $results )
@@ -724,12 +736,18 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			$buttonTypeDef .= ' id="'.$buttonName.'" name="'.$buttonName.'"';					
 			$buttonTypeDef .= ' class="'.$buttonClasses.'"';					
 
+			if (!$this->adminPageActive)
+			{
+				$onClickHandler = $this->myJSRoot.'_OnClick'.ucwords($buttonID);
+				$buttonTypeDef .= ' onClick="return '.$onClickHandler.'(this, '.$this->shortcodeCount.')"';				
+			}
+			
 			return $buttonTypeDef;
 		}
 				
 		function OutputContent_OnlineRemoveButton($cartIndex, $removeLinkContent='')
 		{
-			$buttonName = 'RemoveTicketSale'.'_'.$cartIndex;
+			$buttonName = 'RemoveItemButton'.'_'.$cartIndex;
 			$buttonType = $this->GetButtonTypeDef('remove', $buttonName, '', 'button-secondary');
 
 			echo '<input '."$buttonType $removeLinkContent".' value="'.__('Remove', $this->myDomain).'"/>'."\n";
@@ -739,7 +757,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		{
 			if ($this->adminPageActive)
 			{
-				echo '<input class="stageshow-boxoffice-button button-primary" type="submit" name="'.$this->GetButtonID('editbuyer').'" value="'.__('Next', $this->myDomain).'"/>'."\n";
+				echo '<input class="'.$this->cssBaseID.'-button button-primary" type="submit" name="'.$this->GetButtonID('editbuyer').'" value="'.__('Next', $this->myDomain).'"/>'."\n";
 				return '';
 			}
 			
@@ -945,9 +963,9 @@ StageShowLibUtilsClass::print_r($rowsDefs, '$rowsDefs');
 			
 			$html .= '
 <script>
-function stageshowStandard_OnClickSubmitDetails(obj)
+function StageShowLib_JS_OnClickSubmitDetails(obj)
 {
-	var divElem = document.getElementById("stageshow-checkoutdetails");
+	var divElem = document.getElementById("'.$this->cssDomain.'-checkoutdetails");
 	var inputElems = divElem.getElementsByTagName("input"); 
 	for (var i = 0; i < inputElems.length; i++) 
 	{ 
@@ -1006,7 +1024,7 @@ echo $html;
 				
 		function Cart_OnlineStore_HandleTrolley()
 		{
-			// Only Allow One Shopping Trolley (If there are multiple StageShow shortcodes on one page)
+			// Only Allow One Shopping Trolley (If there are multiple shortcodes on one page)
 			if (isset($this->DoneSalesTrolley))
 				return;
 			$this->DoneSalesTrolley = true;
@@ -1029,19 +1047,19 @@ echo $html;
 		
 		function OnlineStore_EMailSaleButton($saleDetails)
 		{
-			$targetFile = STAGESHOW_SENDEMAIL_TARGET;
+			$targetFile = STAGESHOWLIB_SENDEMAIL_TARGET;
 			$ourNOnce = StageShowLibNonce::GetStageShowLibNonce($targetFile);
 
 			$jQueryURL = STAGESHOWLIB_URL."include/".$targetFile;
 			$jQueryParams = "this, '".$ourNOnce."','".$jQueryURL."'";	
 			echo '
-				&nbsp;&nbsp;<input type="button" class="stageshow-trolley-ui button-secondary" name="EMailSale" id="EMailSale" value="'.__('EMail Sale', $this->myDBaseObj->get_domain()).'" onclick="stageshowlib_manualsale_email_click()" />
-				&nbsp;&nbsp;<span class="stageshow-sendemail-status" name="stageshow-sendemail-status" id="stageshow-sendemail-status"></span>
+				&nbsp;&nbsp;<input type="button" class="'.$this->cssDomain.'-trolley-ui button-secondary" name="EMailSale" id="EMailSale" value="'.__('EMail Sale', $this->myDBaseObj->get_domain()).'" onclick="stageshowlib_manualsale_email_click()" />
+				&nbsp;&nbsp;<span class="'.$this->cssDomain.'-sendemail-status" name="'.$this->cssDomain.'-sendemail-status" id="'.$this->cssDomain.'-sendemail-status"></span>
 <script>
 function stageshowlib_manualsale_email_click()
 {
 	/* Set Cursor to Busy and Disable All UI Buttons */
-	StageShowLib_SetBusy(true, "stageshow-trolley-ui");
+	StageShowLib_SetBusy(true, "'.$this->cssDomain.'-trolley-ui");
 	
 	/* Implement Manual Sale EMail */
 	var postvars = {
@@ -1059,11 +1077,11 @@ function stageshowlib_manualsale_email_click()
 	    {
 	    	if (status != "success") data = "JQuery Error: " + status;
 	    	
-			divElem = jQuery("#stageshow-sendemail-status");
+			divElem = jQuery("#'.$this->cssDomain.'-sendemail-status");
 			divElem.html(data);
 			
 			/* Set Cursor to Normal and Enable All UI Buttons */
-			StageShowLib_SetBusy(false, "stageshow-trolley-ui");
+			StageShowLib_SetBusy(false, "'.$this->cssDomain.'-trolley-ui");
 	    }
     );
     
@@ -1166,11 +1184,11 @@ function stageshowlib_manualsale_email_click()
 				if (!is_numeric($reqId)) 
 					continue;
 					
-				if ($postIdElems[0] == 'AddTicketSale') 
+				if ($postIdElems[0] == 'AddItemButton') 
 				{
 					$itemID = $reqId;
 				}
-				if ($postIdElems[0] == 'RemoveTicketSale') 
+				if ($postIdElems[0] == 'RemoveItemButton') 
 				{
 					$_GET['remove'] = $reqId;
 				}
@@ -1367,10 +1385,10 @@ function stageshowlib_manualsale_email_click()
 						$rowsDef = defined('STAGESHOWLIB_NOTETOSELLER_ROWS') ? "rows=".STAGESHOWLIB_NOTETOSELLER_ROWS." " : "";
 						
 						echo '
-							<tr class="stageshow-trolley-notetoseller">
+							<tr class="'.$this->cssDomain.'-trolley-notetoseller">
 							<td>'.__('Message To Seller', $this->myDomain).'</td>
 							<td colspan="'.$noteCols.'">
-							<textarea class="stageshow-trolley-ui" name="saleNoteToSeller" id="saleNoteToSeller" '.$rowsDef.'>'.$noteToSeller.'</textarea>
+							<textarea class="'.$this->cssDomain.'-trolley-ui" name="saleNoteToSeller" id="saleNoteToSeller" '.$rowsDef.'>'.$noteToSeller.'</textarea>
 							</td>
 							</tr>
 							';

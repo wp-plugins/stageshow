@@ -20,6 +20,12 @@ Copyright 2014 Malcolm Shergold
 
 */
 
+if(!isset($_SESSION)) 
+{
+	// Must be Registered to use SESSIONS 
+	session_start();
+}	
+
 /*
 ini_set( 'error_reporting', E_STRICT );
 error_reporting(E_ALL);
@@ -96,7 +102,7 @@ if (!class_exists('StageShowJQueryTrolley'))
 			{
 				$buttonId = $_POST['buttonid'];
 				$_REQUEST[$buttonId] = $_POST[$buttonId] = 'submit';
-				$qtyId = str_replace('AddTicketSale_', 'quantity_', $buttonId);
+				$qtyId = str_replace('AddItemButton', 'quantity', $buttonId);
 				$_REQUEST[$qtyId] = $_POST[$qtyId] = $_POST['qty'];
 				
 				//StageShowLibUtilsClass::print_r($_POST, '$_POST - Updated');

@@ -161,7 +161,7 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 			}
 			
 ?>
-	<table class="stageshow-form-table">
+	<table class="form-table">
 <?php 
 			if ($canEditSettings && (count($gatewaySettingPresets) > 0))
 			{

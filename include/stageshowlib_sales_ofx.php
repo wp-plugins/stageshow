@@ -47,7 +47,7 @@ if (!class_exists('StageShowLibOFXExportAdminClass'))
 	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
 			if ( isset( $_POST['downloadexport'] ) )
 			{
-				$this->fileName = 'stageshow';	
+				$this->fileName = $this->myDomain;	
 							
 				if ( isset( $_POST['download'] ) ) 
 				{

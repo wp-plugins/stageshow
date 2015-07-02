@@ -268,13 +268,10 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			parent::load_user_scripts();
 
 			$reloadParam = false;
-			if (defined('STAGESHOW_JS_NOCACHE')) $reloadParam = time();
+			if (defined('STAGESHOWLIB_JS_NOCACHE')) $reloadParam = time();
 			
 			// Add our own Javascript
-			wp_enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', __FILE__ ), array(), $reloadParam);
 			wp_enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ), array(), $reloadParam);
-
-			wp_enqueue_script('jquery');
 		}	
 		
 		function load_admin_styles()
