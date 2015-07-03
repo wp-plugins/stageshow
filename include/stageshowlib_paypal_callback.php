@@ -218,11 +218,6 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 							$this->AddToLog('EMail Status: '.$emailStatus);
 							$this->emailSent = true;
 						}
-						
-						if ($Payment_status == PAYMENT_API_SALESTATUS_UNVERIFIED)
-						{
-							$this->GatewayErrorEMail("Payment Verification Failed", $this->LogMessage);
-						}
 					}
 					else if ($saleID < 0)
 					{

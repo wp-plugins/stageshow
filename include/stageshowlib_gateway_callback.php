@@ -88,7 +88,7 @@ if (!class_exists('StageShowLibGatewayCallbackClass'))
 
 			if (!$this->emailSent || $this->HTTPError)
 			{
-				$this->GatewayDiagnosticEMail("Payment Verification HTTP Error", $this->LogMessage);
+				$this->GatewayErrorEMail($this->LogMessage);
 			}							
 		}
 		
@@ -116,31 +116,17 @@ if (!class_exists('StageShowLibGatewayCallbackClass'))
 			return $gatewayResponse;
 		}
 		
-		function GatewayErrorEMail($subject, $LogMessage)
+		function GatewayErrorEMail($LogMessage)
 		{
-			$to = $this->notifyDBaseObj->getOption('AdminEMail');	
-			$this->GatewayEMail($subject, $LogMessage, $to);		
-		}
-		
-		function GatewayDiagnosticEMail($subject, $LogMessage)
-		{
-			$to = $this->notifyDBaseObj->getDbgOption('Dev_GatewayEMailAlerts');	
-			$this->GatewayEMail($subject, $LogMessage, $to);					
-		}
-		
-		function GatewayEMail($subject, $LogMessage, $to = '')
-		{
-			$from = $to;
+			$to = $from = $this->notifyDBaseObj->getDbgOption('Dev_GatewayEMailAlerts');			
 			if ($to != '')
 			{
 				$headers  = "From: $from";	
 				$headers .= "\r\nReply-To: $from";	
 										
-				$orgId = $this->ourOptions['OrganisationID'];
-				$subject .= " ($orgId)";
-				
 				//send the email
-				wp_mail($to, $subject, $LogMessage, $headers);
+				$orgId = $this->ourOptions['OrganisationID'];
+				wp_mail($to, "Gateway Callback ($orgId) Error Detected", $LogMessage, $headers);
 			}		
 		}
 		
