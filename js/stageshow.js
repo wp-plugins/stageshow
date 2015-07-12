@@ -384,7 +384,7 @@ function stageshow_OnClickAdd(obj, inst)
   		return stageshowCustom_OnClickAdd(obj, inst); 
 	}	
 
-	rtnVal = StageShowLib_JQuery_OnClickAdd(obj, inst); 
+	rtnVal = StageShowLib_JQuery_OnClickTrolleyButton(obj, inst); 
 	
 	return rtnVal;
 }
@@ -451,5 +451,5 @@ function stageshow_OnClickRemove(obj, inst)
   		return stageshowCustom_OnClickRemove(obj, inst); 
 	}
 	
-	return StageShowLib_JQuery_OnClickAdd(obj, inst); 
+	return StageShowLib_JQuery_OnClickTrolleyButton(obj, inst); 
 }

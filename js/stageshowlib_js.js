@@ -257,21 +257,22 @@ function StageShowLib_OnKeypressNumericOnly(obj, event, maxval, minval, dp)
 	return true;
 }
 
-function StageShowLib_JQuery_OnClickAdd(obj, inst)
+function StageShowLib_JQuery_ScrollToAnchor(inst)
 {
-	rtnVal = StageShowLib_JQuery_OnClickTrolleyButton(obj, inst);
+	if ( (typeof stageshowlib_pageAnchor == 'undefined') 
+	  || (typeof stageshowlib_pageAnchor[inst] != 'string') )
+		return;
 	
-	if ((typeof stageshowlib_pageAnchor != 'undefined') && (typeof stageshowlib_pageAnchor[inst] == 'string'))
-	{
-		anchorId = "#"+stageshowlib_pageAnchor[inst];
-	    jQuery('html, body').animate({
-	        scrollTop: jQuery(anchorId).offset().top - anchorOffset
-	    }, anchorDuration);		
-	}
+	var anchorId = "#"+stageshowlib_pageAnchor[inst];	
+	if (jQuery(anchorId).length == 0)
+		return;
+
+    jQuery('html, body').animate({
+        scrollTop: jQuery(anchorId).offset().top - anchorOffset
+    }, anchorDuration);					
 	
-	return rtnVal;
 }
-	
+
 function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
 {
 	var pluginId = stageshowlib_pluginId;
@@ -297,7 +298,7 @@ function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
 	if (nameParts[0] == "AddItemButton")
 	{
 		var qtyId = "quantity_" + nameParts[1];
-		var qty = document.getElementById(qtyId).value;
+		qty = document.getElementById(qtyId).value;
 		postvars[qtyId] = qty;
 	}
 	
@@ -350,6 +351,11 @@ function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
 			/* Now delete the downloaded HTML */
 			trolleyUpdateElem.remove();
 			
+			if (qty > 0)
+			{
+				StageShowLib_JQuery_ScrollToAnchor(inst);				
+			}
+							
 			/* Set Cursor to Normal and Enable All UI Buttons */
 			StageShowLib_SetBusy(false, pluginId + "-trolley-ui");
 	    }
