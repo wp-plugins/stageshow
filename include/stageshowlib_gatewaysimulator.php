@@ -194,7 +194,8 @@ if (!class_exists('GatewaySimulator'))
 		function OutputSupplementaryRow($title, $value) 
 		{
 			$this->totalSale += $value;
-			$html = "<tr><td>$title</td><td>$value</td></tr>\n";
+			$rowClass = 'gatewaysim-'.strtolower($title).'row';
+			$html = "<tr class=$rowClass><td>$title</td><td>$value</td></tr>\n";
 			return $html;
 	    }
 		
@@ -239,7 +240,7 @@ if (!class_exists('GatewaySimulator'))
 				$html .= $this->OutputItemsTableRow($indexNo, $result);
 			}
 
-			$html .= "<tr><td>&nbsp;</td></tr>\n";			
+			$html .= "<tr class=gatewaysim-extrarows><td>&nbsp;</td></tr>\n";			
 			$html .= $this->OutputSupplementaryRow('Postage', $results[0]->salePostage);
 			$html .= $this->OutputSupplementaryRow('Donation', $results[0]->saleDonation);
 			$html .= $this->OutputSupplementaryRow('Transaction Fee', $results[0]->saleTransactionFee);
@@ -427,7 +428,7 @@ if (!class_exists('GatewaySimulator'))
 			if (!$editable)
 	        	return "<input type=\"hidden\" name=\"$tagName\" value=\"$tagValue\">\n";
 			
-			$tagTitle = str_replace("_", " ", $tagName);
+			$tagTitle = ucwords(str_replace("_", " ", $tagName));
 			$paramID = 'PayPalVal_'.$tagName;
 			
 			$sessionVar = 'StageShowLib_Sim_'.$tagName;

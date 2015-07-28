@@ -70,8 +70,8 @@ if (!class_exists('StageShowLibLogFileClass'))
 		function StampedLogToFile($Filename, $LogLine, $OpenMode = self::ForAppending, $LogHeader = '')
 		{			
 			$LogStamp  = 'Log Timestamp: '.date(DATE_RFC822)."\n";
-			$LogStamp .= 'Content Length: '.strlen($LogLine)."\n";
-			$LogStamp .= "Content: \n";
+			$LogStamp .= 'Log Length: '.strlen($LogLine)."\n";
+			$LogStamp .= "\n";
 			
 			$LogLine  = $LogStamp.$LogLine;
 			$LogLine .= "\n---------------------------------------------\n\n";

@@ -38,7 +38,7 @@ function StageShowLib_ParseCurrency(currencyText)
 
 function StageShowLib_OnChangeTrolleyTotal(obj)
 {
-	var pluginId = stageshowlib_pluginId;
+	var pluginId = stageshowlib_cssDomain;
 	var donationObj = document.getElementById('saleDonation');
 	var saleDonation = 0;
 	if (donationObj != null)
@@ -275,7 +275,7 @@ function StageShowLib_JQuery_ScrollToAnchor(inst)
 
 function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
 {
-	var pluginId = stageshowlib_pluginId;
+	var pluginId = stageshowlib_cssDomain;
 	var scIndex = inst;
 	
 	/* Set Cursor to Busy and Disable All UI Buttons */

@@ -504,10 +504,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			return $saleDetails;
 		}						
-		
-				
-
-		
 
 		function GetSalesEMail()
 		{

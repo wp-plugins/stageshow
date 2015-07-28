@@ -76,7 +76,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		function load_user_styles() 
 		{
 			//Add Style Sheet
-			wp_enqueue_style(STAGESHOW_CODE_PREFIX, STAGESHOW_STYLESHEET_URL); // StageShow core style
+			$this->myDBaseObj->enqueue_style(STAGESHOW_CODE_PREFIX, STAGESHOW_STYLESHEET_URL); // StageShow core style
 		}
 		
 		//Returns an array of admin options
@@ -265,25 +265,26 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		
 		function load_user_scripts()
 		{
+			$myDBaseObj = $this->myDBaseObj;			
+
 			parent::load_user_scripts();
 
-			$reloadParam = false;
-			if (defined('STAGESHOWLIB_JS_NOCACHE')) $reloadParam = time();
-			
 			// Add our own Javascript
-			wp_enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ), array(), $reloadParam);
+			$myDBaseObj->enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ));
 		}	
 		
 		function load_admin_styles()
 		{
+			$myDBaseObj = $this->myDBaseObj;			
+
 			parent::load_admin_styles();
 
 			// Add our own style sheet
-			wp_enqueue_style( 'stageshow', plugins_url( 'admin/css/stageshow-admin.css', __FILE__ ));
+			$myDBaseObj->enqueue_style( 'stageshow', plugins_url( 'admin/css/stageshow-admin.css', __FILE__ ));
 			
 			// Add our own Javascript
-			wp_enqueue_script( $this->adminClassPrefix.'-admin', plugins_url( 'admin/js/stageshow-admin.js', __FILE__ ));
-			wp_enqueue_script( $this->adminClassPrefix.'-dtpicker', plugins_url( 'admin/js/datetimepicker_css.js', __FILE__ ));
+			$myDBaseObj->enqueue_script( $this->adminClassPrefix.'-admin', plugins_url( 'admin/js/stageshow-admin.js', __FILE__ ));
+			$myDBaseObj->enqueue_script( $this->adminClassPrefix.'-dtpicker', plugins_url( 'admin/js/datetimepicker_css.js', __FILE__ ));
 		}
 
 		function GenerateMenus() 

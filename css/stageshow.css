@@ -202,6 +202,19 @@ td.stageshow-checkoutdetails-value input
 
 /* --------------------------------------------------------------------------- */
 /*                                                                             */
+/*                 StageShow Checkout Simulator Styles                         */
+/*                                                                             */
+/* --------------------------------------------------------------------------- */
+
+.gatewaysim_formFieldId,
+.gatewaysim_formFieldValue,
+.stageshow-simulator-detailsrow td
+{
+	text-align: left !important;
+}
+
+/* --------------------------------------------------------------------------- */
+/*                                                                             */
 /*                   StageShow Run-time Error Styles                           */
 /*                                                                             */
 /* --------------------------------------------------------------------------- */

@@ -295,7 +295,7 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 				$gatewayAtts = new stdClass();
 				$gatewayAtts->Filename = basename($filePath);
 				$gatewayAtts->Id = str_replace('stageshowlib_', '', str_replace('_gateway.php', '', $gatewayAtts->Filename));
-				include $gatewayAtts->Filename;      						// i.e. stageshowlib_paypal_api.php
+				include $gatewayAtts->Filename;      						// i.e. stageshowlib_paypal_gateway.php
 				$gatewayClass = 'StageShowLib_'.$gatewayAtts->Id.'_GatewayClass'; 
 				$gatewayAtts->Obj = new $gatewayClass(null); 					// i.e. StageShowLib_paypal_GatewayClass
 				$gatewayAtts->Name = $gatewayAtts->Obj->GetName();

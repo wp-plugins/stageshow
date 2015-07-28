@@ -32,6 +32,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 		function __construct()
 		{
 			$this->cssBaseID = "stageshow-boxoffice";
+			$this->stockAnchor = "boxoffice";
 		
 			if (defined('STAGESHOW_SHORTCODE'))
 			{

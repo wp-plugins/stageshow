@@ -94,7 +94,7 @@ if (!class_exists('StageShowLibSalesCartDBaseClass'))
 
 			$gatewayClass = 'StageShowLib_'.$this->GatewayID.'_GatewayClass'; 
 			
-			include $gatewayFile;      						// i.e. stageshowlib_paypal_api.php
+			include $gatewayFile;      						// i.e. stageshowlib_paypal_gateway.php
 			$this->gatewayObj = new $gatewayClass($opts); 	// i.e. StageShowLib_paypal_GatewayClass
 			
 			$this->GatewayName = $this->gatewayObj->GetName();

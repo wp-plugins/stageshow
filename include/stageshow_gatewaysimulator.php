@@ -25,7 +25,7 @@ if (!class_exists('StageShowGatewaySimulator'))
 			$html .= '
 			<div>
 			<table  class="stageshow-simulator-detailstable">
-				<tr class="stageshow-simulator-detailsrow">
+				<tr class="stageshow-simulator-detailsrow stageshow-simulator-details-header">
 					<td class="stageshow-simulator-datetime">Date & Time</td>
 					<td class="stageshow-simulator-type">Ticket Type</td>';
 			if (isset($result->ticketSeat))
@@ -44,7 +44,7 @@ if (!class_exists('StageShowGatewaySimulator'))
 		
 		function OutputItemsTableRow($indexNo, $result) 
 		{
-			$html = '<tr class="stageshow-simulator-detailsrow">';
+			$html = '<tr class="stageshow-simulator-detailsrow stageshow-simulator-details-items">';
 			
 			$description = $result->showName.' - '.$this->myDBaseObj->FormatDateForDisplay($result->perfDateTime);
 			$reference = $result->showID.'-'.$result->perfID;

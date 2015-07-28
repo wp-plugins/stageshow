@@ -500,7 +500,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 					case STAGESHOWLIB_STATE_POST:
 						$quantityTagId = $this->GetOnlineStoreElemTagId('quantity', $result); 
 						$storeRowHTML .= '
-								<select class="'.$this->cssBaseID.'-ui '.$this->cssBaseID.'-qty" name="'.$quantityTagId.'" id="'.$quantityTagId.'">
+								<select class="'.$this->cssTrolleyBaseID.'-ui" name="'.$quantityTagId.'" id="'.$quantityTagId.'">
 									<option value="1" selected="">1</option>
 						';
 						for ($no=2; $no<=STAGESHOWLIB_MAXSALECOUNT; $no++)
@@ -514,7 +514,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 					case STAGESHOWLIB_STATE_DOWNLOAD:
 					default:
 						$quantityTagId = $this->GetOnlineStoreElemTagId('quantity', $result); 
-						$storeRowHTML .= '<input type="hidden" name="'.$quantityTagId.'" value="1"/>1'."\n";
+						$storeRowHTML .= '<input type="hidden" name="'.$quantityTagId.'" id="'.$quantityTagId.'" value="1"/>1'."\n";
 						break;
 				}
 				
@@ -1050,13 +1050,15 @@ echo $html;
 			$targetFile = STAGESHOWLIB_SENDEMAIL_TARGET;
 			$ourNOnce = StageShowLibNonce::GetStageShowLibNonce($targetFile);
 
+			$emailSaleButtonClick = 'stageshowlib_manualsale_email_click'.$saleDetails->saleID;
+			
 			$jQueryURL = STAGESHOWLIB_URL."include/".$targetFile;
 			$jQueryParams = "this, '".$ourNOnce."','".$jQueryURL."'";	
 			echo '
-				&nbsp;&nbsp;<input type="button" class="'.$this->cssDomain.'-trolley-ui button-secondary" name="EMailSale" id="EMailSale" value="'.__('EMail Sale', $this->myDBaseObj->get_domain()).'" onclick="stageshowlib_manualsale_email_click()" />
+				&nbsp;&nbsp;<input type="button" class="'.$this->cssDomain.'-trolley-ui button-secondary" name="EMailSale" id="EMailSale" value="'.__('EMail Sale', $this->myDBaseObj->get_domain()).'" onclick="'.$emailSaleButtonClick.'()" />
 				&nbsp;&nbsp;<span class="'.$this->cssDomain.'-sendemail-status" name="'.$this->cssDomain.'-sendemail-status" id="'.$this->cssDomain.'-sendemail-status"></span>
 <script>
-function stageshowlib_manualsale_email_click()
+function '.$emailSaleButtonClick.'()
 {
 	/* Set Cursor to Busy and Disable All UI Buttons */
 	StageShowLib_SetBusy(true, "'.$this->cssDomain.'-trolley-ui");

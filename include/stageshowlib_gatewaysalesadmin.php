@@ -132,6 +132,17 @@ if (!class_exists('StageShowLibGatewaySalesAdminListClass'))
 			);
 			
 			$ourOptions = self::MergeSettings(parent::GetDetailsRowsDefinition(), $ourOptions);
+			
+			if (!$this->editMode) 
+			{
+				// FUNCTIONALITY: Sales - StageShow+ - Edit Sale
+				$actions = array(
+					array(StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_FUNCTION, StageShowLibTableClass::TABLEPARAM_FUNC => 'AddSaleListActions'),						
+				);
+				
+				$ourOptions = self::MergeSettings($ourOptions, $actions);
+			}
+						
 			return $ourOptions;
 		}
 		
@@ -196,6 +207,25 @@ if (!class_exists('StageShowLibGatewaySalesAdminListClass'))
 		{			
 			$this->pricesList = $pricesList;
 			$this->OutputList($editSaleEntry);
+		}
+		
+		function AddSaleListActions($result)
+		{
+			$html  = '<div class="edit-entry-button">';
+			$html .= $this->AddSaleListButtons($result);
+			$html .= '</div>';
+			return $html;
+		}
+		
+		function AddSaleListButtons($result)
+		{
+			ob_start();
+			$pluginObj = $this->env['PluginObj'];
+			$pluginObj->OnlineStore_EMailSaleButton($result);
+			$html .= ob_get_contents();
+			ob_end_clean();
+						
+			return $html;
 		}
 		
 	}

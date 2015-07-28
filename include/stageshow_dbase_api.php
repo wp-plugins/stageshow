@@ -1239,7 +1239,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 					$latest['Status'] = "HTTP_CompletePage";
 					$latest['LatestNews'] = '';
 				}
-				else if (strlen($latest['LatestNews']) <= 2)
+				else if (strlen($htmlPage) <= 2)
 				{
 					$latest['Status'] = "HTTP_Empty";
 					$latest['LatestNews'] = '';

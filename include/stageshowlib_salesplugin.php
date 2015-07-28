@@ -36,6 +36,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 	class StageShowLibSalesPluginBaseClass extends StageShowLibSalesCartPluginBaseClass // Define class
 	{
 		var $shortcodeCount = 0;
+		var $stockAnchor = "stock";
 		
 		function __construct()
 		{
@@ -75,18 +76,14 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$actionURL = remove_query_arg('editpage', $actionURL);
 			
 			return $actionURL;
-		}
-		
+		}		
 		
 		function load_user_scripts()
 		{
 			$myDBaseObj = $this->myDBaseObj;			
 
-			$reloadParam = false;
-			if (defined('STAGESHOWLIB_JS_NOCACHE')) $reloadParam = time();
-			
 			// Add our own Javascript
-			wp_enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', dirname(__FILE__)), array(), $reloadParam);
+			$myDBaseObj->enqueue_script( $this->adminClassPrefix.'-lib', plugins_url( 'js/stageshowlib_js.js', dirname(__FILE__)));
 
 			$myDBaseObj->gatewayObj->Gateway_LoadUserScripts();
 
@@ -97,7 +94,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;			
 
-			wp_enqueue_script( 'stageshowlib-admin', plugins_url( 'admin/js/stageshowlib-admin.js', dirname(__FILE__) ));
+			$myDBaseObj->enqueue_script( 'stageshowlib_admin', plugins_url( 'admin/js/stageshowlib_admin.js', dirname(__FILE__) ));
 			
 			$myDBaseObj->gatewayObj->Gateway_LoadAdminStyles();
 		}
@@ -206,7 +203,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 								
 				$scriptCode .=  "var stageshowlib_attStrings = [];\n";				
 				$scriptCode .=  "var stageshowlib_pageAnchor = [];\n";
-				$scriptCode .=  "var stageshowlib_pluginId = '".$this->myDomain."';\n";
+				$scriptCode .=  "var stageshowlib_cssDomain = '".$this->cssDomain."';\n";
 			}
 
 			$comma = '';
@@ -364,7 +361,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				ob_start();
 				
-				$this->Cart_OutputContent_Anchor("boxoffice");
+				$this->Cart_OutputContent_Anchor($this->stockAnchor);
 			
 				if (!$this->OutputContent_ProcessGatewayCallbacks($atts))
 				{
