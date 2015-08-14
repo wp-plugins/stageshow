@@ -79,6 +79,9 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			
 		var		$checkout = '';
 		
+		const	PAYPAL_SHIPPING_NOTREQUIRED = '1';
+		const	PAYPAL_SHIPPING_REQUIRED = '2';
+		
 		function __construct( $opts )
 		{
 			$this->opts = $opts;
@@ -300,7 +303,15 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 
 			if ($logoURL != '') $reqParams['image_url'] = $logoURL;
 			if ($headerURL != '') $reqParams['cpp_header_image'] = $headerURL;
-			$reqParams['no_shipping'] = '2';
+			
+			if (isset($saleDetails['salePostage']))
+			{
+				$reqParams['no_shipping'] = self::PAYPAL_SHIPPING_REQUIRED;
+			}
+			else
+			{
+				$reqParams['no_shipping'] = self::PAYPAL_SHIPPING_NOTREQUIRED;
+			}
 
 			// Use Merchant ID if it is defined
 			if ($myDBaseObj->isOptionSet('PayPalMerchantID'))

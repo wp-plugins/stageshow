@@ -5,6 +5,8 @@ var SeatRequestedClassText = 'stageshow-boxoffice-seat-requested';
 var SeatReservedClassText = 'stageshow-boxoffice-seat-reserved';
 var SeatDisabledClassText = 'stageshow-boxoffice-seat-disabled';
 
+var SeatCountBlockIdRoot = "stageshow-boxoffice-zoneSeatsBlock";
+
 var SeatStateInvalid = -1;
 var SeatStateAvailable = 0;
 var SeatStateRequested = 1;
@@ -224,20 +226,19 @@ function stageshow_CheckClickSeat(obj)
 
 function stageshow_UpdateZonesCount(zoneID, zoneCountRequested, zoneCountCurrent)
 {
-	var elemIdRoot = "stageshow-boxoffice-zoneSeatsBlock";
-	var blockElem = document.getElementById(elemIdRoot);
+	var blockElem = document.getElementById(SeatCountBlockIdRoot);
 	if (blockElem == null)
 		return;
 		
-	var zoneElem = document.getElementById(elemIdRoot+zoneID);
+	var zoneElem = document.getElementById(SeatCountBlockIdRoot+zoneID);
 	if (zoneElem == null)
 		return;
 		
-	requestedElem = document.getElementById(elemIdRoot+"-requested"+zoneID);
+	requestedElem = document.getElementById(SeatCountBlockIdRoot+"-requested"+zoneID);
 	requestedElem.innerHTML = zoneCountRequested;
 	
 	zoneCountSelected = zoneCountRequested - zoneCountCurrent;
-	selectedElem = document.getElementById(elemIdRoot+"-selected"+zoneID);
+	selectedElem = document.getElementById(SeatCountBlockIdRoot+"-selected"+zoneID);
 	selectedElem.innerHTML = zoneCountSelected;
 	
 	zoneElem.style.display = '';
@@ -315,6 +316,12 @@ function stageshow_ToggleSeat(obj, isClick)
 	
 }
 
+function stageshow_OnSeatsView(obj, url)
+{
+	window.open(url, '_blank');
+	return false;
+}
+
 function stageshow_OnSeatsLoad()
 {
 	/* Check if Block End Markers are defined */
@@ -325,11 +332,13 @@ function stageshow_OnSeatsLoad()
 	document.getElementById("stageshow-boxoffice-layout-seats").value = '';
 	document.getElementById("stageshow-boxoffice-layout-zones").value = '';
 	
+	seatsRequestedCount = 0;
 	for (var zoneID in zones) 
 	{
 		zonesReq[zoneID] = zones[zoneID];
+		seatsRequestedCount += zones[zoneID];
 	}
-	
+
 	/* Note: Uses maxRows and maxCols which must be defined in template */
 	var row, col;
 	for (row=1; row<=maxRows; row++)
@@ -375,6 +384,12 @@ function stageshow_OnSeatsLoad()
 	{
 		stageshow_UpdateZonesCount(zoneID, zonesReq[zoneID], zones[zoneID]);		
 	}
+	
+	if (seatsRequestedCount == 0)
+	{
+		jQuery('#' + SeatCountBlockIdRoot).hide();
+	}
+		
 }
 
 function stageshow_OnClickAdd(obj, inst)

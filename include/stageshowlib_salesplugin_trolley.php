@@ -97,7 +97,16 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			$myDBaseObj = $this->myDBaseObj;
 			
 			$this->myDomain = $myDBaseObj->get_domain();
-					
+			
+			if (isset($_REQUEST['pageURI']))
+			{
+				$this->pageURI = $_REQUEST['pageURI'];
+			}
+			else
+			{
+				$this->pageURI = $_SERVER['REQUEST_URI'];				
+			}
+			
 			if (!isset($this->cssDomain)) $this->cssDomain = $this->myDomain;
 			if (!isset($this->cssBaseID)) $this->cssBaseID = $this->cssDomain.'-shop';
 			if (!isset($this->cssTrolleyBaseID)) $this->cssTrolleyBaseID = $this->cssDomain.'-trolley';

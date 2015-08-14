@@ -251,8 +251,10 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			$storeRowHTML .= '
 				<table width="100%" cellspacing="0">'.$separator.'
 				<tr>
-				<td class="stageshow-boxoffice-datetime">'.$formattedPerfDateTime.'</td>
-				';
+				<td class="stageshow-boxoffice-datetime">'.$formattedPerfDateTime.'</td>';
+				
+			if (isset($result->perfRowHTML))
+				$storeRowHTML .= $result->perfRowHTML;
 				
 			$storeRowHTML .= '
 			<td class="stageshow-boxoffice-type">'.$this->OnlineStore_GetPriceType($result).'</td>
@@ -595,8 +597,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			
 			return true;
 		}
-			
-		
+					
 	}
 }
 

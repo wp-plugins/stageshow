@@ -269,6 +269,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				postvars.action = "'.$_REQUEST['action'].'";';
 			}				
 			
+			$jqCode .= '
+			postvars.pageURI = "'.$this->pageURI.'";';
+			
 			return $jqCode;
 		}
 				
