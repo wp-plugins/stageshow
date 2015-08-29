@@ -313,7 +313,7 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 <?php
 
 			$this->WPNonceField();
-			
+	
 			// Get setting as stdClass object
 			$results = $myDBaseObj->GetAllSettingsList();
 			if (count($results) == 0)

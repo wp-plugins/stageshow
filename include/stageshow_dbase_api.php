@@ -1075,16 +1075,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$sqlFilters['groupBy']= 'saleID';
 			return $this->GetSalesList($sqlFilters);
 		}
-				
-		function GetAllSalesListBySaleTxnId($saleTxnId)
-		{
-			// Add TotalSalesField .... groupBy does the trick!
-			$sqlFilters['saleTxnId'] = $saleTxnId;
-			//$sqlFilters['groupBy'] = 'saleID';
-			return $this->GetSalesList($sqlFilters);
-		}
-				
-		
+					
 		function GetPricesListWithSales($saleID)
 		{
 			$selectFields  = '*';

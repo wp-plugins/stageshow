@@ -3,14 +3,19 @@ function stageshowlib_OnSettingsLoad()
 {
 	/* Get Disabled GatewaysList */
 	
-	var selectedTabId = stageshowlib_GetURLParam('tab');
-	if (selectedTabId != '')
-	{		
-		selectedTabId = selectedTabId.replace(/_/g,'-');
-		selectedTabId = selectedTabId.toLowerCase()
-		selectedTabId = selectedTabId + '-tab';
+	var selectedTabId = jQuery("#lastTabId").val();
+	if (selectedTabId == '')
+	{
+		selectedTabId = stageshowlib_GetURLParam('tab');
+		if (selectedTabId != '')
+		{		
+			selectedTabId = selectedTabId.replace(/_/g,'-');
+			selectedTabId = selectedTabId.toLowerCase()
+			selectedTabId = selectedTabId + '-tab';
+		}
 	}
-	else
+	
+	if (selectedTabId == '')
 	{
 		selectedTabId = tabIdsList[defaultTabIndex];
 	}
@@ -67,6 +72,13 @@ function stageshowlib_SelectTab(selectedTabID)
 		tabId = tabIdsList[index];
 		stageshowlib_ShowOrHideTab(tabId, selectedTabID);
 	}
+	
+	lastTabElem = document.getElementById('lastTabId');
+	if (lastTabElem)
+	{
+		lastTabElem.value = selectedTabID;
+	}
+	
 }
 
 function stageshowlib_HideElement(elemID)

@@ -573,6 +573,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $saleFieldValue;
 		}
 		
+		static function HasCheckoutImage()
+		{
+			return false;
+		}
+		
 		function AddEMailFields($EMailTemplate, $saleDetails)
 		{
 			// FUNCTIONALITY: DBase - Sales - Add DB fields to EMail
@@ -711,6 +716,27 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return 'OK';		
 		}
 		
+		function DoTemplateLoop($section, $loopType, $saleRecord)	
+		{				
+			$saleConfirmation = '';
+			
+			switch ($loopType)
+			{
+				case '[startloop]':
+					foreach($saleRecord as $ticket)
+					{
+						$saleConfirmation .= $this->AddEMailFields($section, $ticket);
+					}
+					break;
+				
+				default:
+					$saleConfirmation = "<br><strong>Unknown Loop Definition in Template ($loopType)</strong><br><br>";
+					break;
+			}
+			
+			return $saleConfirmation;
+		}
+		
 		function AddSaleToTemplate($saleRecord, $templatePath, &$EMailSubject, &$saleConfirmation)	
 		{				
 			$mailTemplate = $this->ReadTemplateFile($templatePath);
@@ -737,7 +763,10 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			$loopCount = 0;
 			for (; $loopCount < 10; $loopCount++)
 			{
-				$loopStart = stripos($mailTemplate, '[startloop]');
+				if (preg_match('/(\[[a-zA-Z0-9]*loop\])/', $mailTemplate, $matches) != 1)
+					break;
+
+				$loopStart = stripos($mailTemplate, $matches[0]);
 				$loopEnd = stripos($mailTemplate, '[endloop]');
 
 				if (($loopStart === false) || ($loopEnd === false))
@@ -746,14 +775,11 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 				$section = substr($mailTemplate, 0, $loopStart);
 				$saleConfirmation .= $this->AddEMailFields($section, $saleRecord[0]);
 
-				$loopStart += strlen('[startloop]');
+				$loopStart += strlen($matches[0]);
 				$loopLen = $loopEnd - $loopStart;
 
-				foreach($saleRecord as $ticket)
-				{
-					$section = substr($mailTemplate, $loopStart, $loopLen);
-					$saleConfirmation .= $this->AddEMailFields($section, $ticket);
-				}
+				$section = substr($mailTemplate, $loopStart, $loopLen);
+				$saleConfirmation .= $this->DoTemplateLoop($section, $matches[0], $saleRecord);
 
 				$loopEnd += strlen('[endloop]');
 				$mailTemplate = substr($mailTemplate, $loopEnd);
@@ -764,8 +790,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			return 'OK';		
 		}
-		
-		
 		
 		function GetTxnStatus($Txnid)
 		{
@@ -778,7 +802,6 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			
 			return $txnEntries[0]->saleStatus;
 		}
-		
 		
 		function UpdateSaleIDStatus($SaleId, $Payment_status)
 		{

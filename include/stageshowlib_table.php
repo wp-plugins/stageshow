@@ -1832,7 +1832,10 @@ if (!class_exists('StageShowLibAdminListClass'))
 					
 			if (count($this->columnDefs) <= 1)
 				return;
-						
+
+			$lastTabId = isset($_POST['lastTabId']) ? $_POST['lastTabId'] : "";
+			echo '<input type="hidden" name="lastTabId" id="lastTabId" value="'.$lastTabId.'"/>'."\n";
+			
 			$javascript = $this->JS_Top();
 			foreach ($this->columnDefs as $column)
 			{
@@ -1855,7 +1858,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			}
 			else
 			{
-				$tableId = $this->GetTableID($results[0]);
+				$tableId = $this->GetTableID(reset($results));
 				
 				$this->OutputJavascript();		
 			}
@@ -1899,7 +1902,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			$this->rowCount = 0;
 			
 			if (count($results) > 0)
-				$this->tableName = $this->GetTableID($results[0]);			
+				$this->tableName = $this->GetTableID(reset($results));			
 	
 			foreach($results as $result)
 			{

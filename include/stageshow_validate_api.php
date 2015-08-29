@@ -72,8 +72,8 @@ if (!class_exists('StageShowWPOrgValidateDBaseClass'))
 			return '';
 		}
 		
-		function GetAllSalesListBySaleTxnId($saleTxnId)
-		{
+		function GetAllSalesListBySaleTxnId($ticketDetails)
+		{			
 			$sql  = 'SELECT * FROM '.STAGESHOW_SALES_TABLE.' ';
 			$sql .= 'JOIN '.STAGESHOW_TICKETS_TABLE.' ON '.STAGESHOW_TICKETS_TABLE.'.saleID='.STAGESHOW_SALES_TABLE.'.saleID ';
 			$sql .= 'JOIN '.STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.priceID='.STAGESHOW_TICKETS_TABLE.'.priceID ';
@@ -81,13 +81,13 @@ if (!class_exists('StageShowWPOrgValidateDBaseClass'))
 			$sql .= 'JOIN '.STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID ';
 
 			$sql .= $this->GetJoinedTables();
-			$sql .= 'WHERE '.STAGESHOW_SALES_TABLE.'.saleTxnId="'.$saleTxnId.'" ';
+			$sql .= 'WHERE '.STAGESHOW_SALES_TABLE.'.saleTxnId="'.$ticketDetails->txnId.'" ';
 			$sql .= 'AND (('.STAGESHOW_PERFORMANCES_TABLE.'.perfState IS NULL) OR ('.STAGESHOW_PERFORMANCES_TABLE.'.perfState<>"deleted")) ';
 			$sql .= 'AND '.STAGESHOW_SHOWS_TABLE.'.showState<>"deleted"';		
 				
 			// Get results
 			$salesListArray = $this->get_results($sql);
-					
+
 			return $salesListArray;
 		}	
 		

@@ -116,7 +116,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 				$this->colID['name'] = __('Name', $this->myDomain);
 				$this->cssColID['name'] = "name";			
 				$this->colID['datetime'] = __('Date & Time', $this->myDomain);
-				$this->cssColID['datetime'] = "name";			
+				$this->cssColID['datetime'] = "datetime";			
 				$this->colID['ref'] = __('Ref', $this->myDomain);
 				$this->cssColID['ref'] = "ref";
 
@@ -470,7 +470,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 						<td class="'.$this->cssBaseID.'-header">
 							<table width="100%" cellspacing="0">
 								<tr>
-									<td class="'.$this->cssBaseID.'-'.$this->cssColID['datetime'].'">'.$this->colID['datetime'].'</td>
+									<td class="'.$this->cssBaseID.'-'.$this->cssColID['name'].'">'.$this->colID['name'].'</td>
 									<td class="'.$this->cssBaseID.'-'.$this->cssColID['ref'].'">'.$this->colID['ref'].'</td>
 									<td class="'.$this->cssBaseID.'-'.$this->cssColID['price'].'">'.$this->colID['price'].'</td>
 									<td class="'.$this->cssBaseID.'-'.$this->cssColID['qty'].'">'.$this->colID['qty'].'</td>
@@ -498,7 +498,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			$storeRowHTML .= '
 				<table width="100%" cellspacing="0">
 					<tr>
-						<td class="'.$this->cssBaseID.'-'.$this->cssColID['datetime'].'">'.$result->stockName.'</td>
+						<td class="'.$this->cssBaseID.'-'.$this->cssColID['name'].'">'.$result->stockName.'</td>
 						<td class="'.$this->cssBaseID.'-'.$this->cssColID['ref'].'">'.$result->stockRef.'</td>
 						<td class="'.$this->cssBaseID.'-price">'.$itemPrice.'</td>
 						<td class="'.$this->cssBaseID.'-qty">

@@ -181,6 +181,16 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Currency',                        StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalCurrency',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $currSelect, ),
 			);
 			
+			$dbClass = STAGESHOWLIB_DBASE_CLASS;
+			if ($dbClass::HasCheckoutImage())
+			{
+				$pluginID = basename(dirname(dirname(__FILE__)));	// Library files should be in 'include' folder						
+				$uploadImagesPath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/images';
+				$rowDefs = StageShowLibAdminListClass::MergeSettings($rowDefs, array(
+					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Checkout Header Image File',            StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalHeaderImageFile', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ADDEMPTY => true, StageShowLibTableClass::TABLEPARAM_DIR => $uploadImagesPath, StageShowLibTableClass::TABLEPARAM_EXTN => 'gif,jpeg,jpg,png', StageShowLibTableClass::TABLEPARAM_BEFORE => 'PayPalLogoImageFile'),
+					));				
+			}
+			
 			return $rowDefs;
 		}
 			

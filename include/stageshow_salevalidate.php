@@ -25,6 +25,8 @@ include STAGESHOW_INCLUDE_PATH.'stageshow_sales_table.php';
 	
 if (!class_exists('StageShowWPOrgSaleValidateClass')) 
 {
+	define('STAGESHOW_TICKETID_TEXTLEN', PAYMENT_API_SALETXNID_TEXTLEN+10);
+	
 	if (!defined('STAGESHOWLIB_TESTSALES_LIMIT')) 
 		define('STAGESHOWLIB_TESTSALES_LIMIT', 20);
 	
@@ -185,7 +187,7 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			<tr>
 				<td class="stageshow_tl8" id="label_Transaction_ID"><?php _e('Sale Reference', $this->myDomain); ?></td>
 				<td id="value_Transaction_ID">
-					<input class="stageshow-tools-ui" type="text" maxlength="<?php echo PAYMENT_API_SALETXNID_TEXTLEN; ?>" size="<?php echo PAYMENT_API_SALETXNID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
+					<input class="stageshow-tools-ui" type="text" maxlength="<?php echo STAGESHOW_TICKETID_TEXTLEN; ?>" size="<?php echo STAGESHOW_TICKETID_TEXTLEN+2; ?>" name="TxnId" id="TxnId" value="<?php echo $TxnId; ?>" autocomplete="off" />
 					&nbsp;
 					<input class="stageshow-tools-ui button-primary" onclick="stageshow_onclick_validate()" type="button" name="jqueryvalidatebutton" id="jqueryvalidatebutton" value="Validate"/>
 				</td>
@@ -352,29 +354,39 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			';
 		}
 
-		function ShowValidation($env, $saleID = 0, $perfID = 0)
+		function ShowValidation($env, $ticketDetails = null)
 		{
 			return '';
 		}
 		
-		function LogValidation($saleID, $perfID = 0)
+		function LogValidation($ticketDetails)
 		{
 		}
 
-		function ValidateSale($env, $perfID)
+		function GetValidateReqTxnid($TxnId)
 		{
-			$saleID = 0;
-				 
-			$myDBaseObj = $this->myDBaseObj;
-				 
-			$myDBaseObj->CheckAdminReferer();
-
-			$TxnId = trim(stripslashes($_REQUEST['TxnId']));
-			if (preg_match('/[^a-z_\-0-9]/i', $TxnId))
+			if (preg_match('/^([A-Z0-9]*)$/i', $TxnId) != 1)
 			{
 				return 0;
 			}
 		
+			$ticketDetails = new stdClass();
+			$ticketDetails->saleID = 0;
+			$ticketDetails->txnId = $TxnId;
+			
+			return $ticketDetails;
+		}
+
+		function ValidateSale($env, $perfID)
+		{
+			$myDBaseObj = $this->myDBaseObj;
+				 
+			$myDBaseObj->CheckAdminReferer();
+			$TxnId = trim(stripslashes($_REQUEST['TxnId']));
+			$ticketDetails = $this->GetValidateReqTxnid($TxnId);
+			if ($ticketDetails == null)
+				return 0;
+				
 			$verifyMessageHTML = '';
 			$saleDetailsHTML = '';
 			$ticketsListTableHTML = '';
@@ -384,20 +396,18 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			$msgClass = '';
 			$showDetails = true;
 			
-			if (strlen($TxnId) == 0) return 0;
+			if (strlen($ticketDetails->txnId) == 0) return 0;
 			
-			$ticketsList = $results = $myDBaseObj->GetAllSalesListBySaleTxnId($TxnId);
+			$ticketsList = $results = $myDBaseObj->GetAllSalesListBySaleTxnId($ticketDetails);
 			
 			$entryCount = count($results);
 			if ($entryCount == 0)
 			{
 				$validateMsg .= $this->TranslatedText('No matching record', $this->myDomain);
-				$msgClass = 'stageshow-validate-notfound';				
-				$saleID = 0;
-			}
+				$msgClass = 'stageshow-validate-notfound';							}
 			else
 			{
-				$saleID = $results[0]->saleID;
+				$ticketDetails->saleID = $results[0]->saleID;
 			 
 				// Check that it is for selected performance
 				if ($perfID != 0)
@@ -431,13 +441,13 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 					$msgClass = 'stageshow-validate-wrongperf error alert';
 					
 					$results = $ticketsList;
-					$saleID = 0;
+					$ticketDetails->saleID = 0;
 					$salerecord = $results[0];
 				}	
 				else
 				{
-					$perfID = $salerecord->perfID;
-					$validatedMessageHTML = $this->ShowValidation($env, $saleID, $perfID);
+					$ticketDetails->perfID = $salerecord->perfID;
+					$validatedMessageHTML = $this->ShowValidation($env, $ticketDetails);
 					if (($validatedMessageHTML != '') && (STAGESHOW_VERIFYLOG_DUPLICATEACTION != 'ignore'))
 					{
 						$validateMsg .= $this->TranslatedText('Already Verified', $this->myDomain);
@@ -448,7 +458,7 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 					}
 					else
 					{
-						$this->LogValidation($saleID, $perfID);
+						$this->LogValidation($ticketDetails);
 						
 						$validateMsg .= $this->TranslatedText('Matching record found', $this->myDomain);
 						switch($salerecord->saleStatus)
@@ -489,14 +499,14 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_nonce.php';
 			echo $validatedMessageHTML;
 			echo "</table>\n";
 						 
-			return $saleID;
+			return $ticketDetails->saleID;
 		}
 		
 		function SaleSummaryTable($env, $results)
 		{
 			if (count($results)>0)
 			{
-				$salerecord = $results[0];
+				$salerecord = reset($results);
 				$ticketsListTableHTML = '<tr><td class="stageshow_tl8" id="label_Name">'.__('Name', $this->myDomain).':</td><td id="value_Name">'.$salerecord->saleFirstName.' '.$salerecord->saleLastName.'</td></tr>'."\n";
 				$ticketsListTableHTML .= '<tr><td class="stageshow_tl8" id="label_Sale_Status">'.__('Sale Status', $this->myDomain).':</td><td id="value_Sale_Status">'.__($salerecord->saleStatus, $this->myDomain).'</td></tr>'."\n";
 			}
