@@ -50,6 +50,11 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 		$dbPrefix .= 'sshow_';		
 	}
 	
+	if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
+	{
+		define('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT',STAGESHOW_DATETIME_BOXOFFICE_FORMAT);
+	}
+
 	if (!defined('STAGESHOW_TABLE_PREFIX'))
 	{
 		define('STAGESHOW_TABLE_PREFIX', $dbPrefix);

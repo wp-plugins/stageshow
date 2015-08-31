@@ -143,21 +143,21 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 			{
 				$selectedPayPalMode = $_POST['GatewayDefaultSettings_Mode'];
 				$testDefaults = GatewayDefaultsClass::GetDefaults($selectedPayPalMode);	
-				$selectedPayPalID = GatewayDefaultsClass::GetSettingsID($selectedPayPalMode);
+				$selectedGatewayID = GatewayDefaultsClass::GetSettingsID($selectedPayPalMode);
 			}			
 			
 			if (isset($_POST['testbutton_SetGatewayDefaultSettings'])) 
 			{
 				$this->CheckAdminReferer();
 				$myDBaseObj->SetTestSettings($testDefaults);							
-				echo '<div id="message" class="updated"><p>Settings initialised to '.$selectedPayPalID.'</p></div>';
+				echo '<div id="message" class="updated"><p>Settings initialised to '.$selectedGatewayID.'</p></div>';
 			}		
 							
 			if (isset($_POST['testbutton_ShowGatewayDefaultSettings'])) 
 			{
 				$this->CheckAdminReferer();
 				
-				echo "Settings for PayPal Mode: <strong>$selectedPayPalID </strong><br>\n";
+				echo "Settings for Payment Gateway: <strong>$selectedGatewayID </strong><br>\n";
 				StageShowLibUtilsClass::print_r($testDefaults);
 			}
 			

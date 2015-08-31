@@ -146,6 +146,11 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			);
 		}
 		
+		function IsTestServer()
+		{
+			return false;
+		}
+		
 		//Returns an array of admin options
 		function Gateway_GetOptions() 
 		{
@@ -214,7 +219,7 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			$useLocalIPNServer = isset($dbgOptions['Dev_IPNLocalServer']) && ($dbgOptions['Dev_IPNLocalServer']);
 
 			$this->GatewayNotifyURL = PAYPAL_APILIB_IPN_NOTIFY_URL;							
-			$this->PayPalURL = $this->GetPayPalURL(false);
+			$this->PayPalURL = $this->GetGatewayURL();
 
 			// URL for Plugin code to verify PayPal IPNs
 			if ($useLocalIPNServer)
@@ -279,23 +284,6 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			
 		}
 		
-		function IsCheckout()
-		{
-			$buttonID = 'checkout';
-			if (defined('CORONDECK_RUNASDEMO'))
-			{
-				$pluginID = $this->myDBaseObj->get_name();
-				$buttonID .= '_'.$pluginID;
-			}
-			
-			if (isset($_POST[$buttonID]) || isset($_POST[$buttonID.'_x'])) 
-				$this->checkout = 'checkout';
-			else
-				$this->checkout = '';
-			
-			return $this->checkout;
-		}
-		
 		function GetGatewayRedirectURL($saleId, $saleDetails)
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -349,7 +337,7 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 				
 			$reqParams['notify_url'] = $this->GatewayNotifyURL;
 		
-			$gatewayURL = $this->GetPayPalURL(false);
+			$gatewayURL = $this->GetGatewayURL();
 			foreach ($reqParams as $paypalArg => $paypalParam)
 				$gatewayURL = add_query_arg($paypalArg, urlencode($paypalParam), $gatewayURL);
 
@@ -402,9 +390,9 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			$this->APIStatusMsg = '';
 		}
 		
-		function SetTestMode($testmode)
+		function SetTestMode()
 		{
-			if ($testmode)
+			if ($this->IsTestServer())
 			{
 				$this->APIEndPoint = 'https://api-3t.sandbox.paypal.com/nvp';
 			}
@@ -414,9 +402,9 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			}
 		}
 		
-		function GetPayPalURL($testmode)
+		function GetGatewayURL()
 		{
-			if ($testmode)
+			if ($this->IsTestServer())
 			{
 				return 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 			}

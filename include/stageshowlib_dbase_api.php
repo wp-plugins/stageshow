@@ -886,6 +886,11 @@ if (!class_exists('StageShowLibDBaseClass'))
 		define('CORONDECK_RUNASDEMO', '".CORONDECK_RUNASDEMO."');
 	";
 	
+			if (defined('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT')) $defines .= "
+	if (!defined('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT'))
+		define('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT', '".STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT."');
+	";
+	
 			return $defines;
 		}
 		

@@ -170,6 +170,11 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			return false;
 		}
 		
+		function IsTestServer()
+		{
+			return false;
+		}
+		
 		//Returns an array of admin options
 		function Gateway_GetOptions() 
 		{
@@ -231,6 +236,7 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			        
 		function IsGatewayConfigured ($adminOptions)
 		{
+			$this->UndefinedFunction("IsGatewayConfigured");
 			return false;
 		}
 		
@@ -246,14 +252,34 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		
 		function IsCheckout()
 		{
-			return '';
+			$buttonID = 'checkout';
+			if (defined('CORONDECK_RUNASDEMO'))
+			{
+				$pluginID = $this->myDBaseObj->get_name();
+				$buttonID .= '_'.$pluginID;
+			}
+			
+			if (isset($_POST[$buttonID]) || isset($_POST[$buttonID.'_x'])) 
+				$this->checkout = 'checkout';
+			else
+				$this->checkout = '';
+			
+			return $this->checkout;
 		}
-		
+				
 		function GetGatewayRedirectURL($saleId, $saleDetails)
 		{
-			return '';
+			$this->UndefinedFunction("GetGatewayRedirectURL");
 		}
 			
+		function UndefinedFunction($funcName)
+		{
+			$gatewayname = $this->GetName();
+			echo "$funcName method not defined for $gatewayname Gateway";
+			exit;
+			
+		}
+		
 		function AddItem($itemName, $itemPrice, $qty, $shipping)
 		{	
 			static $paramCount = 1;
@@ -300,7 +326,8 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 				$gatewayAtts->Obj = new $gatewayClass(null); 					// i.e. StageShowLib_paypal_GatewayClass
 				$gatewayAtts->Name = $gatewayAtts->Obj->GetName();
 				$gatewayAtts->Type = $gatewayAtts->Obj->GetType();
-
+				if ($gatewayAtts->Name == '') continue;
+				
 				$parentsList[] = $gatewayAtts->Obj->GetParent();
 				
 				$gatewaysList[$gatewayAtts->Id] = $gatewayAtts;

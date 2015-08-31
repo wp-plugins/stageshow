@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
 Tested up to: 4.3
-Stable tag: 5.2.1
+Stable tag: 5.2.3
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,7 +187,13 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 
 == Changelog ==
 
-= 5.2.1(29/08/2015) =
+= 5.2.3(31/08/2015) =
+* Bug Fix: STAGESHOW_DATETIME_BOXOFFICE_FORMAT option ignored after Box-Office Add/Remove button used
+
+= 5.2.2(29/08/2015) =
+* Bug Fix: Individual Barcodes invalid in some email clients (gmail esp.) (StageShowGold) 
+
+= 5.2.1(28/08/2015) =
 * Added individual ticket barcode to Sale EMails (StageShowGold)
 * Bug Fix: Checkout Header Images disappeared from settings (StageShowPlus)
 * Bug Fix: Selected Tab on Settings Admin Page not restored after Save Changes
