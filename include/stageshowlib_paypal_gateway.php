@@ -26,12 +26,17 @@ if (defined('STAGESHOWLIB_TRACK_INCLUDES_FILE'))
 	trackIncludes(__FILE__);
 }
 	
+include_once('stageshowlib_gatewaybase.php');
+	
 // Definitions for API Interface Functions
-if (!class_exists('StageShowLib_paypal_GatewayClass')) 
+if (!defined('STAGESHOWLIB_PAYPAL_DEFINITIONS')) 
 {
+	define('STAGESHOWLIB_PAYPAL_DEFINITIONS', true);
+	
 	if (!defined('PAYPAL_APILIB_IPN_NOTIFY_URL'))
 		define('PAYPAL_APILIB_IPN_NOTIFY_URL', STAGESHOWLIB_URL.'include/stageshowlib_paypal_callback.php');
 
+	// Copy historical definitions ....
 	if (defined('PAYPAL_APILIB_STREET_LABEL')) 
 		define ('PAYMENT_API_STREET_LABEL', PAYPAL_APILIB_STREET_LABEL);	
 	if (defined('PAYPAL_APILIB_CITY_LABEL')) 
@@ -50,18 +55,18 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 		define('PAYMENT_API_LOGIN_PWD_TEXTLEN', 65);
 		define('PAYMENT_API_LOGIN_SIG_TEXTLEN', 65);
 		
+		define('PAYMENT_API_LOGIN_EMAIL_TEXTLEN', 65);
+		
 		define('PAYMENT_API_LOGIN_EDITLEN', 75);
 			
 		define('PAYMENT_API_BUTTONID_TEXTLEN',16);		
 	
 		define('PAYPAL_APILIB_REFUNDALL', '-1');	
 	}
+}
 
-	if (!defined('PAYPAL_APILIB_DEFAULT_CURRENCY'))
-		define ( 'PAYPAL_APILIB_DEFAULT_CURRENCY', 'GBP' );
-
-	include_once('stageshowlib_gatewaybase.php');
-
+if (!class_exists('StageShowLib_paypal_GatewayClass')) 
+{
 	class StageShowLib_paypal_GatewayClass extends StageShowLibGatewayBaseClass // Define class
 	{
 		var		$APIEndPoint;		//	PayPal API access URL
@@ -98,26 +103,31 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			return 'PayPal';
 		}
 		
+		static function IsValidGateway($pluginID)
+		{
+			return parent::IsValidGateway($pluginID);
+		}
+		
 		static function GetType()
 		{
 			return 'paypal';
 		}
-		
+/*		
 		static function GetDefaultCurrency()
 		{
 			return PAYPAL_APILIB_DEFAULT_CURRENCY;
 		}
-		
+*/		
 		function GetCheckoutType()
 		{
 			return $this->myDBaseObj->getOption('PayPalCheckoutType');
 		}
-		
+/*		
 		function GetCurrencyOptionID()
 		{
-			return 'PayPalCurrency';
+			return $this->GetName().'Currency';
 		}
-		
+*/		
 		function GetCurrencyTable()
 		{
 			return array( 
@@ -171,19 +181,15 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 		
 		function Gateway_SettingsRowsDefinition()
 		{
-			$CurrencyTable = $this->GetCurrencyTable();			
-			foreach ($CurrencyTable as $index => $currDef)
-			{
-				$currSelect[$index] = $currDef['Currency'];
-				$currSelect[$index] .= '|';
-				$currSelect[$index] .= $currDef['Name'];
-				$currSelect[$index] .= ' ('.$currDef['Symbol'].') ';
-			}
+			$currencyOptionID = $this->GetCurrencyOptionID();
+			$currSelect = $this->GetCurrencyList();
 			
 			$rowDefs = array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Account EMail',                   StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalAPIEMail',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_LOGIN_EMAIL_TEXTLEN,       StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_LOGIN_EDITLEN, ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Merchant ID',                     StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalMerchantID',      StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_NOTFORDEMO => true, StageShowLibTableClass::TABLEPARAM_LEN => PAYMENT_API_LOGIN_MERCHANTID_TEXTLEN,  StageShowLibTableClass::TABLEPARAM_SIZE => PAYMENT_API_LOGIN_EDITLEN, StageShowLibTableClass::TABLEPARAM_BLOCKBLANK => true, ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Currency',                        StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => 'PayPalCurrency',        StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $currSelect, ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Currency',                        StageShowLibTableClass::TABLEPARAM_TAB => 'gateway-settings-tab-paypal', StageShowLibTableClass::TABLEPARAM_ID => $currencyOptionID,       StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_SELECT, StageShowLibTableClass::TABLEPARAM_ITEMS => $currSelect, ),
+
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Purchaser Address',               StageShowLibTableClass::TABLEPARAM_TAB => 'advanced-settings-tab',       StageShowLibTableClass::TABLEPARAM_ID => 'GetPurchaserAddress',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_CHECKBOX, StageShowLibTableClass::TABLEPARAM_TEXT => 'Always Required',  StageShowLibTableClass::TABLEPARAM_DEFAULT => false, StageShowLibTableClass::TABLEPARAM_BEFORE => 'CheckoutTimeout',  ),
 			);
 			
 			$dbClass = STAGESHOWLIB_DBASE_CLASS;
@@ -302,7 +308,8 @@ if (!class_exists('StageShowLib_paypal_GatewayClass'))
 			if ($logoURL != '') $reqParams['image_url'] = $logoURL;
 			if ($headerURL != '') $reqParams['cpp_header_image'] = $headerURL;
 			
-			if (isset($saleDetails['salePostage']))
+			if ( isset($saleDetails['salePostage'])
+			  || $myDBaseObj->isOptionSet('GetPurchaserAddress') )
 			{
 				$reqParams['no_shipping'] = self::PAYPAL_SHIPPING_REQUIRED;
 			}

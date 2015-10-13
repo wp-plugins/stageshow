@@ -51,33 +51,36 @@ if (!class_exists('StageShowLibTestSettingsClass'))
 			// Stage Show TEST HTML Output - End
 		}
 		
-		function GetOptionsDefs()
+		static function GetOptionsDefs($inherit = true)
 		{
 			$testOptionDefs1 = array();
 			if (!defined('CORONDECK_RUNASDEMO'))
 			{
 				$testOptionDefs1 = array(
-					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Display IPNs',      StageShowLibTableClass::TABLEPARAM_NAME => 'cbDisplayIPNs',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_IPNDisplay', ),
-					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Local IPN Server',  StageShowLibTableClass::TABLEPARAM_NAME => 'cbLocalIPNServer',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_IPNLocalServer', ),
-					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Skip IPN Server',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbSkipIPNServer',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_IPNSkipServer', ),
-					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log IPN Requests',  StageShowLibTableClass::TABLEPARAM_NAME => 'cbLogIPNRequests',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_IPNLogRequests', ),
+					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Display IPNs',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_IPNDisplay', ),
+					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Local IPN Server',  StageShowLibTableClass::TABLEPARAM_ID => 'Dev_IPNLocalServer', ),
+					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Skip IPN Server',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_IPNSkipServer', ),
+					array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log IPN Requests',  StageShowLibTableClass::TABLEPARAM_ID => 'Dev_IPNLogRequests', ),
 				);
 			}
 					
 			$testOptionDefs2 = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Call Stack',      StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowCallStack',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowCallStack', StageShowLibTableClass::TABLEPARAM_AFTER => 'Dev_ShowDBOutput', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Call Stack Params',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbCallStackParams',  StageShowLibTableClass::TABLEPARAM_ID => 'Dev_CallStackParams', StageShowLibTableClass::TABLEPARAM_AFTER => 'Dev_ShowCallStack', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Call Stack',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowCallStack',   StageShowLibTableClass::TABLEPARAM_AFTER => 'Dev_ShowDBOutput', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Call Stack Params',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_CallStackParams', StageShowLibTableClass::TABLEPARAM_AFTER => 'Dev_ShowCallStack', ),
 					
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Gateway API',     StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowPayPalAPI',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowGatewayAPI', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log Gateway API',      StageShowLibTableClass::TABLEPARAM_NAME => 'cbLogPayPalAPI',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_LogGatewayAPI', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log JQuery Calls',     StageShowLibTableClass::TABLEPARAM_NAME => 'cbLogJQueryCalls',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_LogJQueryCalls', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Misc Debug',      StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowMiscDebug',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowMiscDebug', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show WPOnce',          StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowWPOnce',       StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowWPOnce', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'No Sample Sales',      StageShowLibTableClass::TABLEPARAM_NAME => 'cbNoSampleSales',    StageShowLibTableClass::TABLEPARAM_ID => 'Dev_NoSampleSales', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Gateway API',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowGatewayAPI', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log Gateway API',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_LogGatewayAPI', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log JQuery Calls',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_LogJQueryCalls', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log News Updates',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_LogNewsUpdates', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Misc Debug',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowMiscDebug', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show WPOnce',          StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowWPOnce', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'No Sample Sales',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_NoSampleSales', ),
 					
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Disable Test Menus',   StageShowLibTableClass::TABLEPARAM_NAME => 'cbDisableTestMenus', StageShowLibTableClass::TABLEPARAM_ID => 'Dev_DisableTestMenus', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Disable JS/CSS Cache', StageShowLibTableClass::TABLEPARAM_NAME => 'cbDisableJSCache',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_DisableJSCache', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Options',         StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowOptions',      StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowOptions', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Disable Test Menus',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_DisableTestMenus', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Disable JS/CSS Cache', StageShowLibTableClass::TABLEPARAM_ID => 'Dev_DisableJSCache', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Allow Multiline JS',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_AllowMultilineJS', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Dump Options',         StageShowLibTableClass::TABLEPARAM_ID => 'Dev_DumpOptions', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Expert Mode!',         StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ExpertMode', ),
 			);
 			
 			

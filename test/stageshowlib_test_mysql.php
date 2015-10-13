@@ -31,7 +31,7 @@ if (!class_exists('StageShowLib_Test_mysql'))
 		
 		static function GetOrder()
 		{
-			return 1;	// Determines order tests are output
+			return 0.7;	// Determines order tests are output
 		}
 		
 		function Show()

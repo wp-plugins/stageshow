@@ -59,6 +59,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 				'id'    => '',
 				'perf'  => '',
 				'count' => '',
+				'months' => '',
 				'anchor' => '',
 				'style' => 'normal' 
 			), $atts );
@@ -136,7 +137,8 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
 			$url = $this->myDBaseObj ->get_pluginURI();
 			$name = $this->myDBaseObj ->get_pluginName();
 			$weblink = __('Driven by').' <a target="_blank" href="'.$url.'">'.$name.'</a>';
-			echo '<div class="stageshow-boxoffice-weblink">'.$weblink.'</div>'."\n";
+			
+			return '<div class="stageshow-boxoffice-weblink">'.$weblink.'</div>'."\n";
 		}
 		
 		function GetOnlineStoreItemName($result, $cartEntry = null)

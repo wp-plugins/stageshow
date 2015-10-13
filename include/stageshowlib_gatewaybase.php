@@ -20,6 +20,8 @@ Copyright 2014 Malcolm Shergold
 
 */
 
+include 'stageshowlib_logfile.php';
+	
 // Definitions for API Interface Functions
 if (!class_exists('StageShowLibGatewayBaseClass')) 
 {
@@ -51,8 +53,6 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		define('PAYMENT_API_SALETXNID_EDITLEN',40);		// Extended to 40 because text box was too small
 		define('PAYMENT_API_SALESTATUS_EDITLEN',20);
 
-		define('PAYMENT_API_LOGIN_EMAIL_TEXTLEN', 65);
-		
 		define('PAYMENT_API_URL_TEXTLEN',110);
 		define('PAYMENT_API_URL_EDITLEN',80);
 			
@@ -66,18 +66,19 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		if (!defined('PAYMENT_API_SALESTATUS_COMPLETED'))
 		{
 			define('PAYMENT_API_SALESTATUS_COMPLETED', 'Completed');
-			define('PAYMENT_API_SALESTATUS_PENDING', 'Pending');
 			define('PAYMENT_API_SALESTATUS_CHECKOUT', 'Checkout');
 			define('PAYMENT_API_SALESTATUS_UNVERIFIED', 'Unverified');
 			define('PAYMENT_API_SALESTATUS_PENDINGPPEXP', 'PendingPPExp');
+			define('PAYMENT_API_SALESTATUS_TIMEOUT', 'Timeout');
 		}		
 	}
 		
 	if (!defined('STAGESHOWLIB_FILENAME_GATEWAYAPILOG'))
 		define('STAGESHOWLIB_FILENAME_GATEWAYAPILOG', 'GatewayAPILog.txt');
 		
-	include 'stageshowlib_logfile.php';
-	
+	if (!defined('PAYPAL_APILIB_DEFAULT_CURRENCY'))
+		define ( 'PAYPAL_APILIB_DEFAULT_CURRENCY', 'GBP' );
+
 	class StageShowLibGatewayBaseClass // Define class
 	{
 		const STAGESHOWLIB_CHECKOUTSTYLE_STANDARD = 1;
@@ -130,6 +131,11 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			return 'Undefined';
 		}
 		
+		static function IsValidGateway($pluginID)
+		{
+			return true;
+		}
+		
 		static function GetType()
 		{
 			return 'Undefined';
@@ -147,7 +153,7 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		
 		static function GetDefaultCurrency()
 		{
-			return 'Undefined';
+			return PAYPAL_APILIB_DEFAULT_CURRENCY;
 		}
 		
 		function GetCheckoutType()
@@ -157,9 +163,9 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 		
 		function GetCurrencyOptionID()
 		{
-			return '';
+			return $this->GetName().'Currency';
 		}
-		
+
 		function GetCurrencyTable()
 		{
 			return array();
@@ -217,6 +223,21 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			return null;
 		}
 		
+		function GetCurrencyList()
+		{
+			$currSelect = array();
+			$CurrencyTable = $this->GetCurrencyTable();			
+			foreach ($CurrencyTable as $index => $currDef)
+			{
+				$currSelect[$index] = $currDef['Currency'];
+				$currSelect[$index] .= '|';
+				$currSelect[$index] .= $currDef['Name'];
+				$currSelect[$index] .= ' ('.$currDef['Symbol'].') ';
+			}
+			
+			return $currSelect;
+		}
+			
 		function Gateway_LoadUserScripts()
 		{
 		}
@@ -259,19 +280,24 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 				$buttonID .= '_'.$pluginID;
 			}
 			
-			if (isset($_POST[$buttonID]) || isset($_POST[$buttonID.'_x'])) 
+			if ($this->myDBaseObj->IsButtonClicked($buttonID)) 
 				$this->checkout = 'checkout';
 			else
 				$this->checkout = '';
 			
 			return $this->checkout;
 		}
-				
+		
 		function GetGatewayRedirectURL($saleId, $saleDetails)
 		{
 			$this->UndefinedFunction("GetGatewayRedirectURL");
 		}
 			
+		function IsComplete()
+		{
+			return null;
+		}
+		
 		function UndefinedFunction($funcName)
 		{
 			$gatewayname = $this->GetName();
@@ -302,6 +328,18 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 
 ------------------------------------------------------------------ */
 			
+		static function GetGatewayAtts($filePath)
+		{
+			$gatewayAtts = new stdClass();
+			$gatewayAtts->Filename = basename($filePath);
+			$gatewayAtts->CallbackFilename = str_replace('_gateway.php', '_callback.php', $gatewayAtts->Filename);
+			$gatewayAtts->Id = str_replace('stageshowlib_', '', str_replace('_gateway.php', '', $gatewayAtts->Filename));
+			
+			$gatewayAtts->ClassName = 'StageShowLib_'.$gatewayAtts->Id.'_GatewayClass'; 
+			
+			return $gatewayAtts;
+		}
+			
 		static function GetGatewaysList()
 		{
 			static $gatewaysList = null;
@@ -318,11 +356,17 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			$filesList = glob($dir);
 			foreach ($filesList as $filePath)
 			{
-				$gatewayAtts = new stdClass();
-				$gatewayAtts->Filename = basename($filePath);
-				$gatewayAtts->Id = str_replace('stageshowlib_', '', str_replace('_gateway.php', '', $gatewayAtts->Filename));
+				$gatewayAtts = self::GetGatewayAtts($filePath);
+/*				
+				$count = preg_match('/stageshowlib[_a-zA-z]*_([a-zA-z]*)_gateway\.php/', $filePath, $matches);
+				StageShowLibUtilsClass::print_r($matches, '$matches');
+				if ($count == 0)
+				{
+					continue;					
+				}
+*/		
 				include $gatewayAtts->Filename;      						// i.e. stageshowlib_paypal_gateway.php
-				$gatewayClass = 'StageShowLib_'.$gatewayAtts->Id.'_GatewayClass'; 
+				$gatewayClass = $gatewayAtts->ClassName; 
 				$gatewayAtts->Obj = new $gatewayClass(null); 					// i.e. StageShowLib_paypal_GatewayClass
 				$gatewayAtts->Name = $gatewayAtts->Obj->GetName();
 				$gatewayAtts->Type = $gatewayAtts->Obj->GetType();

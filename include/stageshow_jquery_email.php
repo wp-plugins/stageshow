@@ -26,32 +26,6 @@ if(!isset($_SESSION))
 	session_start();
 }	
 
-/*
-include 'stageshow_nowp_defs.php';
-
-global $wpdb;
-$wpdb->prefix = isset($table_prefix) ? $table_prefix : 'wp_';
-
-if (!defined('StageShowLibAdminClass'))
-{
-	class StageShowLibAdminClass
-	{
-		var $myDomain = 'stageshow';
-	
-		function __construct($env, $inForm = false) //constructor	
-		{
-			$this->env = $env;
-		}
-		
-		function WPNonceField($referer = '', $name = '_wpnonce', $echo = true)
-		{
-			//$this->myDBaseObj->WPNonceField($referer, $name, $echo);
-		}
-
-	}
-}
-*/
-
 include '../../../../wp-config.php';
 
 include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_dbase_api.php';      

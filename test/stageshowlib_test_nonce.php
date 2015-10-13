@@ -39,7 +39,7 @@ if (!class_exists('StageShowLib_Test_nonce'))
 		
 		static function GetOrder()
 		{
-			return 0.1;	// Determines order tests are output
+			return 0.2;	// Determines order tests are output
 		}
 		
 		function Test_OurNOnce()

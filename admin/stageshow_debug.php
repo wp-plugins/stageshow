@@ -26,16 +26,18 @@ if (!class_exists('StageShowWPOrgDebugAdminClass'))
 {
 	class StageShowWPOrgDebugAdminClass extends StageShowLibDebugSettingsClass // Define class
 	{
-		function GetOptionsDefs()
+		static function GetOptionsDefs($inherit = true)
 		{
-			$testOptionDefs = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',            StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowTrolley',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowTrolley', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Diagnostic Alert EMails', StageShowLibTableClass::TABLEPARAM_NAME => 'cbGWEMailAlerts',   StageShowLibTableClass::TABLEPARAM_ID => 'Dev_GatewayEMailAlerts', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT),
+			$ourOptions = array(
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',            StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowTrolley',        StageShowLibTableClass::TABLEPARAM_AFTER => 'Dev_ShowDBOutput'),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Diagnostic Alert EMails', StageShowLibTableClass::TABLEPARAM_ID => 'Dev_GatewayEMailAlerts', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT),
 			);
 			
-			$childOptions = parent::GetOptionsDefs();
-			
-			$ourOptions = StageShowLibAdminListClass::MergeSettings($childOptions, $testOptionDefs);
+			if ($inherit)
+			{			
+				$childOptions = parent::GetOptionsDefs();			
+				$ourOptions = StageShowLibAdminListClass::MergeSettings($childOptions, $ourOptions);
+			}
 			
 			return $ourOptions;
 		}

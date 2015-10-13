@@ -390,6 +390,22 @@ if (!class_exists('StageShowLibSalesCartDBaseClass'))
 				$fieldSep = ' , ';
 			}
 			
+			if ($fromTrolley)
+			{
+				$saleID = $results->saleID;
+				if (isset($results->saleStatus) && ($results->saleStatus == PAYMENT_API_SALESTATUS_COMPLETED))
+				{
+					$sql .= $fieldSep.'saleCheckoutURL=""';
+				}
+			}
+			else
+			{
+				if (isset($results['saleStatus']) && ($results['saleStatus'] == PAYMENT_API_SALESTATUS_COMPLETED))
+				{
+					$sql .= $fieldSep.'saleCheckoutURL=""';
+				}
+			}
+			
 			$sql .= ' WHERE '.$this->DBTables->Sales.'.saleID='.$saleID;;
 			 
 			$rtnVal = $this->query($sql);	

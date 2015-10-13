@@ -88,6 +88,11 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 		
 		function activate()
 		{
+			if (version_compare(PHP_VERSION, '5.3.0') < 0) 
+			{
+			    die('Cannot Activate - StageShow requires PHP version 5.3 or later - PHP '.PHP_VERSION.' Installed');
+			}
+			
 			$myDBaseObj = $this->myDBaseObj;
       
 	  		// FUNCTIONALITY: Activate - Add defaults to options that are not set
@@ -114,6 +119,24 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			if (!is_dir($LogsFolder))
 				mkdir($LogsFolder, 0644, TRUE);
 
+			if (defined('STAGESHOWLIB_LOG_HTTPIO'))
+			{
+				// Initialise from a define constant so we can log first activation
+				$myDBaseObj->dbgOptions['Dev_LogHTTP'] = true;
+			}
+
+			if (defined('STAGESHOWLIB_INFO_SERVER_URL'))
+			{
+				// Initialise from a define constant so we can log first activation
+				$myDBaseObj->dbgOptions['Dev_InfoSrvrURL'] = STAGESHOWLIB_INFO_SERVER_URL;
+			}
+
+			if ( !isset($myDBaseObj->adminOptions['GetPurchaserAddress'])
+			  && defined('STAGESHOWLIB_SHIPPING_REQUIRED') )
+			{
+				$myDBaseObj->adminOptions['GetPurchaserAddress'] = true;
+			}
+			
 	  		// FUNCTIONALITY: Activate - Set EMail template to file name ONLY
 			// EMail Template defaults to templates folder - remove folders from path
 			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath', STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH);

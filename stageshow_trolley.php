@@ -128,7 +128,7 @@ if (!class_exists('StageShowWPOrgCartPluginClass'))
 		{
 			$formHTML = $extraHTML;
 			
-			if ($this->myDBaseObj->getOption('EnableReservations'))
+			if ($this->myDBaseObj->getOption('ReservationsMode') != STAGESHOW_RESERVATIONSMODE_DISABLED) 
 			{
 				// Output Select Status Drop-down Dialogue
 				$saleStatus = isset($cartContents->saleStatus) ? $cartContents->saleStatus : '';

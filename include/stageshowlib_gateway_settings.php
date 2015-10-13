@@ -68,7 +68,7 @@ if (!class_exists('GatewaySettingsAdminListClass'))
 			$uploadImagesPath = WP_CONTENT_DIR . '/uploads/'.$pluginID.'/images';
 			
 			include 'stageshowlib_gatewaybase.php';
-			$gatewayList = StageShowLibGatewayBaseClass::GetGatewaysList();
+			$gatewayList = StageShowLibGatewayBaseClass::GetGatewaysList($pluginID);
 			$serverSelect = array();
 			foreach ($gatewayList as $gatewayDef)
 			{

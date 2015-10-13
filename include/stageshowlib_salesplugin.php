@@ -75,6 +75,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			$actionURL = remove_query_arg('remove', $actionURL);
 			$actionURL = remove_query_arg('editpage', $actionURL);
 			
+			$actionURL = remove_query_arg('saleCompleteID', $actionURL);
+			$actionURL = remove_query_arg('saleCompleteTxn', $actionURL);
+			
 			return $actionURL;
 		}		
 		
@@ -371,8 +374,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					$this->Cart_OutputContent_OnlineStoreMain($atts);
 				}
 				
-				$this->OutputContent_OnlineStoreFooter();
-				
 				if ($this->boxofficeContent == '')
 				{
 					$this->boxofficeContent = ob_get_contents();
@@ -399,6 +400,17 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			
 			$outputContent .= '</form>'."\n";	
 			
+			if (!$this->adminPageActive 
+			  && $showBoxOffice
+			  && defined('STAGESHOWLIB_LOADING_URL') 
+			  && (STAGESHOWLIB_LOADING_URL != ''))
+			{
+				$nameAndClass = $this->myDomain."-boxoffice-loading";
+				$outputContent .= '<div id="'.$nameAndClass.'" class="'.$nameAndClass.'"><img src="'.STAGESHOWLIB_LOADING_URL.'"></div>'."\n";					
+			}
+			
+			$outputContent .= $this->OutputContent_OnlineStoreFooter();
+				
 			$outputContent .= "\n<!-- $pluginID Plugin Code - Ends Here -->\n";
 			
 			if (!$hasActiveTrolley)
@@ -534,18 +546,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			// Process checkout request for Integrated Trolley
 			// This function must be called before any output as it redirects to Payment Gateway if successful
 			$myDBaseObj = $this->myDBaseObj;				
-			
-			if (isset($_SESSION['REDIRECTED_GET']))
-			{
-				// Get Arguments from page redirect in SESSION Variable
-				$redirectedArgs = unserialize($_SESSION['REDIRECTED_GET']);
-				foreach ($redirectedArgs as $argID => $argVal)
-				{
-					$_GET[$argID] = $argVal;
-					$_REQUEST[$argID] = $argVal;
-				}
-				unset($_SESSION['REDIRECTED_GET']);
-			}
 			if ($myDBaseObj->isDbgOptionSet('Dev_ShowGET'))
 			{
 				StageShowLibUtilsClass::print_r($_GET, '$_GET');
@@ -560,7 +560,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			}		
 			
 			$checkout = $myDBaseObj->gatewayObj->IsCheckout();
-
 			if ($checkout != '')
 			{
 				$checkoutRslt = $this->OnlineStore_ScanCheckoutSales();
@@ -641,8 +640,11 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 							StageShowLibUtilsClass::print_r($gatewayURLParams, 'gatewayURLParams');
 							exit;
 						}
-						$myDBaseObj->gatewayObj->RedirectToGateway($gatewayURL);
-						exit;
+						
+						// RedirectToGateway() does not return if browser is redirected ....
+						$this->checkoutMsg .= $myDBaseObj->gatewayObj->RedirectToGateway($gatewayURL);
+						$this->checkoutMsgClass = $this->cssDomain.'-ok';
+						//exit;
 					}
 				}
 				else
@@ -653,6 +655,13 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				}
 				
 			}			
+
+			$checkoutComplete = $myDBaseObj->gatewayObj->IsComplete();
+			if ($checkoutComplete != null)
+			{
+				$this->checkoutMsg .= __('Transaction Complete - Ref: ', $this->myDomain).$checkoutComplete->saleTxnId;
+				$this->checkoutMsgClass = $this->cssDomain.'-ok';
+			}
 		}
 		
 		function CheckGatewayParam(&$paramsArray, $paramId, $paramValue, $paramIndex = 0)		
@@ -676,23 +685,6 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			return true;
 		}
 		
-		function InjectJSCode($jsCode)
-		{
-			if (defined('STAGESHOWLIB_INJECTEDJSCODE_UNCOMPRESSED'))
-			{
-				echo $jsCode;
-				return;
-			}
-			
-			// Split into lines ...
-			$jsLines = explode("\n", $jsCode);
-			foreach ($jsLines as $jsLine)
-			{
-				// Output the line without whitespace or the CR
-				echo trim($jsLine);
-			}
-			echo "\n";
-		}
 	}
 }
 ?>

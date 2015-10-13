@@ -103,7 +103,6 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 		define('STAGESHOW_STATE_DELETED', 'deleted');
 
 		define('STAGESHOW_VISIBILITY_PUBLIC', 'public');
-		define('STAGESHOW_VISIBILITY_ADMIN', 'admin');
 	}
 	
 	class StageShowWPOrgCartDBaseClass extends StageShowWPOrgCartDBaseClass_Parent // Define class
@@ -141,6 +140,8 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 				$this->buttonImageURLs['checkout'] = STAGESHOW_CHECKOUTBUTTON_URL;
 			if (defined('STAGESHOW_REMOVEBUTTON_URL'))
 				$this->buttonImageURLs['remove'] = STAGESHOW_REMOVEBUTTON_URL;
+			if (defined('STAGESHOW_CLOSEBUTTON_URL'))
+				$this->buttonImageURLs['closewindow'] = STAGESHOW_CLOSEBUTTON_URL;
 				
 			// Call base constructor
 			parent::__construct($opts);
@@ -189,10 +190,10 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 	if (!defined('PAYMENT_API_SALESTATUS_COMPLETED'))
 	{
 	define('PAYMENT_API_SALESTATUS_COMPLETED', '".PAYMENT_API_SALESTATUS_COMPLETED."');
-	define('PAYMENT_API_SALESTATUS_PENDING', '".PAYMENT_API_SALESTATUS_PENDING."');
 	define('PAYMENT_API_SALESTATUS_CHECKOUT', '".PAYMENT_API_SALESTATUS_PENDINGPPEXP."');
 	define('PAYMENT_API_SALESTATUS_PENDINGPPEXP', '".PAYMENT_API_SALESTATUS_PENDINGPPEXP."');
 	define('PAYMENT_API_SALESTATUS_RESERVED', '".PAYMENT_API_SALESTATUS_RESERVED."');
+	define('PAYMENT_API_SALESTATUS_TIMEOUT', '".PAYMENT_API_SALESTATUS_TIMEOUT."');
 	}
 	
 	if (!defined('STAGESHOW_TABLE_PREFIX'))
@@ -415,7 +416,7 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 			
 			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
 			$sql .= " LEFT JOIN ".STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
-			$sql .= " LEFT JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
+			$sql .= " JOIN ".STAGESHOW_PRICES_TABLE.' ON '.STAGESHOW_PRICES_TABLE.'.perfID='.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 
 			// Add SQL filter(s)
 			$sqlCond  = '('.STAGESHOW_PERFORMANCES_TABLE.'.perfState="")';
@@ -426,10 +427,12 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 										
 			$timeNow = current_time('mysql');
 			$sqlWhere .= ' AND '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime>"'.$timeNow.'" ';
+
+			$sqlWhere .= ' AND '.STAGESHOW_PRICES_TABLE.'.priceVisibility="'.STAGESHOW_VISIBILITY_PUBLIC.'" ';
 			
 			$sql .= ' WHERE '.$sqlWhere;
 			
-			$sql .= ' GROUP BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+			$sql .= ' GROUP BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
 
 			$perfsListArray = $this->get_results($sql);
@@ -507,7 +510,6 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 		{
 			if ($activeOnly)
 			{
-				if (!isset($this->allowAdminOnly)) $sqlFilters['publicPrices'] = true;
 				$sqlFilters['activePrices'] = true;
 				$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
 			}
@@ -546,7 +548,8 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 		{		
 			if (isset($sqlFilters['addTicketFee']))
 			{
-				$sql  = "ticketID, saleTxnId, saleStatus, saleFirstName, saleLastName, user_login, showName, perfDateTime, priceType, ticketQty, ticketPaid, ";
+				$sql  = ""; // ticketID, ";
+				$sql .= "saleTxnId, saleStatus, saleFirstName, saleLastName, user_login, showName, perfDateTime, priceType, ticketQty, ticketPaid, ";
 				$sql .= "saleFee*(ticketQty)/saleTotalQty AS ticketFee, ";
 				$sql .= "saleTransactionFee*(ticketQty)/saleTotalQty AS ticketCharge, ";
 				$sql .= "saleDateTime, saleEMail, salePPPhone, salePPStreet, salePPCity, salePPState, salePPZip, salePPCountry, perfRef";

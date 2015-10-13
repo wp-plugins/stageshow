@@ -1,17 +1,27 @@
 
-
+/* Seat Selector class definitions - Redefined if STAGESHOW_CLASS_BOXOFFICE_***** values are defined */
+var SeatUnknownClassText = 'stageshow-boxoffice-seat-unknown';
 var SeatAvailableClassText = 'stageshow-boxoffice-seat-available';
 var SeatRequestedClassText = 'stageshow-boxoffice-seat-requested';
-var SeatReservedClassText = 'stageshow-boxoffice-seat-reserved';
+var SeatReservedClassText = 'stageshow-boxoffice-seat-reserved';	// Used for Both Booked & Reserved Seats
+var SeatAllocatedClassText = 'stageshow-boxoffice-seat-allocated';
+var SeatBookedClassText = 'stageshow-boxoffice-seat-booked';
 var SeatDisabledClassText = 'stageshow-boxoffice-seat-disabled';
 
+var SeatLayoutClassText = 'stageshow-boxoffice-layout-seat-';
+
+/* Seat Selector id definitions - Never Redefined */
 var SeatCountBlockIdRoot = "stageshow-boxoffice-zoneSeatsBlock";
+var SeatLayoutBlockId = "#stageshow-boxoffice-seats";
+var SeatsLoadingBlockId = "#stageshow-boxoffice-loading";
 
 var SeatStateInvalid = -1;
 var SeatStateAvailable = 0;
 var SeatStateRequested = 1;
 var SeatStateReserved = 2;
-var SeatStateDisabled = 3;
+var SeatStateAllocated = 3;
+var SeatStateBooked = 4;
+var SeatStateDisabled = 5;
 
 var SeatLeftEndClass = 'stageshow-boxoffice-leftend';
 var SeatRightEndClass = 'stageshow-boxoffice-rightend';
@@ -26,6 +36,18 @@ function stageshow_SeatAvailability(seatId)
 	if (bookedIndex >= 0) 
 	{
 		return 'booked';
+	}
+	
+	var reservedIndex = jQuery.inArray(seatId, reservedSeats);
+	if (reservedIndex >= 0) 
+	{
+		return 'reserved';
+	}
+	
+	var allocatedIndex = jQuery.inArray(seatId, allocatedSeats);
+	if (allocatedIndex >= 0) 
+	{
+		return 'allocated';
 	}
 	
 	var selectedIndex = jQuery.inArray(seatId, selectedSeats);
@@ -77,9 +99,19 @@ function stageshow_GetSeatState(obj)
 		return SeatStateRequested;
 	}
 	
+	if (thisSeatClass.indexOf(SeatAllocatedClassText) > -1)
+	{
+		return SeatStateAllocated;
+	}
+	
 	if (thisSeatClass.indexOf(SeatReservedClassText) > -1)
 	{
 		return SeatStateReserved;
+	}
+	
+	if (thisSeatClass.indexOf(SeatBookedClassText) > -1)
+	{
+		return SeatStateBooked;
 	}
 	
 	if (thisSeatClass.indexOf(SeatDisabledClassText) > -1)
@@ -283,8 +315,8 @@ function stageshow_ToggleSeat(obj, isClick)
 	var className = obj.className;
 	var classPosn = className.search(SeatAvailableClassText);
 	
-	hiddenSeatsElem = document.getElementById("stageshow-boxoffice-layout-seats");
-	hiddenZonesElem = document.getElementById("stageshow-boxoffice-layout-zones");
+	hiddenSeatsElem = document.getElementById("stageshow-seatselected-seats");
+	hiddenZonesElem = document.getElementById("stageshow-seatselected-zones");
 	
 	/* Remove existing class specifier */
 	className  = className.replace(SeatAvailableClassText + ' ', '');
@@ -316,10 +348,32 @@ function stageshow_ToggleSeat(obj, isClick)
 	
 }
 
-function stageshow_OnSeatsView(obj, url)
+function  stageshow_OnClickSeatsavailable(obj, inst)
 {
+	var buttonIdParts = obj.id.split("_");
+	var perfId = parseInt(buttonIdParts[1]);
+	
+	var url = window.location.pathname;
+	if (url.indexOf('?') > -1)
+	{
+		url = url.replace('?', '?seatsavailable=' + perfId + '&');
+	}
+	else if (url.indexOf('#') > -1)
+	{
+		url = url.replace('#', '?seatsavailable=' + perfId + '#');
+	}
+	else
+	{
+		url = url + '?seatsavailable=' + perfId;
+	}
+
 	window.open(url, '_blank');
 	return false;
+}
+
+function  stageshow_OnClickClosewindow(obj, inst)
+{
+	window.close();
 }
 
 function stageshow_OnSeatsLoad()
@@ -329,8 +383,8 @@ function stageshow_OnSeatsLoad()
 	hasEndLimitTags = (elemsList.length > 0);	
 	
 	/* Clear hidden pass back values - Required if page is refreshed */
-	document.getElementById("stageshow-boxoffice-layout-seats").value = '';
-	document.getElementById("stageshow-boxoffice-layout-zones").value = '';
+	document.getElementById("stageshow-seatselected-seats").value = '';
+	document.getElementById("stageshow-seatselected-zones").value = '';
 	
 	seatsRequestedCount = 0;
 	for (var zoneID in zones) 
@@ -346,11 +400,11 @@ function stageshow_OnSeatsLoad()
 		for (col=1; col<=maxCols; col++)
 		{
 			var seatId = row + '_' + col;
-			var seatObj = document.getElementById('stageshow-boxoffice-layout-seat-' + seatId);
+			var seatObj = document.getElementById(SeatLayoutClassText + seatId);
 			
 			if (seatObj != null)
 			{
-				var className  = seatObj.className.replace('stageshow-boxoffice-seat-unknown', '');
+				var className  = seatObj.className.replace(SeatUnknownClassText, '');
 				var zoneID = stageshow_IsZoneValid(seatObj);
 				
 				if (zoneID > 0)
@@ -364,6 +418,14 @@ function stageshow_OnSeatsLoad()
 						case 'selected': 
 							seatObj.className = SeatAvailableClassText + ' ' + className;
 							stageshow_ToggleSeat(seatObj, false);
+							break;
+							
+						case 'allocated': 
+							seatObj.className = SeatAllocatedClassText + ' ' + className;
+							break;
+							
+						case 'booked': 
+							seatObj.className = SeatBookedClassText + ' ' + className;
 							break;
 							
 						default: 
@@ -390,6 +452,11 @@ function stageshow_OnSeatsLoad()
 		jQuery('#' + SeatCountBlockIdRoot).hide();
 	}
 		
+	jQuery(SeatsLoadingBlockId).hide();
+	jQuery(SeatLayoutBlockId).show();
+	jQuery('#trolley').css("visibility", "visible"); 
+	jQuery('#stageshow-trolley-trolley-std').show();
+
 }
 
 function stageshow_OnClickAdd(obj, inst)
@@ -404,13 +471,83 @@ function stageshow_OnClickAdd(obj, inst)
 	return rtnVal;
 }
 
+var stageshow_scrollPosn;
+
+function stageshow_OnClickSeatsSelectorButton(obj)
+{
+	var postvars = {
+		jquery: "true"
+	};
+	
+	switch(obj.id)
+	{
+		case "selectseats":		
+			stageshow_scrollPosn = jQuery(window).scrollTop();
+			jQuery('#trolley').css("visibility", "hidden"); 
+			jQuery('#stageshow-trolley-trolley-std').hide();
+			jQuery(SeatsLoadingBlockId).css("padding-top", "");
+			break;
+			
+		case "seatsselected":
+			postvars["PerfId"] = jQuery("#PerfId").val();
+			postvars["stageshow-seatselected-seats"] = jQuery("#stageshow-seatselected-seats").val();
+			postvars["stageshow-seatselected-zones"] = jQuery("#stageshow-seatselected-zones").val();		
+
+			var seatSelectorHeight = jQuery('#stageshow-trolley-trolley-std').outerHeight();
+			var loadingHeight = jQuery(SeatsLoadingBlockId).outerHeight();
+			var padding = seatSelectorHeight - loadingHeight;
+			
+			jQuery(SeatsLoadingBlockId).css("padding-top", padding + "px");
+			loadingHeight = jQuery(SeatsLoadingBlockId).outerHeight();
+
+			jQuery('#stageshow-trolley-trolley-std').hide();
+			break;
+			
+		default:
+			break;
+	}
+	
+	jQuery(SeatsLoadingBlockId).show();
+			
+	return StageShowLib_JQuery_ActionTrolleyButton(obj, 1, postvars, "stageshow_SeatsSelectorCallback");
+}
+
+function stageshow_SeatsSelectorCallback(data, inst, buttonId, qty)
+{
+	/* Call the standard callabck function */
+	StageShowLib_JQuery_Callback(data, inst, buttonId, qty);
+	
+	switch(buttonId)
+	{
+		case "selectseats":
+			stageshow_OnSeatsLoad();
+			break;	
+			
+		case "seatsselected":
+			jQuery(SeatsLoadingBlockId).hide();
+			jQuery(SeatLayoutBlockId).show();
+			jQuery('#trolley').css("visibility", "visible"); 
+			jQuery('#stageshow-trolley-trolley-std').show();
+			
+			/* Scroll back to the position before seats selection */
+			jQuery(window).scrollTop(stageshow_scrollPosn);
+			break;	
+			
+		default:
+			break;	
+	}
+	
+}
+
 function stageshow_OnClickSelectseats(obj)
 {
 	if (typeof stageshowCustom_OnClickSelectseats == 'function') 
 	{ 
   		return stageshowCustom_OnClickSelectseats(obj); 
 	}	
-	return true;
+
+	rtnVal = stageshow_OnClickSeatsSelectorButton(obj); 		
+	return rtnVal;
 }
 
 function stageshow_OnClickSeatsselected(obj)
@@ -419,7 +556,9 @@ function stageshow_OnClickSeatsselected(obj)
 	{ 
   		return stageshowCustom_OnClickSeatsselected(obj); 
 	}	
-	return true;
+	
+	rtnVal = stageshow_OnClickSeatsSelectorButton(obj); 		
+	return rtnVal;
 }
 
 function stageshow_OnClickReserve(obj)
@@ -428,6 +567,7 @@ function stageshow_OnClickReserve(obj)
 	{ 
   		return stageshowCustom_OnClickReserve(obj); 
 	}	
+	StageShowLib_BeforeSubmit(obj, stageshowlib_cssDomain);
 	return true;
 }
 
@@ -437,6 +577,7 @@ function stageshow_OnClickCheckout(obj)
 	{ 
   		return stageshowCustom_OnClickCheckout(obj); 
 	}
+	StageShowLib_BeforeSubmit(obj, stageshowlib_cssDomain);
 	return true;
 }
 

@@ -77,18 +77,17 @@ if (!class_exists('StageShowLibJQueryTrolley'))
 			{
 				$cartObj->shortcodeCount = $_POST['count'];
 			}
-			
+/*			
 			// Convert JQuery call parameters to original format params
 			if (isset($_POST['buttonid']))			
 			{
 				$buttonId = $_POST['buttonid'];
 				$_REQUEST[$buttonId] = $_POST[$buttonId] = 'submit';
 				$qtyId = str_replace('AddItemButton', 'quantity', $buttonId);
-				$_REQUEST[$qtyId] = $_POST[$qtyId] = $_POST['qty'];
-				
-				//StageShowLibUtilsClass::print_r($_POST, '$_POST - Updated');
+				$_REQUEST[$qtyId] = $_POST[$qtyId] = $_POST['qty'];				
 			}
-			
+*/			
+
 			$atts = array();
 			$scattMarker = 'scatt_';
 			$scattMarkerLen = strlen($scattMarker);

@@ -19,7 +19,6 @@ Copyright 2014 Malcolm Shergold
 
 */
 
-@import url(stageshow-seats.css);
 @import url(stageshow-calendar.css);
 
 /* --------------------------------------------------------------------------- */
@@ -95,6 +94,19 @@ div.stageshow-boxoffice-weblink
 td.stageshow-boxoffice-add input
 {
 	border: none;
+}
+
+.stageshow-trolley-seatsavailable-button
+{
+	border: none;
+}
+
+.stageshow-boxoffice-loading 
+{
+	text-align: center;
+	width: 100%;
+	height: 64px;
+	display: none;
 }
 
 /* --------------------------------------------------------------------------- */

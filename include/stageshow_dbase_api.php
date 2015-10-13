@@ -38,6 +38,9 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 	
 if (!class_exists('StageShowWPOrgDBaseClass')) 
 {
+	if (!defined('STAGESHOWLIB_FILENAME_NEWSLOG'))
+		define('STAGESHOWLIB_FILENAME_NEWSLOG', 'NewsLog.txt');
+						
 	class StageShowWPOrgDBaseClass extends StageShowWPOrgCartDBaseClass	// Define class
   	{
 		function __construct($caller) //constructor	
@@ -1031,10 +1034,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$sqlFilters['saleID'] = $saleID;
 			return $this->GetSalesQty($sqlFilters);
 		}
-				
-		
-		
-		
 		
 // ----------------------------------------------------------------------
 //
@@ -1059,8 +1058,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			
 			return $stockID;
 		}
-				
-		
 				
 		function GetSalesListByPerfID($perfID)
 		{
@@ -1108,8 +1105,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$this->show_results($salesListArray);
 								
 			return $salesListArray;
-		}
-		
+		}	
 		
 		function DeleteSale($saleID)
 		{
@@ -1117,8 +1113,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 
 			$this->DeleteOrders($saleID);			
 		}			
-		
-				
 		
 // ----------------------------------------------------------------------
 //
@@ -1242,7 +1236,16 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 				}
 					
 				$this->adminOptions['LatestNews'] = $latest['LatestNews'];
+				if ($this->isDbgOptionSet('Dev_LogNewsUpdates'))
+				{
+					$newsUpdate = "Status: ".$latest['Status']."\n".$latest['LatestNews']."\n";
 					
+					include 'stageshowlib_logfile.php';
+					$LogsFolder = $this->getOption('LogsFolderPath').'/';
+					$logFileObj = new StageShowLibLogFileClass($LogsFolder);
+					$logFileObj->StampedLogToFile(STAGESHOWLIB_FILENAME_NEWSLOG, $newsUpdate, StageShowLibDBaseClass::ForWriting);
+				}
+				
 				$this->adminOptions['NewsUpdateTime'] = current_time('timestamp');
 				$this->saveOptions();
 				//echo "News Updated<br>\n";

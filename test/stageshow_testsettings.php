@@ -21,6 +21,7 @@ Copyright 2014 Malcolm Shergold
 */
 	
 include STAGESHOW_TEST_PATH.'stageshowlib_testsettings.php';  
+include STAGESHOW_ADMIN_PATH.'stageshow_debug.php';   
 
 if (!class_exists('StageShowWPOrgTestSettingsAdminClass')) 
 {
@@ -55,15 +56,17 @@ if (!class_exists('StageShowWPOrgTestSettingsAdminClass'))
 			echo '</form>'."\n";
 		}
 		
-		function GetOptionsDefs()
+		static function GetOptionsDefs($inherit = true)
 		{
 			$testOptionDefs = array(
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show Trolley',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowTrolley',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowTrolley', ),
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Log HTTP I/O',            StageShowLibTableClass::TABLEPARAM_ID => 'Dev_LogHTTP', StageShowLibTableClass::TABLEPARAM_AFTER => 'Dev_IPNLogRequests'),
 			);
-			
-			$childOptions = parent::GetOptionsDefs();
-			
+
+			$childOptions = parent::GetOptionsDefs();			
 			$ourOptions = StageShowLibAdminListClass::MergeSettings($childOptions, $testOptionDefs);
+		
+			$childOptions = StageShowWPOrgDebugAdminClass::GetOptionsDefs(false);			
+			$ourOptions = StageShowLibAdminListClass::MergeSettings($ourOptions, $childOptions);
 			
 			return $ourOptions;
 		}

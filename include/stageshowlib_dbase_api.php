@@ -259,6 +259,24 @@ if (!class_exists('StageShowLibDBaseClass'))
 			}
 		}
 		
+		function IsButtonClicked($buttonID)
+		{
+			$normButtonID = $this->GetButtonID($buttonID);
+			$rtnVal = (isset($_REQUEST[$normButtonID]) || isset($_REQUEST[$normButtonID.'_x']));
+			return $rtnVal;
+		}
+				
+		function GetButtonID($buttonID)
+		{
+			if (defined('CORONDECK_RUNASDEMO'))
+			{
+				$pluginID = $this->myDBaseObj->get_name();
+				$buttonID .= '_'.$pluginID;
+			}
+			
+			return $buttonID;
+		}
+				
 		function getDebugFlagsArray()
 		{
 			$debugFlagsArray = array();
@@ -706,7 +724,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 			if ($saveToDB)
 				$this->saveOptions();// Saving Options - in getOptions functions
 				
-			if ($this->getDbgOption('Dev_ShowOptions'))
+			if ($this->getDbgOption('Dev_DumpOptions'))
 			{
 				StageShowLibUtilsClass::print_r($ourOptions, 'Options');
 			}
@@ -886,7 +904,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		define('CORONDECK_RUNASDEMO', '".CORONDECK_RUNASDEMO."');
 	";
 	
-			if (defined('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT')) $defines .= "
+			if (defined('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT') && defined('STAGESHOWLIB_DATETIME_IN_WP_CONFIG')) $defines .= "
 	if (!defined('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT'))
 		define('STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT', '".STAGESHOWLIB_DATETIME_BOXOFFICE_FORMAT."');
 	";
@@ -995,19 +1013,23 @@ if (!class_exists('StageShowLibDBaseClass'))
 	define('STAGESHOWLIB_CONFIG_STAMP', '".$configMarker."');
 	";
 			
-			if (defined('STAGESHOWLIB_TROLLEYID'))
+			$definesToCopy = array();	
+			if (defined('STAGESHOWLIB_TROLLEYID')) $definesToCopy = array_merge($definesToCopy, array('STAGESHOWLIB_TROLLEYID' => STAGESHOWLIB_TROLLEYID));
+
+			foreach ($definesToCopy as $defineID => $value)
 			{
-				
-			$phpText .= "	
-	if (!defined('STAGESHOWLIB_TROLLEYID'))
+				if (defined($defineID))
+				{				
+					$phpText .= "
+	if (!defined('$defineID'))
 	{
-		/** The name of the database for WordPress */
-		define('STAGESHOWLIB_TROLLEYID', '".STAGESHOWLIB_TROLLEYID."');
+		define('$defineID', '$value');
 	}
-	";
-	
+					";
+				}	
+				
 			}
-			
+
 			global $table_prefix;			
 
 			if ($table_prefix != '')

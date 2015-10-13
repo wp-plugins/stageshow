@@ -61,7 +61,7 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 				$decodedParams = '';
 				foreach ($URLParamsArray as $key => $param)
 				{
-					$decodedParams .= "$key=$param\n";
+					$decodedParams .= '$params'."['$key']='$param';\n";
 				}
 				
 				$LogIPNContent = "Gateway Verify Request Parameters: \n" . $decodedParams . "\n";
@@ -153,6 +153,7 @@ if (!class_exists('StageShowLib_paypal_CallbackClass'))
 					if (($txnStatus === $Payment_status) || ($txnStatus === PAYMENT_API_SALESTATUS_COMPLETED))
 						$IPNError = 'Txn_ID Already Processed';		// Entry with matching Txn_Id found
 				}
+				
 				if ($IPNError === '')
 				{
 					if ($txnStatus !== '')

@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
-Tested up to: 4.3
-Stable tag: 5.2.3
+Tested up to: 4.3.1
+Stable tag: 5.3.6
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -186,6 +186,58 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 12. Screenshot 12: Sample EMail 
 
 == Changelog ==
+
+= 5.3.6(13/10/2015) =
+* Bug Fix: Unallocated zones not shown on Select Seats page (StageShowGold)
+* Bug Fix: Price Plan editor rejects duplicate Ticket Types in different zones (StageShowGold)
+* Added STAGESHOW_IDENTIFY_RESERVED option - changes reserved seats styles (StageShowGold)
+* Added STAGESHOW_CLASS_BOXOFFICE options (StageShowGold)
+* Added Loading Animated GIF to Seating Selector (StageShowGold)
+* Seating Selector Speed Improved using jQuery calls (StageShowGold)
+* Added class to donation text (StageShowGold)
+* Admin Only Tickets now visible in Box-Office when logged in (StageShow+)
+* Added stageshow site config file (stageshow-wp-config.php)
+
+= 5.3.5(02/10/2015) =
+* Bug Fix: Unallocated zones can be shown on "Select Seats" page (StageShowGold)
+* Bug Fix: Import Template not reporting some errors (StageShowGold)
+* Bug Fix: Add ticket can fail when ticket name identical in another zone (StageShowGold)
+* Empty Seats in Seating Template are collated (StageShowGold)
+* Added "Purchaser Address" setting option
+* Added MJSLIB_TROLLEYHTML_*********** defines
+
+= 5.3.4(18/09/2015) =
+* Bug Fix: Fatal Error saving edited sales (since 5.3.2)
+
+= 5.3.3(15/09/2015) =
+* Bug Fix: Incorrect screen display of HTML special characters in Seating Plan Ref (StageShowGold)
+* Bug Fix: Error parsing Zone Specifications (StageShowGold)
+* Added trap for Seat Decode Definition errors (StageShowGold)
+* Added Seating Plan update confirmation (StageShowGold)
+* Cursor Changes to "busy" on clicking any Box-Office button
+
+= 5.3.2(14/09/2015) =
+* Bug Fix: Database Error generating Offline Validator
+* Bug Fix: Ticket export Database Error 
+
+= 5.3.1(13/09/2015) =
+* Bug Fix: Loading of Seatingplan can be blocked by other plugins using window.onload (StageShowGold)
+
+= 5.3(08/09/2015) =
+* Bug Fix: Trolley Column is "Show" instead of "Date & Time"
+* Bug Fix: Cursor changes when hovering over seats on Seats Available page (StageShowGold)
+* Bug Fix: Calendar view includes performances with no prices (StageShowGold)
+* Added "Show Available Seats" and "Close Window" button images (StageShowGold)
+* Added images for View Available Seating page (StageShowGold)
+* Removed cursor updates from View Available Seating page (StageShowGold)
+* Added/Changed Close Window button on View Available Seating page (StageShowGold)
+* Added optional months parameter to Calendar shortcode (StageShowGold)
+
+= 5.2.4(05/09/2015) =
+* Bug Fix: Messages not cleared from Box-Office when Add or Remove clicked
+* Bug Fix: Text EMails not formatted by View EMail button
+* Added option of Reservations without user registration
+* Added "Disabled" to visibility options
 
 = 5.2.3(31/08/2015) =
 * Bug Fix: STAGESHOW_DATETIME_BOXOFFICE_FORMAT option ignored after Box-Office Add/Remove button used

@@ -35,8 +35,10 @@ if (!class_exists('StageShowLibCalendarClass'))
 			$this->myDBaseObj = $myDBaseObj;
 		}
 
-		function OutputCalender($results)
+		function OutputCalender($results, $months=-1)
 		{		
+			$htmlOutput = '';
+					
 			$this->secsPerDay = (60*60*24);
 				 
 			// Get current day of the week
@@ -66,7 +68,6 @@ if (!class_exists('StageShowLibCalendarClass'))
 			}
 
 			$newMonth = true;
-			$htmlOutput = '';
 			
 			// Loop Round for 52 weeks (max)
 			for ($weekNo = 1; $weekNo<=52; $weekNo++)
@@ -74,7 +75,9 @@ if (!class_exists('StageShowLibCalendarClass'))
 				if ($newMonth)
 				{
 					//if ($result === null) break;
-				
+					if ($months-- == 0)
+						break;
+						
 					if ($weekNo != 1) 
 					{
 						// Add end of table tag block

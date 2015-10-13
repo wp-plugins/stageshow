@@ -56,7 +56,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			// TEST HTML Output - End
 		}
 		
-		function GetOptionsDefs()
+		static function GetOptionsDefs($inherit = true)
 		{
 			$testOptionDefs = array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show $_GET',        StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowGET',          StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowGET', ),
@@ -66,7 +66,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show SQL',          StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowSQL',          StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowSQL', ),
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Show DB Output',    StageShowLibTableClass::TABLEPARAM_NAME => 'cbShowDBOutput',     StageShowLibTableClass::TABLEPARAM_ID => 'Dev_ShowDBOutput', ),
 			);
-			
+		
 			return $testOptionDefs;
 		}
 		
@@ -99,8 +99,8 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 					$label = $optDef[StageShowLibTableClass::TABLEPARAM_LABEL];
 					if ($label === '') continue;
 					
-					$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
 					$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_ID];
+					$ctrlId = isset($optDef[StageShowLibTableClass::TABLEPARAM_NAME]) ? $optDef[StageShowLibTableClass::TABLEPARAM_NAME] : 'ctrl'.$settingId;
 					$settingValue = trim(StageShowLibUtilsClass::GetHTTPElement($_POST,$ctrlId));
 					$myDBaseObj->dbgOptions[$settingId] = $settingValue;
 				}
@@ -117,7 +117,6 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 				foreach ($optDefs as $optDef)
 				{
 					$label = $optDef[StageShowLibTableClass::TABLEPARAM_LABEL];
-					$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
 					$ctrlDesc = $this->GetOptionsDescription($label);
 					echo "<tr><td><strong>$label</strong></td><td>$ctrlDesc</td></tr>\n";
 				}
@@ -145,8 +144,8 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			if ($count == 0) echo '<tr valign="top">'."\n";
 			if ($label !== '')
 			{
-				$ctrlId = $optDef[StageShowLibTableClass::TABLEPARAM_NAME];
 				$settingId = $optDef[StageShowLibTableClass::TABLEPARAM_ID];
+				$ctrlId = isset($optDef[StageShowLibTableClass::TABLEPARAM_NAME]) ? $optDef[StageShowLibTableClass::TABLEPARAM_NAME] : 'ctrl'.$settingId;
 				$optValue = StageShowLibUtilsClass::GetArrayElement($myDBaseObj->dbgOptions, $settingId);
 				if (!isset($optDef[StageShowLibTableClass::TABLEPARAM_TYPE]))
 				{

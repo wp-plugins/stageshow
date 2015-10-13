@@ -31,12 +31,12 @@ function stageshow_TestClickSeat(obj)
 	seatsElem = document.getElementById("stageshow-boxoffice-layout-seatdef");
 
 	var className = obj.className;
-	var classPosn = className.search('stageshow-boxoffice-seat-requested');
+	var classPosn = className.search(SeatRequestedClassText);
 	
 	/* Remove existing class specifier */
-	className  = className.replace('stageshow-boxoffice-seat-available', ' ');
-	className  = className.replace('stageshow-boxoffice-seat-requested', ' ');
-	className  = className.replace('stageshow-boxoffice-seat-unknown', ' ');
+	className  = className.replace(SeatAvailableClassText, ' ');
+	className  = className.replace(SeatRequestedClassText, ' ');
+	className  = className.replace(SeatUnknownClassText, ' ');
 	className  = className.replace('  ', ' ');
 	
 	seatName = 'Row ' + seatId.replace('_', ' Seat ');
@@ -44,12 +44,12 @@ function stageshow_TestClickSeat(obj)
 	
 	if (classPosn < 0)
 	{
-		className = 'stageshow-boxoffice-seat-requested ' + className;
+		className = SeatRequestedClassText + ' ' + className;
 		seatsElem.innerHTML = seatName + ' Changed to Booked';		
 	}
 	else
 	{
-		className = 'stageshow-boxoffice-seat-available ' + className;
+		className = SeatAvailableClassText + ' ' + className;
 		seatsElem.innerHTML = seatName + ' Changed to Available';		
 	}
 	obj.className = className;

@@ -161,13 +161,30 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			return $TL8text.'<input type="hidden" name="'.$id.'" id="'.$id.'" value="'.$TL8text.'" />';
 		}
 		
+		function InjectJSCode($jsCode)
+		{
+			if (!$this->myDBaseObj->isDbgOptionSet('Dev_AllowMultilineJS'))
+			{
+				echo $jsCode;
+				return;
+			}
+			
+			// Split into lines ...
+			$jsLines = explode("\n", $jsCode);
+			foreach ($jsLines as $jsLine)
+			{
+				// Output the line without whitespace or the CR
+				echo trim($jsLine);
+			}
+			echo "\n";
+		}
+		
 		function Cart_OutputContent_OnlineStoreMain($atts)
 		{
 			// Deal with sale editor pages
 			if ($this->adminPageActive)
 			{
-				$buttonID = $this->GetButtonID('editbuyer');
-				if (isset($_POST[$buttonID]))	// 'editbuyer' editing sale - get buyer details
+				if ($this->myDBaseObj->IsButtonClicked('editbuyer'))	// editing sale - get buyer details
 				{
 					// Output Buyer Details Form
 					if (!current_user_can(STAGESHOWLIB_CAPABILITY_ADMINUSER))
@@ -185,10 +202,8 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 					return;
 				}
 				
-				$buttonID = $this->GetButtonID('savesaleedit');
-				if (isset($_POST[$buttonID]))
+				if ($this->myDBaseObj->IsButtonClicked('savesaleedit'))
 					return;
-
 			}
 			
       		// Get all database entries for this item ... ordered by date/time then ticket type
@@ -270,7 +285,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			}
 			
 			$saveCaption = __('Save', $this->myDomain);
-			$buttonID = $this->GetButtonID('savesaleedit');
+			$buttonID = $this->myDBaseObj->GetButtonID('savesaleedit');
 			
 			$buttonClassdef = ($this->adminPageActive) ? 'class="button-secondary " ' : 'class="xx" ';
 			
@@ -693,23 +708,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		{
 			return;
 		}
-		
-		function GetButtonPostID($buttonID)
-		{
-			return $this->GetButtonID($buttonID);
-		}
-				
-		function GetButtonID($buttonID)
-		{
-			if (defined('CORONDECK_RUNASDEMO'))
-			{
-				$pluginID = $this->myDBaseObj->get_name();
-				$buttonID .= '_'.$pluginID;
-			}
 			
-			return $buttonID;
-		}
-				
 		function GetButtonTypeDef($buttonID, $buttonName = '', $buttonType = '', $buttonClasses = 'button-primary')
 		{
 			$buttonTypeDef = '';
@@ -719,8 +718,12 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 				$buttonType = 'submit';
 			}
 			
-			// Try for a payment gateway defined button ...
-			$buttonImage = $this->myDBaseObj->gatewayObj->GetButtonImage($buttonID);
+			$buttonImage = $this->myDBaseObj->ButtonURL($buttonID);
+			if ($buttonImage == '')
+			{
+				// Try for a payment gateway defined button ...
+				$buttonImage = $this->myDBaseObj->gatewayObj->GetButtonImage($buttonID);
+			}
 			if ($buttonImage != '')
 			{
 				$buttonType = 'image';
@@ -731,7 +734,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 				
 			if ($buttonName == '')
 			{
-				$buttonName = $this->GetButtonID($buttonID);
+				$buttonName = $this->myDBaseObj->GetButtonID($buttonID);
 			}
 
 			if ($buttonType == 'image')
@@ -766,7 +769,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		{
 			if ($this->adminPageActive)
 			{
-				echo '<input class="'.$this->cssBaseID.'-button button-primary" type="submit" name="'.$this->GetButtonID('editbuyer').'" value="'.__('Next', $this->myDomain).'"/>'."\n";
+				echo '<input class="'.$this->cssBaseID.'-button button-primary" type="submit" name="'.$this->myDBaseObj->GetButtonID('editbuyer').'" value="'.__('Next', $this->myDomain).'"/>'."\n";
 				return '';
 			}
 			
@@ -922,8 +925,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
-			$buttonID = $this->GetButtonPostID('checkoutdetails');
-			if (!isset($_POST[$buttonID]))	// Get checkout details from user
+			if (!$myDBaseObj->IsButtonClicked('checkoutdetails'))	// Get checkout details from user
 				return '';
 			
 			// Get the list of fields for user to add
@@ -936,16 +938,24 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 				return '';
 			}
 			
-			$html = '';
-/*			
-			// If Fields Defined 
-			$classId = $myPluginObj->adminClassPrefix.'SalesAdminListClass';
-			$salesList = new $classId(null, null);
+			$this->Cart_OutputContent_Anchor("checkoutdetails");
+					
+			$html = $this->Cart_OnlineStore_GetPurchaserDetailsForm($userFieldsList);
 			
-			$rowsDefs = $myDBaseObj->gatewayObj->Gateway_SettingsRowsDefinition();
-StageShowLibUtilsClass::print_r($rowsDefs, '$rowsDefs');
-*/				
-			// TODO: Pass trolley details as parameters
+			$buttonType = $this->GetButtonTypeDef('checkout');
+			$buttonType = str_replace('_OnClickCheckout', '_OnClickSubmitDetails', $buttonType);
+			$html .= '<input '.$buttonType.' value="'.__('Checkout', $this->myDomain).'"/>'."\n";
+			
+			echo $html;
+			return $html;	
+		}
+		
+		function Cart_OnlineStore_GetPurchaserDetailsForm($userFieldsList)
+		{
+			$html = '';
+			$detailsCSSBase = $this->cssDomain.'-checkoutdetails';
+			
+			// Pass cart contents so we can detect if the trolley is changed in another window
 			$cartContents = $this->GetTrolleyContents();
 			$paramCount = 0;
 			if (isset($cartContents->rows))
@@ -962,10 +972,6 @@ StageShowLibUtilsClass::print_r($rowsDefs, '$rowsDefs');
 				}				
 			}
 					
-			$this->Cart_OutputContent_Anchor("checkoutdetails");
-					
-			$detailsCSSBase = $this->cssDomain.'-checkoutdetails';
-			
 			echo '<div class="'.$this->cssTrolleyBaseID.'-header"><h2>'.__('Your Contact Details', $this->myDomain)."</h2></div>\n";
 
 			$missingMessage = __('must be entered', $this->myDomain);
@@ -1024,11 +1030,7 @@ function StageShowLib_JS_OnClickSubmitDetails(obj)
 				</table>
 				</div>';
 			
-			$buttonType = $this->GetButtonTypeDef('checkout');
-			$buttonType = str_replace('_OnClickCheckout', '_OnClickSubmitDetails', $buttonType);
-			$html .= '<input '.$buttonType.' value="'.__('Checkout', $this->myDomain).'"/>'."\n";
-echo $html;
-			return $html;	
+			return $html;
 		}
 				
 		function Cart_OnlineStore_HandleTrolley()
@@ -1127,15 +1129,13 @@ function '.$emailSaleButtonClick.'()
 			{
 				if ($_GET['action'] == 'editsale')
 				{
-					$buttonID = $this->GetButtonID('editbuyer');
-					if (isset($_POST[$buttonID])) 
+					if ($myDBaseObj->IsButtonClicked('editbuyer')) 
 					{
 						$this->cart_ReadOnly = true;
 						$this->OnlineStore_AddTrolleySuplementaryInputs($cartContents);	
 					}
 					
-					$buttonID = $this->GetButtonID('savesaleedit');
-					if (isset($_POST[$buttonID])) 
+					if ($myDBaseObj->IsButtonClicked('savesaleedit')) 
 					{
 						$cartContents = $this->GetTrolleyContents();
 						
@@ -1179,7 +1179,7 @@ function '.$emailSaleButtonClick.'()
 						
 						// $cartContents is updated when OnlineStoreSaveEdit() fails - Reload it!
 						$cartContents = $this->GetTrolleyContents();
-						unset($_POST[$buttonID]);
+						unset($_POST['savesaleedit']);
 					}				
 				}
 			}
@@ -1365,6 +1365,8 @@ function '.$emailSaleButtonClick.'()
 				$runningTotal = $myDBaseObj->FormatCurrency($runningTotal);				
 				$trolleyTotal = $myDBaseObj->FormatCurrency($trolleyTotal);
 
+				if (defined('STAGESHOWLIB_TROLLEYHTML_ABOVETOTAL')) echo STAGESHOWLIB_TROLLEYHTML_ABOVETOTAL;
+				
 				echo '<tr class="'.$this->cssTrolleyBaseID.'-totalrow">'."\n";
 				echo '<td colspan="'.($this->trolleyHeaderCols-4).'">&nbsp;</td>'."\n";
 				echo '<td>'.__('Total', $this->myDomain)."\n";
@@ -1376,9 +1378,11 @@ function '.$emailSaleButtonClick.'()
 					echo '<td>&nbsp;</td>'."\n";
 				echo "</tr>\n";
 				
+				if (defined('STAGESHOWLIB_TROLLEYHTML_ABOVEBUTTONS')) echo STAGESHOWLIB_TROLLEYHTML_ABOVEBUTTONS;
+				
 				if ( ($checkoutNotePosn == 'above') && ($checkoutNote != '') )
 				{
-					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
+					echo '<tr><td class="'.$this->cssTrolleyBaseID.'-checkoutnote" colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
 				}
 					
 				if (!isset($this->cart_ReadOnly))
@@ -1418,9 +1422,11 @@ function '.$emailSaleButtonClick.'()
 					$this->OutputContent_OnlineTrolleyFooterRows($cartContents);
 				}
 				
+				if (defined('STAGESHOWLIB_TROLLEYHTML_BELOWBUTTONS')) echo STAGESHOWLIB_TROLLEYHTML_BELOWBUTTONS;
+				
 				if ( ($checkoutNotePosn == 'below') && ($checkoutNote != '') )
 				{
-					echo '<tr><td colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
+					echo '<tr><td class="'.$this->cssTrolleyBaseID.'-checkoutnote" colspan="'.$this->trolleyHeaderCols.'">'.$checkoutNote."</td></tr>\n";
 				}
 					
 				echo "</table>\n";

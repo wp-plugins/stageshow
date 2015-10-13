@@ -92,6 +92,22 @@ if (!class_exists('StageShowLibGatewayCallbackClass'))
 			}							
 		}
 		
+		function DoCallback()
+		{
+			// Default Callback Function ... only run if not defined is parent class
+			$LogMessage = '';
+			foreach ($_REQUEST as $reqKey => $reqValue)
+			{
+				$LogMessage .= "$reqKey: $reqValue \n";
+			}
+			
+			$fileName = get_class($this).STAGESHOWLIB_FILENAME_GATEWAYNOTIFY;
+			$logFileObj = new StageShowLibLogFileClass($this->LogsFolder);
+			$logFileObj->LogToFile($fileName, $LogMessage, StageShowLibDBaseClass::ForAppending);
+			
+			echo str_replace("\n", "<br>\n", $LogMessage);
+		}
+		
 		function VerifyGatewayCallback($VerifyURL, $pfParamString)
 		{
 			$retries = 1;

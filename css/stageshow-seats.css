@@ -69,14 +69,26 @@ div.stageshow-boxoffice-seat-requested
     background-color: #FF800F;
 }
 
+/* When STAGESHOW_IDENTIFY_RESERVED is not defined booked and reserved seats both get the stageshow-boxoffice-seat-reserved class */
 div.stageshow-boxoffice-seat-reserved
+{
+    background-color: #FF0000;
+}
+
+/* When STAGESHOW_IDENTIFY_RESERVED is defined reserved seats both get the stageshow-boxoffice-seat-allocated class */
+div.stageshow-boxoffice-seat-allocated
+{
+    background-color: #c42bbf;
+}
+
+/* When STAGESHOW_IDENTIFY_RESERVED is defined booked seats both get the stageshow-boxoffice-seat-booked class */
+div.stageshow-boxoffice-seat-booked
 {
     background-color: #FF0000;
 }
 
 div.stageshow-boxoffice-seat-disabled
 {
-	
 }
 
 div.stageshow-boxoffice-seat-unknown

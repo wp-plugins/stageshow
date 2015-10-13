@@ -21,8 +21,12 @@ Copyright 2014 Malcolm Shergold
 */
 
 /*
-	This file lists examples of definitions of Advanced Customisation constants
-	and is never loaded when running StageShow
+	This file lists examples of definitions of Advanced Customisation  constants  and  is  never
+	loaded when running StageShow.
+	
+	These constants should be defined in the stageshow site config file (stageshow-wp-config.php) 
+	which is located in the  wp-contents/uploads/{plugin}  folder.  Before  version  5.3.5  these 
+	constants were located in the wp-config.php  file.
 */
 
 /*
@@ -58,10 +62,12 @@ define('STAGESHOW_STYLESHEET_URL', 'wp-content/plugins/stageshowgold/css/stagesh
 */
 define('STAGESHOW_ADDBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Add.gif');
 define('STAGESHOW_CHECKOUTBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Checkout.gif');
+define('STAGESHOW_CLOSEBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Close.gif');
 define('STAGESHOW_REMOVEBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Remove.gif');
 define('STAGESHOW_RESERVEBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Reserve.gif');
 define('STAGESHOW_SEATSSELECTEDBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_Continue.gif');
 define('STAGESHOW_SELECTSEATSBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_SelectSeats.gif');
+define('STAGESHOW_SHOWAVAILABLEBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_ShowAvailable.gif');
 define('STAGESHOW_CONFIRMANDPAYBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_CommandAndPay.gif');
 
 /* --------------------------------------------------------------------------------
@@ -197,6 +203,18 @@ define('STAGESHOW_BOXOFFICE_SORTFIELD', 'priceValue');
 
 /*
 ------------------------------------------------------------------------------------------------
+	STAGESHOW_IDENTIFY_RESERVED
+	
+	Defininng this value causes reserved seats to be displayed in a different colour to booked 
+	seats on the seat selection page, and the seats available page.
+	
+------------------------------------------------------------------------------------------------
+*/
+
+define('STAGESHOW_IDENTIFY_RESERVED', true);
+
+/*
+------------------------------------------------------------------------------------------------
 	STAGESHOWLIB_SCROLLTOANCHOR_OFFSET
 	STAGESHOWLIB_SCROLLTOANCHOR_DURATION
 	
@@ -210,5 +228,33 @@ define('STAGESHOW_BOXOFFICE_SORTFIELD', 'priceValue');
 
 define('STAGESHOWLIB_SCROLLTOANCHOR_OFFSET', 0);
 define('STAGESHOWLIB_SCROLLTOANCHOR_DURATION', 1000);
+
+/*
+------------------------------------------------------------------------------------------------
+	STAGESHOWLIB_TROLLEYHTML_ABOVETOTAL
+	STAGESHOWLIB_TROLLEYHTML_ABOVEBUTTONS
+	STAGESHOWLIB_TROLLEYHTML_BELOWBUTTONS
+	
+	These values determine HTML code that is inserted into the shopping trolley output. This does 
+	a simillar function to the "Checkout Note" option in the settings, but gives more flexability
+	to the code that can be inserted.
+	
+------------------------------------------------------------------------------------------------
+*/
+
+define('STAGESHOWLIB_TROLLEYHTML_ABOVETOTAL', '<tr><td colspan="6">Just some text in the Trolley</td></tr>');
+define('STAGESHOWLIB_TROLLEYHTML_ABOVEBUTTONS', '<tr><td colspan="6">Just some text in the Trolley</td></tr>');
+define('STAGESHOWLIB_TROLLEYHTML_BELOWBUTTONS', '<tr><td colspan="6">Just some text in the Trolley</td></tr>');
+
+/*
+------------------------------------------------------------------------------------------------
+	STAGESHOWLIB_LOADING_URL
+	
+	This value defines the URL of the image displayed while the seating layout is loaded.
+	
+------------------------------------------------------------------------------------------------
+*/
+
+define('STAGESHOWLIB_LOADING_URL', 'wp-content/plugins/stageshowgold/images/loading-segments.gif');
 
 ?>

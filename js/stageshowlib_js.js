@@ -2,19 +2,12 @@ var currencySymbol = '';
 
 function StageShowLib_addWindowsLoadHandler(newHandler)
 {
-	var oldonload = window.onload;
-	if (typeof window.onload != "function") 
-	{
-		window.onload = newHandler;
-	} 
-	else 
-	{
-		window.onload = function() 
+	jQuery(document).ready(
+		function() 
 		{
-          oldonload();
-          newHandler();
-        }
-	}
+		    newHandler();
+		}
+	);
 }
 
 function StageShowLib_ParseCurrency(currencyText)
@@ -131,21 +124,43 @@ function StageShowLib_replaceAll(find, replace, str)
 	return str.replace(new RegExp(find, 'g'), replace);
 }
 
+function StageShowLib_BeforeSubmit(obj, cssDomain) 
+{
+	jQuery("body").css("cursor", "progress");
+	StageShowLib_EnableControls(cssDomain + "-trolley-ui", false);
+}
+
 function StageShowLib_SetBusy(newState, elemClassId) 
 {
 	if (newState)
 	{
 		jQuery("body").css("cursor", "progress");		
-		StageShowLib_EnableControls(elemClassId, false);
+		StageShowLib_EnableControls(elemClassId, false, true);
 	}
 	else
 	{
-		StageShowLib_EnableControls(elemClassId, true);
+		StageShowLib_EnableControls(elemClassId, true, true);
 		jQuery("body").css("cursor", "default");		
 	}
 }
 
-function StageShowLib_EnableControls(classId, state)
+function StageShowLib_AddHiddenValue(name, value)
+{
+	var hiddenTag = "<input type=hidden name=" + name + " id=" + name + "  value=" + value + " />";
+
+	/* Add HTML to Trolley Header div tag */
+	divElem = jQuery(".stageshow-trolley-header");
+
+	/* Get updated trolley (which is not visible) */
+	trolleyHTML = divElem[0].innerHTML;
+	trolleyHTML = hiddenTag + trolleyHTML;
+	divElem.html(trolleyHTML);
+	
+	var newTrolleyHTML = divElem[0].innerHTML;
+	newTrolleyHTML = "";
+}
+
+function StageShowLib_EnableControls(classId, state, disable)
 {
 	var classSpec = "."+classId;
 	var buttonElemsList = jQuery(classSpec);
@@ -162,8 +177,8 @@ function StageShowLib_EnableControls(classId, state)
 			}
 			else
 			{
-				uiElem.prop("disabled", true);			
-				uiElem.css("cursor", "progress");				
+				if (disable) uiElem.prop("disabled", true);			
+				uiElem.css("cursor", "progress");
 			}
 				
 	    	return true;
@@ -266,24 +281,39 @@ function StageShowLib_JQuery_ScrollToAnchor(inst)
 	var anchorId = "#"+stageshowlib_pageAnchor[inst];	
 	if (jQuery(anchorId).length == 0)
 		return;
+		
+	StageShowLib_JQuery_ScrollTo(anchorId, anchorOffset, anchorDuration);
+}
 
+function StageShowLib_JQuery_ScrollTo(reqAnchorId, reqAnchorOffset, reqAnchorDuration)
+{
     jQuery('html, body').animate({
-        scrollTop: jQuery(anchorId).offset().top - anchorOffset
-    }, anchorDuration);					
+        scrollTop: jQuery(reqAnchorId).offset().top - reqAnchorOffset
+    }, reqAnchorDuration);					
 	
 }
 
 function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
 {
+	var postvars = {
+		jquery: "true"
+	};
+	
+	return StageShowLib_JQuery_ActionTrolleyButton(obj, inst, postvars, "StageShowLib_JQuery_Callback");
+}
+
+function StageShowLib_JQuery_ActionTrolleyButton(obj, inst, postvars, callback)
+{
 	var pluginId = stageshowlib_cssDomain;
-	var scIndex = inst;
+	var buttonId = obj.id;	
 	
 	/* Set Cursor to Busy and Disable All UI Buttons */
 	StageShowLib_SetBusy(true, pluginId + "-trolley-ui");
 			
-	var postvars = {
-		jquery: "true"
-	};
+	/* Clear any messages */
+	messageElem = jQuery("#message");
+	messageElem.hide();
+			
 	postvars.count = inst;
 	postvars.timeout = 30000;
 	postvars.cache = false;
@@ -291,8 +321,6 @@ function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
 	
 	postvars = StageShowLib_JQuery_PostVars(postvars);
 
-	var buttonId = obj.id;	
-	postvars[buttonId] = "submit";
 	var qty = 0;
 	var nameParts = buttonId.split("_");
 	if (nameParts[0] == "AddItemButton")
@@ -302,7 +330,7 @@ function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
 		postvars[qtyId] = qty;
 	}
 	
-	ourAtts = stageshowlib_attStrings[scIndex-1];
+	ourAtts = stageshowlib_attStrings[inst-1];
 	ourAtts = ourAtts.split(",");
 	for (var attId=0; attId<ourAtts.length; attId++) 
 	{
@@ -313,54 +341,64 @@ function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
 		postvars[key] = value;
 	}
 
+	postvars[buttonId] = "submit";
+	
 	/* Get New HTML from Server */
-    jQuery.post(jQueryURL, postvars,
+    jQuery.post(jQueryURL, postvars, 
 	    function(data, status)
 	    {
-			trolleyTargetElem = jQuery("#" + pluginId + "-trolley-trolley-std");
-			
-	    	if ((status != 'success') || (data.length == 0))
-	    	{
+			if ((status != 'success') || (data.length == 0))
+			{
 				StageShowLib_SetBusy(false, pluginId + "-trolley-ui");
 				
-	    		/* Fall back to HTML Post Method */
+				/* Should Fall back to HTML Post Method ... TODO */
 				return true;
 			}
 
-			/* Apply translations to any message */
-			for (var index=0; index<tl8_srch.length; index++)
-			{
-				var srchFor = tl8_srch[index];
-				var repWith = tl8_repl[index];
-				data = StageShowLib_replaceAll(srchFor, repWith, data);
-			}
-
-			targetElemID = "#" + pluginId + "-trolley-container" + inst;
-			divElem = jQuery(targetElemID);
-			divElem.html(data);
-	
-			/* Copy New Trolley HTML */
-			trolleyUpdateElem = jQuery("#" + pluginId + "-trolley-trolley-jquery");
-			
-			/* Get updated trolley (which is not visible) */
-			trolleyHTML = trolleyUpdateElem[0].innerHTML;
-
-			/* Copy New Trolley HTML */
-			trolleyTargetElem.html(trolleyHTML);
-			
-			/* Now delete the downloaded HTML */
-			trolleyUpdateElem.remove();
-			
-			if (qty > 0)
-			{
-				StageShowLib_JQuery_ScrollToAnchor(inst);				
-			}
-							
-			/* Set Cursor to Normal and Enable All UI Buttons */
-			StageShowLib_SetBusy(false, pluginId + "-trolley-ui");
-	    }
+			var callbackFn = window[callback];
+			callbackFn(data, inst, buttonId, qty);
+		}    
     );
     
     return false;
 }
 				
+function StageShowLib_JQuery_Callback(data, inst, buttonId, qty)
+{
+	var pluginId = stageshowlib_cssDomain;
+	
+	trolleyTargetElem = jQuery("#" + pluginId + "-trolley-trolley-std");
+	
+	/* Apply translations to any message */
+	for (var index=0; index<tl8_srch.length; index++)
+	{
+		var srchFor = tl8_srch[index];
+		var repWith = tl8_repl[index];
+		data = StageShowLib_replaceAll(srchFor, repWith, data);
+	}
+
+	targetElemID = "#" + pluginId + "-trolley-container" + inst;
+	divElem = jQuery(targetElemID);
+	divElem.html(data);
+
+	/* Copy New Trolley HTML */
+	trolleyUpdateElem = jQuery("#" + pluginId + "-trolley-trolley-jquery");
+	
+	/* Get updated trolley (which is not visible) */
+	trolleyHTML = trolleyUpdateElem[0].innerHTML;
+
+	/* Copy New Trolley HTML */
+	trolleyTargetElem.html(trolleyHTML);
+	
+	/* Now delete the downloaded HTML */
+	trolleyUpdateElem.remove();
+	
+	if (qty > 0)
+	{
+		StageShowLib_JQuery_ScrollToAnchor(inst);				
+	}
+					
+	/* Set Cursor to Normal and Enable All UI Buttons */
+	StageShowLib_SetBusy(false, pluginId + "-trolley-ui");
+	
+}

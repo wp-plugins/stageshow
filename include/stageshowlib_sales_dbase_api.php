@@ -53,6 +53,9 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 	if (!defined('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH'))
 		define('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH', '');
 		
+	if (!defined('STAGESHOWLIB_FILENAME_HTTPIOLOG'))
+		define('STAGESHOWLIB_FILENAME_HTTPIOLOG', 'HTTPLog.txt');
+						
 	class StageShowLibSalesDBaseClass extends StageShowLibSalesCartDBaseClass // Define class 
   	{	
 		const STAGESHOWLIB_LOGSALEMODE_CHECKOUT = 'Checkout';
@@ -333,6 +336,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						saleStatus VARCHAR('.PAYMENT_API_SALESTATUS_TEXTLEN.'),
 						saleNoteToSeller TEXT,
 						salePPExpToken VARCHAR('.PAYMENT_API_EXPTOKEN_TEXTLEN.') NOT NULL DEFAULT "",
+						saleCheckoutURL VARCHAR('.PAYMENT_API_URL_TEXTLEN.') NOT NULL DEFAULT "",
 						user_login VARCHAR(60) NOT NULL DEFAULT "",
 					';
 					break;
@@ -803,6 +807,18 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $txnEntries[0]->saleStatus;
 		}
 		
+		function GetCheckoutURL($SaleId)
+		{
+			$sql = 'SELECT saleCheckoutURL FROM '.$this->DBTables->Sales.' WHERE saleId="'.$SaleId.'"';
+			 
+			$chkoutEntries = $this->get_results($sql);
+			
+			if (count($chkoutEntries) == 0) 
+				return '';
+			
+			return $chkoutEntries[0]->saleCheckoutURL;
+		}
+		
 		function UpdateSaleIDStatus($SaleId, $Payment_status)
 		{
 			$sql  = 'UPDATE '.$this->DBTables->Sales;
@@ -824,7 +840,14 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function UpdateSaleStatus($Txn_id, $Payment_status)
 		{
 			$sql  = 'UPDATE '.$this->DBTables->Sales;
-			$sql .= ' SET saleStatus="'.$Payment_status.'"';		
+			if ($Payment_status == PAYMENT_API_SALESTATUS_COMPLETED)
+			{
+				$sql .= ' SET saleStatus, saleCheckoutURL="'.$Payment_status.'", ""';
+			}
+			else		
+			{
+				$sql .= ' SET saleStatus="'.$Payment_status.'"';
+			}		
 			$sql .= ' WHERE saleTxnId="'.$Txn_id.'"';							
 			 
 			$this->query($sql);	
@@ -886,6 +909,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 						wp_get_current_user();
 						$saleVals['user_login'] = $current_user->user_login;
 					}		
+									
+					$saleVals['saleCheckoutURL'] = StageShowLibUtilsClass::GetPageURL();
 							
 					$saleID = $this->AddSale($saleDateTime, $saleVals);
 
@@ -993,14 +1018,27 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			}
 			
 			$HTTPResponse = $this->HTTPAction($url, $urlParams, $method, $redirect);
-			if ($this->getDbgOption('Dev_ShowMiscDebug') == 1)
+			if ( $this->isDbgOptionSet('Dev_ShowMiscDebug')
+			  || $this->isDbgOptionSet('Dev_LogHTTP') )
 			{
-				echo "HTTPRequest Called<br>";
-				echo "URL: $url<br>";
-				echo "METHOD: $method<br>";
-				echo "URL Params: <br>";
-				print_r($urlParams);
-				StageShowLibUtilsClass::print_r($HTTPResponse, 'HTTPResponse:');
+				$httpLog = '';
+				$httpLog .= "HTTPRequest Called<br>";
+				$httpLog .= "URL: $url<br>";
+				$httpLog .= "METHOD: $method<br>";
+				$httpLog .= "URL Params: <br>";
+				$httpLog .= print_r($urlParams, true);
+				$httpLog .= StageShowLibUtilsClass::print_r($HTTPResponse, 'HTTPResponse:', true);
+				
+				if ($this->isDbgOptionSet('Dev_ShowMiscDebug'))
+					echo $httpLog;
+					
+				if ($this->isDbgOptionSet('Dev_LogHTTP'))
+				{					
+					include 'stageshowlib_logfile.php';
+					$LogsFolder = $this->getOption('LogsFolderPath').'/';
+					$logFileObj = new StageShowLibLogFileClass($LogsFolder);
+					$logFileObj->StampedLogToFile(STAGESHOWLIB_FILENAME_HTTPIOLOG, $httpLog, StageShowLibDBaseClass::ForAppending);
+				}
 			}
 			return $HTTPResponse; 
 	    }

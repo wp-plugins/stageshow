@@ -96,8 +96,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 
 					if ($this->adminPageActive)
 					{
-						$buttonID = $this->GetButtonID('editbuyer');
-						if (isset($_POST[$buttonID]))	// 'editbuyer' editing sale - get buyer details
+						if ($myDBaseObj->IsButtonClicked('editbuyer'))	// editing sale - get buyer details
 						{
 							break;
 						}
@@ -212,7 +211,22 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			
 		function OutputContent_OnlineStoreHeader($result)
 		{
-			parent::OutputContent_OnlineStoreHeader($result);
+			echo '
+				<table class="'.$this->cssBaseID.'-table" width="100%" border="0">
+					<tr>
+						<td class="'.$this->cssBaseID.'-header">
+							<table width="100%" cellspacing="0">
+								<tr>
+									<td class="'.$this->cssBaseID.'-'.$this->cssColID['datetime'].'">'.$this->colID['datetime'].'</td>
+									<td class="'.$this->cssBaseID.'-'.$this->cssColID['ref'].'">'.$this->colID['ref'].'</td>
+									<td class="'.$this->cssBaseID.'-'.$this->cssColID['price'].'">'.$this->colID['price'].'</td>
+									<td class="'.$this->cssBaseID.'-'.$this->cssColID['qty'].'">'.$this->colID['qty'].'</td>
+									<td class="'.$this->cssBaseID.'-add">&nbsp;</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				';
 		}
 				
 		function OutputContent_OnlineStoreRow($result)
@@ -375,28 +389,6 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			if (!$this->saleConfirmationMode)
 				echo '<td class="'.$this->cssTrolleyBaseID.'-remove">&nbsp;</td>'."\n";
 			echo "</tr>\n";
-		}
-				
-		function GetButtonPostID($buttonID)
-		{
-			$postID = parent::GetButtonPostID($buttonID);
-			
-			$buttonImageID = $buttonID;
-			switch ($buttonID)
-			{
-				case 'checkoutdetails':
-					$buttonImageID = 'checkout';
-					// Fall into next case ...
-					
-				case 'checkout':
-					if ($this->myDBaseObj->IfButtonHasURL($buttonImageID))
-					{
-						$postID .='_x';
-					}
-					break;
-			}
-			
-			return $postID;
 		}
 				
 		function GetButtonTypeDef($buttonID, $buttonName = '', $buttonType = 'submit', $buttonClasses = '')

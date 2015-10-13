@@ -34,9 +34,21 @@ define('STAGESHOW_URL', $siteurl.'/wp-content/plugins/' . STAGESHOW_FOLDER .'/')
 define('STAGESHOW_UPLOADS_URL', $siteurl.'/wp-content/uploads/' . STAGESHOW_FOLDER .'/');
 define('STAGESHOW_ADMIN_URL', STAGESHOW_URL . 'admin/');
 define('STAGESHOW_ADMIN_IMAGES_URL', STAGESHOW_ADMIN_URL . 'images/');
+define('STAGESHOW_IMAGES_URL', STAGESHOW_URL . 'images/');
 if (!defined('STAGESHOW_UPLOADS_PATH'))
 {
 	define('STAGESHOW_UPLOADS_PATH', WP_CONTENT_DIR.'/uploads/'.STAGESHOW_FOLDER);				
+}
+
+if (defined('STAGESHOW_DATETIME_BOXOFFICE_FORMAT'))
+{
+	define('STAGESHOWLIB_DATETIME_IN_WP_CONFIG', true);
+}
+
+$stageshowSiteOptionsPath = STAGESHOW_UPLOADS_PATH.'/stageshow-wp-config.php';
+if (file_exists($stageshowSiteOptionsPath))
+{
+	include $stageshowSiteOptionsPath;
 }
 
 define('STAGESHOWLIB_URL', STAGESHOW_URL);
@@ -130,5 +142,8 @@ if (!defined('STAGESHOWLIB_SALES_ACTIVATE_TIMEOUT_EMAIL_TEMPLATE_PATH'))
 
 if (!defined('STAGESHOWLIB_DATETIME_ADMIN_FORMAT'))
 	define('STAGESHOWLIB_DATETIME_ADMIN_FORMAT', 'Y-m-d H:i');
+
+if (!defined('STAGESHOWLIB_LOADING_URL'))
+	define('STAGESHOWLIB_LOADING_URL', STAGESHOW_IMAGES_URL.'loading-segments.gif');
 
 ?>

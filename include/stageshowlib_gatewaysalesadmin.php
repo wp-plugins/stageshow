@@ -350,11 +350,6 @@ if (!class_exists('PayPalSalesAdminClass'))
 			{
 				// Sale Editor ... output tickets selector
 				$pluginObj = $this->env['PluginObj'];
-				if (current_user_can(STAGESHOWLIB_CAPABILITY_SALESUSER))
-				{
-					$myDBaseObj = $this->env['DBaseObj'];
-					$myDBaseObj->allowAdminOnly = true;
-				}
 				echo $pluginObj->OutputContent_DoShortcode(NULL);
 				return '';
 			}
