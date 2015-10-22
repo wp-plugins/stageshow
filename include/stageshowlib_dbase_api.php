@@ -270,7 +270,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		{
 			if (defined('CORONDECK_RUNASDEMO'))
 			{
-				$pluginID = $this->myDBaseObj->get_name();
+				$pluginID = $this->get_name();
 				$buttonID .= '_'.$pluginID;
 			}
 			

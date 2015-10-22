@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
 Tested up to: 4.3.1
-Stable tag: 5.3.6
+Stable tag: 5.4
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -58,7 +58,8 @@ StageShow Features Summary
 <a name="StageShowGold"></a>Additional Features in StageShowGold (available <a href="http://corondeck.co.uk/StageShow/Gold">here</a>)
 
 * Allocated Seating
-* Custom Seating Layouts
+* Customisable Seating Layouts
+* Discounted Tickets/Discount Codes
 * PayPal Express Checkout
 
 == Installation ==
@@ -186,6 +187,20 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 12. Screenshot 12: Sample EMail 
 
 == Changelog ==
+
+= 5.4(20/10/2015) =
+* Bug Fix: Seat Selector does not work without jQuery call (StageShowGold)
+* Bug Fix: Show Available Seats button not shown for all performances (StageShowGold)
+* Added Discount codes (StageShowGold)
+
+= 5.3.8(15/10/2015) =
+* Bug Fix: Seats "invisible" (using CSS) in Preview (since 5.3.6) (StageShowGold)
+* Inactive Shows excluded from Summary EMails (StageShow+)
+* Inactive Performances excluded from Summary EMails (StageShow+)
+
+= 5.3.7(14/10/2015) =
+* Bug Fix: Seat Selector invisible when editing/adding sales from admin page (StageShowGold)
+* Show Available Seats button removed from admin page Sales editor (StageShowGold)
 
 = 5.3.6(13/10/2015) =
 * Bug Fix: Unallocated zones not shown on Select Seats page (StageShowGold)

@@ -37,7 +37,6 @@ if (!class_exists('StageShowWPOrgSampleDBaseClass'))
 		{
 			// FUNCTIONALITY: DBase - StageShow - Implement "Create Sample"
 			$showName1 = "The Wordpress Show";
-			//if ($this->InTestMode()) $showName1 .= " (".StageShowLibUtilsClass::GetSiteID().")";
 
 			// Sample dates to reflect current date/time
 			$showTime1 = date(StageShowWPOrgDBaseClass::STAGESHOW_DATE_FORMAT, $this->Sample_strtotime("+28 days"))." 20:00";

@@ -272,7 +272,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 				
 			$storeRowHTML .= '
 			<td class="stageshow-boxoffice-type">'.$this->OnlineStore_GetPriceType($result).'</td>
-			<td class="stageshow-boxoffice-price">'.$myDBaseObj->FormatCurrency($result->priceValue).'</td>
+			<td class="stageshow-boxoffice-price">'.$myDBaseObj->FormatCurrency($this->GetOnlineStoreItemPrice($result)).'</td>
 			';
 															
 			if (!$soldOut)

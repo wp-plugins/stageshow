@@ -525,6 +525,9 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 			else
 				$joinCmd = ' JOIN ';
 						
+			// Explicitly add joined fields from "base" tables (otherwise values will be NULL if there is no matching JOIN)
+			$selectFields .= ', '.STAGESHOW_PRICES_TABLE.'.priceID';
+						
 			$sql  = 'SELECT '.$selectFields.' FROM '.STAGESHOW_PRICES_TABLE;
       		$sql .= ' '.$joinCmd.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID='.STAGESHOW_PRICES_TABLE.'.perfID';
       		$sql .= ' '.$joinCmd.STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';

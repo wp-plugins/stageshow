@@ -645,7 +645,6 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 				{
 					$showName = __('Unnamed Show', $this->get_domain());
 					if ($newNameNo > 1) $showName .= ' '.$newNameNo;
-					//if ($this->InTestMode()) $showName .= " (".StageShowLibUtilsClass::GetSiteID().")";
 						
 					if ($this->IsShowNameUnique($showName))
 						break;
@@ -1006,6 +1005,9 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$sqlFilters['groupBy'] = 'perfID';
 			$sqlFilters['JoinType'] = 'RIGHT JOIN';
 
+			$sqlFilters['showState'] = STAGESHOW_STATE_ACTIVE;
+			$sqlFilters['perfState'] = STAGESHOW_STATE_ACTIVE;
+
 			$sql  = 'SELECT *,'.$this->TotalSalesField($sqlFilters).' FROM '.STAGESHOW_SALES_TABLE;	
 			$sql .= $this->GetJoinedTables($sqlFilters, __CLASS__);
 			$sql .= $this->GetWhereSQL($sqlFilters);
@@ -1085,8 +1087,8 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 				$sqlWhere2 .= ' WHERE '.STAGESHOW_PRICES_TABLE.'.loginID = "'.$this->loginID.'"';
 			}
 			$sql  = 'SELECT '.$selectFields;
-			$sql .= ' FROM ( SELECT * FROM '.STAGESHOW_TICKETS_TABLE.$sqlWhere1.' ) AS sales';
-			$sql .= ' RIGHT JOIN ( SELECT * FROM '.STAGESHOW_PRICES_TABLE.$sqlWhere2.' ) AS prices';
+			$sql .= ' FROM (SELECT * FROM '.STAGESHOW_TICKETS_TABLE.$sqlWhere1.' ) AS sales';
+			$sql .= ' RIGHT JOIN (SELECT * FROM '.STAGESHOW_PRICES_TABLE.$sqlWhere2.' ) AS prices';
 			$sql .= ' ON sales.priceID = prices.priceID';
 			$sql .= ' JOIN '.STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.perfID=prices.perfID';			
 			$sql .= ' JOIN '.STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';

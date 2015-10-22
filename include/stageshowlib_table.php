@@ -332,10 +332,8 @@ if (!class_exists('StageShowLibTableClass'))
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
 		
-		function AddInputToTable($result, $inputName, $maxlength, $value, $col=0, $newRow = false, $extraParams = '')
+		function GetInputHTML($inputName, $maxlength, $value, $extraParams='')
 		{
-			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
-
 			$params  = " name=$inputName";
 			$params .= " id=$inputName";
 			$params .= " maxlength=\"$maxlength\"";
@@ -358,6 +356,15 @@ if (!class_exists('StageShowLibTableClass'))
 			$params .= " value=\"$value\"";
 			
 			$content .= "<input type=\"hidden\" $params />";
+			
+			return $content;
+		}
+		
+		function AddInputToTable($result, $inputName, $maxlength, $value, $col=0, $newRow = false, $extraParams = '')
+		{
+			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);				
+
+			$content = $this->GetInputHTML($inputName, $maxlength, $value, $extraParams);
 			
 			$this->AddToTable($result, $content, $col, $newRow);
 		}
@@ -1467,7 +1474,13 @@ if (!class_exists('StageShowLibAdminListClass'))
 						else
 						{
 							// Get value(s) from database
-							$currVal = $result->$columnId;
+							$currVal = $result->$columnId;	
+/*
+							if (!isset($result->$columnId))
+							{
+StageShowLibUtilsClass::print_r($result, '$result does not include '.$columnId);
+							}
+*/
 						}						
 					}
 					else

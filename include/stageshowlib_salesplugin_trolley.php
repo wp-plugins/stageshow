@@ -1263,6 +1263,22 @@ function '.$emailSaleButtonClick.'()
 			return $doneHeader;			
 		}
 		
+		function OnlineStore_UpdateTrolleyPrices($cartContents)
+		{
+			if (!isset($cartContents->rows))
+				return false;
+				
+			foreach ($cartContents->rows as $cartIndex => $cartEntry)
+			{				
+				$itemID = $cartEntry->itemID;
+				
+				$priceEntries = $this->GetOnlineStoreProductDetails($itemID);				
+				if (count($priceEntries) == 0) continue;
+				
+				$cartContents->rows[$cartIndex]->price = $this->GetOnlineStoreItemPrice($priceEntries[0]);
+			}
+		}
+		
 		function OnlineStore_OutputTrolley($cartContents)
 		{
 			$myDBaseObj = $this->myDBaseObj;

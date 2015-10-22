@@ -50,12 +50,6 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 			if (isset($this->loginID))
 				return $this->loginID;
 				
-			if (isset($_SESSION['stageshowlib_loginID']))
-			{
-				$this->loginID = $_SESSION['stageshowlib_loginID'];	
-				return $this->loginID;
-			}
-				
 			if (!function_exists('get_currentuserinfo'))
 			{
 				require_once( ABSPATH . WPINC . '/pluggable.php' );
@@ -68,8 +62,6 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 				$this->loginID = $current_user->user_login;	
 			else
 				$this->loginID = '';
-							
-			$_SESSION['stageshowlib_loginID'] = $this->loginID;
 			
 			return $this->loginID;
 		}
@@ -218,6 +210,33 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 				echo "Array[$i] = " . print_r($results[$i], true) . "<br>\n";
 		}
 		
+		function GetSQLBlockEnd($sql, $startPosn, $startChar = '(', $endChar = ')')
+		{
+			$posn = $startPosn;
+			$len = strlen($sql);
+			$matchCount = 0;
+			
+			while ($posn < $len)
+			{
+				$nxtChar = $sql[$posn];
+				if ($nxtChar == $startChar)
+				{
+					$matchCount++;
+				}
+				else if ($nxtChar == $endChar)
+				{
+					$matchCount--;
+					if ($matchCount == 0)
+					{
+						return $posn;
+					}
+				}
+				$posn++;
+			}
+			
+			return -1;
+		}
+		
 		function SQLForDemo($sql)
 		{
 			if (!defined('CORONDECK_RUNASDEMO'))
@@ -253,17 +272,37 @@ if (!class_exists('StageShowLibGenericDBaseClass'))
 										
 					$where = ' WHERE '.$tableName.'.loginID = "'.$this->loginID.'" ';
 					
-					if (strpos($sqlDemo, 'WHERE') !== false)
+					$srchpos = 0;
+					if (($bpos = strrpos($sqlDemo, '(SELECT')) !== false)
 					{
-						$sqlDemo = str_replace("WHERE", "$where AND", $sqlDemo);
+						$srchpos = $this->GetSQLBlockEnd($sqlDemo, $bpos);
 					}
-					else if (strpos($sqlDemo, 'GROUP BY') !== false)
+					
+					$sqlSrchCmd = '';
+					if (strpos($sqlDemo, 'WHERE', $srchpos) !== false)
 					{
-						$sqlDemo = str_replace("GROUP BY", "$where GROUP BY", $sqlDemo);
+						$sqlSrchCmd = 'WHERE';
+						$sqlReplCmd = 'AND';
 					}
-					else if (strpos($sqlDemo, 'ORDER BY') !== false)
+					else if (strpos($sqlDemo, 'GROUP BY', $srchpos) !== false)
 					{
-						$sqlDemo = str_replace("ORDER BY", "$where ORDER BY", $sqlDemo);
+						$sqlSrchCmd = $sqlReplCmd = 'GROUP BY';
+					}
+					else if (strpos($sqlDemo, 'ORDER BY', $srchpos) !== false)
+					{
+						$sqlSrchCmd = $sqlReplCmd = 'ORDER BY';
+					}
+
+					if ($sqlSrchCmd != '')
+					{
+						if ($srchpos > 0)
+						{
+							$sqlDemo = substr($sqlDemo, 0, $srchpos).str_replace($sqlSrchCmd, "$where $sqlReplCmd", substr($sqlDemo, $srchpos));
+						}
+						else
+						{
+							$sqlDemo = str_replace($sqlSrchCmd, "$where $sqlReplCmd", $sqlDemo);
+						}						
 					}
 					else
 					{

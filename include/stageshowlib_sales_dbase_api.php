@@ -380,7 +380,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		{
 			$sqlFields = 'INSERT INTO '.$this->DBTables->Sales.'(saleDateTime';
 			$sqlValues = ' VALUES("'.$saleDateTime.'"';
-			
+
 			foreach ($salesVals as $fieldID => $fieldVal)
 			{
 				if ($fieldID == 'saleDateTime')
@@ -902,7 +902,8 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 					if (isset($results['salePostage']))         $saleVals['salePostage'] = $results['salePostage'];
 					if (isset($results['saleNoteToSeller']))	$saleVals['saleNoteToSeller'] = $results['saleNoteToSeller'];
 					if (isset($results['salePPExpToken']))      $saleVals['salePPExpToken'] = $results['salePPExpToken'];
-					
+					if (isset($results['saleDiscountCode']))    $saleVals['saleDiscountCode'] = $results['saleDiscountCode'];
+
 					global $current_user;
 					if (is_user_logged_in())
 					{
