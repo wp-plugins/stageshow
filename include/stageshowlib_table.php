@@ -127,7 +127,9 @@ if (!class_exists('StageShowLibTableClass'))
 		var $tableType;
 		
 		var $dateTimeMode = 'dateseconds';
-			
+	
+		var $disablePostControls = false;
+		
 		function __construct($newTableType = self::TABLETYPE_HTML) //constructor
 		{
 			if (!isset($this->myDomain) || ($this->myDomain == ''))
@@ -334,10 +336,18 @@ if (!class_exists('StageShowLibTableClass'))
 		
 		function GetInputHTML($inputName, $maxlength, $value, $extraParams='')
 		{
-			$params  = " name=$inputName";
-			$params .= " id=$inputName";
-			$params .= " maxlength=\"$maxlength\"";
-			$params .= " value=\"$value\"";
+			if ($this->disablePostControls)
+			{
+				$baseParams = ' class="stageshowlib_PostVars"';
+			}
+			else
+			{
+				$baseParams = " name=$inputName";
+			}
+			$baseParams .= " id=$inputName";
+			$baseParams .= " value=\"$value\"";
+			
+			$params = $baseParams . " maxlength=\"$maxlength\"";
 			
 			if ($extraParams != '')
 			{
@@ -349,13 +359,11 @@ if (!class_exists('StageShowLibTableClass'))
 			
 			$content = "<input type=\"text\" $params />";
 			
-			$inputName = 'curr'.$inputName;
+			$hiddenInputName = 'curr'.$inputName;
 			
-			$params  = " name=$inputName";
-			$params .= " id=$inputName";
-			$params .= " value=\"$value\"";
+			$baseParams = str_replace($inputName, $hiddenInputName, $baseParams);
 			
-			$content .= "<input type=\"hidden\" $params />";
+			$content .= "<input type=\"hidden\" $baseParams />";
 			
 			return $content;
 		}
@@ -398,10 +406,19 @@ if (!class_exists('StageShowLibTableClass'))
 		{
 			$inputName = $columnDef[self::TABLEPARAM_ID];
 			$inputName .= $this->GetRecordID($result).$this->GetDetailID($result);
+			if ($this->disablePostControls)
+			{
+				$params = ' class="stageshowlib_PostVars"';
+			}
+			else
+			{
+				$params = " name=$inputName";
+			}
+			$params .= " id=$inputName";
 			
 			$onChange = isset($columnDef[self::TABLEPARAM_ONCHANGE]) ? ' onchange="'.$columnDef[self::TABLEPARAM_ONCHANGE].'(this)" ' : '';
 		
-			$content = "<select name=$inputName id=$inputName $onChange>"."\n";
+			$content = "<select $params $onChange>"."\n";
 			foreach ($options as $index => $option)
 			{
 				$selected = ($index == $value) ? ' selected=""' : '';
@@ -1273,7 +1290,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			return $controlValue;
 		}
 		
-		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
+		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary", $clickEvent = '')
 		{
 			$buttonText = __($buttonText, $this->myDomain);
 			
@@ -1286,8 +1303,20 @@ if (!class_exists('StageShowLibAdminListClass'))
 			$controlIdDef = 'id="'.$settingOption[self::TABLEPARAM_ID].'" name="'.$settingOption[self::TABLEPARAM_ID].'" ';
 			
 			$editControl = '';
+			$inputClass = '';
 			
 			$settingType = $settingOption[self::TABLEPARAM_TYPE];
+			if ($this->disablePostControls)
+			{
+				switch($settingType)
+				{
+					case self::TABLEENTRY_SELECT:
+					case self::TABLEENTRY_TEXT:
+						$controlIdDef = 'id="'.$settingOption[self::TABLEPARAM_ID].'" class="stageshowlib_PostVars" ';
+						break;
+				}
+			}
+			
 			$onChange = isset($settingOption[self::TABLEPARAM_ONCHANGE]) ? ' onchange="'.$settingOption[self::TABLEPARAM_ONCHANGE].'(this)" ' : '';
 
 			if (isset($settingOption[self::TABLEPARAM_READONLY]))
@@ -1331,7 +1360,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 			{
 				case self::TABLEENTRY_DATETIME:
 					$editSize = 28;
-					$inputClass = $this->myDBaseObj->get_domain().'-dateinput';
+					$inputClass .= $this->myDBaseObj->get_domain().'-dateinput';
 					$eventHandler = " class=\"".$inputClass."\" readonly=true onclick=\"javascript:StageShowLib_CalendarSelector(this, '".$this->dateTimeMode."')\" ";
 					$editControl  = '<input type="text"'.$eventHandler.' size="'.$editSize.'" '.$controlIdDef.' value="'.$controlValue.'" />'."\n";
 					$editControl .= '<input type="hidden" '.str_replace('="', '="curr', $controlIdDef).' value="'.$controlValue.'" />'."\n";					

@@ -183,3 +183,40 @@ function stageshowlib_OpenTicketView(saleId, showEMailURL)
 	window.open(url);
 }
 
+function stageshowlib_serialiseText(text)	
+{
+	text = encodeURIComponent(text);
+	var serialiseText = 's:'+text.length+':"'+text+'";';
+	return serialiseText;
+}
+	
+function stageshowlib_serialiseArrayElem(key, value)	
+{
+	var serialiseText = stageshowlib_serialiseText(key) + stageshowlib_serialiseText(value);
+	return serialiseText;
+}
+	
+function stageshowlib_serialisePost(obj, classId)	
+{	
+	var formElem = obj.form;
+	
+	var elemsList = jQuery(formElem).find("." + classId);
+	var serializedString = "a:"+elemsList.length+":{";
+	for (i=0; i<elemsList.length; i++)
+	{
+		elemId = elemsList[i].id;
+		elemVal = elemsList[i].value;
+		
+		serializedString += stageshowlib_serialiseArrayElem(elemId, elemVal);
+	}
+	
+	serializedString += "}";
+		
+	var input = jQuery("<input>")
+		.attr("type", "hidden")
+		.attr("name", "stageshowlib_PostVars").val(serializedString);
+               
+	jQuery(formElem).append(jQuery(input));	
+	
+	return true;
+}

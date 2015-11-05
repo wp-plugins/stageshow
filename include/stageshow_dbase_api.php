@@ -25,8 +25,9 @@ if (!defined('STAGESHOWLIB_DBASE_CLASS'))
 	
 if (!defined('STAGESHOWLIB_DATABASE_FULL')) define('STAGESHOWLIB_DATABASE_FULL', true);
 
+define('STAGESHOW_DEFAULT_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
 if (!defined('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH'))
-	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', 'stageshow_EMail.php');
+	define('STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH', STAGESHOW_DEFAULT_EMAIL_TEMPLATE_PATH);
 
 if (!defined('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE'))
 	define('PAYPAL_APILIB_DEFAULT_LOGOIMAGE_FILE', 'StageShowLogo.jpg');
@@ -40,7 +41,9 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 {
 	if (!defined('STAGESHOWLIB_FILENAME_NEWSLOG'))
 		define('STAGESHOWLIB_FILENAME_NEWSLOG', 'NewsLog.txt');
-						
+	
+	define('STAGESHOW_TMP_TABLE', STAGESHOW_TABLE_PREFIX.'tmp');
+
 	class StageShowWPOrgDBaseClass extends StageShowWPOrgCartDBaseClass	// Define class
   	{
 		function __construct($caller) //constructor	
@@ -481,12 +484,57 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 		}
 
 		
-		function CreateNewPerformance(&$rtnMsg, $showID, $perfDateTime, $perfRef = '', $perfSeats = -1)
+		function CreateNewPerformance(&$rtnMsg, $showID, $perfDateTime = null, $perfRef = '', $perfSeats = -1)
 		{
 			if ($showID <= 0) 
 			{
 				$rtnMsg = __('Internal Error - showID', $this->get_domain());
 				return 0;
+			}
+			
+			if ($perfRef == '')
+			{
+				$perfRef = $this->GetUniquePerfID($showID);
+			}
+			
+			if ($perfDateTime == null)
+			{
+				// Add default performance
+				
+				// Get last performance entry
+				$perfsList = $this->GetPerformancesListByShowID($showID);
+				
+				if (count($perfsList) > 0)
+				{
+					$lastPerf = $perfsList[0];
+					
+					// Copy to new performance
+					$perfID = $lastPerf->perfID;
+					
+					$sql = 'CREATE TEMPORARY TABLE '.STAGESHOW_TMP_TABLE.' SELECT * FROM '.STAGESHOW_PERFORMANCES_TABLE.' WHERE perfID = '.$perfID;
+					$this->query($sql);
+					
+					// Use last date/time plus 1 day for new performance					
+					$timestamp = strtotime($lastPerf->perfDateTime);
+					$perfDateTime = date(StageShowWPOrgDBaseClass::MYSQL_DATETIME_FORMAT, strtotime('+1 day', $timestamp));
+				
+					$sql  = 'UPDATE '.STAGESHOW_TMP_TABLE.' SET perfID = NULL ';
+					$sql .= ',  perfDateTime = "'.$perfDateTime.'"';
+					$sql .= ',  perfRef = "'.$perfRef.'"';
+					$this->query($sql);
+				
+					$sql = 'INSERT INTO '.STAGESHOW_PERFORMANCES_TABLE.' SELECT * FROM '.STAGESHOW_TMP_TABLE;
+					$this->query($sql);	
+					$perfID = $this->GetInsertId();
+
+					$sql = 'DROP TEMPORARY TABLE IF EXISTS '.STAGESHOW_TMP_TABLE;
+					$this->query($sql);
+
+					return $perfID;
+				}
+				
+				// Use current date/time for performance
+				$perfDateTime = date(StageShowWPOrgDBaseClass::MYSQL_DATETIME_FORMAT, current_time('timestamp'));			
 			}
 			
 			$perfState = '';
@@ -546,9 +594,48 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			return '';
 		}
 
+		function GetSortedShowsList($extraFields = '')
+		{
+			$selectFields  = STAGESHOW_SHOWS_TABLE.'.showID';
+			$selectFields .= ' , showName, perfDateTime';
+			$selectFields .= ' , MAX('.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime) AS maxDate';
+			if ($extraFields != '') $selectFields .= ' , '.$extraFields;
+			
+			$sql = "SELECT $selectFields FROM ".STAGESHOW_SHOWS_TABLE;
+			$sql .= " LEFT JOIN ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.showID='.STAGESHOW_SHOWS_TABLE.'.showID';
+			
+			$sql .= ' GROUP BY '.STAGESHOW_SHOWS_TABLE.'.showID';			
+			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime IS NULL DESC';
+			$sql .= ' , '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime DESC';
+			$sql .= ' , '.STAGESHOW_SHOWS_TABLE.'.showName ASC';
+			
+			$results = $this->get_results($sql);
+
+			return $results;
+		}
+
 		function GetAllShowsList()
 		{
 			return $this->GetShowsList(0);
+		}
+		
+		function GetShowNameAndID($showID = 0)
+		{
+			$sql = "SELECT showID, showName FROM ".STAGESHOW_SHOWS_TABLE;
+			if ($showID != 0)
+			{
+				$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showID='.$showID;;
+			}
+			
+			$results = $this->get_results($sql);
+
+			if ($showID != 0)
+			{
+				if (count($results) <= 0) return null;
+				$results = $results[0];
+			}
+			
+			return $results;
 		}
 		
 		function GetShowsList($showID = 0)
@@ -557,6 +644,7 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			$selectFields .= ','.STAGESHOW_SHOWS_TABLE.'.showID';
 			$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
 			$selectFields .= ','.STAGESHOW_PRICES_TABLE.'.priceID';
+			$selectFields .= ' , MAX('.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime) AS maxDate';
 
 			$sqlFilters['showID'] = $showID;
 			$sqlFilters['groupBy'] = 'showID';
@@ -722,6 +810,21 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 				
 		function GetPerformancesListByShowID($showID)
 		{
+			$selectFields  = STAGESHOW_SHOWS_TABLE.'.showID';
+			$selectFields .= ', perfID, perfRef, perfDateTime';
+			
+			$sql = "SELECT $selectFields FROM ".STAGESHOW_PERFORMANCES_TABLE;
+			$sql .= " LEFT JOIN ".STAGESHOW_SHOWS_TABLE.' ON '.STAGESHOW_SHOWS_TABLE.'.showID='.STAGESHOW_PERFORMANCES_TABLE.'.showID';
+			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.showID='.$showID;
+			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime DESC';
+			
+			$perfsListArray = $this->get_results($sql);
+
+			return $perfsListArray;
+		}
+				
+		function GetPerformancesDetailsByShowID($showID)
+		{
 			$sqlFilters['showID'] = $showID;
 			return $this->GetPerformancesList($sqlFilters);
 		}
@@ -768,10 +871,26 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			return $results[0]->LastPerf;
 		}
 		
-		function IsPerfRefUnique($perfRef)
+		function GetUniquePerfID($showId)
+		{
+			$perfRefNo = 1;
+			while (true)
+			{
+				// Query Database for proposed Performance Ref until we find one that doesn't already exist
+				$perfRef = 'PERF'.$perfRefNo;
+				if ($this->IsPerfRefUnique($perfRef, $showId))
+					break;
+				$perfRefNo++;
+			}
+			
+			return $perfRef;
+		}
+		
+		function IsPerfRefUnique($perfRef, $showId)
 		{
 			$sql  = 'SELECT COUNT(*) AS MatchCount FROM '.STAGESHOW_PERFORMANCES_TABLE;
 			$sql .= ' WHERE '.STAGESHOW_PERFORMANCES_TABLE.'.perfRef="'.$perfRef.'"';
+			$sql .= ' AND '.STAGESHOW_PERFORMANCES_TABLE.'.showId="'.$showId.'"';
 			 
 			$perfsCount = $this->get_results($sql);
 			return ($perfsCount[0]->MatchCount > 0) ? false : true;
@@ -798,19 +917,11 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 		{
 			if ($perfRef === '')
 			{
-				$perfRefNo = 1;
-				while (true)
-				{
-					// Query Database for proposed Performance Ref until we find one that doesn't already exist
-					$perfRef = 'PERF'.$perfRefNo;
-					if ($this->IsPerfRefUnique($perfRef))
-						break;
-					$perfRefNo++;
-				}
+				$perfRefNo = $this->GetUniquePerfID($showID);
 			}
 			else
 			{
-				if (!$this->IsPerfRefUnique($perfRef))
+				if (!$this->IsPerfRefUnique($perfRef, $showID))
 					return 0;	// Error - Performance Reference is not unique
 			}
 			
@@ -828,9 +939,9 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 			return $this->UpdatePerformanceEntry($perfID, $sqlSET);
 		}
 				
-		function UpdatePerformanceRef($perfID, $newPerfRef)
+		function UpdatePerformanceRef($perfID, $newPerfRef, $showID)
 		{
-			if (!$this->IsPerfRefUnique($newPerfRef))
+			if (!$this->IsPerfRefUnique($newPerfRef, $showID))
 			{
 				return "ERROR";
 			}

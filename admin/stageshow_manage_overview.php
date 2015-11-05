@@ -111,7 +111,7 @@ if (!class_exists('StageShowWPOrgOverviewAdminListClass'))
 			{
 				// Save Performances Lists in class object so it can be reused by ShowSaleDetails() function
 				$sqlFilter['salesCompleted'] = true;
-				$this->perfsList[$result->showID] = $this->myDBaseObj->GetPerformancesListByShowID($result->showID, $sqlFilter);				
+				$this->perfsList[$result->showID] = $this->myDBaseObj->GetPerformancesDetailsByShowID($result->showID, $sqlFilter);				
 				$results[$key]->perfCount = count($this->perfsList[$result->showID]);
 			}
 			
@@ -202,14 +202,14 @@ if (!class_exists('StageShowWPOrgOverviewAdminClass'))
 			
 			$isConfigured = $myDBaseObj->CheckIsConfigured();
 						
-			$results = $myDBaseObj->GetAllShowsList();
+			$showsList = $myDBaseObj->GetAllShowsList();
 						
 ?>
 	<br>
 	<h2><?php _e('Shows', $this->myDomain); ?></h2>
 <?php	
 	
-			if(count($results) == 0)
+			if(count($showsList) == 0)
 			{
 				// FUNCTIONALITY: Overview - Show Link to Settings page if Payment Gateway settings required
 				if ($isConfigured)
@@ -228,13 +228,13 @@ if (!class_exists('StageShowWPOrgOverviewAdminClass'))
 			{
 				$classId       = $this->GetAdminListClass();
 				$overviewList = new $classId($this->env);
-				$overviewList->OutputList($results);	
+				$overviewList->OutputList($showsList);	
 					
 				$saleCounts = array();
 				$this->totalSales = 0;
-				foreach($results as $result)
+				foreach ($showsList as $showEntry)
 				{
-					$this->totalSales += $result->soldValue;
+					$this->totalSales += $showEntry->soldValue;
 				}
 				
 				if ($this->totalSales > 0) echo "<br>Total Sales: ".$myDBaseObj->FormatCurrencyValue($this->totalSales)." <br>";

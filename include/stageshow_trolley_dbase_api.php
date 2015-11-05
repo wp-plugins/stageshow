@@ -66,6 +66,7 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 		define('STAGESHOW_TICKETS_TABLE', STAGESHOW_TABLE_PREFIX.'tickets');
 
 		define('STAGESHOW_DEMOLOG_TABLE', STAGESHOW_TABLE_PREFIX.'demolog');
+	
 	}
 	
 	if( !defined( 'STAGESHOW_DATETIME_TEXTLEN' ) )
@@ -232,16 +233,6 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 			return current_user_can(STAGESHOWLIB_CAPABILITY_DEVUSER);
 		}
 		
-		function prepareBoxOffice($showID)
-		{
-			if (isset($_GET['sc']))
-			{
-				// Output counts
-				$results = $this->GetSalesListByShowID($showID);
-				echo "<!-- Sh:$showID C:".count($results)." -->\n";	// TODP - Remove debug code ...
-			}
-		}
-		
 		function IsStateActive($state)
 		{
 			switch ($state)
@@ -314,34 +305,6 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 			return $showID;
 		}
 		
-		function GetPerfID($showName, $perfDate)
-		{
-			if (is_numeric($perfDate))
-			{
-				$perfID = $perfDate;
-			}
-			else if (($showName == '') || ($perfDate == ''))
-			{
-				$perfID = 0;
-			}
-			else 
-			{
-				$showID = $this->GetShowID($showName);
-				
-				$sql  = 'SELECT * FROM '.STAGESHOW_SHOWS_TABLE;
-				$sql .= " LEFT JOIN ".STAGESHOW_PERFORMANCES_TABLE.' ON '.STAGESHOW_PERFORMANCES_TABLE.'.showID='.STAGESHOW_SHOWS_TABLE.'.showID';
-				$sql .= ' WHERE '.STAGESHOW_SHOWS_TABLE.'.showID="'.$showID.'"';
-				$sql .= ' AND '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime="%s"';
-				
-				$values = array($perfDate);
-				
-				$perfsEntries = $this->getresultsWithPrepare($sql, $values);
-				$perfID = (count($perfsEntries) > 0) ? $perfsEntries[0]->perfID : 0;
-			}
-			
-			return $perfID;
-		}
-		
 		function get_results($sql, $debugOutAllowed = true, $sqlFilters = array())
 		{
 			$this->perfJoined = false;
@@ -401,14 +364,14 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 			$sql .= $this->GetWhereSQL($sqlFilters);
 			$sql .= $this->GetOptsSQL($sqlFilters);
 			
-			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime';
+			$sql .= ' ORDER BY '.STAGESHOW_PERFORMANCES_TABLE.'.showID, '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime DESC';
 			
 			$perfsListArray = $this->get_results($sql);
 
 			return $perfsListArray;
 		}
 		
-		function GetActivePerformances()
+		function GetActivePerformances($showID = '')
 		{
 			$selectFields  = '*';
 			//$selectFields .= ','.STAGESHOW_PERFORMANCES_TABLE.'.perfID';
@@ -429,6 +392,11 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 			$sqlWhere .= ' AND '.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime>"'.$timeNow.'" ';
 
 			$sqlWhere .= ' AND '.STAGESHOW_PRICES_TABLE.'.priceVisibility="'.STAGESHOW_VISIBILITY_PUBLIC.'" ';
+			
+			if ($showID != '')
+			{
+				$sqlWhere .= ' AND '.STAGESHOW_SHOWS_TABLE.'.showID="'.$showID.'" ';
+			}
 			
 			$sql .= ' WHERE '.$sqlWhere;
 			
@@ -486,6 +454,23 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 		{
 			$sqlFilters['perfID'] = $perfID;
 			return $this->GetPricesList($sqlFilters, $activeOnly);
+		}
+				
+		function GetPricesListByPerfDateTime($showID, $perfDate)
+		{
+			if ($showID != 0)
+			{
+				$sqlFilters['showID'] = $showID;
+			}
+			if (strpos($perfDate, ":"))
+			{
+				$sqlFilters['perfDateTime'] = $perfDate;
+			}
+			else
+			{
+				$sqlFilters['perfDate'] = $perfDate;
+			}
+			return $this->GetPricesList($sqlFilters, true);
 		}
 				
 		function GetPricesListByPriceID($priceID, $activeOnly = false)
@@ -600,6 +585,18 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 			$sqlWhere = parent::GetWhereSQL($sqlFilters);
 			$sqlCmd = ($sqlWhere === '') ? ' WHERE ' : ' AND ';
 			
+			if (isset($sqlFilters['perfDate']))
+			{
+				$sqlWhere .= $sqlCmd.'DATE('.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime)="'.$sqlFilters['perfDate'].'"';
+				$sqlCmd = ' AND ';
+			}
+			
+			if (isset($sqlFilters['perfDateTime']))
+			{
+				$sqlWhere .= $sqlCmd.STAGESHOW_PERFORMANCES_TABLE.'.perfDateTime="'.$sqlFilters['perfDateTime'].'"';
+				$sqlCmd = ' AND ';
+			}
+			
 			if (isset($sqlFilters['priceID']))
 			{
 				$sqlWhere .= $sqlCmd.STAGESHOW_PRICES_TABLE.'.priceID="'.$sqlFilters['priceID'].'"';
@@ -713,7 +710,7 @@ if (!class_exists('StageShowWPOrgCartDBaseClass'))
 //
 // ----------------------------------------------------------------------
     
-		function TotalSalesField($sqlFilters)
+		function TotalSalesField($sqlFilters = null)
 		{
 			// totalQty may not include Pending sales (i.e. saleStatus=Checkout)) - add it here!
 			$sql  = '  SUM(ticketQty) AS totalQty ';

@@ -83,7 +83,9 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 					$count = $atts['count'];
 				else
 					$count = count($shows);
-					
+
+				$this->Cart_OutputContent_Boxoffice_Preload($atts, $shows);
+	
 				foreach ( $shows as $show )
 				{
 					if (!$myDBaseObj->IsShowEnabled($show))
@@ -103,8 +105,14 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 					}						
 						
 				}
+				
+				$this->Cart_OutputContent_Boxoffice_Preload($atts, $shows, 2);
 			}
 			
+		}
+		
+		function Cart_OutputContent_Boxoffice_Preload($atts, $shows, $pass = 1)
+		{
 		}
 		
 		function IsOnlineStoreItemEnabled($result)
@@ -129,7 +137,6 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			{
 				// Get the prices list for a single show
 				$results = $myDBaseObj->GetPricesListByShowID($showID, true);
-				$myDBaseObj->prepareBoxOffice($showID);			
 				if (count($results) == 0)
 				{
 					echo "<!-- StageShow BoxOffice - No Output for ShowID=$showID -->\n";
@@ -145,6 +152,11 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 			return null;
 		}
 		
+		function GetOnlineStoreGroupID($result)
+		{
+			return $result->showID;
+		}
+			
 		function GetOnlineStoreStockID($result)
 		{
 			return $result->perfID;
@@ -200,7 +212,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 				$showNameAnchor .= $nxtChar;				
 			}
 			$this->Cart_OutputContent_Anchor($showNameAnchor);
-			
+		
 			echo '<h2>'.$result->showName."</h2>\n";					
 
 			if (isset($result->showNote) && ($result->showNote !== ''))
@@ -231,7 +243,8 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 				
 		function OutputContent_OnlineStoreRow($result)
 		{
-			static $salesSummary;
+			static $lastShowID = 0;
+			static $lastPerfDateTime = 0;
 			
 			$storeRowHTML = '';
 			
@@ -241,26 +254,24 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 				
 			$myDBaseObj = $this->myDBaseObj;
 
-			// Sales Summary from PerfID
-			if (!isset($this->lastPerfDateTime))
-			{
-				$this->lastPerfDateTime = '';
-			}
-				
+			// Sales Summary from PerfID				
 			$seatsAvailable = $this->GetOnlineStoreItemsAvailable($result);
 			$soldOut = ($seatsAvailable == 0);
 			
 			$separator = '';
-			if (($this->lastPerfDateTime !== $result->perfDateTime) || $showAllDates)
+			if ( ($lastShowID !== $result->showID) 
+			  || ($lastPerfDateTime !== $result->perfDateTime) 
+			  || $showAllDates)
 			{
 				$formattedPerfDateTime = $myDBaseObj->FormatDateForDisplay($result->perfDateTime);
-				if ($this->lastPerfDateTime != '') $separator = "\n".'<tr><td class="stageshow-boxoffice-separator">&nbsp;</td></tr>';
-				$this->lastPerfDateTime = $result->perfDateTime;
+				if ($lastPerfDateTime != '') $separator = "\n".'<tr><td class="stageshow-boxoffice-separator">&nbsp;</td></tr>';
 			}
 			else
 			{
 				$formattedPerfDateTime = '&nbsp;';
 			}
+			$lastShowID = $result->showID;
+			$lastPerfDateTime = $result->perfDateTime;
 			
 			$storeRowHTML .= '
 				<table width="100%" cellspacing="0">'.$separator.'
@@ -367,7 +378,7 @@ if (!class_exists('StageShowWPOrgSalesCartPluginClass'))
 				$results[$lastIndex]->showAvailable = true;
 			}
 			
-			return parent::OutputContent_OnlineStoreSection( $results );
+			parent::OutputContent_OnlineStoreSection( $results );
 		}
 		
 		function OutputContent_OnlineTrolleyDetailsHeaders()

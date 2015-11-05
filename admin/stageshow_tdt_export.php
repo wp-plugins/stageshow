@@ -447,7 +447,7 @@ echo '
 				if (($showID !=0) && ($showEntry->showID != $showID))
 					continue;					
 					
-				$perfsLists = $this->myDBaseObj->GetPerformancesListByShowID($showEntry->showID);
+				$perfsLists = $this->myDBaseObj->GetPerformancesDetailsByShowID($showEntry->showID);
 				foreach ($perfsLists as $perfsList)
 				{
 					if (($perfID !=0) && ($perfsList->perfID != $perfID))

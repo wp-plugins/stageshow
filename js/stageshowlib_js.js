@@ -293,13 +293,13 @@ function StageShowLib_JQuery_ScrollTo(reqAnchorId, reqAnchorOffset, reqAnchorDur
 	
 }
 
-function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst)
+function StageShowLib_JQuery_OnClickTrolleyButton(obj, inst, callback)
 {
 	var postvars = {
 		jquery: "true"
 	};
 	
-	return StageShowLib_JQuery_ActionTrolleyButton(obj, inst, postvars, "StageShowLib_JQuery_Callback");
+	return StageShowLib_JQuery_ActionTrolleyButton(obj, inst, postvars, callback);
 }
 
 function StageShowLib_JQuery_ActionTrolleyButton(obj, inst, postvars, callback)

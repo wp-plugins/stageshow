@@ -26,10 +26,14 @@ if (!class_exists('StageShowWPOrgPerformancesAdminListClass'))
 {
 	class StageShowWPOrgPerformancesAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{
+		const CHAR_INFINITY = '&#8734';
+		
 		var $updateFailed;
 		
 		function __construct($env) //constructor
 		{
+			$this->disablePostControls = true;
+			
 			// Call base constructor
 			parent::__construct($env, true);
 			
@@ -72,7 +76,7 @@ if (!class_exists('StageShowWPOrgPerformancesAdminListClass'))
 		{
 			// FUNCTIONALITY: Performances - Negative Max Seats shown as infinity
 			if ($perfSeats < 0)
-				$perfSeats = '&#8734';
+				$perfSeats = self::CHAR_INFINITY;
 			return $perfSeats;
 		}
 		
@@ -146,7 +150,7 @@ if (!class_exists('StageShowWPOrgPerformancesAdminClass'))
 			$this->datesList[$perfDateTime] = true;
 						
 			$perfRef = stripslashes($_POST['perfRef' . $result->perfID]);
-			if ( ($perfRef != $result->perfRef) && !$this->myDBaseObj->IsPerfRefUnique($perfRef) )
+			if ( ($perfRef != $result->perfRef) && !$this->myDBaseObj->IsPerfRefUnique($perfRef, $result->showID) )
 			{
 				return __('Duplicated Performance Reference', $this->myDomain) . ' (' . $perfRef . ')';
 			}
@@ -185,7 +189,7 @@ if (!class_exists('StageShowWPOrgPerformancesAdminClass'))
 			$newPerfRef = stripslashes($_POST['perfRef' . $result->perfID]);
 			if ($newPerfRef != $result->perfRef)
 			{
-				$myDBaseObj->UpdatePerformanceRef($result->perfID, $newPerfRef);
+				$myDBaseObj->UpdatePerformanceRef($result->perfID, $newPerfRef, $result->showID);
 				$result->perfRef = $newPerfRef;
 				$perfUpdated = true;
 			}
@@ -219,7 +223,7 @@ if (!class_exists('StageShowWPOrgPerformancesAdminClass'))
 				
 				// Save Settings Request ....
 				$showID  = $_POST['showID'];
-				$results = $myDBaseObj->GetPerformancesListByShowID($showID);
+				$results = $myDBaseObj->GetPerformancesDetailsByShowID($showID);
 				
 				// Verify that performance Refs are unique 
 				
@@ -267,16 +271,16 @@ if (!class_exists('StageShowWPOrgPerformancesAdminClass'))
 				$showID = $_POST['showID'];
 				
 				$statusMsg = '';
-				$newPerfID = $myDBaseObj->CreateNewPerformance($statusMsg, $showID, date(StageShowWPOrgDBaseClass::MYSQL_DATETIME_FORMAT, current_time('timestamp')));
+				$newPerfID = $myDBaseObj->CreateNewPerformance($statusMsg, $showID);
 				
 				$statusMsgClass = ($newPerfID > 0) ? 'updated' : 'error';
 				echo '<div id="message" class="' . $statusMsgClass . '"><p>' . $statusMsg . '</p></div>';
 			}
 		}
 		
-		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
+		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary", $clickEvent = '')
 		{
-			parent::OutputButton($buttonId, $buttonText, $buttonClass);
+			parent::OutputButton($buttonId, $buttonText, $buttonClass, $clickEvent);
 		}
 		
 		function Output_MainPage($updateFailed)
@@ -285,8 +289,8 @@ if (!class_exists('StageShowWPOrgPerformancesAdminClass'))
 			$myDBaseObj  = $this->myDBaseObj;
 			
 			// Stage Show Performances HTML Output - Start 
-			$showLists = $myDBaseObj->GetAllShowsList();
-			if (count($showLists) == 0)
+			$showsList = $myDBaseObj->GetSortedShowsList();
+			if (count($showsList) == 0)
 			{
 				// FUNCTIONALITY: Performances - Show Link to Settings page if Payment Gateway settings required
 				if ($myDBaseObj->CheckIsConfigured())
@@ -314,13 +318,13 @@ function stageshow_OnLoadPerformances()
 </script>
 						";
 						
-			foreach ($showLists as $showList)
+			foreach ($showsList as $showEntry)
 			{
-				$results = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
+				$results = $myDBaseObj->GetPerformancesDetailsByShowID($showEntry->showID);
 ?>
 	<div class="stageshow-admin-form">
 	<form method="post">
-	<h3><?php echo($showList->showName); ?></h3>
+	<h3><?php echo($showEntry->showName); ?></h3>
 <?php
 				foreach ($results as $result)
 				{
@@ -337,31 +341,31 @@ PerfIDList.push('.$result->perfID.');
 				}
 				else
 				{
-					$thisUpdateFailed = (($updateFailed) && ($showList->showID == $_POST['showID']));
+					$thisUpdateFailed = (($updateFailed) && ($showEntry->showID == $_POST['showID']));
 					$classId          = $this->GetAdminListClass();
 					$adminTableObj    = new $classId($this->env);
 					$adminTableObj->OutputList($results, $thisUpdateFailed);
 				} // End of if (count($results) == 0) ... else ...
 				
 ?>
-      <input type="hidden" name="showID" value="<?php echo $showList->showID; ?>"/>
+      <input type="hidden" name="showID" value="<?php echo $showEntry->showID; ?>"/>
 <?php
 				if ($myDBaseObj->CanAddPerformance())
 				{
 					// FUNCTIONALITY: Performances - Output "Add New Show" Button (if valid)
-					$this->OutputButton("addperfbutton", __("Add New Performance", $this->myDomain));
+					$this->OutputPostButton("addperfbutton", __("Add New Performance", $this->myDomain));
 				}
 				
 				if (count($results) > 0)
 				{
 					// FUNCTIONALITY: Performances - Output "Save Changes" Button (if there are entries)
-					$this->OutputButton("savechanges", __("Save Changes", $this->myDomain), "button-primary");					
+					$this->OutputPostButton("savechanges", __("Save Changes", $this->myDomain), "button-primary");					
 				}
 ?>
 </form>
 </div>		
 <?php
-			} // End of foreach ($showLists as $showList) ..
+			} // End of foreach ($showsList as $showEntry) ..
 
 			// Stage Show Performances HTML Output - End 
 		}

@@ -135,14 +135,14 @@ if (!class_exists('StageShowLibAdminClass'))
 					// TODO - Entry Updated - Generate iCal file
 				}
 				
+				$actionMsg = $this->GetBulkActionMsg($bulkAction, $actionCount);
 				if ($actionCount > 0)
 				{
-					$actionMsg = $this->GetBulkActionMsg($bulkAction, $actionCount);
+					$this->myDBaseObj->PurgeDB();						
 					echo '<div id="message" class="updated"><p>'.$actionMsg.'</p></div>';
 				}
 				else
 				{										
-					$actionMsg = $this->GetBulkActionMsg($bulkAction, $actionCount);
 					echo '<div id="message" class="error"><p>'.$actionMsg.'</p></div>';
 				}
 				
@@ -225,12 +225,23 @@ if (!class_exists('StageShowLibAdminClass'))
 			
 			return $derivedClassName;
 		}
+				
+		function OutputPostButton($buttonId, $buttonText, $buttonClass = "button-secondary")
+		{
+			$clickEvent="return stageshowlib_serialisePost(this, 'stageshowlib_PostVars')";
+			$this->OutputButton($buttonId, $buttonText, $buttonClass, $clickEvent);			
+		}
 		
-		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary")
+		function OutputButton($buttonId, $buttonText, $buttonClass = "button-secondary", $clickEvent = '')
 		{
 			$buttonText = __($buttonText, $this->myDomain);
 			
-			echo "<input class=\"$buttonClass\" type=\"submit\" name=\"$buttonId\" value=\"$buttonText\" />\n";
+			if ($clickEvent != '')
+			{
+				$clickEvent = ' onclick="'.$clickEvent.'" ';
+			}
+			
+			echo "<input class=\"$buttonClass\" type=\"submit\" $clickEvent name=\"$buttonId\" value=\"$buttonText\" />\n";
 		}
 		
 		function Output_MainPage($updateFailed)
@@ -313,7 +324,7 @@ if (!class_exists('StageShowLibSettingsAdminClass'))
 <?php
 
 			$this->WPNonceField();
-	
+			
 			// Get setting as stdClass object
 			$results = $myDBaseObj->GetAllSettingsList();
 			if (count($results) == 0)

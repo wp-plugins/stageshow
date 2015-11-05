@@ -30,6 +30,8 @@ if (!class_exists('StageShowWPOrgPricesAdminListClass'))
 		
 		function __construct($env) //constructor
 		{
+			$this->disablePostControls = true;
+			
 			// Call base constructor
 			parent::__construct($env, true);
 			
@@ -65,7 +67,7 @@ if (!class_exists('StageShowWPOrgPricesAdminListClass'))
 			// FUNCTIONALITY: Prices - Lists Performance, Type and Price
 			$ourOptions = array(
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Performance',  StageShowLibTableClass::TABLEPARAM_ID => 'perfDateTime', StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_VIEW,   StageShowLibTableClass::TABLEPARAM_DECODE => 'FormatDateForAdminDisplay', ),
-				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Ticket Type',  StageShowLibTableClass::TABLEPARAM_ID => 'priceType',    StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
+				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Ticket Type',  StageShowLibTableClass::TABLEPARAM_ID => 'priceType',  StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => STAGESHOW_PRICETYPE_TEXTLEN, ),						
 				array(StageShowLibTableClass::TABLEPARAM_LABEL => 'Price',        StageShowLibTableClass::TABLEPARAM_ID => 'priceValue',   StageShowLibTableClass::TABLEPARAM_TYPE => StageShowLibTableClass::TABLEENTRY_TEXT,   StageShowLibTableClass::TABLEPARAM_LEN => 9, StageShowLibTableClass::TABLEPARAM_DECODE => 'DecodePrice'),
 			);
 			
@@ -209,8 +211,8 @@ if (!class_exists('StageShowWPOrgPricesAdminClass'))
 			$myDBaseObj  = $this->myDBaseObj;
 			
 			// Stage Show Prices HTML Output - Start 
-			$showLists = $myDBaseObj->GetAllShowsList();
-			if (count($showLists) == 0)
+			$showsList = $myDBaseObj->GetSortedShowsList();
+			if (count($showsList) == 0)
 			{
 				// FUNCTIONALITY: Prices - Show Link to Settings page if Payment Gateway settings required
 				if ($myDBaseObj->CheckIsConfigured())
@@ -219,18 +221,17 @@ if (!class_exists('StageShowWPOrgPricesAdminClass'))
 					echo "<div class='error'><p>" . __('No Show Configured', $this->myDomain) . ' - <a href=' . $showsPageURL . '>' . __('Add one Here', $this->myDomain) . '</a>' . "</p></div>\n";
 				}
 			}
-			foreach ($showLists as $showList)
+			foreach ($showsList as $showEntry)
 			{
-				$perfsLists = $myDBaseObj->GetPerformancesListByShowID($showList->showID);
 ?>
 	<div class="stageshow-admin-form">
 	<form method="post">
 <?php
 				$this->WPNonceField();
-				if (count($perfsLists) == 0)
+				if ($showEntry->perfDateTime == null)
 				{
 					$showsPageURL = get_option('siteurl') . '/wp-admin/admin.php?page=' . STAGESHOW_MENUPAGE_PERFORMANCES;
-					$showsPageMsg = $showList->showName . ' ' . __('has No Performances', $this->myDomain) . ' - <a href=' . $showsPageURL . '>' . __('Add one Here', $this->myDomain) . '</a>';
+					$showsPageMsg = $showEntry->showName . ' ' . __('has No Performances', $this->myDomain) . ' - <a href=' . $showsPageURL . '>' . __('Add one Here', $this->myDomain) . '</a>';
 ?> 
 	<div class='error'><p><?php echo $showsPageMsg; ?></p></div>
 <?php
@@ -238,9 +239,9 @@ if (!class_exists('StageShowWPOrgPricesAdminClass'))
 				else
 				{
 ?>
-		<h3><?php echo($showList->showName); ?></h3>
+		<h3><?php echo($showEntry->showName); ?></h3>
 <?php
-					$results = $myDBaseObj->GetPricesListByShowID($showList->showID);
+					$results = $myDBaseObj->GetPricesListByShowID($showEntry->showID);
 					if (count($results) == 0)
 					{
 						echo "<div class='noconfig'>" . __('Show has No Prices', $this->myDomain) . "</div>\n";
@@ -252,18 +253,18 @@ if (!class_exists('StageShowWPOrgPricesAdminClass'))
 						$showsList->OutputList($results, $updateFailed);
 					} 
 
-      				echo '<input type="hidden" name="showID" value="'.$showList->showID.'" />'."\n";
+      				echo '<input type="hidden" name="showID" value="'.$showEntry->showID.'" />'."\n";
 
 					// FUNCTIONALITY: Prices - Output "Add New Price" Button (if valid)
-					$this->showID = $showList->showID;
-					$this->OutputButton("addpricebutton", __("Add New Price", $this->myDomain));
+					$this->showID = $showEntry->showID;
+					$this->OutputPostButton("addpricebutton", __("Add New Price", $this->myDomain), "button-secondary");
 
 					// Output Performance Select
 					$this->OutputPerformanceSelect('&nbsp; '.__('for performance', $this->myDomain).' &nbsp;');
 				
 					// FUNCTIONALITY: Prices - Output "Save Changes" Button (if there are entries)
 					if (count($results) > 0)
-						$this->OutputButton("savechanges", __("Save Changes", $this->myDomain), "button-primary");
+						$this->OutputPostButton("savechanges", __("Save Changes", $this->myDomain), "button-primary");
 				}
 ?>
 		</form>
@@ -345,7 +346,7 @@ if (!class_exists('StageShowWPOrgPricesAdminClass'))
 			echo $label;
 			
 			// Get performances list for this show
-			$perfsList = $myDBaseObj->GetPerformancesListByShowID($this->showID);
+			$perfsList = $myDBaseObj->GetPerformancesDetailsByShowID($this->showID);
 			
 			echo '<select name="perfID">'."\n";
 			foreach ($perfsList as $perfRecord)

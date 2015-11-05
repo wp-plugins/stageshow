@@ -204,6 +204,9 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 				$scriptCode .= $this->DefineTranslatedText('Seat Available', $this->myDomain);
 				$scriptCode .= $this->DefineTranslatedText('Seats Available', $this->myDomain);
 								
+				$scriptCode .= $this->DefineTranslatedText('Show Available Seats', $this->myDomain, '"');
+				$scriptCode .= $this->DefineTranslatedText('Continue', $this->myDomain, '"');
+								
 				$scriptCode .=  "var stageshowlib_attStrings = [];\n";				
 				$scriptCode .=  "var stageshowlib_pageAnchor = [];\n";
 				$scriptCode .=  "var stageshowlib_cssDomain = '".$this->cssDomain."';\n";
@@ -362,7 +365,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			}
 			$trolleyContent = ob_get_contents();
 			ob_end_clean();
-			
+
 			if ($showBoxOffice)
 			{
 				ob_start();
@@ -374,28 +377,32 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 					$this->Cart_OutputContent_OnlineStoreMain($atts);
 				}
 				
-				if ($this->boxofficeContent == '')
+				if (isset($this->boxofficeOverride))
 				{
-					$this->boxofficeContent = ob_get_contents();
+					$boxofficeContent = $this->boxofficeOverride;
+				}
+				else
+				{
+					$boxofficeContent = ob_get_contents();
 				}
 				ob_end_clean();				
 			}
 			else
 			{
-				$this->boxofficeContent = '';
+				$boxofficeContent = '';
 			}
-			$this->boxofficeContent = $boxoffDiv.$this->boxofficeContent.$endDiv;
+			$boxofficeContent = $boxoffDiv.$boxofficeContent.$endDiv;
 			$trolleyContent = $trolleyDiv.$trolleyContent.$endDiv;
 			
 			$this->OutputContent_OnlineStoreMessages();
 			
 			if ($myDBaseObj->getOption('ProductsAfterTrolley'))
 			{
-				$outputContent .= $trolleyContent.$this->boxofficeContent;
+				$outputContent .= $trolleyContent.$boxofficeContent;
 			}
 			else
 			{
-				$outputContent .= $this->boxofficeContent.$trolleyContent;
+				$outputContent .= $boxofficeContent.$trolleyContent;
 			}
 			
 			$outputContent .= '</form>'."\n";	
@@ -545,7 +552,8 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 		{
 			// Process checkout request for Integrated Trolley
 			// This function must be called before any output as it redirects to Payment Gateway if successful
-			$myDBaseObj = $this->myDBaseObj;				
+			$myDBaseObj = $this->myDBaseObj;	
+			
 			if ($myDBaseObj->isDbgOptionSet('Dev_ShowGET'))
 			{
 				StageShowLibUtilsClass::print_r($_GET, '$_GET');
@@ -554,11 +562,12 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			{
 				StageShowLibUtilsClass::print_r($_POST, '$_POST');
 			}		
+			$myDBaseObj->GetSerialisedPostVars();
 			if ($myDBaseObj->isDbgOptionSet('Dev_ShowSESSION'))
 			{
 				StageShowLibUtilsClass::print_r($_SESSION, '$_SESSION');
 			}		
-			
+									
 			$checkout = $myDBaseObj->gatewayObj->IsCheckout();
 			if ($checkout != '')
 			{

@@ -100,14 +100,14 @@ if (!class_exists('StageShowWPOrgShowsAdminClass'))
 			if (isset($_POST['savechanges']))
 			{
 				// Save Settings Request ....
-				$results = $myDBaseObj->GetAllShowsList();
+				$showsList = $myDBaseObj->GetAllShowsList();
 				
 				// Verify that show names are unique 				
-				if (count($results) > 0)
+				if (count($showsList) > 0)
 				{
-					foreach ($results as $result)
+					foreach ($showsList as $showEntry)
 					{
-						$showEntry = stripslashes($_POST['showName' . $result->showID]);
+						$showEntry = stripslashes($_POST['showName' . $showEntry->showID]);
 						// FUNCTIONALITY: Shows - Reject Duplicate or Empty Show Name
 						if (strlen($showEntry) == 0)
 						{
@@ -130,7 +130,7 @@ if (!class_exists('StageShowWPOrgShowsAdminClass'))
 				}
 				else
 				{
-					if (count($results) > 0)
+					if (count($showsList) > 0)
 					{
 						$classId       = $this->GetAdminListClass();
 						$adminTableObj = new $classId($this->env);
@@ -139,17 +139,17 @@ if (!class_exists('StageShowWPOrgShowsAdminClass'))
 						$settings = $adminTableObj->GetDetailsRowsDefinition();
 						$dbOpts   = $adminTableObj->ExtendedSettingsDBOpts();
 						
-						foreach ($results as $result)
+						foreach ($showsList as $showEntry)
 						{
-							$newShowName = stripslashes($_POST['showName' . $result->showID]);
-							if ($newShowName != $result->showName)
+							$newShowName = stripslashes($_POST['showName' . $showEntry->showID]);
+							if ($newShowName != $showEntry->showName)
 							{
-								$myDBaseObj->UpdateShowName($result->showID, $newShowName);
+								$myDBaseObj->UpdateShowName($showEntry->showID, $newShowName);
 							}
 							
 							// FUNCTIONALITY: Shows - Save "Options" settings
 							// Save option extensions
-							$this->UpdateHiddenRowValues($result, $result->showID, $settings, $dbOpts);
+							$this->UpdateHiddenRowValues($showEntry, $showEntry->showID, $settings, $dbOpts);
 						}
 					}
 					echo '<div id="message" class="updated"><p>' . __('Settings have been saved', $this->myDomain) . '</p></div>';
@@ -186,8 +186,8 @@ if (!class_exists('StageShowWPOrgShowsAdminClass'))
 
 			$this->WPNonceField();
 			
-			$results = $myDBaseObj->GetAllShowsList();
-			if (count($results) == 0)
+			$showsList = $myDBaseObj->GetAllShowsList();
+			if (count($showsList) == 0)
 			{
 				echo "<div class='noconfig'>" . __('No Show Configured', $this->myDomain) . "</div>\n";
 			}
@@ -195,7 +195,7 @@ if (!class_exists('StageShowWPOrgShowsAdminClass'))
 			{
 				$classId       = $this->GetAdminListClass();
 				$adminTableObj = new $classId($this->env);
-				$adminTableObj->OutputList($results, $updateFailed);
+				$adminTableObj->OutputList($showsList, $updateFailed);
 			}
 			
 			if ($myDBaseObj->CanAddShow())
@@ -204,7 +204,7 @@ if (!class_exists('StageShowWPOrgShowsAdminClass'))
 				$this->OutputButton("addshowbutton", __("Add New Show", $this->myDomain));
 			}
 			
-			if (count($results) > 0)
+			if (count($showsList) > 0)
 			{
 				// FUNCTIONALITY: Shows - Output "Save Changes" Button (if there are entries)
 				$this->OutputButton("savechanges", __("Save Changes", $this->myDomain), "button-primary");
@@ -248,7 +248,7 @@ if (!class_exists('StageShowWPOrgShowsAdminClass'))
 				case StageShowLibAdminListClass::BULKACTION_DELETE:
 					// FUNCTIONALITY: Shows - Bulk Action Delete - Remove Prices, Hosted Buttons, Performances and Show		
 					// Get a list of performances
-					$results = $myDBaseObj->GetPerformancesListByShowID($recordId);
+					$results = $myDBaseObj->GetPerformancesDetailsByShowID($recordId);
 					
 					foreach ($results as $result)
 					{

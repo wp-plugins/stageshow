@@ -466,9 +466,18 @@ function stageshow_OnClickAdd(obj, inst)
   		return stageshowCustom_OnClickAdd(obj, inst); 
 	}	
 
-	rtnVal = StageShowLib_JQuery_OnClickTrolleyButton(obj, inst); 
+	rtnVal = StageShowLib_JQuery_OnClickTrolleyButton(obj, inst, "stageshow_JQuery_Callback"); 
 	
 	return rtnVal;
+}
+
+function stageshow_JQuery_Callback(data, inst, buttonId, qty)
+{
+	StageShowLib_JQuery_Callback(data, inst, buttonId, qty);
+	
+	stageshow_OnClickSelectshow(lastSelectShowObj);
+	stageshow_OnClickSelectperf(lastSelectPerfObj);
+	
 }
 
 var stageshow_scrollPosn;
@@ -524,6 +533,9 @@ function stageshow_SeatsSelectorCallback(data, inst, buttonId, qty)
 			break;	
 			
 		case "seatsselected":
+			stageshow_OnClickSelectshow(lastSelectShowObj);
+			stageshow_OnClickSelectperf(lastSelectPerfObj);
+		
 			jQuery(SeatsLoadingBlockId).hide();
 			jQuery(SeatLayoutBlockId).show();
 			jQuery('#trolley').css("visibility", "visible"); 
@@ -607,5 +619,90 @@ function stageshow_OnClickRemove(obj, inst)
   		return stageshowCustom_OnClickRemove(obj, inst); 
 	}
 	
-	return StageShowLib_JQuery_OnClickTrolleyButton(obj, inst); 
+	return StageShowLib_JQuery_OnClickTrolleyButton(obj, inst, "stageshow_JQuery_Callback"); 
+}
+
+function stageshow_PurgeDrilldownAtts(newAtts)
+{
+	for (var index=0; index<stageshowlib_attStrings.length; index++) 
+	{
+		var origAtts = stageshowlib_attStrings[index];
+		origAtts = origAtts.split(",");
+		
+		for (var attId=0; attId<origAtts.length; attId++) 
+		{
+			var thisAtt = origAtts[attId].split("=");
+			var key = thisAtt[0];
+			
+			if (key == "scatt_dd_id") continue;
+			if (key == "scatt_dd_perf") continue;
+
+			var attval = thisAtt[1];
+			newAtts = newAtts + ',' + key + '=' + attval;
+		}
+		stageshowlib_attStrings[index] = newAtts;
+	}
+	
+}
+
+var	lastSelectShowObj = null;
+
+function stageshow_OnClickSelectshow(obj, inst)
+{
+	if (obj == null) return;
+	
+	lastSelectShowObj = obj;
+	
+	jQuery(".stageshow-selector-showbutton").show();
+	jQuery(".stageshow-selector-perfrow").hide();
+	
+	var ourName = obj.id;
+	var perfRowClass = ourName.replace("stageshow-selbutton-show-", "stageshow-selector-perfrow-");
+	jQuery("."+perfRowClass).show();
+	jQuery("#"+obj.id).hide();
+}
+
+var	lastSelectPerfObj = null;
+
+function stageshow_OnClickSelectperf(obj, inst)
+{
+	if (obj == null) return;
+	
+	lastSelectPerfObj = obj;
+	
+	var ourName = obj.id;
+	var show_perf_parts = ourName.replace("stageshow-selbutton-perf-", "").split("-");;
+	var showID = show_perf_parts[0];
+	var perfID = show_perf_parts[1];
+	
+	var newAtts = "scatt_dd_id="+showID+",scatt_dd_perf="+perfID+",";
+	stageshow_PurgeDrilldownAtts(newAtts);
+	
+	jQuery("#stageshow-selector-table").hide();
+
+	jQuery(".stageshow-boxoffice-row").hide();	
+	
+	var rowsClassId = ".stageshow-boxoffice-row-perf" + perfID;	
+	jQuery(rowsClassId).show();
+	
+	var showDivId = "#stageshow-boxoffice-body-" + showID;
+	jQuery(showDivId).show();
+	
+	jQuery("#stageshow-selbutton-back-div").show();
+}
+
+function stageshow_OnClickSelectorback()
+{
+	lastSelectPerfObj = null;
+
+	stageshow_PurgeDrilldownAtts('');
+	
+	/* Hide the button */
+	jQuery("#stageshow-selbutton-back-div").hide();
+
+	/* Hide all box-office ticket entries */
+	jQuery(".stageshow-boxoffice-body").hide();
+
+	/* Show the selector */
+	jQuery("#stageshow-selector-table").show();
 }

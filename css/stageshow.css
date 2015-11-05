@@ -27,6 +27,34 @@ Copyright 2014 Malcolm Shergold
 /*                                                                             */
 /* --------------------------------------------------------------------------- */
 
+#stageshow-selector-table,
+#stageshow-selector-table tr,
+#stageshow-selector-table tr td
+{
+	border: 0 none;
+	vertical-align: middle;
+}
+
+#stageshow-selector-table h2
+{
+	margin: 0;
+}
+
+#stageshow-selector-table
+{
+	width: auto;
+}
+
+td.stageshow-selector-separator
+{
+	padding: 0;
+}
+
+#stageshow-selbutton-back-div
+{
+	padding: 20px 0px;
+}
+
 td.stageshow-boxoffice-perfnote
 {
 	text-align: left !important;

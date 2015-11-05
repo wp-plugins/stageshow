@@ -116,6 +116,26 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
     		return 'paypal';
 		}
 		
+		function GetSerialisedPostVars()
+		{
+			if (!isset($_POST['stageshowlib_PostVars'])) return;
+			
+			$Postvars = array();
+			
+			$serObj = stripslashes($_POST['stageshowlib_PostVars']);
+			$postVarsArrray = unserialize($serObj);
+			foreach($postVarsArrray as $postKey => $postVar)
+			{
+				$postVar = urldecode($postVar);
+				$Postvars[$postKey] = $postVar;
+				$_POST[$postKey] = $postVar;
+			}
+			
+			if ($this->isDbgOptionSet('Dev_ShowPOST'))
+			{
+				StageShowLibUtilsClass::print_r($Postvars, '$_POST(Postvars)');
+			}		
+		}
 		
 		function SplitSaleNameField()
 		{
@@ -624,27 +644,24 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 			return $ourEmail;
 		}
 		
-		function CheckEmailTemplatePath($templateID, $defaultTemplate = '')
+		function CheckEmailTemplatePath($templateID, $defaultTemplate = '', $baseClassTemplate = '')
 		{
 			$templatePath = str_replace("\\", "/", $this->adminOptions[$templateID]);
-			$this->adminOptions[$templateID] = basename($templatePath);
+			$templatePath = basename($templatePath);
 
-			if ($defaultTemplate == '')
-				return;
-				
-			// If EMail Summmary Template is a default template ... set to the correct one
-			$templatePath = STAGESHOWLIB_DEFAULT_TEMPLATES_PATH . 'emails/*.php';
-			$templateFiles = glob($templatePath);
-			foreach ($templateFiles as $path)
+			// Fix for update downgrading template error
+			if ( ($baseClassTemplate != '')
+			  && ($defaultTemplate != $baseClassTemplate)
+			  && ($templatePath == $baseClassTemplate))
 			{
-				$fileName = basename($path);
-				if ($this->adminOptions[$templateID] === $fileName)
-				{
-					$this->adminOptions[$templateID] = $defaultTemplate;
-					break;
-				}	
+			  	$templatePath = $defaultTemplate;
 			}
 			
+			if ($templatePath == '')
+			{
+				$templatePath = $defaultTemplate;
+			}
+			$this->adminOptions[$templateID] = $templatePath;
 		}
 
 		function GetEmailTemplatePath($templateID, $sale = array())

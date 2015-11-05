@@ -41,6 +41,18 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 		
 		function Output_MainPage($updateFailed)
 		{
+			$customTestPath = dirname(dirname(__FILE__)).'/test/stageshowlib_customtest.php';
+			if (file_exists($customTestPath))
+			{
+				// stageshowlib_customtest.php must create and run test class object
+				include $customTestPath;
+				if (class_exists('StageShowLibCustomTestClass'))
+				{
+					new StageShowLibCustomTestClass($this->env);	
+					return;						
+				}
+			}
+			
 			$myPluginObj = $this->myPluginObj;
 			$myDBaseObj = $this->myDBaseObj;			
 					
@@ -52,7 +64,7 @@ if (!class_exists('StageShowLibDebugSettingsClass'))
 			
 			$this->Test_DebugSettings(); 
 
-			echo '</form>'."\n";
+			echo '</form>'."\n";			
 			// TEST HTML Output - End
 		}
 		

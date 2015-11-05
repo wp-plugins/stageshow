@@ -439,6 +439,11 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			return ($reqRecordId == '') ? $myDBaseObj->GetPricesList(null) :  $this->GetOnlineStoreProductDetails($reqRecordId);
 		}
 		
+		function GetOnlineStoreGroupID($result)
+		{
+			return $this->GetOnlineStoreItemID($result);
+		}
+			
 		function GetOnlineStoreStockID($result)
 		{
 			return $this->GetOnlineStoreItemID($result);
@@ -587,6 +592,16 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 			echo '<a name="'.$anchor.'" id="'.$anchor.'"></a>';	
 		}
 		
+		function GetBoxOfficeRowClass($result)
+		{
+			static $oddPage = true;
+			
+			$rowClass = $this->cssBaseID . '-row ' . $this->cssBaseID . ($oddPage ? "-oddrow" : "-evenrow");
+			$oddPage = !$oddPage;
+			
+			return $rowClass;
+		}
+		
 		function OutputContent_OnlineStoreSection( $results )
 		{
 			$myDBaseObj = $this->myDBaseObj;
@@ -599,11 +614,7 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 				return;
 			}
       
-			echo '<div class="'.$this->cssBaseID.'">'."\n";
-			$this->OutputContent_OnlineStoreTitle($results[0]);			
-				
-			$oddPage = true;
-			
+			$lastGrouptID = 0;	
 			for ($recordIndex = 0; $recordIndex<count($results); $recordIndex++)
 			{		
 				$result = $results[$recordIndex];
@@ -616,7 +627,20 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 					continue;
 				
 				$rowCount++;
-				if ($rowCount == 1) $this->OutputContent_OnlineStoreHeader($result);				
+				
+				$groupID = $this->GetOnlineStoreGroupID($result);
+				if ($lastGrouptID != $groupID)
+				{
+					if ($rowCount > 1)
+					{
+						echo '</table></div>';						
+					}
+					
+					echo '<div class="'.$this->cssBaseID.'">'."\n";
+					$this->OutputContent_OnlineStoreTitle($result);			
+					$this->OutputContent_OnlineStoreHeader($result);				
+				}
+				$lastGrouptID = $groupID;
 					
 				$stockID = $this->GetOnlineStoreStockID($result);
 				if ($this->lastItemID !== $stockID)
@@ -624,13 +648,10 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 					$this->GetOnlineStoreItemNote($result, 'above');
 				}
 											
-				$rowClass = $this->cssBaseID . '-row ' . $this->cssBaseID . ($oddPage ? "-oddrow" : "-evenrow");
-				$oddPage = !$oddPage;
-					
 				$addSaleItemParams = '';
 				
 				echo '
-					<tr class="'.$rowClass.'">
+					<tr class="'.$this->GetBoxOfficeRowClass($result).'">
 					<td class="'.$this->cssBaseID.'-data">
 					';
 
@@ -650,18 +671,10 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 
 			}
 
-			if ($rowCount == 0) 
-				echo __('Sales Not Available Currently', $this->myDomain)."<br>\n";
-			else
+			if ($rowCount >= 1)
 			{
-				echo '
-					</table>
-					';
-			}	
-			
-			echo '
-				</div>
-				';
+				echo '</table></div>';						
+			}
 
 			// OnlineStore BoxOffice HTML Output - End 
 		}

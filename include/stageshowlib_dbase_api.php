@@ -210,6 +210,10 @@ if (!class_exists('StageShowLibDBaseClass'))
 			$this->DBTables = $this->getTableNames($dbPrefix);
 		}
 
+		function PurgeDB()
+		{
+		}
+		
 	    function uninstall()
 	    {
 		}
@@ -307,7 +311,7 @@ if (!class_exists('StageShowLibDBaseClass'))
 		function AddGenericFields($EMailTemplate)
 		{
 			$EMailTemplate = str_replace('[organisation]', $this->adminOptions['OrganisationID'], $EMailTemplate);			
-			$EMailTemplate = str_replace('[url]', get_option('siteurl'), $EMailTemplate);
+			$EMailTemplate = str_replace('[url]', get_option('home'), $EMailTemplate);
 			
 			return $EMailTemplate;
 		}

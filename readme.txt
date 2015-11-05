@@ -4,7 +4,7 @@ Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
 Tested up to: 4.3.1
-Stable tag: 5.4
+Stable tag: 5.6
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,6 +187,28 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 12. Screenshot 12: Sample EMail 
 
 == Changelog ==
+
+= 5.6(05/11/2015) =
+* Bug Fix: PHP POST variables limit can break admin page updates
+* Bug Fix: EMail [url] entry uses site URL instead of home URL
+* Bug Fix: PHP Warning - preg_replace() called with e modifier (PHP 5.5 onwards)
+* Bug Fix: Multiple Shortcodes on same page repeats 1st instance (since 5.0.10)
+* Bug Fix: Performance Ref checks duplicates against all shows (StageShow+)
+* Bug Fix: Discount Ref entries not saving correctly on Discount Codes admin page (StageShowGold)
+* Bug Fix: New price entries shown with price=-100 (StageShowGold)
+* Bug Fix: Zero discount prices are not removed from database (StageShowGold)
+* Added translations to Reservations User Details Form
+* Admin pages updated to list shows in decreasing order of last performance date
+* Performance admin page now lists performances in decreasing date order (StageShow+)
+* Add New Performance copies latest performance (with date incremented by 1 day)
+
+= 5.5(27/10/2015) =
+* Bug Fix: Selected EMail template can be changed by update/activate
+* Bug Fix: Added translation for "Show Available Seats" (StageShow+)
+* Bug Fix: Added translation for "Continue" (StageShowGold)
+* Added shortcode style=drilldown to Box-Office (StageShow+)
+* Implemented Shortcode perf=date option (StageShow+)
+* Zone refs in Box-Office output inside <span> tag (StageShowGold)
 
 = 5.4(20/10/2015) =
 * Bug Fix: Seat Selector does not work without jQuery call (StageShowGold)

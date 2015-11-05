@@ -457,6 +457,11 @@ if (!class_exists('StageShowLibSalesCartDBaseClass'))
 			return $this->GetSalesList($sqlFilters);
 		}
 				
+		function TotalSalesField($sqlFilters = null)
+		{
+			return '';
+		}
+
 		function GetSalesList($sqlFilters)
 		{
 			$selectFields  = $this->GetSalesQueryFields($sqlFilters);

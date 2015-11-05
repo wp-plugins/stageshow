@@ -139,7 +139,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			
 	  		// FUNCTIONALITY: Activate - Set EMail template to file name ONLY
 			// EMail Template defaults to templates folder - remove folders from path
-			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath', STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH);
+			$myDBaseObj->CheckEmailTemplatePath('EMailTemplatePath', STAGESHOW_ACTIVATE_EMAIL_TEMPLATE_PATH, STAGESHOW_DEFAULT_EMAIL_TEMPLATE_PATH);
 			
       		$this->myDBaseObj->saveOptions();
       
