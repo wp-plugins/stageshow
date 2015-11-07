@@ -208,21 +208,6 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			return array();
 		}
 		
-		function GetCurrencyDef($currency)
-		{
-			$currencyTable = $this->GetCurrencyTable();
-			
-			foreach ($currencyTable as $currencyDef)
-			{
-				if ($currencyDef['Currency'] == $currency)
-				{
-					return $currencyDef;
-				}
-			}
-			
-			return null;
-		}
-		
 		function GetCurrencyList()
 		{
 			$currSelect = array();
@@ -321,6 +306,27 @@ if (!class_exists('StageShowLibGatewayBaseClass'))
 			$this->items[$paramCount] = $item;
 			$paramCount++;		
 		}			
+		
+/* ------------------------------------------------------------------
+
+	Public Functions
+
+------------------------------------------------------------------ */
+			
+		function GetCurrencyDef($currency)
+		{
+			$currencyTable = $this->GetCurrencyTable();
+			
+			foreach ($currencyTable as $currencyDef)
+			{
+				if ($currencyDef['Currency'] == $currency)
+				{
+					return $currencyDef;
+				}
+			}
+			
+			return null;
+		}
 		
 /* ------------------------------------------------------------------
 

@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the  package.
 msgid ""
 msgstr ""
-"Project-Id-Version: stageshow 5.6 \n"
+"Project-Id-Version: stageshow 5.6.1 \n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/stageshow\n"
-"POT-Creation-Date: 2015-11-05 17:05:00+00:00\n"
+"POT-Creation-Date: 2015-11-06 17:42:51+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -204,7 +204,7 @@ msgstr[1] ""
 #: admin\stageshow_manage_performances.php:444
 #: admin\stageshow_manage_prices.php:334 admin\stageshow_manage_shows.php:301
 #: admin\stageshowgold_manage_discounts.php:347
-#: admin\stageshowgold_manage_seating.php:708
+#: admin\stageshowgold_manage_seating.php:705
 #: admin\stageshowplus_manage_priceplans.php:405
 #: include\stageshowlib_gatewaysalesadmin.php:514
 msgid "Nothing to Delete"
@@ -766,23 +766,23 @@ msgstr ""
 msgid "Select the Template file you want to import below"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:702
+#: admin\stageshowgold_manage_seating.php:699
 msgid "Seating Plan does not exist in Database"
 msgid_plural "Seating Plans do not exist in Database"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshowgold_manage_seating.php:704
+#: admin\stageshowgold_manage_seating.php:701
 msgid "Seating Plan cannot be deleted"
 msgid_plural "Seating Plans cannot be deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin\stageshowgold_manage_seating.php:704
+#: admin\stageshowgold_manage_seating.php:701
 msgid "In use for one or more Performances!"
 msgstr ""
 
-#: admin\stageshowgold_manage_seating.php:706
+#: admin\stageshowgold_manage_seating.php:703
 msgid "Seating Plan has been deleted"
 msgid_plural "Seating Plans have been deleted"
 msgstr[0] ""
@@ -1122,7 +1122,7 @@ msgid "Collect Name, Address & EMail"
 msgstr ""
 
 #: include\stageshowlib_payfast_gateway.php:233
-#: include\stageshowgold_dbase_api.php:1574
+#: include\stageshowgold_dbase_api.php:1575
 msgid "Qty"
 msgstr ""
 
@@ -1139,11 +1139,11 @@ msgstr ""
 msgid "Could not get token from PayPal"
 msgstr ""
 
-#: include\stageshowlib_paypal_gateway.php:288
+#: include\stageshowlib_paypal_gateway.php:289
 msgid "PayPal Login FAILED"
 msgstr ""
 
-#: include\stageshowlib_paypal_gateway.php:389
+#: include\stageshowlib_paypal_gateway.php:390
 msgid "Missing PayPal Login Param"
 msgstr ""
 
@@ -1494,7 +1494,7 @@ msgid "Row"
 msgstr ""
 
 #: include\stageshowgold_dbase_api.php:498
-#: include\stageshowgold_dbase_api.php:1579 stageshow.php:124
+#: include\stageshowgold_dbase_api.php:1580 stageshow.php:124
 #: stageshowgold_trolley.php:51
 msgid "Seat"
 msgstr ""
@@ -1541,7 +1541,7 @@ msgstr ""
 msgid "Seats Selected"
 msgstr ""
 
-#: include\stageshowgold_dbase_api.php:1659
+#: include\stageshowgold_dbase_api.php:1660
 msgid "Discount"
 msgstr ""
 

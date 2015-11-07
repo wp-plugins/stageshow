@@ -492,14 +492,10 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 				return 0;
 			}
 			
-			if ($perfRef == '')
-			{
-				$perfRef = $this->GetUniquePerfID($showID);
-			}
-			
 			if ($perfDateTime == null)
 			{
 				// Add default performance
+				$perfRef = $this->GetUniquePerfID($showID);
 				
 				// Get last performance entry
 				$perfsList = $this->GetPerformancesListByShowID($showID);
@@ -508,33 +504,50 @@ if (!class_exists('StageShowWPOrgDBaseClass'))
 				{
 					$lastPerf = $perfsList[0];
 					
-					// Copy to new performance
-					$perfID = $lastPerf->perfID;
-					
-					$sql = 'CREATE TEMPORARY TABLE '.STAGESHOW_TMP_TABLE.' SELECT * FROM '.STAGESHOW_PERFORMANCES_TABLE.' WHERE perfID = '.$perfID;
-					$this->query($sql);
-					
 					// Use last date/time plus 1 day for new performance					
 					$timestamp = strtotime($lastPerf->perfDateTime);
 					$perfDateTime = date(StageShowWPOrgDBaseClass::MYSQL_DATETIME_FORMAT, strtotime('+1 day', $timestamp));
 				
-					$sql  = 'UPDATE '.STAGESHOW_TMP_TABLE.' SET perfID = NULL ';
-					$sql .= ',  perfDateTime = "'.$perfDateTime.'"';
-					$sql .= ',  perfRef = "'.$perfRef.'"';
+					// Copy to new performance
+					$perfID = $lastPerf->perfID;
+					
+					$sql = 'SELECT * FROM '.STAGESHOW_PERFORMANCES_TABLE.' WHERE perfID = '.$perfID;
+					$dbEntries = $this->get_results($sql);
+					$dbKeys = '(';
+					$dbValues = ' VALUES ("';
+					$sep1 = $sep2 = '';
+					foreach ($dbEntries[0] as $dbKey => $dbValue)
+					{
+						if ($dbKey == 'perfID') continue;
+						$dbKeys .= $sep1.$dbKey;
+						$sep1 = ', ';
+						
+						$dbValues .= $sep2.$dbValue.'"';
+						$sep2 = ', "';					
+					}
+					$dbKeys .= ") ";
+					$dbValues .= ") ";
+					
+					$sql  = 'INSERT INTO '.STAGESHOW_PERFORMANCES_TABLE;
+					$sql .= $dbKeys.$dbValues;
 					$this->query($sql);
-				
-					$sql = 'INSERT INTO '.STAGESHOW_PERFORMANCES_TABLE.' SELECT * FROM '.STAGESHOW_TMP_TABLE;
-					$this->query($sql);	
 					$perfID = $this->GetInsertId();
 
-					$sql = 'DROP TEMPORARY TABLE IF EXISTS '.STAGESHOW_TMP_TABLE;
-					$this->query($sql);
-
+					$this->UpdatePerformanceTime($perfID, $perfDateTime);				
+					$this->UpdatePerformanceRef($perfID, $perfRef, $lastPerf->showID);
+					
+					$rtnMsg = __('New Performance Added', $this->get_domain());
+					
 					return $perfID;
 				}
 				
 				// Use current date/time for performance
 				$perfDateTime = date(StageShowWPOrgDBaseClass::MYSQL_DATETIME_FORMAT, current_time('timestamp'));			
+			}
+			
+			if ($perfRef == '')
+			{
+				$perfRef = $this->GetUniquePerfID($showID);
 			}
 			
 			$perfState = '';
