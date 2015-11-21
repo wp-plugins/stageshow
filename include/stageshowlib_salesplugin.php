@@ -93,7 +93,7 @@ if (!class_exists('StageShowLibSalesPluginBaseClass'))
 			wp_enqueue_script('jquery');
 		}	
 		
-		function load_admin_styles()
+		function load_admin_styles($page)
 		{
 			$myDBaseObj = $this->myDBaseObj;			
 

@@ -1057,7 +1057,7 @@ if (!class_exists('StageShowLibAdminListClass'))
 
 			$tableClass = $this->myDBaseObj->get_domain().'-widefat';			
 			$this->tableTags = 'class="'.$tableClass.' widefat" cellspacing="0"';
-			
+		
 			if (isset($this->myDBaseObj->adminOptions['PageLength']))
 				$this->SetRowsPerPage($this->myDBaseObj->adminOptions['PageLength']);
 			else

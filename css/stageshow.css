@@ -124,6 +124,17 @@ td.stageshow-boxoffice-add input
 	border: none;
 }
 
+div.stageshow-boxoffice .stageshow-boxoffice-qty input  
+{
+	text-align: center;
+}
+
+div.stageshow-boxoffice .stageshow-boxoffice-add  
+{
+	text-align: right;
+	padding: 0 10px 0 0;
+}
+
 .stageshow-trolley-seatsavailable-button
 {
 	border: none;
@@ -135,6 +146,51 @@ td.stageshow-boxoffice-add input
 	width: 100%;
 	height: 64px;
 	display: none;
+}
+
+/* --------------------------------------------------------------------------- */
+/*                                                                             */
+/*                    StageShow Discount Entry Styles                          */
+/*                                                                             */
+/* --------------------------------------------------------------------------- */
+
+.stageshow-discountcode
+{
+ 	border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+    
+	margin: 10px 0px 20px 0px;
+}  
+
+.stageshow-discountcode table
+{
+	margin: 0;
+}
+
+.stageshow-discountcode td
+{
+	vertical-align: middle;
+	border: 0;
+	padding-left: 20px;
+}
+
+#stageshow-trolley-discountcode-text,
+#stageshow-trolley-discountcode-update
+{
+	text-align: right;
+}  
+
+#stageshow-trolley-discountcode-input,
+#stageshow-trolley-discountcode-update
+{
+	width: 1%;
+}  
+
+X.stageshow-discountcode-row td
+{
+	margin: 3px 0px 3px 0px;
+	padding: 0 0 0 0;
 }
 
 /* --------------------------------------------------------------------------- */

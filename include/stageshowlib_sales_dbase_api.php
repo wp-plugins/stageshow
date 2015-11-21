@@ -491,7 +491,7 @@ if (!class_exists('StageShowLibSalesDBaseClass'))
 		function GetAllSalesList($sqlFilters = null)
 		{
 			$sqlFilters['groupBy'] = 'saleID';
-			$sqlFilters['orderBy'] = $this->DBTables->Sales.'.saleID DESC';
+			$sqlFilters['orderBy'] = $this->DBTables->Sales.'.saleDateTime DESC';
 			return $this->GetSalesList($sqlFilters);
 		}
 

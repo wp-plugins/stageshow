@@ -71,6 +71,7 @@ define('STAGESHOW_SHOWAVAILABLEBUTTON_URL', 'wp-content/plugins/stageshowgold/im
 define('STAGESHOW_CONFIRMANDPAYBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_CommandAndPay.gif');
 define('STAGESHOW_SELECTSHOWBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_SelectShow.gif');
 define('STAGESHOW_SELECTPERFBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_SelectPerformance.gif');
+define('STAGESHOW_UPDATEPRICESBUTTON_URL', 'wp-content/plugins/stageshowgold/images/stageshow_UpdatePrices.gif');
 
 /* --------------------------------------------------------------------------------
 	STAGESHOW_PAYPALEXPRESSBUTTON_URL

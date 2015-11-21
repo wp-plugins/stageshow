@@ -31,11 +31,30 @@ Copyright 2014 Malcolm Shergold
 	padding: 10px 0px 20px 0px;	
 }
 
-.stageshow-boxoffice-layout td
+#stageshow-boxoffice-seats td,
+td.stageshow-boxoffice-layout
 {
-	border: 0px !important;	
-	margin: 0px !important;	
-	padding: 0px !important;	
+	border: 0px;	
+	margin: 0px;	
+	padding: 0px;	
+	vertical-align: middle;
+}
+
+.stageshow-boxoffice-header,
+.stageshow-boxoffice-footer
+{
+	display: none;
+}
+
+.stageshow-boxoffice-block
+{
+	border: 2px solid black;	
+	padding: 5px;
+}
+
+.stageshow-boxoffice-id
+{
+	text-align: center;
 }
 
 .stageshow-boxoffice-seat
@@ -96,3 +115,30 @@ div.stageshow-boxoffice-seat-unknown
 	cursor: pointer;
     background-color: #FFFF00;
 }
+
+/* --------------------------------------------------------------------------- */
+/*                                                                             */
+/*                StageShow Sample Seating Plan Styles                         */
+/*                                                                             */
+/* --------------------------------------------------------------------------- */
+
+#stageshow-boxoffice-seats table .stageshow-boxoffice-Studio-header
+{
+	display: table-cell;
+}
+
+.stageshow-boxoffice-Studio-header div
+{
+	border: 1px solid black;
+	padding: 10px;
+	text-align: center;
+	font-size: 16px;
+	font-size: 24px;
+	margin-bottom: 20px;
+}
+
+.stageshow-boxoffice-Studio-header div:after
+{
+	content: "Stage";
+}
+

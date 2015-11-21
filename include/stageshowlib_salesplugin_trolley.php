@@ -711,6 +711,10 @@ if (!class_exists('StageShowLibSalesCartPluginBaseClass'))
 		{
 			return 0;
 		}
+		
+		function OutputContent_OnlineTrolleyUserInterface($cartContents)
+		{
+		}
 				
 		function OutputContent_OnlineTrolleyExtras($cartContents)
 		{
@@ -1138,6 +1142,8 @@ function '.$emailSaleButtonClick.'()
 		{
 			$myDBaseObj = $this->myDBaseObj;
 			
+			$this->OutputContent_OnlineTrolleyUserInterface($cartContents);
+				
 			if (isset($_GET['action']) && isset($_REQUEST['editpage']))
 			{
 				if ($_GET['action'] == 'editsale')
@@ -1271,7 +1277,7 @@ function '.$emailSaleButtonClick.'()
 				
 				$this->OnlineStore_AddTrolleySuplementaryInputs($cartContents);
 			}
-				
+			
 			$doneHeader = $this->OnlineStore_OutputTrolley($cartContents);
 			return $doneHeader;			
 		}

@@ -31,24 +31,24 @@ if (!class_exists('StageShowWPOrgTDTExportAdminClass'))
 			parent::__construct($myDBaseObj);
 			
 	  		// FUNCTIONALITY: Export - Settings, Tickets or Summary
+			$perfID = 0;					
+			$showID = StageShowLibHTTPIO::GetRequestedInt('export_showid', 0);
+			if ($showID != 0) 
+			{
+				$showAndperfID = StageShowLibHTTPIO::GetRequestedInt('export_perfid', 0);
+				if ($showAndperfID != 0)
+				{
+					$showAndperfIDParts = explode('.', $showAndperfID);
+					$perfID = $showAndperfIDParts[1];
+				}
+			}
+					
 			if ( isset( $_POST['downloadexport'] ) )
 			{
 				if ( isset( $_POST['download'] ) ) 
 				{
 					$this->fieldNames = $this->GetFields();
 	
-					$perfID = 0;					
-					$showID = StageShowLibHTTPIO::GetRequestedInt('export_showid', 0);
-					if ($showID != 0) 
-					{
-						$showAndperfID = StageShowLibHTTPIO::GetRequestedInt('export_perfid', 0);
-						if ($showAndperfID != 0)
-						{
-							$showAndperfIDParts = explode('.', $showAndperfID);
-							$perfID = $showAndperfIDParts[1];
-						}
-					}
-					
 					switch ($_POST['export_type'])
 					{          
 						case 'settings':
@@ -82,7 +82,7 @@ if (!class_exists('StageShowWPOrgTDTExportAdminClass'))
 				
 				$this->output_downloadHeader('text/html');
 				$this->output_htmlhead();
-				$this->export_validator();
+				$this->export_validator($showID, $perfID);
 				$this->output_endhtmlhead();
 				$this->ouput_downloadFooter(true);
 			}

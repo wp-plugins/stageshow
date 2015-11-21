@@ -80,6 +80,7 @@ function stageshow_OnChangeZoneDecode(obj)
 function stageshow_OnChangeZoneEntry(obj, elemRootId)
 {
 	changedElemName = obj.name;
+	changedElemValue = obj.value;
 	
 	/* Extract SeatingID and Zone ID from name */
 	ids = changedElemName.replace(elemRootId, "");
@@ -101,16 +102,15 @@ function stageshow_OnChangeZoneEntry(obj, elemRootId)
 	/* Add new value of Zone Spec to URL */
 	for (var index=0; index<params.length; index++) 
 	{
-		paramNameAndValue = params[index].split("=");
-		if (paramNameAndValue.length < 2)
-			continue;
-		
-		paramId = paramNameAndValue[0];
-		if (paramNameAndValue[0] == changedElemName)
+		var i = params[index].indexOf('=');
+		var paramId = params[index].slice(0, i);
+		var paramValue = params[index].slice(i + 1);
+
+		if (paramId == changedElemName)
 		{
-			paramNameAndValue[1] = obj.value;
+			paramValue = changedElemValue;
 		}
-		buttonHref += paramNameAndValue[0] + "=" + paramNameAndValue[1] + "&";			
+		buttonHref += paramId + "=" + paramValue + "&";			
 	}
 	
 	/* Update button URL */

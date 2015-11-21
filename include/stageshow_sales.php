@@ -66,7 +66,7 @@ if (!class_exists('StageShowWPOrgSalesPluginClass'))
         
 			if (($atts['id'] != '') && !is_numeric($atts['id']))
 			{
-				$showID = $this->myDBaseObj->GetShowID($atts['id']);
+				$showID = $this->myDBaseObj->GetShowID(htmlspecialchars_decode($atts['id']));
 				if ($showID > 0) 
 					$atts['id'] = $showID;
 				else

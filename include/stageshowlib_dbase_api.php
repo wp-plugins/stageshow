@@ -1090,17 +1090,30 @@ if (!class_exists('StageShowLibDBaseClass'))
 			return $dateFormat;
 		}
 		
+		function get_JSandCSSver()
+		{
+			static $ver = false;
+			
+			if ($ver == false)
+			{
+				if ($this->isDbgOptionSet('Dev_DisableJSCache')) 
+					$ver = time();
+				else
+					$ver = $this->get_version();
+			}
+			
+			return $ver;
+		}
+		
 		function enqueue_style( $handle, $src = false, $deps = array(), $ver = false, $media = 'all' )
 		{
-			if ($this->isDbgOptionSet('Dev_DisableJSCache')) $ver = time();			
-			
+			$ver = $this->get_JSandCSSver();
 			wp_enqueue_style($handle, $src, $deps, $ver, $media);
 		}
 		
 		function enqueue_script($handle, $src = false, $deps = array(), $ver = false, $in_footer = false)
 		{
-			if ($this->isDbgOptionSet('Dev_DisableJSCache')) $ver = time();			
-			
+			$ver = $this->get_JSandCSSver();
 			wp_enqueue_script($handle, $src, $deps, $ver, $in_footer);
 		}
 	}

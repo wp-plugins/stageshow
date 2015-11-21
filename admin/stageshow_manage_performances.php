@@ -24,6 +24,9 @@ include STAGESHOW_INCLUDE_PATH.'stageshowlib_salesadmin.php';
 
 if (!class_exists('StageShowWPOrgPerformancesAdminListClass'))
 {
+	if (!defined('STAGESHOW_DISABLE_POSTCONTROLS')) 
+		define('STAGESHOW_DISABLE_POSTCONTROLS', true);
+	
 	class StageShowWPOrgPerformancesAdminListClass extends StageShowLibSalesAdminListClass // Define class
 	{
 		const CHAR_INFINITY = '&#8734';
@@ -32,7 +35,7 @@ if (!class_exists('StageShowWPOrgPerformancesAdminListClass'))
 		
 		function __construct($env) //constructor
 		{
-			$this->disablePostControls = true;
+			$this->disablePostControls = STAGESHOW_DISABLE_POSTCONTROLS;
 			
 			// Call base constructor
 			parent::__construct($env, true);

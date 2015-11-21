@@ -387,7 +387,7 @@ function stageshow_OnSeatsLoad()
 	document.getElementById("stageshow-seatselected-zones").value = '';
 	
 	seatsRequestedCount = 0;
-	for (var zoneID in zones) 
+	for (var zoneID in zones)
 	{
 		zonesReq[zoneID] = zones[zoneID];
 		seatsRequestedCount += zones[zoneID];
@@ -470,7 +470,21 @@ function stageshow_OnClickAdd(obj, inst)
 	
 	return rtnVal;
 }
-
+/*
+function stageshow_DiscountChange(obj, inst)
+{
+	discountInst = inst;
+	setTimeout("discountChangeTimeout", 1000);
+	rtnVal = StageShowLib_JQuery_OnClickTrolleyButton(obj, inst, "stageshow_JQuery_Callback");
+	return rtnVal;
+}
+*/	
+function stageshow_OnClickUpdateprices(obj, inst)
+{
+	rtnVal = StageShowLib_JQuery_OnClickTrolleyButton(obj, inst, "stageshow_JQuery_Callback");
+	return rtnVal;
+}
+								
 function stageshow_JQuery_Callback(data, inst, buttonId, qty)
 {
 	StageShowLib_JQuery_Callback(data, inst, buttonId, qty);

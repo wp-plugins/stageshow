@@ -3,8 +3,8 @@ Contributors: Malcolm-OPH
 Donate link: http://www.corondeck.co.uk/StageShow/donate.html
 Tags: admin, calendar, cart, cinema, e-commerce, events, pages, payfast, payment, payments, paypal, posts, theater, theatre, tickets, trolley, user
 Requires at least: 3.0
-Tested up to: 4.3.1
-Stable tag: 5.6.1
+Tested up to: 4.4
+Stable tag: 5.6.2
 
 StageShow adds the facility for an online Box-Office for Small Theatres/Drama Groups, records sales, validates tickets and provides sales downloads.
 
@@ -187,6 +187,23 @@ The User Guide can also be downloaded or viewed <a href=http://corondeck.co.uk/d
 12. Screenshot 12: Sample EMail 
 
 == Changelog ==
+
+= 5.6.2(21/11/2015) =
+* Bug Fix: Shortcode id with HTML encoded characters not processsed
+* Loading order of CSS files restored (Custom CSS last)
+* Sales now listed by date & time (was order in database)
+* Added plugin version number to JS and CSS urls (forces re-load on plugin update)
+* Offline Validator now filters sales by show and performance
+* Add Performance code rewritten to avoid using temporary DB table
+* Bug Fix: Bug Fix: Zone Spec 's' specifier not working (StageShowGold)
+* Added row and seat numbering to Seating Plan Zone Spec (StageShowGold)
+* Updated sample seating plans to include numbering (StageShowGold)
+* Updated Seating Decode samples to remove '-' spacer (StageShowGold)
+* Added [i**] option to Zone Specs to add image to template (StageShowGold)
+* Enter Discount Code moved out of Shopping Trolley output (StageShowGold)
+* Added header and footer divs to Seating Templates (StageShowGold)
+* Added "Reload" action to Seating Plans admin page (StageShowGold)
+* Output "Seat Blocking Disabled" warning for old seating templates (StageShowGold)
 
 = 5.6.1(06/11/2015) =
 * Add Performance code rewritten to avoid using temporary DB table

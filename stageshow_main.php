@@ -198,6 +198,7 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			include STAGESHOW_INCLUDE_PATH.STAGESHOW_FOLDER.'_sample_dbase.php'; 
 				
 			$myDBaseObj = $this->myDBaseObj;
+			$myDBaseObj->setOption('CustomStylesheetPath', 'stageshow-samples.css');
 			$this->myDBaseObj->saveOptions();
 			
 			$sampleClassId = STAGESHOW_PLUGIN_NAME.'SampleDBaseClass';
@@ -296,11 +297,11 @@ if (!class_exists('StageShowWPOrgPluginClass'))
 			$myDBaseObj->enqueue_script( $this->adminClassPrefix.'', plugins_url( 'js/stageshow.js', __FILE__ ));
 		}	
 		
-		function load_admin_styles()
+		function load_admin_styles($page)
 		{
 			$myDBaseObj = $this->myDBaseObj;			
 
-			parent::load_admin_styles();
+			parent::load_admin_styles($page);
 
 			// Add our own style sheet
 			$myDBaseObj->enqueue_style( 'stageshow', plugins_url( 'admin/css/stageshow-admin.css', __FILE__ ));
